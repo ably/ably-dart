@@ -1,0 +1,51 @@
+import '../auth/client_options.dart';
+import '../channels/channels.dart';
+import '../channels/rest_channel.dart';
+import '../channels/rest_channel_options.dart';
+import 'http/http_client.dart';
+import 'rest_channel_impl.dart';
+
+/// Implementation of RestChannels.
+class RestChannelsImpl extends Iterable<RestChannel> implements RestChannels {
+  RestChannelsImpl({
+    required AblyHttpClient httpClient,
+    required ClientOptions options,
+  })  : _httpClient = httpClient,
+        _options = options;
+
+  final AblyHttpClient _httpClient;
+  final ClientOptions _options;
+  final Map<String, RestChannelImpl> _channels = {};
+
+  @override
+  RestChannel get(String name, [RestChannelOptions? options]) {
+    var channel = _channels[name];
+    if (channel == null) {
+      channel = RestChannelImpl(
+        name: name,
+        httpClient: _httpClient,
+        options: _options,
+        channelOptions: options,
+      );
+      _channels[name] = channel;
+    } else if (options != null) {
+      // Update options on existing channel
+      channel.setOptions(options);
+    }
+    return channel;
+  }
+
+  @override
+  RestChannel operator [](String name) => get(name);
+
+  @override
+  bool exists(String name) => _channels.containsKey(name);
+
+  @override
+  void release(String name) {
+    _channels.remove(name);
+  }
+
+  @override
+  Iterator<RestChannel> get iterator => _channels.values.iterator;
+}

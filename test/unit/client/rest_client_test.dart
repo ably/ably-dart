@@ -1,0 +1,303 @@
+import 'package:ably_dart/ably_dart.dart';
+import 'package:test/test.dart';
+
+import '../../helpers/mock_http_client.dart';
+
+/// REST Client Tests
+///
+/// Spec points: RSC7, RSC7b, RSC7c, RSC7d, RSC7e, RSC8, RSC8a, RSC8b, RSC8c,
+///              RSC8d, RSC8e, RSC13, RSC18
+void main() {
+  group('REST Client', () {
+    late MockHttpClient mockHttp;
+
+    setUp(() {
+      mockHttp = MockHttpClient();
+    });
+
+    group('RSC7e - X-Ably-Version header', () {
+      test('includes X-Ably-Version header in all requests', () async {
+        mockHttp.queueResponse(200, {'time': 1234567890000});
+
+        final client = Rest(
+          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+
+        await client.time();
+
+        final request = mockHttp.capturedRequests[0];
+        expect(request.headers.containsKey('X-Ably-Version'), isTrue);
+        expect(
+          request.headers['X-Ably-Version'],
+          matches(RegExp(r'^[0-9.]+$')),
+        );
+      });
+    });
+
+    group('RSC7d - Ably-Agent header', () {
+      test('includes Ably-Agent header with correct format', () async {
+        mockHttp.queueResponse(200, {'time': 1234567890000});
+
+        final client = Rest(
+          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+
+        await client.time();
+
+        final request = mockHttp.capturedRequests[0];
+        expect(request.headers.containsKey('Ably-Agent'), isTrue);
+
+        final agent = request.headers['Ably-Agent']!;
+        // Format: key[/value] entries joined by spaces
+        // Must include at least library name/version
+        expect(
+          agent,
+          matches(RegExp(r'ably-[a-z]+/[0-9]+\.[0-9]+\.[0-9]+')),
+        );
+      });
+    });
+
+    group('RSC7c - Request ID when addRequestIds enabled', () {
+      test('includes request_id query parameter', () async {
+        mockHttp.queueResponse(200, {'time': 1234567890000});
+
+        final client = Rest(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            addRequestIds: true,
+          ),
+          httpClient: mockHttp,
+        );
+
+        await client.time();
+
+        final request = mockHttp.capturedRequests[0];
+        expect(request.url.queryParameters.containsKey('request_id'), isTrue);
+
+        final requestId = request.url.queryParameters['request_id']!;
+        // Should be url-safe base64 encoded, at least 12 characters
+        expect(requestId.length, greaterThanOrEqualTo(12));
+        expect(requestId, matches(RegExp(r'^[A-Za-z0-9_-]+$')));
+      });
+
+      test('preserves same request_id on fallback retry', () async {
+        // First request fails with 500
+        mockHttp.queueResponse(500, {'error': {'code': 50000}});
+        // Retry succeeds
+        mockHttp.queueResponse(200, {'time': 1234567890000});
+
+        final client = Rest(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            addRequestIds: true,
+          ),
+          httpClient: mockHttp,
+        );
+
+        await client.time();
+
+        expect(mockHttp.capturedRequests.length, equals(2));
+
+        final requestId1 = mockHttp.capturedRequests[0].url.queryParameters['request_id'];
+        final requestId2 = mockHttp.capturedRequests[1].url.queryParameters['request_id'];
+
+        // Same ID for retry
+        expect(requestId1, equals(requestId2));
+      });
+    });
+
+    group('RSC8a, RSC8b - Protocol selection', () {
+      test('uses msgpack by default (useBinaryProtocol: true)', () async {
+        mockHttp.queueResponse(201, {'serials': ['s1']});
+
+        final client = Rest(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            useBinaryProtocol: true,
+          ),
+          httpClient: mockHttp,
+        );
+
+        await client.channels.get('test').publish(name: 'e', data: 'd');
+
+        final request = mockHttp.capturedRequests[0];
+        expect(
+          request.headers['Content-Type'],
+          equals('application/x-msgpack'),
+        );
+        expect(
+          request.headers['Accept'],
+          equals('application/x-msgpack'),
+        );
+      });
+
+      test('uses JSON when useBinaryProtocol is false', () async {
+        mockHttp.queueResponse(201, {'serials': ['s1']});
+
+        final client = Rest(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
+          httpClient: mockHttp,
+        );
+
+        await client.channels.get('test').publish(name: 'e', data: 'd');
+
+        final request = mockHttp.capturedRequests[0];
+        expect(
+          request.headers['Content-Type'],
+          equals('application/json'),
+        );
+        expect(
+          request.headers['Accept'],
+          equals('application/json'),
+        );
+      });
+    });
+
+    group('RSC8c - Accept and Content-Type headers', () {
+      test('includes both Accept and Content-Type headers', () async {
+        mockHttp.queueResponse(201, {'serials': ['s1']});
+
+        final client = Rest(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
+          httpClient: mockHttp,
+        );
+
+        await client.channels.get('test').publish(name: 'e', data: 'd');
+
+        final request = mockHttp.capturedRequests[0];
+        expect(request.headers['Accept'], equals('application/json'));
+        expect(request.headers['Content-Type'], equals('application/json'));
+      });
+    });
+
+    group('RSC8e - Unsupported Content-Type handling', () {
+      test('handles error status with unsupported Content-Type', () async {
+        mockHttp.queueResponse(
+          500,
+          '<html>Server Error</html>',
+          headers: {'Content-Type': 'text/html'},
+        );
+
+        final client = Rest(
+          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+
+        expect(
+          () => client.time(),
+          throwsA(
+            isA<AblyException>().having(
+              (e) => e.statusCode,
+              'statusCode',
+              equals(500),
+            ),
+          ),
+        );
+      });
+
+      test('handles success status with unsupported Content-Type', () async {
+        mockHttp.queueResponse(
+          200,
+          '<html>OK</html>',
+          headers: {'Content-Type': 'text/html'},
+        );
+
+        final client = Rest(
+          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+
+        expect(
+          () => client.time(),
+          throwsA(
+            isA<AblyException>().having(
+              (e) => e.code,
+              'code',
+              equals(40013),
+            ),
+          ),
+        );
+      });
+    });
+
+    group('RSC18 - TLS configuration', () {
+      test('uses https by default (tls: true)', () async {
+        mockHttp.queueResponse(200, {'time': 1234567890000});
+
+        final client = Rest(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            tls: true,
+          ),
+          httpClient: mockHttp,
+        );
+
+        await client.time();
+
+        final request = mockHttp.capturedRequests[0];
+        expect(request.url.scheme, equals('https'));
+      });
+
+      test('uses http when tls is false', () async {
+        mockHttp.queueResponse(200, {'time': 1234567890000});
+
+        // Note: API key over non-TLS should be rejected, use token auth
+        final client = Rest(
+          options: ClientOptions(
+            token: 'some-token',
+            tls: false,
+          ),
+          httpClient: mockHttp,
+        );
+
+        await client.time();
+
+        final request = mockHttp.capturedRequests[0];
+        expect(request.url.scheme, equals('http'));
+      });
+
+      test('rejects Basic auth over HTTP', () {
+        expect(
+          () => Rest(
+            options: ClientOptions(
+              key: 'appId.keyId:keySecret',
+              tls: false,
+            ),
+            httpClient: mockHttp,
+          ),
+          throwsA(
+            isA<AblyException>().having(
+              (e) => e.code,
+              'code',
+              equals(40103),
+            ),
+          ),
+        );
+      });
+
+      test('allows token auth over HTTP', () async {
+        mockHttp.queueResponse(200, {'time': 1234567890000});
+
+        final client = Rest(
+          options: ClientOptions(
+            token: 'some-token-string',
+            tls: false,
+          ),
+          httpClient: mockHttp,
+        );
+
+        // Should succeed - token auth over HTTP is permitted
+        final time = await client.time();
+        expect(time, isA<DateTime>());
+      });
+    });
+  });
+}

@@ -1,0 +1,182 @@
+import 'package:ably_dart/ably_dart.dart';
+import 'package:test/test.dart';
+
+/// Options Types Tests
+///
+/// Spec points: TO1, TO2, TO3, AO1, AO2
+void main() {
+  group('ClientOptions', () {
+    group('TO3 - ClientOptions attributes with defaults', () {
+      test('has correct default values', () {
+        final options = ClientOptions.fromKey('appId.keyId:keySecret');
+
+        expect(options.authMethod, equals('GET'));
+        expect(options.tls, isTrue);
+        expect(options.httpRequestTimeout, equals(10000));
+        expect(options.httpMaxRetryCount, equals(3));
+        expect(options.useBinaryProtocol, isTrue);
+        expect(options.idempotentRestPublishing, isTrue);
+        expect(options.addRequestIds, isFalse);
+        expect(options.queryTime, isFalse);
+        expect(options.maxMessageSize, equals(65536));
+      });
+
+      test('accepts custom values', () {
+        final options = ClientOptions(
+          key: 'appId.keyId:keySecret',
+          clientId: 'my-client',
+          environment: 'sandbox',
+          tls: false,
+          httpRequestTimeout: 30000,
+          useBinaryProtocol: false,
+          idempotentRestPublishing: false,
+          addRequestIds: true,
+        );
+
+        expect(options.key, equals('appId.keyId:keySecret'));
+        expect(options.clientId, equals('my-client'));
+        expect(options.environment, equals('sandbox'));
+        expect(options.tls, isFalse);
+        expect(options.httpRequestTimeout, equals(30000));
+        expect(options.useBinaryProtocol, isFalse);
+        expect(options.idempotentRestPublishing, isFalse);
+        expect(options.addRequestIds, isTrue);
+      });
+    });
+
+    group('TO3 - ClientOptions with custom hosts', () {
+      test('accepts custom host configuration', () {
+        final options = ClientOptions(
+          key: 'appId.keyId:keySecret',
+          restHost: 'custom.ably.example.com',
+          fallbackHosts: ['fallback1.example.com', 'fallback2.example.com'],
+        );
+
+        expect(options.restHost, equals('custom.ably.example.com'));
+        expect(
+          options.fallbackHosts,
+          equals(['fallback1.example.com', 'fallback2.example.com']),
+        );
+      });
+    });
+
+    group('TO3 - ClientOptions with auth URL', () {
+      test('accepts auth URL configuration', () {
+        final options = ClientOptions(
+          authUrl: 'https://auth.example.com/token',
+          authMethod: 'POST',
+          authHeaders: {'X-API-Key': 'secret'},
+          authParams: {'scope': 'full'},
+        );
+
+        expect(options.authUrl, equals('https://auth.example.com/token'));
+        expect(options.authMethod, equals('POST'));
+        expect(options.authHeaders?['X-API-Key'], equals('secret'));
+        expect(options.authParams?['scope'], equals('full'));
+      });
+    });
+
+    group('TO3 - ClientOptions with defaultTokenParams', () {
+      test('accepts default token parameters', () {
+        final options = ClientOptions(
+          key: 'appId.keyId:keySecret',
+          defaultTokenParams: TokenParams(
+            ttl: 7200000,
+            clientId: 'default-client',
+            capability: '{"*":["subscribe"]}',
+          ),
+        );
+
+        expect(options.defaultTokenParams?.ttl, equals(7200000));
+        expect(options.defaultTokenParams?.clientId, equals('default-client'));
+        expect(
+          options.defaultTokenParams?.capability,
+          equals('{"*":["subscribe"]}'),
+        );
+      });
+    });
+
+    group('TO - Environment affects host selection', () {
+      test('stores environment option correctly', () {
+        final productionOptions = ClientOptions.fromKey('appId.keyId:keySecret');
+        expect(productionOptions.environment, isNull);
+
+        final sandboxOptions = ClientOptions(
+          key: 'appId.keyId:keySecret',
+          environment: 'sandbox',
+        );
+        expect(sandboxOptions.environment, equals('sandbox'));
+
+        final customOptions = ClientOptions(
+          key: 'appId.keyId:keySecret',
+          environment: 'custom-env',
+        );
+        expect(customOptions.environment, equals('custom-env'));
+      });
+    });
+
+    group('TO - Conflicting options validation', () {
+      test('throws on conflicting restHost and environment', () {
+        expect(
+          () => ClientOptions(
+            key: 'appId.keyId:keySecret',
+            restHost: 'custom.host.com',
+            environment: 'sandbox',
+          ),
+          throwsA(isA<ArgumentError>()),
+        );
+      });
+
+      test('throws when no auth options provided', () {
+        expect(
+          () => Rest(options: ClientOptions()),
+          throwsA(isA<AblyException>()),
+        );
+      });
+    });
+  });
+
+  group('AuthOptions', () {
+    group('AO2 - AuthOptions attributes', () {
+      test('has all required attributes', () {
+        final authOptions = AuthOptions(
+          authUrl: 'https://auth.example.com/token',
+          authMethod: 'POST',
+          authHeaders: {'Authorization': 'Bearer api-key'},
+          authParams: {'user': 'test'},
+          queryTime: true,
+        );
+
+        expect(authOptions.authUrl, equals('https://auth.example.com/token'));
+        expect(authOptions.authMethod, equals('POST'));
+        expect(
+          authOptions.authHeaders?['Authorization'],
+          equals('Bearer api-key'),
+        );
+        expect(authOptions.authParams?['user'], equals('test'));
+        expect(authOptions.queryTime, isTrue);
+      });
+    });
+
+    group('AO - AuthOptions with authCallback', () {
+      test('can hold and invoke authCallback function', () async {
+        var callbackCalled = false;
+
+        Future<Object> testCallback(TokenParams params) async {
+          callbackCalled = true;
+          return TokenDetails(
+            token: 'callback-token',
+            expires: DateTime.now().millisecondsSinceEpoch + 3600000,
+          );
+        }
+
+        final authOptions = AuthOptions(authCallback: testCallback);
+
+        // Verify callback is stored and callable
+        final result = await authOptions.authCallback!(TokenParams());
+        expect(callbackCalled, isTrue);
+        expect((result as TokenDetails).token, equals('callback-token'));
+      });
+    });
+  });
+}
