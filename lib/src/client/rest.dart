@@ -2,8 +2,11 @@ import 'package:http/http.dart' as http;
 
 import '../auth/auth.dart';
 import '../auth/client_options.dart';
+import '../batch/batch_publish_spec.dart';
+import '../batch/batch_result.dart';
 import '../channels/channels.dart';
 import '../impl/rest_impl.dart';
+import '../pagination/http_paginated_response.dart';
 
 /// The Ably REST client.
 ///
@@ -55,6 +58,49 @@ abstract class Rest {
   ///
   /// Useful for ensuring accurate timestamps in token requests.
   Future<DateTime> time();
+
+  /// Makes an arbitrary HTTP request to the Ably REST API.
+  ///
+  /// This provides access to any REST API endpoint, including those not
+  /// directly exposed by other client methods.
+  ///
+  /// The [method] parameter specifies the HTTP method (GET, POST, PUT, etc.).
+  /// The [path] parameter specifies the API path (e.g., '/channels/foo/messages').
+  ///
+  /// Optional parameters:
+  /// - [version]: Explicit API version (defaults to current version).
+  /// - [params]: Query parameters to add to the request URL.
+  /// - [headers]: Additional headers to include in the request.
+  /// - [body]: Request body (will be JSON-encoded).
+  ///
+  /// Returns an [HttpPaginatedResponse] containing the response items and
+  /// HTTP metadata (status code, headers, error codes).
+  ///
+  /// Spec: RSC19
+  Future<HttpPaginatedResponse<dynamic>> request(
+    String method,
+    String path, {
+    int? version,
+    Map<String, String>? params,
+    Map<String, String>? headers,
+    Object? body,
+  });
+
+  /// Publishes messages to multiple channels in a single request.
+  ///
+  /// You can provide either:
+  /// - A single [BatchPublishSpec] to publish to one or more channels
+  /// - A list of [BatchPublishSpec] objects for multiple publish operations
+  ///
+  /// Returns a list of [BatchResult] objects indicating success or failure
+  /// for each channel. When publishing to multiple channels, the result
+  /// contains one entry per channel.
+  ///
+  /// Spec: RSC22
+  Future<List<BatchResult>> batchPublish(
+    Object spec, {
+    Map<String, String>? params,
+  });
 
   /// Closes this client and releases any resources.
   Future<void> close();

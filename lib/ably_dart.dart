@@ -31,6 +31,10 @@ export 'src/message/presence_message.dart';
 export 'src/message/message_extras.dart';
 export 'src/message/delta_extras.dart';
 
+// Batch operations
+export 'src/batch/batch_publish_spec.dart';
+export 'src/batch/batch_result.dart';
+
 // Pagination
 export 'src/pagination/paginated_result.dart';
 export 'src/pagination/http_paginated_response.dart';

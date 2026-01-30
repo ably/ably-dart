@@ -76,6 +76,8 @@ class AblyHttpClient {
     Map<String, String>? queryParams,
     Object? body,
     bool authenticated = true,
+    Map<String, String>? customHeaders,
+    int? customVersion,
   }) async {
     final effectiveQueryParams = Map<String, String>.from(queryParams ?? {});
 
@@ -97,6 +99,8 @@ class AblyHttpClient {
           queryParams: effectiveQueryParams,
           body: body,
           authenticated: authenticated,
+          customHeaders: customHeaders,
+          customVersion: customVersion,
         );
 
         // If we used a fallback host successfully, clear failure tracking
@@ -138,6 +142,8 @@ class AblyHttpClient {
     Map<String, String>? queryParams,
     Object? body,
     bool authenticated = true,
+    Map<String, String>? customHeaders,
+    int? customVersion,
   }) async {
     // Build URL
     final scheme = _options.tls ? 'https' : 'http';
@@ -154,8 +160,13 @@ class AblyHttpClient {
     final contentType = _options.useBinaryProtocol
         ? ContentTypes.msgpack
         : ContentTypes.json;
+
+    // RSC19f1: Use explicit version if provided
+    final version =
+        customVersion?.toString() ?? ablyProtocolVersion;
+
     final headers = <String, String>{
-      HttpHeaders.ablyVersion: ablyProtocolVersion,
+      HttpHeaders.ablyVersion: version,
       HttpHeaders.ablyAgent: _buildAgentString(),
       HttpHeaders.accept: contentType,
     };
@@ -169,6 +180,16 @@ class AblyHttpClient {
       final provider = authHeaderProvider ?? _authHeaderProvider;
       if (provider != null) {
         headers[HttpHeaders.authorization] = await provider();
+      }
+    }
+
+    // RSC19f: Add custom headers (cannot override auth)
+    if (customHeaders != null) {
+      for (final entry in customHeaders.entries) {
+        // RSC19b: Cannot override authentication
+        if (entry.key.toLowerCase() != 'authorization') {
+          headers[entry.key] = entry.value;
+        }
       }
     }
 
@@ -326,6 +347,8 @@ class AblyHttpClient {
       if (requestId != null) {
         errorMap['requestId'] = requestId;
       }
+      // Ensure statusCode is set from HTTP response if not in body
+      errorMap['statusCode'] ??= response.statusCode;
       errorInfo = ErrorInfo.fromMap(errorMap);
     } else {
       errorInfo = ErrorInfo(
