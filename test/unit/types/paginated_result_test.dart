@@ -208,8 +208,7 @@ void main() {
           description: 'simple next link',
         ),
         (
-          linkHeader:
-              '</path?cursor=abc>; rel="next", </path>; rel="first"',
+          linkHeader: '</path?cursor=abc>; rel="next", </path>; rel="first"',
           expectedHasNext: true,
           description: 'next and first links',
         ),
@@ -294,6 +293,358 @@ void main() {
         expect(
           nextResult == null || nextResult.items.isEmpty,
           isTrue,
+        );
+      });
+    });
+
+    group('TG - Pagination preserves authentication', () {
+      test('pagination requests include same auth credentials', () async {
+        final capturedRequests = <CapturedRequest>[];
+        var requestCount = 0;
+
+        final mockHttp = MockHttpClient(
+          onConnectionAttempt: (conn) => conn.respondWithSuccess(),
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            requestCount++;
+            if (requestCount == 1) {
+              req.respondWith(
+                200,
+                [
+                  {'id': 'item1'},
+                ],
+                headers: {
+                  'Link': '</channels/test/messages?cursor=next>; rel="next"',
+                },
+              );
+            } else {
+              req.respondWith(200, [
+                {'id': 'item2'},
+              ]);
+            }
+          },
+        );
+
+        final client = Rest(
+          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+        final channel = client.channels.get('test');
+
+        final page1 = await channel.history();
+        await page1.next();
+
+        // Both requests should have Authorization header
+        expect(capturedRequests[0].headers['Authorization'], isNotNull);
+        expect(capturedRequests[1].headers['Authorization'], isNotNull);
+        expect(
+          capturedRequests[0].headers['Authorization'],
+          equals(capturedRequests[1].headers['Authorization']),
+        );
+      });
+    });
+
+    group('TG - Pagination with relative URLs', () {
+      test('relative URLs are resolved against base REST host', () async {
+        final capturedRequests = <CapturedRequest>[];
+        var requestCount = 0;
+
+        final mockHttp = MockHttpClient(
+          onConnectionAttempt: (conn) => conn.respondWithSuccess(),
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            requestCount++;
+            if (requestCount == 1) {
+              req.respondWith(
+                200,
+                [
+                  {'id': 'item1'},
+                ],
+                headers: {
+                  'Link': '</channels/test/messages?page=2>; rel="next"',
+                },
+              );
+            } else {
+              req.respondWith(200, [
+                {'id': 'item2'},
+              ]);
+            }
+          },
+        );
+
+        final client = Rest(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            restHost: 'rest.ably.io',
+          ),
+          httpClient: mockHttp,
+        );
+        final channel = client.channels.get('test');
+
+        final page1 = await channel.history();
+        await page1.next();
+
+        // Second request should use the same host
+        expect(capturedRequests[1].url.host, equals('rest.ably.io'));
+        expect(
+            capturedRequests[1].url.path, contains('/channels/test/messages'));
+        expect(capturedRequests[1].url.queryParameters['page'], equals('2'));
+      });
+    });
+
+    group('TG - Pagination with absolute URLs', () {
+      test('absolute URLs are used directly', () async {
+        final capturedRequests = <CapturedRequest>[];
+        var requestCount = 0;
+
+        final mockHttp = MockHttpClient(
+          onConnectionAttempt: (conn) => conn.respondWithSuccess(),
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            requestCount++;
+            if (requestCount == 1) {
+              req.respondWith(
+                200,
+                [
+                  {'id': 'item1'},
+                ],
+                headers: {
+                  'Link':
+                      '<https://rest.ably.io/channels/test/messages?cursor=abc>; rel="next"',
+                },
+              );
+            } else {
+              req.respondWith(200, [
+                {'id': 'item2'},
+              ]);
+            }
+          },
+        );
+
+        final client = Rest(
+          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+        final channel = client.channels.get('test');
+
+        final page1 = await channel.history();
+        await page1.next();
+
+        expect(capturedRequests[1].url.scheme, equals('https'));
+        expect(capturedRequests[1].url.host, equals('rest.ably.io'));
+        expect(
+            capturedRequests[1].url.queryParameters['cursor'], equals('abc'));
+      });
+    });
+
+    group('TG - Multiple Link relations', () {
+      test('parses multiple Link relations correctly', () async {
+        mockHttp.queueResponse(
+          200,
+          [
+            {'id': 'item1'},
+          ],
+          headers: {
+            'Link':
+                '</channels/test/messages?page=2>; rel="next", </channels/test/messages?page=1>; rel="first", </channels/test/messages?page=5>; rel="last"',
+          },
+        );
+
+        final client = Rest(
+          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+        final channel = client.channels.get('test');
+
+        final result = await channel.history();
+
+        expect(result.hasNext(), isTrue);
+        // Implementation should be able to navigate to next page
+      });
+    });
+
+    group('TG - Pagination includes request headers', () {
+      test('pagination requests include standard Ably headers', () async {
+        final capturedRequests = <CapturedRequest>[];
+        var requestCount = 0;
+
+        final mockHttp = MockHttpClient(
+          onConnectionAttempt: (conn) => conn.respondWithSuccess(),
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            requestCount++;
+            if (requestCount == 1) {
+              req.respondWith(
+                200,
+                [
+                  {'id': 'item1'},
+                ],
+                headers: {
+                  'Link': '</channels/test/messages?cursor=next>; rel="next"',
+                },
+              );
+            } else {
+              req.respondWith(200, [
+                {'id': 'item2'},
+              ]);
+            }
+          },
+        );
+
+        final client = Rest(
+          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+        final channel = client.channels.get('test');
+
+        final page1 = await channel.history();
+        await page1.next();
+
+        // Check headers on pagination request
+        final nextRequest = capturedRequests[1];
+        expect(nextRequest.headers['X-Ably-Version'], isNotNull);
+        expect(nextRequest.headers['Ably-Agent'], isNotNull);
+        expect(nextRequest.headers['Ably-Agent'], contains('ably-'));
+      });
+    });
+
+    group('TG - Error handling on next()', () {
+      test('404 error during pagination raises AblyException', () async {
+        final capturedRequests = <CapturedRequest>[];
+        var requestCount = 0;
+
+        final mockHttp = MockHttpClient(
+          onConnectionAttempt: (conn) => conn.respondWithSuccess(),
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            requestCount++;
+            if (requestCount == 1) {
+              req.respondWith(
+                200,
+                [
+                  {'id': 'item1'},
+                ],
+                headers: {
+                  'Link':
+                      '</channels/test/messages?cursor=invalid>; rel="next"',
+                },
+              );
+            } else {
+              req.respondWith(404, {
+                'error': {
+                  'code': 40400,
+                  'statusCode': 404,
+                  'message': 'Not found',
+                },
+              });
+            }
+          },
+        );
+
+        final client = Rest(
+          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+        final channel = client.channels.get('test');
+
+        final page1 = await channel.history();
+
+        await expectLater(
+          page1.next(),
+          throwsA(
+            isA<AblyException>().having(
+              (e) => e.statusCode,
+              'statusCode',
+              equals(404),
+            ),
+          ),
+        );
+      });
+
+      test('500 error during pagination raises AblyException', () async {
+        final capturedRequests = <CapturedRequest>[];
+        var requestCount = 0;
+
+        final mockHttp = MockHttpClient(
+          onConnectionAttempt: (conn) => conn.respondWithSuccess(),
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            requestCount++;
+            if (requestCount == 1) {
+              req.respondWith(
+                200,
+                [
+                  {'id': 'item1'},
+                ],
+                headers: {
+                  'Link': '</channels/test/messages?cursor=next>; rel="next"',
+                },
+              );
+            } else {
+              req.respondWith(500, {
+                'error': {
+                  'code': 50000,
+                  'statusCode': 500,
+                  'message': 'Internal server error',
+                },
+              });
+            }
+          },
+        );
+
+        final client = Rest(
+          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+        final channel = client.channels.get('test');
+
+        final page1 = await channel.history();
+
+        await expectLater(
+          page1.next(),
+          throwsA(
+            isA<AblyException>().having(
+              (e) => e.statusCode,
+              'statusCode',
+              equals(500),
+            ),
+          ),
         );
       });
     });

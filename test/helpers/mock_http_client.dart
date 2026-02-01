@@ -4,103 +4,74 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
+/// Callback for handling connection attempts in the mock HTTP client.
+typedef ConnectionHandler = void Function(PendingConnection connection);
+
+/// Callback for handling HTTP requests in the mock HTTP client.
+typedef RequestHandler = void Function(PendingRequest request);
+
 /// A mock HTTP client for testing.
 ///
-/// Captures outgoing requests and returns configurable responses.
-/// Supports error simulation (network errors, timeouts) for fallback testing.
+/// Configured using handlers that are called for each connection or request:
+///
+/// Example:
+/// ```dart
+/// final mock = MockHttpClient(
+///   onRequest: (request) {
+///     if (request.url.path == '/time') {
+///       request.respondWith(200, {'time': 1234567890000});
+///     } else {
+///       request.respondWith(404, {'error': {'code': 40400}});
+///     }
+///   },
+/// );
+/// ```
 class MockHttpClient extends http.BaseClient {
+  /// Handler called for each connection attempt.
+  final ConnectionHandler? onConnectionAttempt;
+
+  /// Handler called for each HTTP request.
+  final RequestHandler? onRequest;
+
   final List<CapturedRequest> capturedRequests = [];
-  final List<QueuedResponse> _queuedResponses = [];
-  final Map<String, List<QueuedResponse>> _hostResponses = {};
-  final List<_QueuedError> _queuedErrors = [];
-  final Map<String, List<_QueuedError>> _hostErrors = {};
 
-  /// Queues a response to be returned for the next request.
-  void queueResponse(
-    int statusCode,
-    Object body, {
-    Map<String, String>? headers,
+  /// Controllers for awaitable events.
+  final StreamController<PendingConnection> _connectionAttempts =
+      StreamController<PendingConnection>.broadcast();
+  final StreamController<PendingRequest> _requests =
+      StreamController<PendingRequest>.broadcast();
+
+  MockHttpClient({
+    this.onConnectionAttempt,
+    this.onRequest,
+  });
+
+  /// Awaits the next connection attempt.
+  ///
+  /// Returns a [PendingConnection] that can be used to respond to the
+  /// connection attempt.
+  ///
+  /// Times out after [timeout] (default: 5 seconds).
+  Future<PendingConnection> awaitConnectionAttempt({
+    Duration timeout = const Duration(seconds: 5),
   }) {
-    _queuedResponses.add(QueuedResponse(
-      statusCode: statusCode,
-      body: body,
-      headers: headers ?? {},
-    ));
+    return _connectionAttempts.stream.first.timeout(timeout);
   }
 
-  /// Queues a response for a specific host.
-  void queueResponseForHost(
-    String host,
-    int statusCode,
-    Object body, {
-    Map<String, String>? headers,
+  /// Awaits the next HTTP request.
+  ///
+  /// Returns a [PendingRequest] that can be used to respond to the request.
+  ///
+  /// Times out after [timeout] (default: 5 seconds).
+  Future<PendingRequest> awaitRequest({
+    Duration timeout = const Duration(seconds: 5),
   }) {
-    _hostResponses.putIfAbsent(host, () => []);
-    _hostResponses[host]!.add(QueuedResponse(
-      statusCode: statusCode,
-      body: body,
-      headers: headers ?? {},
-    ));
+    return _requests.stream.first.timeout(timeout);
   }
 
-  /// Queues a delayed response.
-  void queueDelayedResponse(
-    Duration delay,
-    int statusCode,
-    Object body, {
-    Map<String, String>? headers,
-  }) {
-    _queuedResponses.add(QueuedResponse(
-      statusCode: statusCode,
-      body: body,
-      headers: headers ?? {},
-      delay: delay,
-    ));
-  }
-
-  /// Queues a network error (e.g., connection refused, DNS failure).
-  void queueNetworkError([String message = 'Network error']) {
-    _queuedErrors.add(_QueuedError(
-      type: _ErrorType.network,
-      message: message,
-    ));
-  }
-
-  /// Queues a network error for a specific host.
-  void queueNetworkErrorForHost(String host, [String message = 'Network error']) {
-    _hostErrors.putIfAbsent(host, () => []);
-    _hostErrors[host]!.add(_QueuedError(
-      type: _ErrorType.network,
-      message: message,
-    ));
-  }
-
-  /// Queues a timeout error.
-  void queueTimeout([Duration duration = const Duration(seconds: 30)]) {
-    _queuedErrors.add(_QueuedError(
-      type: _ErrorType.timeout,
-      message: 'Request timed out',
-      duration: duration,
-    ));
-  }
-
-  /// Queues a timeout error for a specific host.
-  void queueTimeoutForHost(String host, [Duration duration = const Duration(seconds: 30)]) {
-    _hostErrors.putIfAbsent(host, () => []);
-    _hostErrors[host]!.add(_QueuedError(
-      type: _ErrorType.timeout,
-      message: 'Request timed out',
-      duration: duration,
-    ));
-  }
-
-  /// Resets all queued responses and captured requests.
+  /// Resets all captured requests.
   void reset() {
     capturedRequests.clear();
-    _queuedResponses.clear();
-    _hostResponses.clear();
-    _queuedErrors.clear();
-    _hostErrors.clear();
   }
 
   /// Gets captured requests for a specific host.
@@ -119,84 +90,196 @@ class MockHttpClient extends http.BaseClient {
     capturedRequests.add(capturedRequest);
 
     final host = request.url.host;
+    final port = request.url.port;
+    final tls = request.url.scheme == 'https';
 
-    // Check for host-specific error first
-    if (_hostErrors.containsKey(host) && _hostErrors[host]!.isNotEmpty) {
-      return _handleError(_hostErrors[host]!.removeAt(0));
+    // Always emit connection attempt (for awaitConnectionAttempt support)
+    final pendingConnection = PendingConnection._(
+      host: host,
+      port: port,
+      tls: tls,
+      timestamp: DateTime.now(),
+    );
+    if (!_connectionAttempts.isClosed) {
+      _connectionAttempts.add(pendingConnection);
     }
 
-    // Check for general queued error
-    if (_queuedErrors.isNotEmpty) {
-      return _handleError(_queuedErrors.removeAt(0));
+    // Call handler if provided, otherwise auto-succeed
+    if (onConnectionAttempt != null) {
+      onConnectionAttempt!(pendingConnection);
+    } else {
+      pendingConnection.respondWithSuccess();
     }
 
-    // Check for host-specific response
-    if (_hostResponses.containsKey(host) && _hostResponses[host]!.isNotEmpty) {
-      return _createResponse(_hostResponses[host]!.removeAt(0));
+    // Wait for connection resolution
+    await pendingConnection._completer.future;
+
+    // Always emit request (for awaitRequest support)
+    final pendingRequest = PendingRequest._(
+      url: request.url,
+      method: request.method,
+      headers: Map.from(request.headers),
+      body: request is http.Request ? utf8.encode(request.body) : <int>[],
+      timestamp: DateTime.now(),
+    );
+    if (!_requests.isClosed) {
+      _requests.add(pendingRequest);
     }
 
-    // Use general queue
-    if (_queuedResponses.isNotEmpty) {
-      return _createResponse(_queuedResponses.removeAt(0));
+    // Call handler if provided
+    if (onRequest != null) {
+      onRequest!(pendingRequest);
+    } else {
+      // Provide default 200 response
+      pendingRequest.respondWith(200, {});
     }
 
-    // Default 200 OK response
-    return _createResponse(QueuedResponse(
-      statusCode: 200,
-      body: {},
-      headers: {'Content-Type': 'application/json'},
-    ));
+    return await pendingRequest._completer.future;
   }
 
-  Future<http.StreamedResponse> _handleError(_QueuedError error) async {
-    switch (error.type) {
-      case _ErrorType.network:
-        throw SocketException(error.message);
-      case _ErrorType.timeout:
-        throw TimeoutException(error.message, error.duration);
+  /// Disposes of resources used by this mock client.
+  void dispose() {
+    _connectionAttempts.close();
+    _requests.close();
+  }
+}
+
+/// Represents a pending connection attempt that can be responded to by test code.
+class PendingConnection {
+  /// The hostname being connected to.
+  final String host;
+
+  /// The port being connected to.
+  final int port;
+
+  /// Whether TLS/HTTPS is being used.
+  final bool tls;
+
+  /// The timestamp when the connection was attempted.
+  final DateTime timestamp;
+
+  final Completer<void> _completer = Completer<void>();
+
+  PendingConnection._({
+    required this.host,
+    required this.port,
+    required this.tls,
+    required this.timestamp,
+  });
+
+  /// Responds with a successful connection.
+  void respondWithSuccess() {
+    if (!_completer.isCompleted) {
+      _completer.complete();
     }
   }
 
-  Future<http.StreamedResponse> _createResponse(QueuedResponse response) async {
-    // Apply delay if specified
-    if (response.delay != null) {
-      await Future.delayed(response.delay!);
+  /// Responds with a connection refused error.
+  void respondWithRefused() {
+    if (!_completer.isCompleted) {
+      _completer.completeError(
+        SocketException('Connection refused'),
+      );
     }
+  }
 
-    final body = response.body;
+  /// Responds with a connection timeout.
+  void respondWithTimeout() {
+    if (!_completer.isCompleted) {
+      _completer.completeError(
+        TimeoutException('Connection timed out'),
+      );
+    }
+  }
+
+  /// Responds with a DNS resolution error.
+  void respondWithDnsError() {
+    if (!_completer.isCompleted) {
+      _completer.completeError(
+        SocketException('Failed to resolve hostname: $host'),
+      );
+    }
+  }
+}
+
+/// Represents a pending HTTP request that can be responded to by test code.
+class PendingRequest {
+  /// The URL being requested.
+  final Uri url;
+
+  /// The HTTP method (GET, POST, etc).
+  final String method;
+
+  /// The request headers.
+  final Map<String, String> headers;
+
+  /// The request body as bytes.
+  final List<int> body;
+
+  /// The timestamp when the request was made.
+  final DateTime timestamp;
+
+  final Completer<http.StreamedResponse> _completer =
+      Completer<http.StreamedResponse>();
+
+  PendingRequest._({
+    required this.url,
+    required this.method,
+    required this.headers,
+    required this.body,
+    required this.timestamp,
+  });
+
+  /// Gets the request body as a string (UTF-8 decoded).
+  String get bodyAsString => utf8.decode(body);
+
+  /// Gets the request body parsed as JSON.
+  dynamic get jsonBody => json.decode(bodyAsString);
+
+  /// Responds with the specified status code, body, and optional headers.
+  void respondWith(
+    int status,
+    Object body, {
+    Map<String, String>? headers,
+  }) {
+    if (_completer.isCompleted) return;
+
     final String bodyString;
-
     if (body is String) {
       bodyString = body;
     } else {
       bodyString = json.encode(body);
     }
 
-    final headers = Map<String, String>.from(response.headers);
-    headers.putIfAbsent('Content-Type', () => 'application/json');
+    final responseHeaders = Map<String, String>.from(headers ?? {});
+    responseHeaders.putIfAbsent('Content-Type', () => 'application/json');
 
-    return http.StreamedResponse(
+    _completer.complete(http.StreamedResponse(
       Stream.value(utf8.encode(bodyString)),
-      response.statusCode,
-      headers: headers,
-    );
+      status,
+      headers: responseHeaders,
+    ));
   }
-}
 
-/// Internal error type for mock error simulation.
-enum _ErrorType { network, timeout }
+  /// Responds with a delay, then the specified status code, body, and headers.
+  Future<void> respondWithDelay(
+    Duration delay,
+    int status,
+    Object body, {
+    Map<String, String>? headers,
+  }) async {
+    await Future.delayed(delay);
+    respondWith(status, body, headers: headers);
+  }
 
-/// Internal class for queued errors.
-class _QueuedError {
-  final _ErrorType type;
-  final String message;
-  final Duration? duration;
-
-  _QueuedError({
-    required this.type,
-    required this.message,
-    this.duration,
-  });
+  /// Responds with a timeout error.
+  void respondWithTimeout() {
+    if (!_completer.isCompleted) {
+      _completer.completeError(
+        TimeoutException('Request timed out'),
+      );
+    }
+  }
 }
 
 /// A captured HTTP request for inspection.
@@ -215,19 +298,4 @@ class CapturedRequest {
 
   /// Parses the body as JSON.
   dynamic get jsonBody => body != null ? json.decode(body!) : null;
-}
-
-/// A queued response configuration.
-class QueuedResponse {
-  final int statusCode;
-  final Object body;
-  final Map<String, String> headers;
-  final Duration? delay;
-
-  QueuedResponse({
-    required this.statusCode,
-    required this.body,
-    required this.headers,
-    this.delay,
-  });
 }

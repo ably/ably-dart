@@ -29,7 +29,22 @@ void main() {
 
     group('RSL1k2 - Message ID format when idempotent publishing enabled', () {
       test('generates ID in <base64>:<serial> format', () async {
-        mockHttp.queueResponse(201, {'serials': ['s1']});
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, {
+              'serials': ['s1']
+            });
+          },
+        );
 
         final client = Rest(
           options: ClientOptions(
@@ -42,7 +57,7 @@ void main() {
 
         await channel.publish(name: 'event', data: 'data');
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         final body = json.decode(request.body!) as List;
 
         expect(body[0].containsKey('id'), isTrue);
@@ -63,7 +78,22 @@ void main() {
 
     group('RSL1k2 - Serial increments for batch publish', () {
       test('increments serial for each message in batch', () async {
-        mockHttp.queueResponse(201, {'serials': ['s1', 's2', 's3']});
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, {
+              'serials': ['s1', 's2', 's3']
+            });
+          },
+        );
 
         final client = Rest(
           options: ClientOptions(
@@ -81,7 +111,7 @@ void main() {
         ];
         await channel.publish(messages: messages);
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         final body = json.decode(request.body!) as List;
 
         // All messages should share the same base but different serials
@@ -104,8 +134,22 @@ void main() {
 
     group('RSL1k3 - Separate publishes get unique base IDs', () {
       test('generates different base IDs for separate calls', () async {
-        mockHttp.queueResponse(201, {'serials': ['s1']});
-        mockHttp.queueResponse(201, {'serials': ['s2']});
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, {
+              'serials': ['s1']
+            });
+          },
+        );
 
         final client = Rest(
           options: ClientOptions(
@@ -119,8 +163,8 @@ void main() {
         await channel.publish(name: 'event1', data: 'data1');
         await channel.publish(name: 'event2', data: 'data2');
 
-        final body1 = json.decode(mockHttp.capturedRequests[0].body!) as List;
-        final body2 = json.decode(mockHttp.capturedRequests[1].body!) as List;
+        final body1 = json.decode(capturedRequests[0].body!) as List;
+        final body2 = json.decode(capturedRequests[1].body!) as List;
 
         final base1 = (body1[0]['id'] as String).split(':')[0];
         final base2 = (body2[0]['id'] as String).split(':')[0];
@@ -132,7 +176,22 @@ void main() {
 
     group('RSL1k3 - No ID generated when idempotent publishing disabled', () {
       test('does not add ID when disabled', () async {
-        mockHttp.queueResponse(201, {'serials': ['s1']});
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, {
+              'serials': ['s1']
+            });
+          },
+        );
 
         final client = Rest(
           options: ClientOptions(
@@ -145,7 +204,7 @@ void main() {
 
         await channel.publish(name: 'event', data: 'data');
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         final body = json.decode(request.body!) as List;
 
         // No automatic ID should be added
@@ -155,7 +214,22 @@ void main() {
 
     group('RSL1k - Client-supplied ID preserved', () {
       test('does not overwrite client-supplied IDs', () async {
-        mockHttp.queueResponse(201, {'serials': ['s1']});
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, {
+              'serials': ['s1']
+            });
+          },
+        );
 
         final client = Rest(
           options: ClientOptions(
@@ -170,7 +244,7 @@ void main() {
           message: Message(id: 'my-custom-id', name: 'event', data: 'data'),
         );
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         final body = json.decode(request.body!) as List;
 
         // Client-supplied ID should be preserved exactly
@@ -180,10 +254,32 @@ void main() {
 
     group('RSL1k2 - Same ID used on retry', () {
       test('uses same message ID when retrying after failure', () async {
-        // First request fails with retryable error
-        mockHttp.queueResponse(500, {'error': {'code': 50000}});
-        // Retry succeeds
-        mockHttp.queueResponse(201, {'serials': ['s1']});
+        final capturedRequests = <CapturedRequest>[];
+        var requestCount = 0;
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            requestCount++;
+            if (requestCount == 1) {
+              // First request fails with retryable error
+              req.respondWith(500, {
+                'error': {'code': 50000}
+              });
+            } else {
+              // Retry succeeds
+              req.respondWith(201, {
+                'serials': ['s1']
+              });
+            }
+          },
+        );
 
         final client = Rest(
           options: ClientOptions(
@@ -196,10 +292,10 @@ void main() {
 
         await channel.publish(name: 'event', data: 'data');
 
-        expect(mockHttp.capturedRequests.length, equals(2));
+        expect(capturedRequests.length, equals(2));
 
-        final body1 = json.decode(mockHttp.capturedRequests[0].body!) as List;
-        final body2 = json.decode(mockHttp.capturedRequests[1].body!) as List;
+        final body1 = json.decode(capturedRequests[0].body!) as List;
+        final body2 = json.decode(capturedRequests[1].body!) as List;
 
         // Same ID should be used for retry
         expect(body1[0]['id'], equals(body2[0]['id']));
@@ -208,7 +304,22 @@ void main() {
 
     group('RSL1k - Mixed client and library IDs in batch', () {
       test('preserves client IDs and generates IDs for others', () async {
-        mockHttp.queueResponse(201, {'serials': ['s1', 's2', 's3']});
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, {
+              'serials': ['s1', 's2', 's3']
+            });
+          },
+        );
 
         final client = Rest(
           options: ClientOptions(
@@ -226,7 +337,7 @@ void main() {
         ];
         await channel.publish(messages: messages);
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         final body = json.decode(request.body!) as List;
 
         // Client IDs preserved

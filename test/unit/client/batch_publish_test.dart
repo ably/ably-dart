@@ -19,9 +19,26 @@ void main() {
     group('RSC22c - Request format', () {
       test('RSC22c1 - Single BatchPublishSpec sends POST to /messages',
           () async {
-        mockHttp.queueResponse(201, [
-          {'channel': 'channel1', 'messageId': 'msg1', 'serials': ['s1']},
-        ]);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, [
+              {
+                'channel': 'channel1',
+                'messageId': 'msg1',
+                'serials': ['s1']
+              },
+            ]);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -35,17 +52,30 @@ void main() {
           ),
         );
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.method, equals('POST'));
         expect(request.url.path, equals('/messages'));
       });
 
       test('RSC22c2 - Array of BatchPublishSpecs sends POST to /messages',
           () async {
-        mockHttp.queueResponse(201, [
-          {'channel': 'channel1', 'messageId': 'msg1'},
-          {'channel': 'channel2', 'messageId': 'msg2'},
-        ]);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, [
+              {'channel': 'channel1', 'messageId': 'msg1'},
+              {'channel': 'channel2', 'messageId': 'msg2'},
+            ]);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -63,7 +93,7 @@ void main() {
           ),
         ]);
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.method, equals('POST'));
         expect(request.url.path, equals('/messages'));
 
@@ -73,9 +103,17 @@ void main() {
       });
 
       test('RSC22c3 - Single spec returns single BatchResult', () async {
-        mockHttp.queueResponse(201, [
-          {'channel': 'channel1', 'messageId': 'msg1', 'serials': ['s1']},
-        ]);
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(201, [
+              {
+                'channel': 'channel1',
+                'messageId': 'msg1',
+                'serials': ['s1']
+              },
+            ]);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -94,10 +132,14 @@ void main() {
       });
 
       test('RSC22c4 - Array of specs returns array of BatchResults', () async {
-        mockHttp.queueResponse(201, [
-          {'channel': 'channel1', 'messageId': 'msg1'},
-          {'channel': 'channel2', 'messageId': 'msg2'},
-        ]);
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(201, [
+              {'channel': 'channel1', 'messageId': 'msg1'},
+              {'channel': 'channel2', 'messageId': 'msg2'},
+            ]);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -122,11 +164,15 @@ void main() {
 
       test('RSC22c5 - Multiple channels in spec produces multiple results',
           () async {
-        mockHttp.queueResponse(201, [
-          {'channel': 'channel1', 'messageId': 'msg1'},
-          {'channel': 'channel2', 'messageId': 'msg1'},
-          {'channel': 'channel3', 'messageId': 'msg1'},
-        ]);
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(201, [
+              {'channel': 'channel1', 'messageId': 'msg1'},
+              {'channel': 'channel2', 'messageId': 'msg1'},
+              {'channel': 'channel3', 'messageId': 'msg1'},
+            ]);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -144,9 +190,22 @@ void main() {
       });
 
       test('RSC22c6 - Messages are encoded according to RSL4', () async {
-        mockHttp.queueResponse(201, [
-          {'channel': 'channel1', 'messageId': 'msg1'},
-        ]);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, [
+              {'channel': 'channel1', 'messageId': 'msg1'},
+            ]);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -166,7 +225,7 @@ void main() {
           ),
         );
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         final body = json.decode(request.body!) as Map;
         final messages = body['messages'] as List;
 
@@ -176,9 +235,22 @@ void main() {
       });
 
       test('RSC22c7 - Request uses correct authentication', () async {
-        mockHttp.queueResponse(201, [
-          {'channel': 'channel1', 'messageId': 'msg1'},
-        ]);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, [
+              {'channel': 'channel1', 'messageId': 'msg1'},
+            ]);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -192,16 +264,29 @@ void main() {
           ),
         );
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.headers['Authorization'], startsWith('Basic '));
       });
     });
 
     group('RSC22d - Idempotent publishing', () {
       test('RSC22d1 - Idempotent IDs generated when enabled', () async {
-        mockHttp.queueResponse(201, [
-          {'channel': 'channel1', 'messageId': 'msg1'},
-        ]);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, [
+              {'channel': 'channel1', 'messageId': 'msg1'},
+            ]);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions(
@@ -218,7 +303,7 @@ void main() {
           ),
         );
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         final body = json.decode(request.body!) as Map;
         final messages = body['messages'] as List;
 
@@ -231,9 +316,22 @@ void main() {
       });
 
       test('RSC22d3 - Explicit message IDs preserved', () async {
-        mockHttp.queueResponse(201, [
-          {'channel': 'channel1', 'messageId': 'my-custom-id'},
-        ]);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, [
+              {'channel': 'channel1', 'messageId': 'my-custom-id'},
+            ]);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions(
@@ -250,7 +348,7 @@ void main() {
           ),
         );
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         final body = json.decode(request.body!) as Map;
         final messages = body['messages'] as List;
 
@@ -258,9 +356,22 @@ void main() {
       });
 
       test('RSC22d4 - Idempotent IDs not generated when disabled', () async {
-        mockHttp.queueResponse(201, [
-          {'channel': 'channel1', 'messageId': 'msg1'},
-        ]);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, [
+              {'channel': 'channel1', 'messageId': 'msg1'},
+            ]);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions(
@@ -277,7 +388,7 @@ void main() {
           ),
         );
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         final body = json.decode(request.body!) as Map;
         final messages = body['messages'] as List;
 
@@ -288,10 +399,23 @@ void main() {
 
     group('BSP2 - BatchPublishSpec', () {
       test('BSP2a - channels is array of strings', () async {
-        mockHttp.queueResponse(201, [
-          {'channel': 'ch1', 'messageId': 'msg1'},
-          {'channel': 'ch2', 'messageId': 'msg1'},
-        ]);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, [
+              {'channel': 'ch1', 'messageId': 'msg1'},
+              {'channel': 'ch2', 'messageId': 'msg1'},
+            ]);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -305,7 +429,7 @@ void main() {
           ),
         );
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         final body = json.decode(request.body!) as Map;
 
         expect(body['channels'], isList);
@@ -313,9 +437,22 @@ void main() {
       });
 
       test('BSP2b - messages is array of Message objects', () async {
-        mockHttp.queueResponse(201, [
-          {'channel': 'channel1', 'messageId': 'msg1'},
-        ]);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, [
+              {'channel': 'channel1', 'messageId': 'msg1'},
+            ]);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -332,7 +469,7 @@ void main() {
           ),
         );
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         final body = json.decode(request.body!) as Map;
 
         expect(body['messages'], isList);
@@ -342,9 +479,13 @@ void main() {
 
     group('BPR2 - BatchPublishSuccessResult', () {
       test('BPR2a - channel field contains channel name', () async {
-        mockHttp.queueResponse(201, [
-          {'channel': 'my-channel', 'messageId': 'msg1'},
-        ]);
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(201, [
+              {'channel': 'my-channel', 'messageId': 'msg1'},
+            ]);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -362,9 +503,13 @@ void main() {
       });
 
       test('BPR2b - messageId contains the message ID prefix', () async {
-        mockHttp.queueResponse(201, [
-          {'channel': 'channel1', 'messageId': 'abc123'},
-        ]);
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(201, [
+              {'channel': 'channel1', 'messageId': 'abc123'},
+            ]);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -384,13 +529,17 @@ void main() {
       });
 
       test('BPR2c - serials contains array of message serials', () async {
-        mockHttp.queueResponse(201, [
-          {
-            'channel': 'channel1',
-            'messageId': 'msg1',
-            'serials': ['serial1', 'serial2'],
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(201, [
+              {
+                'channel': 'channel1',
+                'messageId': 'msg1',
+                'serials': ['serial1', 'serial2'],
+              },
+            ]);
           },
-        ]);
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -410,13 +559,17 @@ void main() {
 
       test('BPR2c1 - serials may contain null for conflated messages',
           () async {
-        mockHttp.queueResponse(201, [
-          {
-            'channel': 'channel1',
-            'messageId': 'msg1',
-            'serials': ['serial1', null, 'serial3'],
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(201, [
+              {
+                'channel': 'channel1',
+                'messageId': 'msg1',
+                'serials': ['serial1', null, 'serial3'],
+              },
+            ]);
           },
-        ]);
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -441,13 +594,17 @@ void main() {
 
     group('BPF2 - BatchPublishFailureResult', () {
       test('BPF2a - channel field contains failed channel name', () async {
-        mockHttp.queueResponse(207, [
-          {'channel': 'ok-channel', 'messageId': 'msg1'},
-          {
-            'channel': 'failed-channel',
-            'error': {'code': 40300, 'message': 'Forbidden'},
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(207, [
+              {'channel': 'ok-channel', 'messageId': 'msg1'},
+              {
+                'channel': 'failed-channel',
+                'error': {'code': 40300, 'message': 'Forbidden'},
+              },
+            ]);
           },
-        ]);
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -465,16 +622,20 @@ void main() {
       });
 
       test('BPF2b - error contains ErrorInfo for failure reason', () async {
-        mockHttp.queueResponse(207, [
-          {
-            'channel': 'channel1',
-            'error': {
-              'code': 40300,
-              'statusCode': 403,
-              'message': 'Publish not permitted',
-            },
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(207, [
+              {
+                'channel': 'channel1',
+                'error': {
+                  'code': 40300,
+                  'statusCode': 403,
+                  'message': 'Publish not permitted',
+                },
+              },
+            ]);
           },
-        ]);
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -498,14 +659,18 @@ void main() {
 
     group('BatchResult - Success/failure detection', () {
       test('BatchResult1 - Partial success with mixed results', () async {
-        mockHttp.queueResponse(207, [
-          {'channel': 'channel1', 'messageId': 'msg1'},
-          {
-            'channel': 'channel2',
-            'error': {'code': 40300, 'message': 'Forbidden'},
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(207, [
+              {'channel': 'channel1', 'messageId': 'msg1'},
+              {
+                'channel': 'channel2',
+                'error': {'code': 40300, 'message': 'Forbidden'},
+              },
+              {'channel': 'channel3', 'messageId': 'msg3'},
+            ]);
           },
-          {'channel': 'channel3', 'messageId': 'msg3'},
-        ]);
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -527,13 +692,17 @@ void main() {
 
       test('BatchResult2 - Distinguishing success from failure results',
           () async {
-        mockHttp.queueResponse(207, [
-          {'channel': 'channel1', 'messageId': 'msg1'},
-          {
-            'channel': 'channel2',
-            'error': {'code': 40300, 'message': 'Forbidden'},
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(207, [
+              {'channel': 'channel1', 'messageId': 'msg1'},
+              {
+                'channel': 'channel2',
+                'error': {'code': 40300, 'message': 'Forbidden'},
+              },
+            ]);
           },
-        ]);
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -562,9 +731,13 @@ void main() {
     group('RSC22 - Error handling', () {
       test('RSC22_Error1 - Authentication error throws AblyException',
           () async {
-        mockHttp.queueResponse(401, {
-          'error': {'code': 40100, 'message': 'Unauthorized'},
-        });
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(401, {
+              'error': {'code': 40100, 'message': 'Unauthorized'},
+            });
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -603,9 +776,22 @@ void main() {
 
     group('RSC22 - Request headers', () {
       test('RSC22_Headers1 - Includes standard Ably headers', () async {
-        mockHttp.queueResponse(201, [
-          {'channel': 'channel1', 'messageId': 'msg1'},
-        ]);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, [
+              {'channel': 'channel1', 'messageId': 'msg1'},
+            ]);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -619,7 +805,7 @@ void main() {
           ),
         );
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.headers['X-Ably-Version'], isNotNull);
         expect(request.headers['Ably-Agent'], isNotNull);
         // Content-Type depends on useBinaryProtocol setting (default is msgpack)

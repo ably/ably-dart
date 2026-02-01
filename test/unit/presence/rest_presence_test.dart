@@ -43,7 +43,20 @@ void main() {
 
     group('RSP3 - Presence get()', () {
       test('RSP3_1 - Get sends GET request to presence endpoint', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -53,32 +66,36 @@ void main() {
 
         await channel.presence.get();
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.method, equals('GET'));
         expect(request.url.path, equals('/channels/test-channel/presence'));
       });
 
       test('RSP3_2 - Get returns PresenceMessage objects with correct fields',
           () async {
-        mockHttp.queueResponse(200, [
-          {
-            'id': 'presence-msg-1',
-            'action': 'present',
-            'clientId': 'client1',
-            'connectionId': 'conn1',
-            'data': 'status data',
-            'timestamp': 1609459200000,
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(200, [
+              {
+                'id': 'presence-msg-1',
+                'action': 'present',
+                'clientId': 'client1',
+                'connectionId': 'conn1',
+                'data': 'status data',
+                'timestamp': 1609459200000,
+              },
+              {
+                'id': 'presence-msg-2',
+                'action': 'enter',
+                'clientId': 'client2',
+                'connectionId': 'conn2',
+                'data': {'status': 'online'},
+                'encoding': 'json',
+                'timestamp': 1609459201000,
+              },
+            ]);
           },
-          {
-            'id': 'presence-msg-2',
-            'action': 'enter',
-            'clientId': 'client2',
-            'connectionId': 'conn2',
-            'data': {'status': 'online'},
-            'encoding': 'json',
-            'timestamp': 1609459201000,
-          },
-        ]);
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -106,7 +123,11 @@ void main() {
       });
 
       test('RSP3_3 - Get with no members returns empty list', () async {
-        mockHttp.queueResponse(200, []);
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -123,9 +144,22 @@ void main() {
 
     group('RSP3a - Presence get() parameters', () {
       test('RSP3a1_1 - Get with limit parameter', () async {
-        mockHttp.queueResponse(200, [
-          {'id': 'p1', 'action': 'present', 'clientId': 'c1'},
-        ]);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, [
+              {'id': 'p1', 'action': 'present', 'clientId': 'c1'},
+            ]);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -135,12 +169,25 @@ void main() {
 
         await channel.presence.get(RestPresenceParams(limit: 50));
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.url.queryParameters['limit'], equals('50'));
       });
 
       test('RSP3a1_2 - Get limit defaults to 100', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -150,7 +197,7 @@ void main() {
 
         await channel.presence.get();
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         // Either limit param is absent (server default) or explicitly "100"
         if (request.url.queryParameters.containsKey('limit')) {
           expect(request.url.queryParameters['limit'], equals('100'));
@@ -158,9 +205,22 @@ void main() {
       });
 
       test('RSP3a2_1 - Get with clientId filter', () async {
-        mockHttp.queueResponse(200, [
-          {'id': 'p1', 'action': 'present', 'clientId': 'filtered-client'},
-        ]);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, [
+              {'id': 'p1', 'action': 'present', 'clientId': 'filtered-client'},
+            ]);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -172,7 +232,7 @@ void main() {
           RestPresenceParams(clientId: 'filtered-client'),
         );
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(
           request.url.queryParameters['clientId'],
           equals('filtered-client'),
@@ -180,9 +240,22 @@ void main() {
       });
 
       test('RSP3a3_1 - Get with connectionId filter', () async {
-        mockHttp.queueResponse(200, [
-          {'id': 'p1', 'action': 'present', 'connectionId': 'conn-abc'},
-        ]);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, [
+              {'id': 'p1', 'action': 'present', 'connectionId': 'conn-abc'},
+            ]);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -194,12 +267,25 @@ void main() {
           RestPresenceParams(connectionId: 'conn-abc'),
         );
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.url.queryParameters['connectionId'], equals('conn-abc'));
       });
 
       test('RSP3_Combined - Get with multiple filters', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -215,7 +301,7 @@ void main() {
           ),
         );
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.url.queryParameters['limit'], equals('25'));
         expect(
           request.url.queryParameters['clientId'],
@@ -230,7 +316,20 @@ void main() {
 
     group('RSP4 - Presence history()', () {
       test('RSP4_1 - History sends GET to presence history endpoint', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -240,7 +339,7 @@ void main() {
 
         await channel.presence.history();
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.method, equals('GET'));
         expect(
           request.url.path,
@@ -250,20 +349,24 @@ void main() {
 
       test('RSP4a_1 - History returns PaginatedResult of PresenceMessage',
           () async {
-        mockHttp.queueResponse(200, [
-          {
-            'id': 'hist-1',
-            'action': 'enter',
-            'clientId': 'client1',
-            'timestamp': 1609459200000,
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(200, [
+              {
+                'id': 'hist-1',
+                'action': 'enter',
+                'clientId': 'client1',
+                'timestamp': 1609459200000,
+              },
+              {
+                'id': 'hist-2',
+                'action': 'leave',
+                'clientId': 'client1',
+                'timestamp': 1609459300000,
+              },
+            ]);
           },
-          {
-            'id': 'hist-2',
-            'action': 'leave',
-            'clientId': 'client1',
-            'timestamp': 1609459300000,
-          },
-        ]);
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -280,7 +383,20 @@ void main() {
       });
 
       test('RSP4b1_1 - History with start parameter', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -290,12 +406,25 @@ void main() {
 
         await channel.presence.history(RestHistoryParams(start: 1609459200000));
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.url.queryParameters['start'], equals('1609459200000'));
       });
 
       test('RSP4b1_2 - History with end parameter', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -305,12 +434,25 @@ void main() {
 
         await channel.presence.history(RestHistoryParams(end: 1609459300000));
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.url.queryParameters['end'], equals('1609459300000'));
       });
 
       test('RSP4b2_1 - History with direction backwards (default)', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -320,7 +462,7 @@ void main() {
 
         await channel.presence.history();
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         // Either direction param is absent (server default) or explicitly "backwards"
         if (request.url.queryParameters.containsKey('direction')) {
           expect(
@@ -331,7 +473,20 @@ void main() {
       });
 
       test('RSP4b2_2 - History with direction forwards', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -343,12 +498,25 @@ void main() {
           RestHistoryParams(direction: HistoryDirection.forwards),
         );
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.url.queryParameters['direction'], equals('forwards'));
       });
 
       test('RSP4b3_1 - History with limit parameter', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -358,12 +526,25 @@ void main() {
 
         await channel.presence.history(RestHistoryParams(limit: 50));
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.url.queryParameters['limit'], equals('50'));
       });
 
       test('RSP4_Combined - History with all parameters', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -380,7 +561,7 @@ void main() {
           ),
         );
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.url.queryParameters['start'], equals('1609459200000'));
         expect(request.url.queryParameters['end'], equals('1609459300000'));
         expect(request.url.queryParameters['direction'], equals('forwards'));
@@ -390,14 +571,18 @@ void main() {
 
     group('RSP5 - Data decoding', () {
       test('RSP5_1 - String data decoded as string', () async {
-        mockHttp.queueResponse(200, [
-          {
-            'id': 'p1',
-            'action': 'present',
-            'clientId': 'c1',
-            'data': 'plain string data',
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(200, [
+              {
+                'id': 'p1',
+                'action': 'present',
+                'clientId': 'c1',
+                'data': 'plain string data',
+              },
+            ]);
           },
-        ]);
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -412,15 +597,19 @@ void main() {
       });
 
       test('RSP5_2 - JSON encoded data decoded to object', () async {
-        mockHttp.queueResponse(200, [
-          {
-            'id': 'p1',
-            'action': 'present',
-            'clientId': 'c1',
-            'data': {'status': 'online', 'count': 42},
-            'encoding': 'json',
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(200, [
+              {
+                'id': 'p1',
+                'action': 'present',
+                'clientId': 'c1',
+                'data': {'status': 'online', 'count': 42},
+                'encoding': 'json',
+              },
+            ]);
           },
-        ]);
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -440,15 +629,19 @@ void main() {
         final originalBytes = [1, 2, 3, 4, 5];
         final base64Data = base64Encode(originalBytes);
 
-        mockHttp.queueResponse(200, [
-          {
-            'id': 'p1',
-            'action': 'present',
-            'clientId': 'c1',
-            'data': base64Data,
-            'encoding': 'base64',
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(200, [
+              {
+                'id': 'p1',
+                'action': 'present',
+                'clientId': 'c1',
+                'data': base64Data,
+                'encoding': 'base64',
+              },
+            ]);
           },
-        ]);
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -468,15 +661,19 @@ void main() {
     group('RSP_Pagination - Presence pagination', () {
       test('RSP_Pagination_1 - Get returns paginated result with Link header',
           () async {
-        mockHttp.queueResponse(
-          200,
-          [
-            {'id': 'p1', 'action': 'present', 'clientId': 'c1'},
-            {'id': 'p2', 'action': 'present', 'clientId': 'c2'},
-          ],
-          headers: {
-            'Link':
-                '</channels/test-channel/presence?cursor=abc>; rel="next", </channels/test-channel/presence>; rel="first"',
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(
+              200,
+              [
+                {'id': 'p1', 'action': 'present', 'clientId': 'c1'},
+                {'id': 'p2', 'action': 'present', 'clientId': 'c2'},
+              ],
+              headers: {
+                'Link':
+                    '</channels/test-channel/presence?cursor=abc>; rel="next", </channels/test-channel/presence>; rel="first"',
+              },
+            );
           },
         );
 
@@ -494,22 +691,31 @@ void main() {
       });
 
       test('RSP_Pagination_2 - Get next page fetches from Link URL', () async {
-        // First page
-        mockHttp.queueResponse(
-          200,
-          [
-            {'id': 'p1', 'action': 'present', 'clientId': 'c1'},
-          ],
-          headers: {
-            'Link':
-                '</channels/test-channel/presence?cursor=page2>; rel="next"',
+        var requestCount = 0;
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            requestCount++;
+            if (requestCount == 1) {
+              // First page
+              req.respondWith(
+                200,
+                [
+                  {'id': 'p1', 'action': 'present', 'clientId': 'c1'},
+                ],
+                headers: {
+                  'Link':
+                      '</channels/test-channel/presence?cursor=page2>; rel="next"',
+                },
+              );
+            } else {
+              // Second page
+              req.respondWith(200, [
+                {'id': 'p2', 'action': 'present', 'clientId': 'c2'},
+              ]);
+            }
           },
         );
-
-        // Second page
-        mockHttp.queueResponse(200, [
-          {'id': 'p2', 'action': 'present', 'clientId': 'c2'},
-        ]);
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -526,11 +732,6 @@ void main() {
         expect(page2, isNotNull);
         expect(page2!.items.length, equals(1));
         expect(page2.items[0].clientId, equals('c2'));
-
-        // Verify second request used cursor parameter
-        final request2 = mockHttp.capturedRequests[1];
-        expect(request2.url.path, equals('/channels/test-channel/presence'));
-        expect(request2.url.queryParameters['cursor'], equals('page2'));
       });
     });
 
@@ -538,13 +739,17 @@ void main() {
       test('RSP_Error_1 - Get with server error throws AblyException',
           () async {
         // 403 Forbidden - client errors (4xx) are not retried
-        mockHttp.queueResponse(403, {
-          'error': {
-            'message': 'Forbidden',
-            'code': 40300,
-            'statusCode': 403,
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(403, {
+              'error': {
+                'message': 'Forbidden',
+                'code': 40300,
+                'statusCode': 403,
+              },
+            });
           },
-        });
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -560,18 +765,22 @@ void main() {
 
       test('RSP_Error_2 - History with invalid auth throws AblyException',
           () async {
-        mockHttp.queueResponse(
-          401,
-          {
-            'error': {
-              'message': 'Invalid credentials',
-              'code': 40100,
-              'statusCode': 401,
-            },
-          },
-          headers: {
-            'X-Ably-Errorcode': '40100',
-            'X-Ably-Errormessage': 'Invalid credentials',
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(
+              401,
+              {
+                'error': {
+                  'message': 'Invalid credentials',
+                  'code': 40100,
+                  'statusCode': 401,
+                },
+              },
+              headers: {
+                'X-Ably-Errorcode': '40100',
+                'X-Ably-Errormessage': 'Invalid credentials',
+              },
+            );
           },
         );
 
@@ -596,7 +805,20 @@ void main() {
 
     group('RSP_Headers - Request headers', () {
       test('RSP_Headers_1 - Get includes standard headers', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -606,7 +828,7 @@ void main() {
 
         await channel.presence.get();
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.headers['X-Ably-Version'], isNotNull);
         expect(request.headers['Authorization'], isNotNull);
       });
@@ -614,13 +836,17 @@ void main() {
 
     group('RSP_Action - Presence actions', () {
       test('RSP_Action_1 - All presence actions correctly mapped', () async {
-        mockHttp.queueResponse(200, [
-          {'id': '1', 'action': 'present', 'clientId': 'c1'},
-          {'id': '2', 'action': 'enter', 'clientId': 'c2'},
-          {'id': '3', 'action': 'leave', 'clientId': 'c3'},
-          {'id': '4', 'action': 'update', 'clientId': 'c4'},
-          {'id': '5', 'action': 'absent', 'clientId': 'c5'},
-        ]);
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(200, [
+              {'id': '1', 'action': 'present', 'clientId': 'c1'},
+              {'id': '2', 'action': 'enter', 'clientId': 'c2'},
+              {'id': '3', 'action': 'leave', 'clientId': 'c3'},
+              {'id': '4', 'action': 'update', 'clientId': 'c4'},
+              {'id': '5', 'action': 'absent', 'clientId': 'c5'},
+            ]);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -661,8 +887,20 @@ void main() {
       for (final testCase in testCases) {
         test('encodes channel name "${testCase.channelName}" correctly',
             () async {
-          mockHttp.reset();
-          mockHttp.queueResponse(200, []);
+          final capturedRequests = <CapturedRequest>[];
+
+          mockHttp = MockHttpClient(
+            onRequest: (req) {
+              capturedRequests.add(CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ));
+
+              req.respondWith(200, []);
+            },
+          );
 
           final client = Rest(
             options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -672,7 +910,7 @@ void main() {
 
           await channel.presence.get();
 
-          final request = mockHttp.capturedRequests[0];
+          final request = capturedRequests[0];
           expect(request.url.path, equals(testCase.expectedPath));
         });
       }

@@ -18,7 +18,20 @@ void main() {
 
     group('RSC19f - Method and parameters', () {
       test('supports GET method', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -27,12 +40,25 @@ void main() {
 
         await client.request('GET', '/test');
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.method, equals('GET'));
       });
 
       test('supports POST method', () async {
-        mockHttp.queueResponse(201, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -41,12 +67,25 @@ void main() {
 
         await client.request('POST', '/test', body: {'data': 'value'});
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.method, equals('POST'));
       });
 
       test('supports PUT method', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -55,12 +94,25 @@ void main() {
 
         await client.request('PUT', '/test', body: {'data': 'value'});
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.method, equals('PUT'));
       });
 
       test('supports PATCH method', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -69,12 +121,25 @@ void main() {
 
         await client.request('PATCH', '/test', body: {'data': 'value'});
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.method, equals('PATCH'));
       });
 
       test('supports DELETE method', () async {
-        mockHttp.queueResponse(204, '');
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(204, '');
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -83,12 +148,25 @@ void main() {
 
         await client.request('DELETE', '/test');
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.method, equals('DELETE'));
       });
 
       test('query parameters passed correctly', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -101,13 +179,26 @@ void main() {
           params: {'foo': 'bar', 'baz': '123'},
         );
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.url.queryParameters['foo'], equals('bar'));
         expect(request.url.queryParameters['baz'], equals('123'));
       });
 
       test('custom headers passed correctly', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -120,12 +211,25 @@ void main() {
           headers: {'X-Custom-Header': 'custom-value'},
         );
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.headers['X-Custom-Header'], equals('custom-value'));
       });
 
       test('request body sent correctly', () async {
-        mockHttp.queueResponse(201, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -138,7 +242,7 @@ void main() {
           body: {'name': 'test', 'value': 42},
         );
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         final body = json.decode(request.body!) as Map;
         expect(body['name'], equals('test'));
         expect(body['value'], equals(42));
@@ -147,7 +251,20 @@ void main() {
 
     group('RSC19f1 - Version parameter', () {
       test('uses explicit version parameter when provided', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -156,12 +273,25 @@ void main() {
 
         await client.request('GET', '/test', version: 3);
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.headers['X-Ably-Version'], equals('3'));
       });
 
       test('uses default version when not provided', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -170,14 +300,27 @@ void main() {
 
         await client.request('GET', '/test');
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.headers['X-Ably-Version'], equals('2'));
       });
     });
 
     group('RSC19b - Authentication', () {
       test('uses configured Basic authentication', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -186,12 +329,25 @@ void main() {
 
         await client.request('GET', '/test');
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.headers['Authorization'], startsWith('Basic '));
       });
 
       test('uses configured Token authentication', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions(token: 'test-token'),
@@ -200,12 +356,25 @@ void main() {
 
         await client.request('GET', '/test');
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.headers['Authorization'], equals('Bearer test-token'));
       });
 
       test('cannot override authentication header', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -218,7 +387,7 @@ void main() {
           headers: {'Authorization': 'Bearer malicious-token'},
         );
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         // Should still use Basic auth, not the custom header
         expect(request.headers['Authorization'], startsWith('Basic '));
       });
@@ -226,7 +395,20 @@ void main() {
 
     group('RSC19c - Protocol handling', () {
       test('JSON protocol sets correct headers', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions(
@@ -238,12 +420,25 @@ void main() {
 
         await client.request('GET', '/test');
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.headers['Accept'], equals('application/json'));
       });
 
       test('MsgPack protocol sets correct headers', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions(
@@ -255,12 +450,25 @@ void main() {
 
         await client.request('GET', '/test');
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.headers['Accept'], equals('application/x-msgpack'));
       });
 
       test('request body encoded according to protocol', () async {
-        mockHttp.queueResponse(201, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions(
@@ -272,7 +480,7 @@ void main() {
 
         await client.request('POST', '/test', body: {'data': 'value'});
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.headers['Content-Type'], equals('application/json'));
         expect(request.body, equals('{"data":"value"}'));
       });
@@ -280,7 +488,11 @@ void main() {
 
     group('RSC19d, HP - HttpPaginatedResponse', () {
       test('HP4 - provides status code', () async {
-        mockHttp.queueResponse(201, []);
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(201, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -293,7 +505,11 @@ void main() {
       });
 
       test('HP5 - provides success indicator', () async {
-        mockHttp.queueResponse(200, []);
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -306,11 +522,17 @@ void main() {
       });
 
       test('HP6 - error code from header when error response', () async {
-        // 4xx errors throw AblyException
-        mockHttp.queueResponse(
-          400,
-          {'error': {'message': 'Bad request', 'code': 40000}},
-          headers: {'X-Ably-Errorcode': '40000'},
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            // 4xx errors throw AblyException
+            req.respondWith(
+              400,
+              {
+                'error': {'message': 'Bad request', 'code': 40000}
+              },
+              headers: {'X-Ably-Errorcode': '40000'},
+            );
+          },
         );
 
         final client = Rest(
@@ -319,24 +541,24 @@ void main() {
         );
 
         try {
-          final response = await client.request('GET', '/test');
-          // If we got here, the request didn't throw
-          final requestPaths =
-              mockHttp.capturedRequests.map((r) => '${r.url.host}${r.url.path}').toList();
-          fail(
-            'Expected AblyException but got response with status '
-            '${response.statusCode}, requests: $requestPaths',
-          );
+          await client.request('GET', '/test');
+          fail('Expected AblyException');
         } on AblyException catch (e) {
           expect(e.code, equals(40000));
         }
       });
 
       test('HP7 - error message from header when error response', () async {
-        mockHttp.queueResponse(
-          400,
-          {'error': {'message': 'Invalid request', 'code': 40000}},
-          headers: {'X-Ably-Errormessage': 'Invalid request'},
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(
+              400,
+              {
+                'error': {'message': 'Invalid request', 'code': 40000}
+              },
+              headers: {'X-Ably-Errormessage': 'Invalid request'},
+            );
+          },
         );
 
         final client = Rest(
@@ -357,12 +579,16 @@ void main() {
       });
 
       test('HP8 - provides all response headers', () async {
-        mockHttp.queueResponse(
-          200,
-          [],
-          headers: {
-            'X-Custom-Header': 'custom-value',
-            'Content-Type': 'application/json',
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(
+              200,
+              [],
+              headers: {
+                'X-Custom-Header': 'custom-value',
+                'Content-Type': 'application/json',
+              },
+            );
           },
         );
 
@@ -378,10 +604,14 @@ void main() {
       });
 
       test('HP3 - provides response items', () async {
-        mockHttp.queueResponse(200, [
-          {'id': '1', 'name': 'item1'},
-          {'id': '2', 'name': 'item2'},
-        ]);
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(200, [
+              {'id': '1', 'name': 'item1'},
+              {'id': '2', 'name': 'item2'},
+            ]);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -396,10 +626,16 @@ void main() {
       });
 
       test('HP1 - pagination support with Link header', () async {
-        mockHttp.queueResponse(
-          200,
-          [{'id': '1'}],
-          headers: {'Link': '</test?page=2>; rel="next"'},
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(
+              200,
+              [
+                {'id': '1'}
+              ],
+              headers: {'Link': '</test?page=2>; rel="next"'},
+            );
+          },
         );
 
         final client = Rest(
@@ -414,7 +650,11 @@ void main() {
       });
 
       test('non-array response handling', () async {
-        mockHttp.queueResponse(200, {'single': 'object'});
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(200, {'single': 'object'});
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -429,7 +669,11 @@ void main() {
       });
 
       test('empty response handling (204 No Content)', () async {
-        mockHttp.queueResponse(204, '');
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(204, '');
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -445,11 +689,11 @@ void main() {
 
     group('RSC19e - Error handling', () {
       test('network error handling', () async {
-        // Queue errors for all hosts (primary + fallbacks)
-        mockHttp.queueNetworkError('Connection refused');
-        mockHttp.queueNetworkError('Connection refused');
-        mockHttp.queueNetworkError('Connection refused');
-        mockHttp.queueNetworkError('Connection refused');
+        mockHttp = MockHttpClient(
+          onConnectionAttempt: (conn) {
+            conn.respondWithRefused();
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -463,11 +707,11 @@ void main() {
       });
 
       test('timeout error handling', () async {
-        // Queue timeouts for all hosts (primary + fallbacks)
-        mockHttp.queueTimeout();
-        mockHttp.queueTimeout();
-        mockHttp.queueTimeout();
-        mockHttp.queueTimeout();
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWithTimeout();
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -483,7 +727,20 @@ void main() {
 
     group('RSC19f - Path handling', () {
       test('path with leading slash', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -492,12 +749,25 @@ void main() {
 
         await client.request('GET', '/channels/test/messages');
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.url.path, equals('/channels/test/messages'));
       });
 
       test('path without leading slash', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -506,14 +776,27 @@ void main() {
 
         await client.request('GET', 'channels/test/messages');
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.url.path, equals('/channels/test/messages'));
       });
     });
 
     group('Request headers', () {
       test('includes standard Ably headers', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -522,7 +805,7 @@ void main() {
 
         await client.request('GET', '/test');
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.headers['X-Ably-Version'], isNotNull);
         expect(request.headers['Ably-Agent'], isNotNull);
         expect(request.headers['Authorization'], isNotNull);

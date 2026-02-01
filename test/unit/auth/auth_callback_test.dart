@@ -8,17 +8,26 @@ import '../../helpers/mock_http_client.dart';
 /// Spec points: RSA8c, RSA8c1a, RSA8c1b, RSA8c1c, RSA8c2, RSA8c3, RSA8d
 void main() {
   group('Auth Callback', () {
-    late MockHttpClient mockHttp;
-
-    setUp(() {
-      mockHttp = MockHttpClient();
-    });
-
     group('RSA8d - authCallback invocation', () {
       test('invokes callback with TokenParams and returns token', () async {
         final callbackInvocations = <TokenParams>[];
+        final capturedRequests = <CapturedRequest>[];
 
-        mockHttp.queueResponse(201, {'serials': ['s1']});
+        final mockHttp = MockHttpClient(
+          onConnectionAttempt: (conn) => conn.respondWithSuccess(),
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, {
+              'serials': ['s1']
+            });
+          },
+        );
 
         final client = Rest(
           options: ClientOptions(
@@ -46,7 +55,7 @@ void main() {
         expect(callbackInvocations[0], isA<TokenParams>());
 
         // Token was used in request
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(
           request.headers['Authorization'],
           equals('Bearer mock-token-string'),
@@ -56,7 +65,23 @@ void main() {
 
     group('RSA8d - authCallback returns different token types', () {
       test('accepts TokenDetails return type', () async {
-        mockHttp.queueResponse(201, {'serials': ['s1']});
+        final capturedRequests = <CapturedRequest>[];
+
+        final mockHttp = MockHttpClient(
+          onConnectionAttempt: (conn) => conn.respondWithSuccess(),
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, {
+              'serials': ['s1']
+            });
+          },
+        );
 
         final client = Rest(
           options: ClientOptions(
@@ -70,7 +95,7 @@ void main() {
 
         await client.channels.get('test').publish(name: 'e', data: 'd');
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(
           request.headers['Authorization'],
           equals('Bearer callback-token'),
@@ -78,7 +103,23 @@ void main() {
       });
 
       test('accepts String (token) return type', () async {
-        mockHttp.queueResponse(201, {'serials': ['s1']});
+        final capturedRequests = <CapturedRequest>[];
+
+        final mockHttp = MockHttpClient(
+          onConnectionAttempt: (conn) => conn.respondWithSuccess(),
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, {
+              'serials': ['s1']
+            });
+          },
+        );
 
         final client = Rest(
           options: ClientOptions(
@@ -89,7 +130,7 @@ void main() {
 
         await client.channels.get('test').publish(name: 'e', data: 'd');
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(
           request.headers['Authorization'],
           equals('Bearer raw-string-token'),
@@ -97,14 +138,33 @@ void main() {
       });
 
       test('accepts TokenRequest return type', () async {
-        // First request: exchange TokenRequest for TokenDetails
-        mockHttp.queueResponse(200, {
-          'token': 'exchanged-token',
-          'expires': DateTime.now().millisecondsSinceEpoch + 3600000,
-          'keyName': 'appId.keyId',
-        });
-        // Second request: actual publish
-        mockHttp.queueResponse(201, {'serials': ['s1']});
+        final capturedRequests = <CapturedRequest>[];
+
+        final mockHttp = MockHttpClient(
+          onConnectionAttempt: (conn) => conn.respondWithSuccess(),
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            if (req.url.path.contains('requestToken')) {
+              // First request: exchange TokenRequest for TokenDetails
+              req.respondWith(200, {
+                'token': 'exchanged-token',
+                'expires': DateTime.now().millisecondsSinceEpoch + 3600000,
+                'keyName': 'appId.keyId',
+              });
+            } else {
+              // Second request: actual publish
+              req.respondWith(201, {
+                'serials': ['s1']
+              });
+            }
+          },
+        );
 
         final client = Rest(
           options: ClientOptions(
@@ -123,13 +183,13 @@ void main() {
 
         // First request should be token exchange
         expect(
-          mockHttp.capturedRequests[0].url.path,
+          capturedRequests[0].url.path,
           equals('/keys/appId.keyId/requestToken'),
         );
 
         // Second request should use exchanged token
         expect(
-          mockHttp.capturedRequests[1].headers['Authorization'],
+          capturedRequests[1].headers['Authorization'],
           equals('Bearer exchanged-token'),
         );
       });
@@ -137,15 +197,33 @@ void main() {
 
     group('RSA8c - authUrl queries URL for token', () {
       test('queries authUrl to obtain a token', () async {
-        // Response from authUrl
-        mockHttp.queueResponseForHost(
-          'auth.example.com',
-          200,
-          {'token': 'authurl-token', 'expires': 9999999999999},
-          headers: {'Content-Type': 'application/json'},
+        final capturedRequests = <CapturedRequest>[];
+
+        final mockHttp = MockHttpClient(
+          onConnectionAttempt: (conn) => conn.respondWithSuccess(),
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            if (req.url.host == 'auth.example.com') {
+              // Response from authUrl
+              req.respondWith(
+                200,
+                {'token': 'authurl-token', 'expires': 9999999999999},
+                headers: {'Content-Type': 'application/json'},
+              );
+            } else {
+              // Response from Ably for publish
+              req.respondWith(201, {
+                'serials': ['s1']
+              });
+            }
+          },
         );
-        // Response from Ably for publish
-        mockHttp.queueResponse(201, {'serials': ['s1']});
 
         final client = Rest(
           options: ClientOptions(
@@ -157,12 +235,12 @@ void main() {
         await client.channels.get('test').publish(name: 'e', data: 'd');
 
         // First request goes to authUrl
-        final authRequest = mockHttp.capturedRequests[0];
+        final authRequest = capturedRequests[0];
         expect(authRequest.url.host, equals('auth.example.com'));
         expect(authRequest.url.path, equals('/get-token'));
 
         // Subsequent request uses obtained token
-        final publishRequest = mockHttp.capturedRequests[1];
+        final publishRequest = capturedRequests[1];
         expect(
           publishRequest.headers['Authorization'],
           equals('Bearer authurl-token'),
@@ -172,13 +250,31 @@ void main() {
 
     group('RSA8c1a - authUrl with GET method', () {
       test('sends TokenParams and authParams as query string', () async {
-        mockHttp.queueResponseForHost(
-          'auth.example.com',
-          200,
-          'plain-token-string',
-          headers: {'Content-Type': 'text/plain'},
+        final capturedRequests = <CapturedRequest>[];
+
+        final mockHttp = MockHttpClient(
+          onConnectionAttempt: (conn) => conn.respondWithSuccess(),
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            if (req.url.host == 'auth.example.com') {
+              req.respondWith(
+                200,
+                'plain-token-string',
+                headers: {'Content-Type': 'text/plain'},
+              );
+            } else {
+              req.respondWith(201, {
+                'serials': ['s1']
+              });
+            }
+          },
         );
-        mockHttp.queueResponse(201, {'serials': ['s1']});
 
         final client = Rest(
           options: ClientOptions(
@@ -192,7 +288,7 @@ void main() {
 
         await client.channels.get('test').publish(name: 'e', data: 'd');
 
-        final authRequest = mockHttp.capturedRequests[0];
+        final authRequest = capturedRequests[0];
 
         expect(authRequest.method, equals('GET'));
         expect(authRequest.url.queryParameters['custom'], equals('param1'));
@@ -203,13 +299,31 @@ void main() {
 
     group('RSA8c1b - authUrl with POST method', () {
       test('sends TokenParams and authParams as form-encoded body', () async {
-        mockHttp.queueResponseForHost(
-          'auth.example.com',
-          200,
-          {'token': 'post-token'},
-          headers: {'Content-Type': 'application/json'},
+        final capturedRequests = <CapturedRequest>[];
+
+        final mockHttp = MockHttpClient(
+          onConnectionAttempt: (conn) => conn.respondWithSuccess(),
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            if (req.url.host == 'auth.example.com') {
+              req.respondWith(
+                200,
+                {'token': 'post-token'},
+                headers: {'Content-Type': 'application/json'},
+              );
+            } else {
+              req.respondWith(201, {
+                'serials': ['s1']
+              });
+            }
+          },
         );
-        mockHttp.queueResponse(201, {'serials': ['s1']});
 
         final client = Rest(
           options: ClientOptions(
@@ -223,7 +337,7 @@ void main() {
 
         await client.channels.get('test').publish(name: 'e', data: 'd');
 
-        final authRequest = mockHttp.capturedRequests[0];
+        final authRequest = capturedRequests[0];
 
         expect(authRequest.method, equals('POST'));
         expect(
@@ -239,17 +353,36 @@ void main() {
 
     group('RSA8c1c - authUrl preserves existing query params', () {
       test('merges existing and new query params', () async {
-        mockHttp.queueResponseForHost(
-          'auth.example.com',
-          200,
-          {'token': 'merged-token'},
-          headers: {'Content-Type': 'application/json'},
+        final capturedRequests = <CapturedRequest>[];
+
+        final mockHttp = MockHttpClient(
+          onConnectionAttempt: (conn) => conn.respondWithSuccess(),
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            if (req.url.host == 'auth.example.com') {
+              req.respondWith(
+                200,
+                {'token': 'merged-token'},
+                headers: {'Content-Type': 'application/json'},
+              );
+            } else {
+              req.respondWith(201, {
+                'serials': ['s1']
+              });
+            }
+          },
         );
-        mockHttp.queueResponse(201, {'serials': ['s1']});
 
         final client = Rest(
           options: ClientOptions(
-            authUrl: 'https://auth.example.com/token?existing=value&another=123',
+            authUrl:
+                'https://auth.example.com/token?existing=value&another=123',
             authMethod: 'GET',
             authParams: {'added': 'new'},
           ),
@@ -258,7 +391,7 @@ void main() {
 
         await client.channels.get('test').publish(name: 'e', data: 'd');
 
-        final authRequest = mockHttp.capturedRequests[0];
+        final authRequest = capturedRequests[0];
 
         // All params should be present
         expect(authRequest.url.queryParameters['existing'], equals('value'));
@@ -269,13 +402,31 @@ void main() {
 
     group('RSA8c2 - TokenParams take precedence over authParams', () {
       test('uses TokenParams values when names conflict', () async {
-        mockHttp.queueResponseForHost(
-          'auth.example.com',
-          200,
-          {'token': 'precedence-token'},
-          headers: {'Content-Type': 'application/json'},
+        final capturedRequests = <CapturedRequest>[];
+
+        final mockHttp = MockHttpClient(
+          onConnectionAttempt: (conn) => conn.respondWithSuccess(),
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            if (req.url.host == 'auth.example.com') {
+              req.respondWith(
+                200,
+                {'token': 'precedence-token'},
+                headers: {'Content-Type': 'application/json'},
+              );
+            } else {
+              req.respondWith(201, {
+                'serials': ['s1']
+              });
+            }
+          },
         );
-        mockHttp.queueResponse(201, {'serials': ['s1']});
 
         final client = Rest(
           options: ClientOptions(
@@ -292,7 +443,7 @@ void main() {
 
         await client.channels.get('test').publish(name: 'e', data: 'd');
 
-        final authRequest = mockHttp.capturedRequests[0];
+        final authRequest = capturedRequests[0];
 
         // TokenParams.clientId should override authParams.clientId
         expect(

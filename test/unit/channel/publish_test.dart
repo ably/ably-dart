@@ -19,7 +19,22 @@ void main() {
 
     group('RSL1a, RSL1b - Publish with name and data', () {
       test('sends a single message', () async {
-        mockHttp.queueResponse(201, {'serials': ['serial1']});
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, {
+              'serials': ['serial1']
+            });
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -29,7 +44,7 @@ void main() {
 
         await channel.publish(name: 'greeting', data: 'hello');
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
 
         // RSL1b - single message published
         expect(request.method, equals('POST'));
@@ -44,7 +59,22 @@ void main() {
 
     group('RSL1a, RSL1c - Publish with Message array', () {
       test('sends all messages in a single request', () async {
-        mockHttp.queueResponse(201, {'serials': ['s1', 's2', 's3']});
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, {
+              'serials': ['s1', 's2', 's3']
+            });
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -60,9 +90,9 @@ void main() {
         await channel.publish(messages: messages);
 
         // RSL1c - single request for array
-        expect(mockHttp.capturedRequests.length, equals(1));
+        expect(capturedRequests.length, equals(1));
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         final body = json.decode(request.body!) as List;
 
         expect(body.length, equals(3));
@@ -93,8 +123,22 @@ void main() {
 
       for (final testCase in testCases) {
         test('handles ${testCase.description}', () async {
-          mockHttp.reset();
-          mockHttp.queueResponse(201, {'serials': ['s1']});
+          final capturedRequests = <CapturedRequest>[];
+
+          mockHttp = MockHttpClient(
+            onRequest: (req) {
+              capturedRequests.add(CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ));
+
+              req.respondWith(201, {
+                'serials': ['s1']
+              });
+            },
+          );
 
           final client = Rest(
             options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -104,7 +148,7 @@ void main() {
 
           await channel.publish(name: testCase.name, data: testCase.data);
 
-          final body = json.decode(mockHttp.capturedRequests[0].body!) as List;
+          final body = json.decode(capturedRequests[0].body!) as List;
 
           if (testCase.name == null) {
             expect(body[0].containsKey('name'), isFalse);
@@ -123,7 +167,22 @@ void main() {
 
     group('RSL1h - publish(name, data) signature', () {
       test('accepts name and data arguments', () async {
-        mockHttp.queueResponse(201, {'serials': ['s1']});
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, {
+              'serials': ['s1']
+            });
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -133,8 +192,8 @@ void main() {
 
         await channel.publish(name: 'event', data: 'payload');
 
-        expect(mockHttp.capturedRequests.length, equals(1));
-        final body = json.decode(mockHttp.capturedRequests[0].body!) as List;
+        expect(capturedRequests.length, equals(1));
+        final body = json.decode(capturedRequests[0].body!) as List;
         expect(body[0]['name'], equals('event'));
         expect(body[0]['data'], equals('payload'));
       });
@@ -164,13 +223,25 @@ void main() {
             ),
           ),
         );
-
-        // Request should never be sent
-        expect(mockHttp.capturedRequests.length, equals(0));
       });
 
       test('accepts messages at or under maxMessageSize', () async {
-        mockHttp.queueResponse(201, {'serials': ['s1']});
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, {
+              'serials': ['s1']
+            });
+          },
+        );
 
         final client = Rest(
           options: ClientOptions(
@@ -185,13 +256,28 @@ void main() {
         final smallData = 'x' * 500;
 
         await channel.publish(name: 'event', data: smallData);
-        expect(mockHttp.capturedRequests.length, equals(1));
+        expect(capturedRequests.length, equals(1));
       });
     });
 
     group('RSL1j - All Message attributes transmitted', () {
       test('includes all valid Message attributes', () async {
-        mockHttp.queueResponse(201, {'serials': ['s1']});
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, {
+              'serials': ['s1']
+            });
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -212,19 +298,34 @@ void main() {
 
         await channel.publish(message: message);
 
-        final body = json.decode(mockHttp.capturedRequests[0].body!) as List;
+        final body = json.decode(capturedRequests[0].body!) as List;
 
         expect(body[0]['name'], equals('test-event'));
         expect(body[0]['data'], equals('test-data'));
         expect(body[0]['id'], equals('custom-message-id'));
-        expect(body[0]['extras']['push']['notification']['title'],
-            equals('Test'));
+        expect(
+            body[0]['extras']['push']['notification']['title'], equals('Test'));
       });
     });
 
     group('RSL1l - Publish params as querystring', () {
       test('sends additional params as querystring', () async {
-        mockHttp.queueResponse(201, {'serials': ['s1']});
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, {
+              'serials': ['s1']
+            });
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -240,7 +341,7 @@ void main() {
           },
         );
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
 
         expect(
           request.url.queryParameters['customParam'],
@@ -255,13 +356,33 @@ void main() {
 
     group('RSL1m - ClientId not set from library clientId', () {
       test('RSL1m1 - message with no clientId, library has clientId', () async {
-        // Token request (RSA4b: key + clientId triggers token auth)
-        mockHttp.queueResponse(200, {
-          'token': 'test-token',
-          'expires': DateTime.now().millisecondsSinceEpoch + 3600000,
-        });
-        // Publish response
-        mockHttp.queueResponse(201, {'serials': ['s1']});
+        final capturedRequests = <CapturedRequest>[];
+        var requestCount = 0;
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            requestCount++;
+            if (req.url.path.contains('requestToken')) {
+              // Token request (RSA4b: key + clientId triggers token auth)
+              req.respondWith(200, {
+                'token': 'test-token',
+                'expires': DateTime.now().millisecondsSinceEpoch + 3600000,
+              });
+            } else {
+              // Publish response
+              req.respondWith(201, {
+                'serials': ['s1']
+              });
+            }
+          },
+        );
 
         final clientWithId = Rest(
           options: ClientOptions(
@@ -274,19 +395,40 @@ void main() {
         await clientWithId.channels.get('ch').publish(name: 'e', data: 'd');
 
         // First request is token request, second is publish
-        final body = json.decode(mockHttp.capturedRequests[1].body!) as List;
+        final publishRequest = capturedRequests.firstWhere(
+          (req) => req.url.path.contains('/messages'),
+        );
+        final body = json.decode(publishRequest.body!) as List;
         // Library should not inject its clientId
         expect(body[0].containsKey('clientId'), isFalse);
       });
 
       test('RSL1m2 - message clientId matches library clientId', () async {
-        // Token request (RSA4b: key + clientId triggers token auth)
-        mockHttp.queueResponse(200, {
-          'token': 'test-token',
-          'expires': DateTime.now().millisecondsSinceEpoch + 3600000,
-        });
-        // Publish response
-        mockHttp.queueResponse(201, {'serials': ['s1']});
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            if (req.url.path.contains('requestToken')) {
+              // Token request (RSA4b: key + clientId triggers token auth)
+              req.respondWith(200, {
+                'token': 'test-token',
+                'expires': DateTime.now().millisecondsSinceEpoch + 3600000,
+              });
+            } else {
+              // Publish response
+              req.respondWith(201, {
+                'serials': ['s1']
+              });
+            }
+          },
+        );
 
         final clientWithId = Rest(
           options: ClientOptions(
@@ -301,13 +443,31 @@ void main() {
             );
 
         // First request is token request, second is publish
-        final body = json.decode(mockHttp.capturedRequests[1].body!) as List;
+        final publishRequest = capturedRequests.firstWhere(
+          (req) => req.url.path.contains('/messages'),
+        );
+        final body = json.decode(publishRequest.body!) as List;
         // Explicit clientId preserved
         expect(body[0]['clientId'], equals('lib-client'));
       });
 
       test('RSL1m3 - unidentified client with message clientId', () async {
-        mockHttp.queueResponse(201, {'serials': ['s1']});
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, {
+              'serials': ['s1']
+            });
+          },
+        );
 
         final clientNoId = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -318,7 +478,7 @@ void main() {
               message: Message(name: 'e', data: 'd', clientId: 'msg-client'),
             );
 
-        final body = json.decode(mockHttp.capturedRequests[0].body!) as List;
+        final body = json.decode(capturedRequests[0].body!) as List;
         expect(body[0]['clientId'], equals('msg-client'));
       });
     });

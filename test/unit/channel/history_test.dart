@@ -16,10 +16,33 @@ void main() {
 
     group('RSL2a - History returns PaginatedResult', () {
       test('returns PaginatedResult containing messages', () async {
-        mockHttp.queueResponse(200, [
-          {'id': 'msg1', 'name': 'event1', 'data': 'data1', 'timestamp': 1000},
-          {'id': 'msg2', 'name': 'event2', 'data': 'data2', 'timestamp': 2000},
-        ]);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, [
+              {
+                'id': 'msg1',
+                'name': 'event1',
+                'data': 'data1',
+                'timestamp': 1000
+              },
+              {
+                'id': 'msg2',
+                'name': 'event2',
+                'data': 'data2',
+                'timestamp': 2000
+              },
+            ]);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -51,8 +74,20 @@ void main() {
 
       for (final testCase in testCases) {
         test('sends ${testCase.parameter}=${testCase.value}', () async {
-          mockHttp.reset();
-          mockHttp.queueResponse(200, []);
+          final capturedRequests = <CapturedRequest>[];
+
+          mockHttp = MockHttpClient(
+            onRequest: (req) {
+              capturedRequests.add(CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ));
+
+              req.respondWith(200, []);
+            },
+          );
 
           final client = Rest(
             options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -64,7 +99,7 @@ void main() {
             RestHistoryParams.fromMap({testCase.parameter: testCase.value}),
           );
 
-          final request = mockHttp.capturedRequests[0];
+          final request = capturedRequests[0];
           expect(
             request.url.queryParameters[testCase.parameter],
             equals(testCase.value),
@@ -75,7 +110,20 @@ void main() {
 
     group('RSL2b1 - Default direction is backwards', () {
       test('uses backwards direction by default', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -85,7 +133,7 @@ void main() {
 
         await channel.history();
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
 
         // Either direction param is absent (server default) or explicitly "backwards"
         if (request.url.queryParameters.containsKey('direction')) {
@@ -97,11 +145,24 @@ void main() {
 
     group('RSL2b2 - Limit parameter', () {
       test('sends limit in query string', () async {
-        mockHttp.queueResponse(200, [
-          {'id': 'msg1', 'name': 'e', 'data': 'd', 'timestamp': 1000},
-          {'id': 'msg2', 'name': 'e', 'data': 'd', 'timestamp': 2000},
-          {'id': 'msg3', 'name': 'e', 'data': 'd', 'timestamp': 3000},
-        ]);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, [
+              {'id': 'msg1', 'name': 'e', 'data': 'd', 'timestamp': 1000},
+              {'id': 'msg2', 'name': 'e', 'data': 'd', 'timestamp': 2000},
+              {'id': 'msg3', 'name': 'e', 'data': 'd', 'timestamp': 3000},
+            ]);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -111,14 +172,27 @@ void main() {
 
         await channel.history(RestHistoryParams(limit: 10));
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.url.queryParameters['limit'], equals('10'));
       });
     });
 
     group('RSL2b3 - Default limit is 100', () {
       test('uses default limit of 100', () async {
-        mockHttp.queueResponse(200, []);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, []);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -128,7 +202,7 @@ void main() {
 
         await channel.history();
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
 
         // Either limit param is absent (server default) or explicitly "100"
         if (request.url.queryParameters.containsKey('limit')) {
@@ -157,8 +231,20 @@ void main() {
 
       for (final testCase in testCases) {
         test('encodes channel name "${testCase.channelName}"', () async {
-          mockHttp.reset();
-          mockHttp.queueResponse(200, []);
+          final capturedRequests = <CapturedRequest>[];
+
+          mockHttp = MockHttpClient(
+            onRequest: (req) {
+              capturedRequests.add(CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ));
+
+              req.respondWith(200, []);
+            },
+          );
 
           final client = Rest(
             options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -168,7 +254,7 @@ void main() {
 
           await channel.history();
 
-          final request = mockHttp.capturedRequests[0];
+          final request = capturedRequests[0];
           expect(request.method, equals('GET'));
           expect(request.url.path, equals(testCase.expectedPath));
         });
@@ -177,9 +263,22 @@ void main() {
 
     group('RSL2 - History with time range', () {
       test('sends start and end parameters', () async {
-        mockHttp.queueResponse(200, [
-          {'id': 'msg1', 'name': 'e', 'data': 'd', 'timestamp': 1500},
-        ]);
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(200, [
+              {'id': 'msg1', 'name': 'e', 'data': 'd', 'timestamp': 1500},
+            ]);
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -191,7 +290,7 @@ void main() {
           RestHistoryParams(start: 1000, end: 2000),
         );
 
-        final request = mockHttp.capturedRequests[0];
+        final request = capturedRequests[0];
         expect(request.url.queryParameters['start'], equals('1000'));
         expect(request.url.queryParameters['end'], equals('2000'));
       });
