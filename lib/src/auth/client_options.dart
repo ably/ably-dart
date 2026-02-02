@@ -54,6 +54,11 @@ class ClientOptions extends AuthOptions {
     Map<String, String>? transportParams,
     Map<String, String>? agents,
     String? connectivityCheckUrl,
+    bool echoMessages = true,
+    bool autoConnect = true,
+    int realtimeRequestTimeout = 10000,
+    int disconnectedRetryTimeout = 15000,
+    int suspendedRetryTimeout = 30000,
   }) {
     // REC1b1: Endpoint conflicts with deprecated options
     if (endpoint != null) {
@@ -132,6 +137,11 @@ class ClientOptions extends AuthOptions {
       transportParams: transportParams,
       agents: agents,
       connectivityCheckUrl: connectivityCheckUrl,
+      echoMessages: echoMessages,
+      autoConnect: autoConnect,
+      realtimeRequestTimeout: realtimeRequestTimeout,
+      disconnectedRetryTimeout: disconnectedRetryTimeout,
+      suspendedRetryTimeout: suspendedRetryTimeout,
     );
   }
 
@@ -172,6 +182,11 @@ class ClientOptions extends AuthOptions {
     this.transportParams,
     this.agents,
     this.connectivityCheckUrl,
+    this.echoMessages = true,
+    this.autoConnect = true,
+    this.realtimeRequestTimeout = 10000,
+    this.disconnectedRetryTimeout = 15000,
+    this.suspendedRetryTimeout = 30000,
   });
 
   /// Creates ClientOptions from an API key string.
@@ -293,6 +308,36 @@ class ClientOptions extends AuthOptions {
   /// Custom connectivity check URL (REC3b).
   final String? connectivityCheckUrl;
 
+  /// Whether to echo messages back to the sender.
+  ///
+  /// When true (default), messages published by this client will be echoed
+  /// back to it on the same channel. When false, messages will not be echoed.
+  ///
+  /// This is sent as a query parameter in the WebSocket connection URL.
+  ///
+  /// Spec: RTC1a
+  final bool echoMessages;
+
+  /// Whether to automatically connect when the Realtime client is created.
+  ///
+  /// Defaults to true. Set to false to delay connection until connect() is called.
+  final bool autoConnect;
+
+  /// Timeout in milliseconds for realtime connection requests.
+  ///
+  /// Defaults to 10000 (10 seconds).
+  final int realtimeRequestTimeout;
+
+  /// Timeout in milliseconds before retrying from DISCONNECTED state.
+  ///
+  /// Defaults to 15000 (15 seconds).
+  final int disconnectedRetryTimeout;
+
+  /// Timeout in milliseconds before retrying from SUSPENDED state.
+  ///
+  /// Defaults to 30000 (30 seconds).
+  final int suspendedRetryTimeout;
+
   /// Parses the endpoint to determine if it's an explicit hostname (REC1b2).
   ///
   /// Returns true if:
@@ -355,6 +400,30 @@ class ClientOptions extends AuthOptions {
     return 'rest.ably.io';
   }
 
+  /// Returns the effective realtime host.
+  String get effectiveRealtimeHost {
+    // Similar logic to REST host but for realtime
+    if (endpoint != null && _isExplicitHostname) {
+      return endpoint!;
+    }
+
+    if (endpoint != null && _isNonprodRoutingPolicy) {
+      final id = _routingPolicyId;
+      return '$id.nonprod-realtime.ably.net';
+    }
+
+    if (endpoint != null && !_isExplicitHostname) {
+      final id = _routingPolicyId;
+      return '$id.realtime.ably.net';
+    }
+
+    if (realtimeHost != null) return realtimeHost!;
+
+    if (environment != null) return '$environment-realtime.ably.io';
+
+    return 'realtime.ably.io';
+  }
+
   /// Returns the effective port.
   int get effectivePort {
     if (tls) {
@@ -411,8 +480,8 @@ class ClientOptions extends AuthOptions {
       ];
     }
 
-    // REC2c6: Custom restHost has no fallbacks
-    if (restHost != null) {
+    // REC2c6: Custom restHost or realtimeHost has no fallbacks
+    if (restHost != null || realtimeHost != null) {
       return null;
     }
 
@@ -483,6 +552,11 @@ class ClientOptions extends AuthOptions {
     Map<String, String>? transportParams,
     Map<String, String>? agents,
     String? connectivityCheckUrl,
+    bool? echoMessages,
+    bool? autoConnect,
+    int? realtimeRequestTimeout,
+    int? disconnectedRetryTimeout,
+    int? suspendedRetryTimeout,
   }) {
     return ClientOptions._(
       key: key ?? this.key,
@@ -520,6 +594,14 @@ class ClientOptions extends AuthOptions {
       transportParams: transportParams ?? this.transportParams,
       agents: agents ?? this.agents,
       connectivityCheckUrl: connectivityCheckUrl ?? this.connectivityCheckUrl,
+      echoMessages: echoMessages ?? this.echoMessages,
+      autoConnect: autoConnect ?? this.autoConnect,
+      realtimeRequestTimeout:
+          realtimeRequestTimeout ?? this.realtimeRequestTimeout,
+      disconnectedRetryTimeout:
+          disconnectedRetryTimeout ?? this.disconnectedRetryTimeout,
+      suspendedRetryTimeout:
+          suspendedRetryTimeout ?? this.suspendedRetryTimeout,
     );
   }
 

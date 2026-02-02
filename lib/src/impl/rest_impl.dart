@@ -7,7 +7,7 @@ import '../auth/client_options.dart';
 import '../batch/batch_publish_spec.dart';
 import '../batch/batch_result.dart';
 import '../channels/channels.dart';
-import '../client/rest.dart';
+import '../rest/rest.dart';
 import '../error/ably_exception.dart';
 import '../error/error_info.dart';
 import '../pagination/http_paginated_response.dart';
@@ -80,7 +80,8 @@ class RestImpl implements Rest {
         throw const AblyException(
           message: 'Invalid API key format',
           errorInfo: ErrorInfo(
-            message: 'Invalid API key format. Expected format: keyName:keySecret',
+            message:
+                'Invalid API key format. Expected format: keyName:keySecret',
             code: 40101,
             statusCode: 401,
           ),
@@ -220,8 +221,9 @@ class RestImpl implements Rest {
   ) async {
     final uri = Uri.parse(url);
     final path = uri.path;
-    final queryParams =
-        uri.queryParameters.isNotEmpty ? Map<String, String>.from(uri.queryParameters) : null;
+    final queryParams = uri.queryParameters.isNotEmpty
+        ? Map<String, String>.from(uri.queryParameters)
+        : null;
 
     final response = await _httpClient.request(
       method,

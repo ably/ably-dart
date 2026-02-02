@@ -18,33 +18,34 @@ const String defaultPrimaryDomain = 'main.realtime.ably.net';
 
 /// Default fallback hosts (REC2c1).
 const List<String> defaultFallbackHosts = [
-  'a.ably-realtime.com',
-  'b.ably-realtime.com',
-  'c.ably-realtime.com',
-  'd.ably-realtime.com',
-  'e.ably-realtime.com',
+  'main.a.fallback.ably-realtime.com',
+  'main.b.fallback.ably-realtime.com',
+  'main.c.fallback.ably-realtime.com',
+  'main.d.fallback.ably-realtime.com',
+  'main.e.fallback.ably-realtime.com',
 ];
 
 /// Fallback domain suffixes for nonprod routing policy (REC2c3).
 const List<String> nonprodFallbackSuffixes = [
-  'a-fallback.nonprod-realtime.ably.net',
-  'b-fallback.nonprod-realtime.ably.net',
-  'c-fallback.nonprod-realtime.ably.net',
-  'd-fallback.nonprod-realtime.ably.net',
-  'e-fallback.nonprod-realtime.ably.net',
+  'a.fallback.ably-realtime-nonprod.com',
+  'b.fallback.ably-realtime-nonprod.com',
+  'c.fallback.ably-realtime-nonprod.com',
+  'd.fallback.ably-realtime-nonprod.com',
+  'e.fallback.ably-realtime-nonprod.com',
 ];
 
 /// Fallback domain suffixes for production routing policy (REC2c4/REC2c5).
 const List<String> productionFallbackSuffixes = [
-  'a-fallback.realtime.ably.net',
-  'b-fallback.realtime.ably.net',
-  'c-fallback.realtime.ably.net',
-  'd-fallback.realtime.ably.net',
-  'e-fallback.realtime.ably.net',
+  'a.fallback.ably-realtime.com',
+  'b.fallback.ably-realtime.com',
+  'c.fallback.ably-realtime.com',
+  'd.fallback.ably-realtime.com',
+  'e.fallback.ably-realtime.com',
 ];
 
 /// Default connectivity check URL (REC3a).
-const String defaultConnectivityCheckUrl = 'https://internet-up.ably-realtime.com/is-the-internet-up.txt';
+const String defaultConnectivityCheckUrl =
+    'https://internet-up.ably-realtime.com/is-the-internet-up.txt';
 
 /// HTTP header names.
 class HttpHeaders {

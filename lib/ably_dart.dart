@@ -1,6 +1,6 @@
-/// Ably REST SDK for Dart.
+/// Ably SDK for Dart.
 ///
-/// This library provides a pure Dart implementation of the Ably REST API.
+/// This library provides a pure Dart implementation of the Ably REST and Realtime APIs.
 library ably_dart;
 
 // Authentication
@@ -11,8 +11,21 @@ export 'src/auth/token_details.dart';
 export 'src/auth/token_params.dart';
 export 'src/auth/token_request.dart';
 
-// Client
-export 'src/client/rest.dart';
+// REST
+export 'src/rest/rest.dart';
+
+// Realtime
+export 'src/realtime/realtime.dart';
+export 'src/realtime/connection.dart';
+export 'src/realtime/connection_state.dart';
+export 'src/realtime/connection_event.dart';
+export 'src/realtime/connection_state_change.dart';
+export 'src/realtime/realtime_channels.dart';
+export 'src/realtime/realtime_channel.dart';
+export 'src/realtime/channel_state.dart';
+export 'src/realtime/channel_event.dart';
+export 'src/realtime/channel_state_change.dart';
+export 'src/realtime/protocol_message.dart';
 
 // Channels
 export 'src/channels/channels.dart';

@@ -7,6 +7,8 @@ import 'package:http/http.dart' as http;
 import '../../auth/client_options.dart';
 import '../../error/ably_exception.dart';
 import '../../error/error_info.dart';
+import '../fallback/error_classifier.dart';
+import '../fallback/host_selector.dart';
 import 'constants.dart';
 
 /// Response from an Ably HTTP request.
@@ -52,19 +54,17 @@ class AblyHttpClient {
     required ClientOptions options,
     http.Client? httpClient,
     AuthHeaderProvider? authHeaderProvider,
+    HostSelector? hostSelector,
   })  : _options = options,
         _httpClient = httpClient ?? http.Client(),
         _authHeaderProvider = authHeaderProvider,
-        _random = Random();
+        _hostSelector = hostSelector ?? HostSelector(options: options);
 
   final ClientOptions _options;
   final http.Client _httpClient;
   final AuthHeaderProvider? _authHeaderProvider;
-  final Random _random;
-
-  // Track fallback host failures
-  DateTime? _fallbackHostsUnavailableSince;
-  final List<String> _failedHosts = [];
+  final HostSelector _hostSelector;
+  final Random _random = Random();
 
   /// Set the auth header provider (called after Auth is initialized).
   AuthHeaderProvider? authHeaderProvider;
@@ -87,7 +87,9 @@ class AblyHttpClient {
     }
 
     // Try primary host first, then fallbacks
-    final hosts = _getHostsToTry();
+    final hosts = _hostSelector.getHostsToTry(
+      primaryHost: _options.effectiveRestHost,
+    );
     AblyException? lastException;
 
     for (final host in hosts) {
@@ -104,9 +106,8 @@ class AblyHttpClient {
         );
 
         // If we used a fallback host successfully, clear failure tracking
-        if (host != _options.effectiveRestHost) {
-          _failedHosts.clear();
-          _fallbackHostsUnavailableSince = null;
+        if (!_hostSelector.isPrimaryHost(host, _options.effectiveRestHost)) {
+          _hostSelector.clearFailureTracking();
         }
 
         return response;
@@ -114,14 +115,12 @@ class AblyHttpClient {
         lastException = e;
 
         // Only retry on certain errors (5xx, network errors)
-        if (!_shouldRetryOnHost(e)) {
+        if (!ErrorClassifier.shouldRetryException(e)) {
           rethrow;
         }
 
         // Mark this host as failed
-        if (!_failedHosts.contains(host)) {
-          _failedHosts.add(host);
-        }
+        _hostSelector.markHostAsFailed(host);
       }
     }
 
@@ -157,13 +156,11 @@ class AblyHttpClient {
     }
 
     // Build headers - use msgpack headers if useBinaryProtocol, otherwise JSON
-    final contentType = _options.useBinaryProtocol
-        ? ContentTypes.msgpack
-        : ContentTypes.json;
+    final contentType =
+        _options.useBinaryProtocol ? ContentTypes.msgpack : ContentTypes.json;
 
     // RSC19f1: Use explicit version if provided
-    final version =
-        customVersion?.toString() ?? ablyProtocolVersion;
+    final version = customVersion?.toString() ?? ablyProtocolVersion;
 
     final headers = <String, String>{
       HttpHeaders.ablyVersion: version,
@@ -236,8 +233,10 @@ class AblyHttpClient {
     // Check Content-Type for supported types (RSC8e)
     final responseContentType = normalizedHeaders['content-type'] ?? '';
     final isJsonResponse = responseContentType.contains('application/json');
-    final isMsgpackResponse = responseContentType.contains('application/x-msgpack');
-    final isSupported = isJsonResponse || isMsgpackResponse || responseContentType.isEmpty;
+    final isMsgpackResponse =
+        responseContentType.contains('application/x-msgpack');
+    final isSupported =
+        isJsonResponse || isMsgpackResponse || responseContentType.isEmpty;
 
     // Parse response body
     dynamic parsedBody;
@@ -297,46 +296,6 @@ class AblyHttpClient {
   String _generateRequestId() {
     final bytes = List<int>.generate(12, (_) => _random.nextInt(256));
     return base64Url.encode(bytes).substring(0, 16);
-  }
-
-  List<String> _getHostsToTry() {
-    final hosts = <String>[_options.effectiveRestHost];
-
-    // Check if we should try fallback hosts
-    final fallbacks = _options.fallbackHosts ?? defaultFallbackHosts;
-
-    // Don't use fallbacks if within fallbackRetryTimeout of failure
-    if (_fallbackHostsUnavailableSince != null) {
-      final elapsed =
-          DateTime.now().difference(_fallbackHostsUnavailableSince!);
-      if (elapsed.inMilliseconds < _options.fallbackRetryTimeout) {
-        return hosts;
-      }
-      _fallbackHostsUnavailableSince = null;
-      _failedHosts.clear();
-    }
-
-    // Add fallback hosts (shuffled, excluding failed ones)
-    final availableFallbacks =
-        fallbacks.where((h) => !_failedHosts.contains(h)).toList();
-    availableFallbacks.shuffle(_random);
-
-    // Limit to httpMaxRetryCount
-    final maxRetries = _options.httpMaxRetryCount;
-    hosts.addAll(availableFallbacks.take(maxRetries));
-
-    return hosts;
-  }
-
-  bool _shouldRetryOnHost(AblyException e) {
-    final statusCode = e.statusCode;
-    if (statusCode == null) return true; // Network error
-
-    // Retry on 5xx errors
-    if (statusCode >= 500 && statusCode < 600) return true;
-
-    // Don't retry on 4xx errors
-    return false;
   }
 
   AblyException _parseError(AblyHttpResponse response, String? requestId) {
