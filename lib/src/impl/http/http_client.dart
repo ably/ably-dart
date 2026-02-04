@@ -48,6 +48,9 @@ class AblyHttpResponse {
 /// Function type for obtaining an authorization header.
 typedef AuthHeaderProvider = Future<String> Function();
 
+/// Function type for renewing a token (e.g., calling authorize()).
+typedef TokenRenewer = Future<void> Function();
+
 /// HTTP client wrapper for Ably REST API.
 class AblyHttpClient {
   AblyHttpClient({
@@ -69,7 +72,13 @@ class AblyHttpClient {
   /// Set the auth header provider (called after Auth is initialized).
   AuthHeaderProvider? authHeaderProvider;
 
+  /// Set the token renewer (called to force token renewal on 40142 errors).
+  TokenRenewer? tokenRenewer;
+
   /// Makes an HTTP request to the Ably REST API.
+  ///
+  /// Automatically retries on token errors (40140-40149) by renewing
+  /// the token and retrying once.
   Future<AblyHttpResponse> request(
     String method,
     String path, {
@@ -78,6 +87,28 @@ class AblyHttpClient {
     bool authenticated = true,
     Map<String, String>? customHeaders,
     int? customVersion,
+  }) async {
+    return _requestWithTokenRetry(
+      method,
+      path,
+      queryParams: queryParams,
+      body: body,
+      authenticated: authenticated,
+      customHeaders: customHeaders,
+      customVersion: customVersion,
+      tokenRetryAttempted: false,
+    );
+  }
+
+  Future<AblyHttpResponse> _requestWithTokenRetry(
+    String method,
+    String path, {
+    Map<String, String>? queryParams,
+    Object? body,
+    bool authenticated = true,
+    Map<String, String>? customHeaders,
+    int? customVersion,
+    required bool tokenRetryAttempted,
   }) async {
     final effectiveQueryParams = Map<String, String>.from(queryParams ?? {});
 
@@ -113,6 +144,26 @@ class AblyHttpClient {
         return response;
       } on AblyException catch (e) {
         lastException = e;
+
+        // RSA4b4: On token error (40140-40149), try to renew token and retry once
+        if (!tokenRetryAttempted &&
+            authenticated &&
+            tokenRenewer != null &&
+            e.errorInfo != null &&
+            ErrorClassifier.isTokenError(e.errorInfo!)) {
+          // Renew token and retry
+          await tokenRenewer!();
+          return _requestWithTokenRetry(
+            method,
+            path,
+            queryParams: queryParams,
+            body: body,
+            authenticated: authenticated,
+            customHeaders: customHeaders,
+            customVersion: customVersion,
+            tokenRetryAttempted: true,
+          );
+        }
 
         // Only retry on certain errors (5xx, network errors)
         if (!ErrorClassifier.shouldRetryException(e)) {

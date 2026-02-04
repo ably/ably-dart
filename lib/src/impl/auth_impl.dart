@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:clock/clock.dart';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 
@@ -37,15 +38,52 @@ class AuthImpl implements Auth {
   void _initialize() {
     // Initialize with any token provided in options
     if (_options.tokenDetails != null) {
+      _validateClientIdConsistency(_options.tokenDetails!);
       _currentToken = _options.tokenDetails;
     } else if (_options.token != null) {
       _currentToken = TokenDetails(token: _options.token);
     }
   }
 
+  /// RSA7: Validates that clientId in ClientOptions is consistent with
+  /// token's clientId. Throws AblyException if there's a mismatch.
+  void _validateClientIdConsistency(TokenDetails token) {
+    final optionsClientId = _options.clientId;
+    final tokenClientId = token.clientId;
+
+    // No validation needed if either is null
+    if (optionsClientId == null || tokenClientId == null) {
+      return;
+    }
+
+    // Wildcard token allows any clientId
+    if (tokenClientId == '*') {
+      return;
+    }
+
+    // ClientIds must match
+    if (optionsClientId != tokenClientId) {
+      throw AblyException(
+        message: 'ClientId mismatch: options clientId "$optionsClientId" '
+            'does not match token clientId "$tokenClientId"',
+        errorInfo: ErrorInfo(
+          message: 'ClientId mismatch: options clientId "$optionsClientId" '
+              'does not match token clientId "$tokenClientId"',
+          code: 40102,
+          statusCode: 401,
+        ),
+      );
+    }
+  }
+
   @override
   String? get clientId {
-    // Return clientId from options, current token, or token params
+    // RSA7: Return clientId with proper precedence
+    // If token has wildcard '*', use options clientId if available
+    if (_currentToken?.clientId == '*') {
+      return _options.clientId ?? '*';
+    }
+    // Otherwise: options clientId > token clientId > stored params clientId
     return _options.clientId ??
         _currentToken?.clientId ??
         _storedTokenParams?.clientId;
@@ -60,6 +98,9 @@ class AuthImpl implements Auth {
     return AuthMethod.basic;
   }
 
+  @override
+  TokenDetails? get tokenDetails => _currentToken;
+
   bool _shouldUseTokenAuth() {
     // RSA4: Use token auth if:
     // - useTokenAuth is explicitly true
@@ -67,12 +108,14 @@ class AuthImpl implements Auth {
     // - authUrl is set
     // - clientId is set (RSA4b - can't use basic auth with clientId)
     // - token or tokenDetails is set
+    // - a token has been obtained via authorize()
     if (_options.useTokenAuth == true) return true;
     if (_options.authCallback != null) return true;
     if (_options.authUrl != null) return true;
     if (_options.clientId != null) return true;
     if (_options.token != null) return true;
     if (_options.tokenDetails != null) return true;
+    if (_currentToken != null) return true; // Token obtained via authorize()
     return false;
   }
 
@@ -131,16 +174,41 @@ class AuthImpl implements Auth {
       _storedAuthOptions = authOptions;
     }
 
+    // RSA10e: If tokenParams provided, save them for reuse
+    if (tokenParams != null) {
+      _storedTokenParams = tokenParams;
+    }
+
     // Merge token params
     final effectiveParams = _mergeTokenParams(tokenParams);
 
-    // Request a new token
-    _currentToken = await requestToken(
-      authOptions: authOptions ?? _storedAuthOptions,
-      tokenParams: effectiveParams,
-    );
+    // RSA16d: Clear current token before attempting renewal
+    // If renewal fails, we don't want to keep using an invalid token
+    final previousToken = _currentToken;
+    _currentToken = null;
 
-    return _currentToken!;
+    try {
+      // Request a new token
+      _currentToken = await requestToken(
+        authOptions: authOptions ?? _storedAuthOptions,
+        tokenParams: effectiveParams,
+      );
+      return _currentToken!;
+    } catch (e) {
+      // If renewal fails, token remains null (RSA16d)
+      // Don't restore the old token - it was invalid
+      rethrow;
+    }
+  }
+
+  @override
+  Future<TokenDetails> getValidToken() async {
+    // Return cached token if valid (not expired)
+    if (_currentToken != null && !_currentToken!.isExpired) {
+      return _currentToken!;
+    }
+    // Otherwise get a new token
+    return authorize();
   }
 
   @override
@@ -188,12 +256,13 @@ class AuthImpl implements Auth {
     int timestamp;
     if (effectiveParams.timestamp != null) {
       timestamp = effectiveParams.timestamp!;
-    } else if (effectiveOptions.queryTime == true || _options.queryTime == true) {
+    } else if (effectiveOptions.queryTime == true ||
+        _options.queryTime == true) {
       // Query server time
       final serverTime = await _queryServerTime();
       timestamp = serverTime.millisecondsSinceEpoch;
     } else {
-      timestamp = DateTime.now().millisecondsSinceEpoch;
+      timestamp = clock.now().millisecondsSinceEpoch;
     }
 
     // Build the token request
@@ -405,8 +474,12 @@ class AuthImpl implements Auth {
     final stored = _storedTokenParams;
 
     return TokenParams(
-      capability: params?.capability ?? stored?.capability ?? defaults?.capability,
-      clientId: params?.clientId ?? stored?.clientId ?? defaults?.clientId ?? _options.clientId,
+      capability:
+          params?.capability ?? stored?.capability ?? defaults?.capability,
+      clientId: params?.clientId ??
+          stored?.clientId ??
+          defaults?.clientId ??
+          _options.clientId,
       nonce: params?.nonce ?? stored?.nonce ?? defaults?.nonce,
       timestamp: params?.timestamp ?? stored?.timestamp ?? defaults?.timestamp,
       ttl: params?.ttl ?? stored?.ttl ?? defaults?.ttl,

@@ -67,8 +67,8 @@ void main() {
         ),
       );
 
-      // Wait for event to be processed
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+      // Allow stream events to be delivered
+      await Future<void>.delayed(Duration.zero);
 
       // State remains CONNECTED
       expect(client.connection.state, equals(ConnectionState.connected));
@@ -90,6 +90,7 @@ void main() {
       expect(client.connection.key, equals('connection-key-2'));
 
       await client.close();
+      mockWs.dispose();
     });
 
     test('UPDATE event includes error reason when present', () async {
@@ -140,8 +141,8 @@ void main() {
         ),
       );
 
-      // Wait for event to be processed
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+      // Allow stream events to be delivered
+      await Future<void>.delayed(Duration.zero);
 
       // UPDATE event was emitted
       expect(updateEvents.length, equals(1));
@@ -156,6 +157,7 @@ void main() {
       expect(updateChange.reason!.message, contains('Token expired'));
 
       await client.close();
+      mockWs.dispose();
     });
 
     test('connectionDetails override stored details', () async {
@@ -204,8 +206,8 @@ void main() {
         ),
       );
 
-      // Wait for update to be processed
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+      // Allow stream events to be delivered
+      await Future<void>.delayed(Duration.zero);
 
       // Connection details were updated
       expect(client.connection.id, equals('connection-id-2'));
@@ -215,6 +217,7 @@ void main() {
       expect(client.connection.state, equals(ConnectionState.connected));
 
       await client.close();
+      mockWs.dispose();
     });
 
     test(
@@ -282,7 +285,7 @@ void main() {
             connectionStateTtl: 120000,
           ),
         );
-        await Future<void>.delayed(const Duration(milliseconds: 50));
+        await Future<void>.delayed(Duration.zero);
       }
 
       // Exactly 3 UPDATE events were added
@@ -304,6 +307,7 @@ void main() {
       expect(connectedStateEvents.length, equals(1)); // Only the initial one
 
       await client.close();
+      mockWs.dispose();
     });
   });
 }

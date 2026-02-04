@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:test/test.dart';
 import 'mock_http_client.dart';
 
@@ -15,7 +17,9 @@ void main() {
           if (request.url.path == '/time') {
             request.respondWith(200, {'time': 1234567890000});
           } else {
-            request.respondWith(404, {'error': {'code': 40400}});
+            request.respondWith(404, {
+              'error': {'code': 40400}
+            });
           }
         },
       );
@@ -57,6 +61,32 @@ void main() {
       );
     });
 
+    test('connection timeout simulation', () async {
+      mock = MockHttpClient(
+        onConnectionAttempt: (connection) {
+          connection.respondWithTimeout();
+        },
+      );
+
+      expect(
+        () => mock.get(Uri.parse('https://rest.ably.io/test')),
+        throwsA(isA<Exception>()),
+      );
+    });
+
+    test('DNS error simulation', () async {
+      mock = MockHttpClient(
+        onConnectionAttempt: (connection) {
+          connection.respondWithDnsError();
+        },
+      );
+
+      expect(
+        () => mock.get(Uri.parse('https://rest.ably.io/test')),
+        throwsA(isA<Exception>()),
+      );
+    });
+
     test('request timeout simulation', () async {
       mock = MockHttpClient(
         onRequest: (request) {
@@ -68,6 +98,66 @@ void main() {
         () => mock.get(Uri.parse('https://rest.ably.io/test')),
         throwsA(isA<Exception>()),
       );
+    });
+
+    test('multiple requests with different responses', () async {
+      var requestCount = 0;
+      mock = MockHttpClient(
+        onRequest: (request) {
+          requestCount++;
+          if (requestCount == 1) {
+            request.respondWith(200, {'first': true});
+          } else {
+            request.respondWith(201, {'second': true});
+          }
+        },
+      );
+
+      final response1 = await mock.get(Uri.parse('https://rest.ably.io/test'));
+      expect(response1.statusCode, 200);
+
+      final response2 = await mock.get(Uri.parse('https://rest.ably.io/test'));
+      expect(response2.statusCode, 201);
+
+      expect(mock.capturedRequests.length, 2);
+    });
+
+    test('request headers are captured', () async {
+      mock = MockHttpClient(
+        onRequest: (request) {
+          expect(request.headers['X-Custom-Header'], 'test-value');
+          request.respondWith(200, {});
+        },
+      );
+
+      await mock.get(
+        Uri.parse('https://rest.ably.io/test'),
+        headers: {'X-Custom-Header': 'test-value'},
+      );
+    });
+
+    test('response headers are returned', () async {
+      mock = MockHttpClient(
+        onRequest: (request) {
+          request.respondWith(
+            200,
+            {'data': 'test'},
+            headers: {'x-response-header': 'response-value'},
+          );
+        },
+      );
+
+      final response = await mock.get(Uri.parse('https://rest.ably.io/test'));
+      expect(response.headers['x-response-header'], 'response-value');
+      // Note: content-type is set by StreamedResponse, not always in headers map
+    });
+  });
+
+  group('MockHttpClient - Awaitable interface', () {
+    late MockHttpClient mock;
+
+    tearDown(() {
+      mock.dispose();
     });
 
     test('awaitable request', () async {
@@ -89,29 +179,57 @@ void main() {
       expect(response.statusCode, 200);
     });
 
-    test('PendingRequest body parsing', () async {
+    test('awaitable connection attempt', () async {
+      mock = MockHttpClient();
+
+      // Start a request in the background
+      final requestFuture = mock.get(Uri.parse('https://rest.ably.io/test'));
+
+      // Both connection and request will be emitted
+      final request = await mock.awaitRequest();
+      expect(request.url.host, 'rest.ably.io');
+      request.respondWith(200, {});
+
+      await requestFuture;
+    });
+
+    test('awaitable connection refusal', () async {
       mock = MockHttpClient(
-        onRequest: (request) {
-          if (request.body.isNotEmpty) {
-            final json = request.jsonBody;
-            expect(json['name'], 'event');
-            expect(json['data'], 'payload');
-          }
-          request.respondWith(200, {'success': true});
+        onConnectionAttempt: (conn) {
+          conn.respondWithRefused();
         },
       );
 
-      await mock.post(
+      expect(
+        () => mock.get(Uri.parse('https://rest.ably.io/test')),
+        throwsA(isA<Exception>()),
+      );
+    });
+
+    test('PendingRequest body parsing', () async {
+      mock = MockHttpClient();
+
+      final requestFuture = mock.post(
         Uri.parse('https://rest.ably.io/channels/test/messages'),
         body: '{"name":"event","data":"payload"}',
       );
+
+      final request = await mock.awaitRequest();
+      expect(request.bodyAsString, '{"name":"event","data":"payload"}');
+
+      final json = request.jsonBody;
+      expect(json['name'], 'event');
+      expect(json['data'], 'payload');
+
+      request.respondWith(200, {'success': true});
+      await requestFuture;
     });
 
     test('delayed response', () async {
       mock = MockHttpClient(
         onRequest: (request) {
           request.respondWithDelay(
-            Duration(milliseconds: 10),
+            Duration(milliseconds: 50),
             200,
             {'delayed': true},
           );
@@ -123,72 +241,154 @@ void main() {
       stopwatch.stop();
 
       expect(response.statusCode, 200);
-      expect(stopwatch.elapsedMilliseconds, greaterThanOrEqualTo(10));
+      expect(stopwatch.elapsedMilliseconds, greaterThanOrEqualTo(45));
     });
   });
 
-  group('MockHttpClient - Backward compatibility', () {
-    test('queue-based responses still work', () async {
-      final mock = MockHttpClient();
+  group('MockHttpClient - Request capture', () {
+    late MockHttpClient mock;
 
-      // Old pattern: queue responses
-      mock.queueResponse(200, {'time': 1234567890000});
-
-      final response = await mock.get(Uri.parse('https://rest.ably.io/time'));
-      expect(response.statusCode, 200);
-
+    tearDown(() {
       mock.dispose();
     });
 
-    test('host-specific queued responses', () async {
-      final mock = MockHttpClient();
-
-      mock.queueResponseForHost('rest.ably.io', 200, {'success': true});
-      mock.queueResponseForHost('other.com', 404, {'error': 'not found'});
-
-      final response1 = await mock.get(Uri.parse('https://rest.ably.io/test'));
-      expect(response1.statusCode, 200);
-
-      final response2 = await mock.get(Uri.parse('https://other.com/test'));
-      expect(response2.statusCode, 404);
-
-      mock.dispose();
-    });
-
-    test('queued errors still work', () async {
-      final mock = MockHttpClient();
-
-      mock.queueNetworkError('Connection refused');
-
-      expect(
-        () => mock.get(Uri.parse('https://rest.ably.io/test')),
-        throwsA(isA<Exception>()),
+    test('capturedRequests stores all requests', () async {
+      mock = MockHttpClient(
+        onRequest: (request) => request.respondWith(200, {}),
       );
 
-      mock.dispose();
+      await mock.get(Uri.parse('https://rest.ably.io/test1'));
+      await mock.post(Uri.parse('https://rest.ably.io/test2'));
+      await mock.put(Uri.parse('https://rest.ably.io/test3'));
+
+      expect(mock.capturedRequests.length, 3);
+      expect(mock.capturedRequests[0].method, 'GET');
+      expect(mock.capturedRequests[0].url.path, '/test1');
+      expect(mock.capturedRequests[1].method, 'POST');
+      expect(mock.capturedRequests[1].url.path, '/test2');
+      expect(mock.capturedRequests[2].method, 'PUT');
+      expect(mock.capturedRequests[2].url.path, '/test3');
+    });
+
+    test('capturedRequestsForHost filters by hostname', () async {
+      mock = MockHttpClient(
+        onRequest: (request) => request.respondWith(200, {}),
+      );
+
+      await mock.get(Uri.parse('https://rest.ably.io/test'));
+      await mock.get(Uri.parse('https://a.fallback.ably-realtime.com/test'));
+      await mock.get(Uri.parse('https://rest.ably.io/test2'));
+
+      final ablyRequests = mock.capturedRequestsForHost('rest.ably.io');
+      expect(ablyRequests.length, 2);
+      expect(ablyRequests[0].url.path, '/test');
+      expect(ablyRequests[1].url.path, '/test2');
+
+      final fallbackRequests =
+          mock.capturedRequestsForHost('a.fallback.ably-realtime.com');
+      expect(fallbackRequests.length, 1);
+    });
+
+    test('reset clears captured requests', () async {
+      mock = MockHttpClient(
+        onRequest: (request) => request.respondWith(200, {}),
+      );
+
+      await mock.get(Uri.parse('https://rest.ably.io/test'));
+      expect(mock.capturedRequests.length, 1);
+
+      mock.reset();
+      expect(mock.capturedRequests.length, 0);
+
+      await mock.get(Uri.parse('https://rest.ably.io/test2'));
+      expect(mock.capturedRequests.length, 1);
+    });
+
+    test('CapturedRequest preserves all request details', () async {
+      mock = MockHttpClient(
+        onRequest: (request) => request.respondWith(200, {}),
+      );
+
+      await mock.post(
+        Uri.parse('https://rest.ably.io/channels/test/messages'),
+        headers: {'X-Custom': 'value'},
+        body: '{"test":"data"}',
+      );
+
+      final captured = mock.capturedRequests[0];
+      expect(captured.method, 'POST');
+      expect(captured.url.host, 'rest.ably.io');
+      expect(captured.url.path, '/channels/test/messages');
+      expect(captured.headers['X-Custom'], 'value');
+      expect(captured.body, '{"test":"data"}');
+    });
+
+    test('CapturedRequest jsonBody parses JSON', () async {
+      mock = MockHttpClient(
+        onRequest: (request) => request.respondWith(200, {}),
+      );
+
+      await mock.post(
+        Uri.parse('https://rest.ably.io/test'),
+        body: '{"name":"test","value":123}',
+      );
+
+      final captured = mock.capturedRequests[0];
+      final json = captured.jsonBody;
+      expect(json['name'], 'test');
+      expect(json['value'], 123);
     });
   });
 
-  group('MockHttpClient - Priority', () {
-    test('handler responses take priority over queued responses', () async {
-      final mock = MockHttpClient(
+  group('MockHttpClient - Default behavior', () {
+    late MockHttpClient mock;
+
+    tearDown(() {
+      mock.dispose();
+    });
+
+    test('auto-succeeds connection attempts without handler', () async {
+      mock = MockHttpClient(
+        onRequest: (request) => request.respondWith(200, {}),
+      );
+
+      // Should succeed even without onConnectionAttempt handler
+      final response = await mock.get(Uri.parse('https://rest.ably.io/test'));
+      expect(response.statusCode, 200);
+    });
+
+    test('auto-responds with 200 without request handler', () async {
+      mock = MockHttpClient();
+
+      // Should get default 200 response
+      final response = await mock.get(Uri.parse('https://rest.ably.io/test'));
+      expect(response.statusCode, 200);
+    });
+  });
+
+  group('MockHttpClient - Mixed handler and awaitable', () {
+    late MockHttpClient mock;
+
+    tearDown(() {
+      mock.dispose();
+    });
+
+    test('handler and awaitable both receive events', () async {
+      var handlerCalled = false;
+      mock = MockHttpClient(
         onRequest: (request) {
-          request.respondWith(201, {'handler': true});
+          handlerCalled = true;
+          request.respondWith(200, {});
         },
       );
 
-      // Queue a response (should be ignored)
-      mock.queueResponse(200, {'queued': true});
+      final requestFuture = mock.get(Uri.parse('https://rest.ably.io/test'));
+      final pendingRequest = await mock.awaitRequest();
 
-      final response = await mock.get(Uri.parse('https://rest.ably.io/test'));
+      expect(handlerCalled, true);
+      expect(pendingRequest.url.path, '/test');
 
-      // Handler response takes priority
-      expect(response.statusCode, 201);
-
-      // Queued response is not consumed
-      expect(mock.capturedRequests.length, 1);
-
-      mock.dispose();
+      await requestFuture;
     });
   });
 }

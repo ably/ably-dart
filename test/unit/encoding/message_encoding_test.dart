@@ -5,6 +5,7 @@ import 'package:ably_dart/ably_dart.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/mock_http_client.dart';
+import '../../helpers/test_channel_name.dart';
 
 /// Message Encoding Tests
 ///
@@ -21,6 +22,7 @@ void main() {
       group('RSL4a - String data', () {
         test('transmits string data without encoding', () async {
           final capturedRequests = <CapturedRequest>[];
+          final channelName = testChannelName('RSL4a');
 
           mockHttp = MockHttpClient(
             onRequest: (req) {
@@ -44,7 +46,7 @@ void main() {
             ),
             httpClient: mockHttp,
           );
-          final channel = client.channels.get('test');
+          final channel = client.channels.get(channelName);
 
           await channel.publish(name: 'event', data: 'hello world');
 
@@ -58,6 +60,7 @@ void main() {
       group('RSL4c - JSON-encodable objects', () {
         test('encodes map data as JSON with encoding field', () async {
           final capturedRequests = <CapturedRequest>[];
+          final channelName = testChannelName('RSL4c-map');
 
           mockHttp = MockHttpClient(
             onRequest: (req) {
@@ -81,7 +84,7 @@ void main() {
             ),
             httpClient: mockHttp,
           );
-          final channel = client.channels.get('test');
+          final channel = client.channels.get(channelName);
 
           await channel.publish(
             name: 'event',
@@ -99,6 +102,7 @@ void main() {
 
         test('encodes list data as JSON', () async {
           final capturedRequests = <CapturedRequest>[];
+          final channelName = testChannelName('RSL4c-list');
 
           mockHttp = MockHttpClient(
             onRequest: (req) {
@@ -122,7 +126,7 @@ void main() {
             ),
             httpClient: mockHttp,
           );
-          final channel = client.channels.get('test');
+          final channel = client.channels.get(channelName);
 
           await channel.publish(name: 'event', data: [1, 2, 3]);
 
@@ -135,6 +139,7 @@ void main() {
       group('RSL4d - Binary data', () {
         test('encodes binary data as base64 for JSON protocol', () async {
           final capturedRequests = <CapturedRequest>[];
+          final channelName = testChannelName('RSL4d');
 
           mockHttp = MockHttpClient(
             onRequest: (req) {
@@ -158,7 +163,7 @@ void main() {
             ),
             httpClient: mockHttp,
           );
-          final channel = client.channels.get('test');
+          final channel = client.channels.get(channelName);
 
           final binaryData = Uint8List.fromList([0x00, 0x01, 0xFF, 0xFE]);
           await channel.publish(name: 'event', data: binaryData);
@@ -176,6 +181,7 @@ void main() {
     group('RSL6 - Decoding messages from server', () {
       group('RSL6a - Plain data (no encoding)', () {
         test('returns data unchanged when no encoding', () async {
+          final channelName = testChannelName('RSL6a');
           mockHttp = MockHttpClient(
             onRequest: (req) {
               req.respondWith(200, [
@@ -188,7 +194,7 @@ void main() {
             options: ClientOptions.fromKey('appId.keyId:keySecret'),
             httpClient: mockHttp,
           );
-          final channel = client.channels.get('test');
+          final channel = client.channels.get(channelName);
 
           final result = await channel.history();
 
@@ -199,6 +205,7 @@ void main() {
 
       group('RSL6b - JSON encoding', () {
         test('decodes JSON-encoded data to objects', () async {
+          final channelName = testChannelName('RSL6b');
           mockHttp = MockHttpClient(
             onRequest: (req) {
               req.respondWith(200, [
@@ -216,7 +223,7 @@ void main() {
             options: ClientOptions.fromKey('appId.keyId:keySecret'),
             httpClient: mockHttp,
           );
-          final channel = client.channels.get('test');
+          final channel = client.channels.get(channelName);
 
           final result = await channel.history();
 
@@ -230,6 +237,7 @@ void main() {
 
       group('RSL6c - Base64 encoding', () {
         test('decodes base64-encoded data to binary', () async {
+          final channelName = testChannelName('RSL6c');
           final originalBytes = [0x00, 0x01, 0xFF, 0xFE];
           final base64Data = base64.encode(originalBytes);
 
@@ -250,7 +258,7 @@ void main() {
             options: ClientOptions.fromKey('appId.keyId:keySecret'),
             httpClient: mockHttp,
           );
-          final channel = client.channels.get('test');
+          final channel = client.channels.get(channelName);
 
           final result = await channel.history();
 
@@ -264,6 +272,7 @@ void main() {
 
       group('RSL6 - Compound encoding', () {
         test('decodes json/base64 encoded data', () async {
+          final channelName = testChannelName('RSL6-compound');
           final jsonData = '{"nested":"object"}';
           final base64Data = base64.encode(utf8.encode(jsonData));
 
@@ -284,7 +293,7 @@ void main() {
             options: ClientOptions.fromKey('appId.keyId:keySecret'),
             httpClient: mockHttp,
           );
-          final channel = client.channels.get('test');
+          final channel = client.channels.get(channelName);
 
           final result = await channel.history();
 
@@ -298,6 +307,7 @@ void main() {
     group('Encoding edge cases', () {
       test('handles empty string data', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSL-empty-str');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -321,7 +331,7 @@ void main() {
           ),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test');
+        final channel = client.channels.get(channelName);
 
         await channel.publish(name: 'event', data: '');
 
@@ -333,6 +343,7 @@ void main() {
 
       test('handles empty binary data', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSL-empty-bin');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -356,7 +367,7 @@ void main() {
           ),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test');
+        final channel = client.channels.get(channelName);
 
         await channel.publish(name: 'event', data: Uint8List(0));
 
@@ -368,6 +379,7 @@ void main() {
 
       test('handles deeply nested JSON objects', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSL-nested');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -391,7 +403,7 @@ void main() {
           ),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test');
+        final channel = client.channels.get(channelName);
 
         final nestedData = {
           'level1': {

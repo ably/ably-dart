@@ -1,5 +1,8 @@
+import 'package:clock/clock.dart';
 import 'package:test/test.dart';
 import 'package:ably_dart/ably_dart.dart';
+import '../../../helpers/fake_timer_manager.dart';
+import '../../../helpers/mock_http_client.dart';
 import '../../../helpers/mock_websocket_client.dart';
 import '../../../helpers/protocol_message_helpers.dart';
 
@@ -14,7 +17,7 @@ void main() {
     test('errorReason populated on connection failure', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
-          conn.respondWithSuccess(
+          conn.respondWithError(
             ProtocolMessageHelpers.error(
               code: 40005,
               statusCode: 400,
@@ -47,7 +50,7 @@ void main() {
       expect(client.connection.errorReason!.statusCode, equals(400));
       expect(client.connection.errorReason!.message, equals('Invalid API key'));
 
-      await client.close();
+      mockWs.dispose();
     });
 
     test('errorReason set on DISCONNECTED state', () async {
@@ -76,50 +79,57 @@ void main() {
       expect(client.connection.errorReason, isNotNull);
       expect(client.connection.errorReason!.message, isNotNull);
 
-      await client.close();
+      mockWs.dispose();
+    });
 
     test('errorReason on SUSPENDED state after connectionStateTtl', () async {
-      final mockWs = MockWebSocketClient(
-        onConnectionAttempt: (conn) {
-          // All connection attempts fail
-          conn.respondWithRefused();
-        },
-      );
+      final testClock = TestClock();
+      final fakeTimers = FakeTimerManager(testClock);
 
-      final client = Realtime.forTesting(
-        options: ClientOptions(
-          key: 'appId.keyId:keySecret',
-          disconnectedRetryTimeout: 500,
-          autoConnect: false,
-        ),
-        webSocketClient: mockWs,
-      );
+      await withClock(testClock, () async {
+        final mockWs = MockWebSocketClient(
+          onConnectionAttempt: (conn) {
+            // All connection attempts fail
+            conn.respondWithRefused();
+          },
+        );
 
-      // Start connection (will fail)
-      client.connect();
+        final client = Realtime.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            disconnectedRetryTimeout: 1000,
+            autoConnect: false,
+            fallbackHosts: [],
+          ),
+          webSocketClient: mockWs,
+          timerManager: fakeTimers,
+        );
 
-      // Wait for DISCONNECTED state
-      await _awaitState(client.connection, ConnectionState.disconnected);
+        // Start connection (will fail)
+        client.connect();
 
-      // Wait for SUSPENDED state (after connectionStateTtl)
-      // Note: This requires implementing the TTL timer
-      await _awaitState(
-        client.connection,
-        ConnectionState.suspended,
-        timeout: const Duration(seconds: 10),
-      );
+        // Wait for DISCONNECTED state
+        await _awaitState(client.connection, ConnectionState.disconnected);
 
-      // errorReason is set and indicates suspension
-      expect(client.connection.errorReason, isNotNull);
-      expect(client.connection.errorReason!.message, isNotNull);
+        // Advance time past connectionStateTtl (default 120s)
+        fakeTimers.elapseTime(const Duration(seconds: 121));
+        await _pumpEventQueue();
 
-      await client.close();
-    }, skip: 'Requires SUSPENDED state and errorReason implementation');
+        // Should be in SUSPENDED state
+        expect(client.connection.state, equals(ConnectionState.suspended));
+
+        // errorReason is set and indicates suspension
+        expect(client.connection.errorReason, isNotNull);
+        expect(client.connection.errorReason!.message, isNotNull);
+
+        mockWs.dispose();
+      });
+    });
 
     test('errorReason on token errors', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
-          conn.respondWithSuccess(
+          conn.respondWithError(
             ProtocolMessageHelpers.error(
               code: 40142,
               statusCode: 401,
@@ -141,8 +151,8 @@ void main() {
       // Start connection
       client.connect();
 
-      // Wait for DISCONNECTED state (can't renew token)
-      await _awaitState(client.connection, ConnectionState.disconnected);
+      // RTN15h1: Can't renew token, transitions to FAILED
+      await _awaitState(client.connection, ConnectionState.failed);
 
       // errorReason contains token error details
       expect(client.connection.errorReason, isNotNull);
@@ -153,8 +163,8 @@ void main() {
         contains('token'),
       );
 
-      await client.close();
-    }, skip: 'Requires token error handling and errorReason implementation');
+      mockWs.dispose();
+    });
 
     test('errorReason cleared on successful connection', () async {
       var connectionAttemptCount = 0;
@@ -172,8 +182,6 @@ void main() {
               ProtocolMessageHelpers.connected(
                 connectionId: 'connection-id',
                 connectionKey: 'connection-key',
-                maxIdleInterval: 15000,
-                connectionStateTtl: 120000,
               ),
             );
           }
@@ -185,6 +193,7 @@ void main() {
           key: 'appId.keyId:keySecret',
           disconnectedRetryTimeout: 100,
           autoConnect: false,
+          fallbackHosts: [], // Disable fallback hosts for this test
         ),
         webSocketClient: mockWs,
       );
@@ -207,23 +216,18 @@ void main() {
 
       // errorReason behavior after successful connection is implementation-specific
       // Either cleared (null) or kept for debugging purposes
-      // Verify implementation behavior:
-      // Option A: errorReason is cleared
-      // expect(client.connection.errorReason, isNull);
-      // Option B: errorReason kept but not relevant to current state
-      // (Implementation-specific behavior)
 
-      await client.close();
+      mockWs.dispose();
+    });
 
     test('errorReason on protocol-level ERROR message', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
-          conn.respondWithSuccess(
+          conn.respondWithError(
             ProtocolMessageHelpers.error(
               code: 50000,
               statusCode: 500,
               message: 'Internal server error',
-              channel: null, // Empty channel = connection-level error
             ),
           );
         },
@@ -252,13 +256,13 @@ void main() {
         equals('Internal server error'),
       );
 
-      await client.close();
-    }, skip: 'Requires protocol ERROR handling and errorReason implementation');
+      mockWs.dispose();
+    });
 
     test('errorReason propagated to ConnectionStateChange events', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
-          conn.respondWithSuccess(
+          conn.respondWithError(
             ProtocolMessageHelpers.error(
               code: 40003,
               statusCode: 400,
@@ -308,50 +312,65 @@ void main() {
         equals(change.reason!.message),
       );
 
-      await client.close();
+      mockWs.dispose();
+    });
   });
 
   group('RTN25 - errorReason across different error types', () {
     test('errorReason on connection timeout', () async {
-      final mockWs = MockWebSocketClient(
-        onConnectionAttempt: (conn) {
-          conn.respondWithSuccess(
-            ProtocolMessageHelpers.connected(
-              connectionId: 'connection-id',
-              connectionKey: 'connection-key',
-            ),
-          );
-          // But never send CONNECTED message (timeout scenario)
-        },
-      );
+      final testClock = TestClock();
+      final fakeTimers = FakeTimerManager(testClock);
 
-      final client = Realtime.forTesting(
-        options: ClientOptions(
-          key: 'appId.keyId:keySecret',
-          realtimeRequestTimeout: 1000, // 1 second timeout
-          autoConnect: false,
-        ),
-        webSocketClient: mockWs,
-      );
+      await withClock(testClock, () async {
+        final mockWs = MockWebSocketClient(
+          onConnectionAttempt: (conn) {
+            // WebSocket connects but server never sends CONNECTED
+            // Simulate unresponsive server
+            conn.respondWithSilence();
+          },
+        );
 
-      client.connect();
+        // Mock HTTP client for connectivity check
+        final mockHttp = MockHttpClient(
+          onRequest: (request) {
+            request.respondWith(200, 'yes');
+          },
+        );
 
-      // Wait for DISCONNECTED (after timeout)
-      await _awaitState(
-        client.connection,
-        ConnectionState.disconnected,
-        timeout: const Duration(seconds: 3),
-      );
+        final client = Realtime.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            realtimeRequestTimeout: 1000, // 1 second timeout
+            autoConnect: false,
+            fallbackHosts: [],
+          ),
+          webSocketClient: mockWs,
+          timerManager: fakeTimers,
+          httpClient: mockHttp,
+        );
 
-      // errorReason indicates timeout
-      expect(client.connection.errorReason, isNotNull);
-      expect(
-        client.connection.errorReason!.message!.toLowerCase(),
-        anyOf(contains('timeout'), contains('timed out')),
-      );
+        client.connect();
 
-      await client.close();
-    }, skip: 'Requires connection timeout and errorReason implementation');
+        // Wait for CONNECTING state
+        await _awaitState(client.connection, ConnectionState.connecting);
+
+        // Advance time past the connection timeout
+        fakeTimers.elapseTime(const Duration(milliseconds: 1100));
+        await _pumpEventQueue();
+
+        // Should be in DISCONNECTED state
+        expect(client.connection.state, equals(ConnectionState.disconnected));
+
+        // errorReason indicates timeout
+        expect(client.connection.errorReason, isNotNull);
+        expect(
+          client.connection.errorReason!.message!.toLowerCase(),
+          contains('timeout'),
+        );
+
+        mockWs.dispose();
+      });
+    });
 
     test('errorReason persists across state transitions', () async {
       var connectionAttemptCount = 0;
@@ -369,8 +388,6 @@ void main() {
               ProtocolMessageHelpers.connected(
                 connectionId: 'connection-id',
                 connectionKey: 'connection-key',
-                maxIdleInterval: 15000,
-                connectionStateTtl: 120000,
               ),
             );
           }
@@ -382,6 +399,7 @@ void main() {
           key: 'appId.keyId:keySecret',
           disconnectedRetryTimeout: 100,
           autoConnect: false,
+          fallbackHosts: [], // Disable fallback hosts for this test
         ),
         webSocketClient: mockWs,
       );
@@ -391,13 +409,15 @@ void main() {
       // Wait for first DISCONNECTED
       await _awaitState(client.connection, ConnectionState.disconnected);
       expect(client.connection.errorReason, isNotNull);
-      final firstError = client.connection.errorReason;
 
       // Wait for second DISCONNECTED (after retry)
-      await Future<void>.delayed(const Duration(milliseconds: 150));
+      await _awaitState(
+        client.connection,
+        ConnectionState.connecting,
+        timeout: const Duration(seconds: 2),
+      );
       await _awaitState(client.connection, ConnectionState.disconnected);
       expect(client.connection.errorReason, isNotNull);
-      // errorReason may be updated or remain the same
 
       // Finally connect successfully
       await _awaitState(
@@ -408,7 +428,8 @@ void main() {
 
       // errorReason lifecycle after successful connection is implementation-specific
 
-      await client.close();
+      mockWs.dispose();
+    });
   });
 }
 
@@ -426,4 +447,10 @@ Future<void> _awaitState(
       .on()
       .firstWhere((change) => change.current == targetState)
       .timeout(timeout);
+}
+
+/// Pumps the event queue to allow async operations to complete.
+/// Used after advancing fake time to let scheduled callbacks run.
+Future<void> _pumpEventQueue() async {
+  await Future<void>.delayed(Duration.zero);
 }

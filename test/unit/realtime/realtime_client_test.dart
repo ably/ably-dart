@@ -1,6 +1,10 @@
 import 'package:ably_dart/ably_dart.dart';
 import 'package:test/test.dart';
 
+import '../../helpers/mock_websocket_client.dart';
+import '../../helpers/protocol_message_helpers.dart';
+import '../../helpers/test_channel_name.dart';
+
 void main() {
   group('Realtime Client - UTS Tests', () {
     test('RTC2 - connection attribute exists', () {
@@ -12,23 +16,24 @@ void main() {
 
     test('RTC3 - channels attribute exists and can get channels', () {
       final realtime = Realtime.fromKey('fake.key:secret');
+      final channelName = testChannelName('RTC3');
 
       expect(realtime.channels, isNotNull);
       expect(realtime.channels, isA<RealtimeChannels>());
 
       // Test get method
-      final channel1 = realtime.channels.get('test-channel');
+      final channel1 = realtime.channels.get(channelName);
       expect(channel1, isNotNull);
       expect(channel1, isA<RealtimeChannel>());
-      expect(channel1.name, equals('test-channel'));
+      expect(channel1.name, equals(channelName));
 
       // Test operator[] method
-      final channel2 = realtime.channels['test-channel'];
+      final channel2 = realtime.channels[channelName];
       expect(channel2, isNotNull);
       expect(channel2, same(channel1)); // Should return same instance
 
       // Test exists method
-      expect(realtime.channels.exists('test-channel'), isTrue);
+      expect(realtime.channels.exists(channelName), isTrue);
       expect(realtime.channels.exists('nonexistent'), isFalse);
     });
 
@@ -85,16 +90,29 @@ void main() {
 
     test('Channel initial state is initialized', () {
       final realtime = Realtime.fromKey('fake.key:secret');
-      final channel = realtime.channels.get('test');
+      final channelName = testChannelName('RTC-init');
+      final channel = realtime.channels.get(channelName);
       expect(channel.state, equals(ChannelState.initialized));
     });
 
     test('Connection state changes can be observed', () async {
-      final realtime = Realtime(
+      final mockWs = MockWebSocketClient(
+        onConnectionAttempt: (conn) {
+          conn.respondWithSuccess(
+            ProtocolMessageHelpers.connected(
+              connectionId: 'test-connection',
+              connectionKey: 'test-key',
+            ),
+          );
+        },
+      );
+
+      final realtime = Realtime.forTesting(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,
         ),
+        webSocketClient: mockWs,
       );
 
       final stateChanges = <ConnectionStateChange>[];
@@ -102,27 +120,29 @@ void main() {
         stateChanges.add(change);
       });
 
-      // Wait a bit for listener to be ready
-      await Future<void>.delayed(Duration.zero);
-
-      // Start connection (will fail without mock WebSocket, but we can observe state changes)
+      // Start connection
       realtime.connect();
 
-      // Wait for state changes to propagate
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+      // Wait for connected state
+      await realtime.connection
+          .on(ConnectionEvent.connected)
+          .first
+          .timeout(const Duration(seconds: 5));
 
-      // Should have transitioned at least to connecting
-      // May also transition to disconnected if connection fails
-      expect(stateChanges.length, greaterThanOrEqualTo(1));
+      // Should have transitioned: initialized -> connecting -> connected
+      expect(stateChanges.length, greaterThanOrEqualTo(2));
       expect(stateChanges.first.current, equals(ConnectionState.connecting));
+      expect(stateChanges.last.current, equals(ConnectionState.connected));
 
       await subscription.cancel();
       await realtime.close();
+      mockWs.dispose();
     });
 
     test('Channel state changes can be observed', () async {
       final realtime = Realtime.fromKey('fake.key:secret');
-      final channel = realtime.channels.get('test');
+      final channelName = testChannelName('RTC-state');
+      final channel = realtime.channels.get(channelName);
 
       final stateChanges = <ChannelStateChange>[];
       final subscription = channel.on().listen((change) {
@@ -135,7 +155,7 @@ void main() {
       await channel.attach();
 
       // Wait for all state changes to propagate
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await Future<void>.delayed(Duration.zero);
 
       // Should have transitioned: initialized -> attaching -> attached
       expect(stateChanges.length, greaterThanOrEqualTo(2));
@@ -146,11 +166,23 @@ void main() {
     });
 
     test('Connection on(event) filters by event type', () async {
-      final realtime = Realtime(
+      final mockWs = MockWebSocketClient(
+        onConnectionAttempt: (conn) {
+          conn.respondWithSuccess(
+            ProtocolMessageHelpers.connected(
+              connectionId: 'test-connection',
+              connectionKey: 'test-key',
+            ),
+          );
+        },
+      );
+
+      final realtime = Realtime.forTesting(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,
         ),
+        webSocketClient: mockWs,
       );
 
       final connectingEvents = <ConnectionStateChange>[];
@@ -159,14 +191,14 @@ void main() {
         connectingEvents.add(change);
       });
 
-      // Wait a bit for listener to be ready
-      await Future<void>.delayed(Duration.zero);
-
-      // Start connection (will at least reach connecting state)
+      // Start connection
       realtime.connect();
 
-      // Wait for state changes to propagate
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+      // Wait for connected state
+      await realtime.connection
+          .on(ConnectionEvent.connected)
+          .first
+          .timeout(const Duration(seconds: 5));
 
       // Should only receive connecting events (filtering works)
       expect(connectingEvents.length, equals(1));
@@ -176,11 +208,13 @@ void main() {
 
       await subscription.cancel();
       await realtime.close();
+      mockWs.dispose();
     });
 
     test('Channel on(event) filters by event type', () async {
       final realtime = Realtime.fromKey('fake.key:secret');
-      final channel = realtime.channels.get('test');
+      final channelName = testChannelName('RTC-filter');
+      final channel = realtime.channels.get(channelName);
 
       final attachedEvents = <ChannelStateChange>[];
       final subscription = channel.on(ChannelEvent.attached).listen((change) {
@@ -193,7 +227,7 @@ void main() {
       await channel.attach();
 
       // Wait for all state changes to propagate
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await Future<void>.delayed(Duration.zero);
 
       // Should only receive attached events
       expect(attachedEvents.length, equals(1));
@@ -205,15 +239,16 @@ void main() {
 
     test('Channel release detaches and removes channel', () async {
       final realtime = Realtime.fromKey('fake.key:secret');
-      final channel = realtime.channels.get('test');
+      final channelName = testChannelName('RTC-release');
+      final channel = realtime.channels.get(channelName);
 
       await channel.attach();
       expect(channel.state, equals(ChannelState.attached));
-      expect(realtime.channels.exists('test'), isTrue);
+      expect(realtime.channels.exists(channelName), isTrue);
 
-      await realtime.channels.release('test');
+      await realtime.channels.release(channelName);
 
-      expect(realtime.channels.exists('test'), isFalse);
+      expect(realtime.channels.exists(channelName), isFalse);
     });
 
     test('Realtime.close closes connection', () async {

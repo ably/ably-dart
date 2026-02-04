@@ -1,195 +1,423 @@
+import 'package:clock/clock.dart';
 import 'package:test/test.dart';
 import 'package:ably_dart/ably_dart.dart';
+import '../../../helpers/fake_timer_manager.dart';
 import '../../../helpers/mock_websocket_client.dart';
 import '../../../helpers/protocol_message_helpers.dart';
+import '../../../helpers/test_channel_name.dart';
 
 /// Unit tests for heartbeat behavior (RTN23).
 ///
-/// These tests use mocked WebSocket to verify connection heartbeat
-/// and idle timeout behavior.
+/// These tests use mocked WebSocket and FakeTimerManager to verify
+/// connection heartbeat and idle timeout behavior.
 ///
 /// Spec: uts/test/realtime/unit/connection/heartbeat_test.md
 void main() {
   group('RTN23a - Disconnect after maxIdleInterval + realtimeRequestTimeout',
       () {
-    test('disconnects when no server activity detected', () async {
-      final mockWs = MockWebSocketClient(
-        onConnectionAttempt: (conn) {
-          conn.respondWithSuccess(
-            ProtocolMessageHelpers.connected(
-              connectionId: 'connection-id',
-              connectionKey: 'connection-key',
-              maxIdleInterval: 5000, // 5 seconds
-              connectionStateTtl: 120000,
-            ),
-          );
-          // Server sends CONNECTED but then no further messages
-        },
-      );
+    test('closes WebSocket and reconnects when no server activity detected',
+        () async {
+      final testClock = TestClock();
+      final fakeTimers = FakeTimerManager(testClock);
 
-      final client = Realtime.forTesting(
-        options: ClientOptions(
-          key: 'appId.keyId:keySecret',
-          realtimeRequestTimeout: 2000, // 2 seconds
-          autoConnect: false,
-        ),
-        webSocketClient: mockWs,
-      );
+      await withClock(testClock, () async {
+        var connectionAttemptCount = 0;
+        final stateChanges = <ConnectionState>[];
 
-      // Start connection
-      client.connect();
+        final mockWs = MockWebSocketClient(
+          onConnectionAttempt: (conn) {
+            connectionAttemptCount++;
+            conn.respondWithSuccess(
+              ProtocolMessageHelpers.connected(
+                connectionId: 'connection-id-$connectionAttemptCount',
+                connectionKey: 'connection-key-$connectionAttemptCount',
+                maxIdleInterval: 5000, // 5 seconds
+                connectionStateTtl: 120000,
+              ),
+            );
+            // Server sends CONNECTED but then no further messages
+          },
+        );
 
-      // Wait for CONNECTED state
-      await _awaitState(client.connection, ConnectionState.connected);
+        final client = Realtime.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            realtimeRequestTimeout: 2000, // 2 seconds
+            autoConnect: false,
+          ),
+          webSocketClient: mockWs,
+          timerManager: fakeTimers,
+        );
 
-      // Wait for maxIdleInterval + realtimeRequestTimeout + buffer
-      // = 5000 + 2000 + 500 = 7500ms
-      await Future<void>.delayed(const Duration(milliseconds: 7500));
+        // Record all state changes
+        client.connection.on().listen((change) {
+          stateChanges.add(change.current);
+        });
 
-      // Should transition to DISCONNECTED
-      await _awaitState(
-        client.connection,
-        ConnectionState.disconnected,
-        timeout: const Duration(seconds: 2),
-      );
+        // Start connection
+        client.connect();
 
-      // Verify error reason indicates timeout/inactivity
-      expect(client.connection.state, equals(ConnectionState.disconnected));
-      expect(client.connection.errorReason, isNotNull);
-      expect(
-        client.connection.errorReason!.message.toLowerCase(),
-        anyOf(contains('idle'), contains('heartbeat'), contains('timeout')),
-      );
+        // Wait for CONNECTED state
+        await _awaitState(client.connection, ConnectionState.connected);
+        expect(connectionAttemptCount, equals(1));
 
-      await client.close();
+        // Advance time past maxIdleInterval + realtimeRequestTimeout
+        // = 5000 + 2000 = 7000ms
+        fakeTimers.elapseTime(const Duration(milliseconds: 7100));
+        await _pumpEventQueue();
+
+        // Wait for reconnection to complete
+        await _awaitState(client.connection, ConnectionState.connected);
+
+        // Verify the sequence of state changes:
+        // CONNECTING -> CONNECTED -> DISCONNECTED -> CONNECTING -> CONNECTED
+        expect(
+            stateChanges,
+            containsAllInOrder([
+              ConnectionState.connecting,
+              ConnectionState.connected,
+              ConnectionState.disconnected,
+              ConnectionState.connecting,
+              ConnectionState.connected,
+            ]));
+
+        // Verify the client closed the first WebSocket connection
+        expect(mockWs.clientCloseEvents, hasLength(1));
+
+        // Verify two connection attempts were made (initial + reconnect)
+        expect(connectionAttemptCount, equals(2));
+
+        // Verify we're connected with the new connection details
+        expect(client.connection.id, equals('connection-id-2'));
+
+        await client.close();
+        mockWs.dispose();
+      });
     });
 
     test('HEARTBEAT message resets idle timer', () async {
-      final mockWs = MockWebSocketClient(
-        onConnectionAttempt: (conn) {
-          conn.respondWithSuccess(
-            ProtocolMessageHelpers.connected(
-              connectionId: 'connection-id',
-              connectionKey: 'connection-key',
-              maxIdleInterval: 3000, // 3 seconds
-              connectionStateTtl: 120000,
-            ),
-          );
-        },
-      );
+      final testClock = TestClock();
+      final fakeTimers = FakeTimerManager(testClock);
 
-      final client = Realtime.forTesting(
-        options: ClientOptions(
-          key: 'appId.keyId:keySecret',
-          realtimeRequestTimeout: 1000, // 1 second
-          autoConnect: false,
-        ),
-        webSocketClient: mockWs,
-      );
+      await withClock(testClock, () async {
+        var connectionAttemptCount = 0;
 
-      // Start connection
-      client.connect();
+        final mockWs = MockWebSocketClient(
+          onConnectionAttempt: (conn) {
+            connectionAttemptCount++;
+            conn.respondWithSuccess(
+              ProtocolMessageHelpers.connected(
+                connectionId: 'connection-id-$connectionAttemptCount',
+                connectionKey: 'connection-key-$connectionAttemptCount',
+                maxIdleInterval: 3000, // 3 seconds
+                connectionStateTtl: 120000,
+              ),
+            );
+          },
+        );
 
-      // Wait for CONNECTED state
-      await _awaitState(client.connection, ConnectionState.connected);
+        final client = Realtime.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            realtimeRequestTimeout: 1000, // 1 second
+            autoConnect: false,
+          ),
+          webSocketClient: mockWs,
+          timerManager: fakeTimers,
+        );
 
-      // Wait 2 seconds (not enough to trigger timeout)
-      await Future<void>.delayed(const Duration(milliseconds: 2000));
+        // Start connection
+        client.connect();
 
-      // Send HEARTBEAT from server to reset timer
-      mockWs.activeConnection!.sendToClient(
-        ProtocolMessageHelpers.heartbeat(),
-      );
+        // Wait for CONNECTED state
+        await _awaitState(client.connection, ConnectionState.connected);
+        expect(connectionAttemptCount, equals(1));
 
-      // Wait another 2 seconds (total 4 seconds, but timer was reset at 2s)
-      await Future<void>.delayed(const Duration(milliseconds: 2000));
+        // Advance time 2 seconds (not enough to trigger timeout of 3000+1000=4000ms)
+        fakeTimers.elapseTime(const Duration(milliseconds: 2000));
+        await _pumpEventQueue();
 
-      // Connection should still be alive
-      expect(client.connection.state, equals(ConnectionState.connected));
+        // Send HEARTBEAT from server to reset timer
+        mockWs.activeConnection!.sendToClient(
+          ProtocolMessageHelpers.heartbeat(),
+        );
+        await _pumpEventQueue();
 
-      // Wait past the new timeout window (3000 + 1000 + buffer)
-      await Future<void>.delayed(const Duration(milliseconds: 2500));
+        // Advance another 2 seconds (total 4 seconds, but timer was reset at 2s)
+        fakeTimers.elapseTime(const Duration(milliseconds: 2000));
+        await _pumpEventQueue();
 
-      // Should disconnect now
-      await _awaitState(
-        client.connection,
-        ConnectionState.disconnected,
-        timeout: const Duration(seconds: 2),
-      );
+        // Connection should still be alive (timer was reset by HEARTBEAT)
+        expect(client.connection.state, equals(ConnectionState.connected));
+        // Still only 1 connection attempt - no reconnection triggered
+        expect(connectionAttemptCount, equals(1));
 
-      expect(client.connection.state, equals(ConnectionState.disconnected));
-      expect(client.connection.errorReason, isNotNull);
+        // Advance past the new timeout window (4000ms from last heartbeat)
+        fakeTimers.elapseTime(const Duration(milliseconds: 2100));
+        await _pumpEventQueue();
 
-      await client.close();
+        // Should have reconnected (immediate reconnection per RTN15a)
+        await _awaitState(client.connection, ConnectionState.connected);
 
-    test('any protocol message resets idle timer', () async {
-      final mockWs = MockWebSocketClient(
-        onConnectionAttempt: (conn) {
-          conn.respondWithSuccess(
-            ProtocolMessageHelpers.connected(
-              connectionId: 'connection-id',
-              connectionKey: 'connection-key',
-              maxIdleInterval: 2000, // 2 seconds
-              connectionStateTtl: 120000,
-            ),
-          );
-        },
-      );
+        // Verify reconnection happened
+        expect(connectionAttemptCount, equals(2));
+        expect(mockWs.clientCloseEvents, hasLength(1));
 
-      final client = Realtime.forTesting(
-        options: ClientOptions(
-          key: 'appId.keyId:keySecret',
-          realtimeRequestTimeout: 1000, // 1 second
-          autoConnect: false,
-        ),
-        webSocketClient: mockWs,
-      );
+        await client.close();
+        mockWs.dispose();
+      });
+    });
 
-      client.connect();
-      await _awaitState(client.connection, ConnectionState.connected);
+    test('any protocol message resets idle timer and client closes on timeout',
+        () async {
+      final testClock = TestClock();
+      final fakeTimers = FakeTimerManager(testClock);
 
-      // Wait 1.5 seconds
-      await Future<void>.delayed(const Duration(milliseconds: 1500));
+      await withClock(testClock, () async {
+        var connectionAttemptCount = 0;
+        final stateChanges = <ConnectionState>[];
 
-      // Send ACK message from server (timer reset)
-      mockWs.activeConnection!.sendToClient(
-        ProtocolMessageHelpers.ack(msgSerial: 0),
-      );
+        final mockWs = MockWebSocketClient(
+          onConnectionAttempt: (conn) {
+            connectionAttemptCount++;
+            conn.respondWithSuccess(
+              ProtocolMessageHelpers.connected(
+                connectionId: 'connection-id-$connectionAttemptCount',
+                connectionKey: 'connection-key-$connectionAttemptCount',
+                maxIdleInterval: 2000, // 2 seconds
+                connectionStateTtl: 120000,
+              ),
+            );
+          },
+        );
 
-      // Wait another 1.5 seconds
-      await Future<void>.delayed(const Duration(milliseconds: 1500));
+        final client = Realtime.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            realtimeRequestTimeout: 1000, // 1 second
+            autoConnect: false,
+          ),
+          webSocketClient: mockWs,
+          timerManager: fakeTimers,
+        );
 
-      // Still connected (timer was reset)
-      expect(client.connection.state, equals(ConnectionState.connected));
+        // Record all state changes
+        client.connection.on().listen((change) {
+          stateChanges.add(change.current);
+        });
 
-      // Send MESSAGE from server (timer reset again)
-      mockWs.activeConnection!.sendToClient(
-        ProtocolMessageHelpers.message(
-          channel: 'test-channel',
-          name: 'event',
-          data: 'data',
-        ),
-      );
+        client.connect();
+        await _awaitState(client.connection, ConnectionState.connected);
 
-      // Wait another 1.5 seconds
-      await Future<void>.delayed(const Duration(milliseconds: 1500));
+        // Advance 1.5 seconds (timeout is 2000+1000=3000ms)
+        fakeTimers.elapseTime(const Duration(milliseconds: 1500));
+        await _pumpEventQueue();
 
-      // Still connected
-      expect(client.connection.state, equals(ConnectionState.connected));
+        // Send ACK message from server (timer reset)
+        mockWs.activeConnection!.sendToClient(
+          ProtocolMessageHelpers.ack(msgSerial: 0),
+        );
+        await _pumpEventQueue();
 
-      // Wait past timeout without any message
-      await Future<void>.delayed(const Duration(milliseconds: 2000));
+        // Advance another 1.5 seconds (total 3s, but timer was reset at 1.5s)
+        fakeTimers.elapseTime(const Duration(milliseconds: 1500));
+        await _pumpEventQueue();
 
-      // Should disconnect now
-      await _awaitState(
-        client.connection,
-        ConnectionState.disconnected,
-        timeout: const Duration(seconds: 2),
-      );
+        // Send MESSAGE from server (timer reset again)
+        final channelName = testChannelName('RTN23a-message');
+        mockWs.activeConnection!.sendToClient(
+          ProtocolMessageHelpers.message(
+            channel: channelName,
+            name: 'event',
+            data: 'data',
+          ),
+        );
+        await _pumpEventQueue();
 
-      expect(client.connection.state, equals(ConnectionState.disconnected));
+        // Advance another 1.5 seconds
+        fakeTimers.elapseTime(const Duration(milliseconds: 1500));
+        await _pumpEventQueue();
 
-      await client.close();
+        // At this point, only one connection attempt (no timeout yet)
+        expect(connectionAttemptCount, equals(1));
+
+        // Advance past timeout without any message (3000ms + buffer)
+        fakeTimers.elapseTime(const Duration(milliseconds: 3100));
+        await _pumpEventQueue();
+
+        // Wait for reconnection to complete
+        await _awaitState(client.connection, ConnectionState.connected);
+
+        // Verify the state change sequence includes disconnected
+        expect(
+            stateChanges,
+            containsAllInOrder([
+              ConnectionState.connecting,
+              ConnectionState.connected,
+              ConnectionState.disconnected,
+              ConnectionState.connecting,
+              ConnectionState.connected,
+            ]));
+
+        // Verify the client closed the WebSocket connection
+        expect(mockWs.clientCloseEvents, hasLength(1));
+
+        // Verify two connection attempts were made
+        expect(connectionAttemptCount, equals(2));
+
+        await client.close();
+        mockWs.dispose();
+      });
+    });
+
+    test('heartbeat timeout triggers immediate reconnection', () async {
+      final testClock = TestClock();
+      final fakeTimers = FakeTimerManager(testClock);
+
+      await withClock(testClock, () async {
+        var connectionAttemptCount = 0;
+        final stateChanges = <ConnectionState>[];
+
+        final mockWs = MockWebSocketClient(
+          onConnectionAttempt: (conn) {
+            connectionAttemptCount++;
+            conn.respondWithSuccess(
+              ProtocolMessageHelpers.connected(
+                connectionId: 'connection-id-$connectionAttemptCount',
+                connectionKey: 'connection-key-$connectionAttemptCount',
+                maxIdleInterval: 2000, // 2 seconds
+                connectionStateTtl: 120000,
+              ),
+            );
+          },
+        );
+
+        final client = Realtime.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            realtimeRequestTimeout: 1000, // 1 second
+            autoConnect: false,
+          ),
+          webSocketClient: mockWs,
+          timerManager: fakeTimers,
+        );
+
+        // Record all state changes
+        client.connection.on().listen((change) {
+          stateChanges.add(change.current);
+        });
+
+        client.connect();
+        await _awaitState(client.connection, ConnectionState.connected);
+
+        expect(connectionAttemptCount, equals(1));
+
+        // Advance time past maxIdleInterval + realtimeRequestTimeout
+        // = 2000 + 1000 = 3000ms
+        fakeTimers.elapseTime(const Duration(milliseconds: 3100));
+        await _pumpEventQueue();
+
+        // Wait for reconnection to complete (immediate per RTN15a)
+        await _awaitState(client.connection, ConnectionState.connected);
+
+        // Verify the state change sequence shows disconnected then reconnected
+        expect(
+            stateChanges,
+            containsAllInOrder([
+              ConnectionState.connecting,
+              ConnectionState.connected,
+              ConnectionState.disconnected,
+              ConnectionState.connecting,
+              ConnectionState.connected,
+            ]));
+
+        // Verify two connection attempts were made (initial + reconnect)
+        expect(connectionAttemptCount, equals(2));
+
+        // Verify the client is now connected with new connection details
+        expect(client.connection.state, equals(ConnectionState.connected));
+        expect(client.connection.id, equals('connection-id-2'));
+
+        // Verify the first connection was closed by the client
+        expect(mockWs.clientCloseEvents, hasLength(1));
+
+        await client.close();
+        mockWs.dispose();
+      });
+    });
+
+    test('reconnection after heartbeat timeout uses resume', () async {
+      final testClock = TestClock();
+      final fakeTimers = FakeTimerManager(testClock);
+
+      await withClock(testClock, () async {
+        final connectionAttempts = <Uri>[];
+        final stateChanges = <ConnectionState>[];
+
+        final mockWs = MockWebSocketClient(
+          onConnectionAttempt: (conn) {
+            connectionAttempts.add(conn.url);
+            conn.respondWithSuccess(
+              ProtocolMessageHelpers.connected(
+                connectionId: 'connection-id-${connectionAttempts.length}',
+                connectionKey: 'connection-key-${connectionAttempts.length}',
+                maxIdleInterval: 2000, // 2 seconds
+                connectionStateTtl: 120000,
+              ),
+            );
+          },
+        );
+
+        final client = Realtime.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            realtimeRequestTimeout: 1000, // 1 second
+            autoConnect: false,
+          ),
+          webSocketClient: mockWs,
+          timerManager: fakeTimers,
+        );
+
+        // Record all state changes
+        client.connection.on().listen((change) {
+          stateChanges.add(change.current);
+        });
+
+        client.connect();
+        await _awaitState(client.connection, ConnectionState.connected);
+
+        // Advance time past timeout to trigger disconnection
+        fakeTimers.elapseTime(const Duration(milliseconds: 3100));
+        await _pumpEventQueue();
+
+        // Wait for reconnection to complete (immediate per RTN15a)
+        await _awaitState(client.connection, ConnectionState.connected);
+
+        // Verify the state change sequence shows disconnected
+        expect(
+            stateChanges,
+            containsAllInOrder([
+              ConnectionState.connecting,
+              ConnectionState.connected,
+              ConnectionState.disconnected,
+              ConnectionState.connecting,
+              ConnectionState.connected,
+            ]));
+
+        expect(connectionAttempts, hasLength(2));
+
+        // First connection should not have resume parameter
+        final firstUrl = connectionAttempts[0];
+        expect(firstUrl.queryParameters.containsKey('resume'), isFalse);
+
+        // Second connection should include resume parameter with first connectionKey
+        final secondUrl = connectionAttempts[1];
+        expect(secondUrl.queryParameters['resume'], equals('connection-key-1'));
+
+        await client.close();
+        mockWs.dispose();
+      });
+    });
   });
 
   group('RTN23b - Client can request heartbeats in query params', () {
@@ -250,49 +478,60 @@ void main() {
       // Verify implementation adds heartbeats query param
 
       await client2.close();
+      mockWs.dispose();
+    });
 
     test('server respects heartbeats=false', () async {
-      final mockWs = MockWebSocketClient(
-        onConnectionAttempt: (conn) {
-          conn.respondWithSuccess(
-            ProtocolMessageHelpers.connected(
-              connectionId: 'connection-id',
-              connectionKey: 'connection-key',
-              maxIdleInterval: 2000, // 2 seconds
-              connectionStateTtl: 120000,
-            ),
-          );
-          // Server sends no HEARTBEAT messages
-        },
-      );
+      final testClock = TestClock();
+      final fakeTimers = FakeTimerManager(testClock);
 
-      final client = Realtime.forTesting(
-        options: ClientOptions(
-          key: 'appId.keyId:keySecret',
-          autoConnect: false,
-          // Configure to disable heartbeats (implementation-specific)
-        ),
-        webSocketClient: mockWs,
-      );
+      await withClock(testClock, () async {
+        final mockWs = MockWebSocketClient(
+          onConnectionAttempt: (conn) {
+            conn.respondWithSuccess(
+              ProtocolMessageHelpers.connected(
+                connectionId: 'connection-id',
+                connectionKey: 'connection-key',
+                maxIdleInterval: 2000, // 2 seconds
+                connectionStateTtl: 120000,
+              ),
+            );
+            // Server sends no HEARTBEAT messages
+          },
+        );
 
-      client.connect();
-      await _awaitState(client.connection, ConnectionState.connected);
+        final client = Realtime.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            autoConnect: false,
+            // Configure to disable heartbeats (implementation-specific)
+          ),
+          webSocketClient: mockWs,
+          timerManager: fakeTimers,
+        );
 
-      // Wait well past maxIdleInterval
-      await Future<void>.delayed(const Duration(milliseconds: 10000));
+        client.connect();
+        await _awaitState(client.connection, ConnectionState.connected);
 
-      // Connection behavior when heartbeats disabled is implementation-specific
-      // Either stays connected indefinitely or has different timeout behavior
-      final state = client.connection.state;
-      expect(
-        state,
-        anyOf(
-          equals(ConnectionState.connected),
-          equals(ConnectionState.disconnected),
-        ),
-      );
+        // Advance time well past maxIdleInterval
+        fakeTimers.elapseTime(const Duration(milliseconds: 10000));
+        await _pumpEventQueue();
 
-      await client.close();
+        // Connection behavior when heartbeats disabled is implementation-specific
+        // Either stays connected indefinitely or has different timeout behavior
+        final state = client.connection.state;
+        expect(
+          state,
+          anyOf(
+            equals(ConnectionState.connected),
+            equals(ConnectionState.disconnected),
+          ),
+        );
+
+        await client.close();
+        mockWs.dispose();
+      });
+    });
   });
 }
 
@@ -310,4 +549,15 @@ Future<void> _awaitState(
       .on()
       .firstWhere((change) => change.current == targetState)
       .timeout(timeout);
+}
+
+/// Pumps the event queue multiple times to allow microtasks to complete.
+///
+/// A single [Future.delayed(Duration.zero)] only processes one "tick" of
+/// microtasks. Multiple nested scheduleMicrotask calls (e.g., close()
+/// schedules onClose, which schedules reconnect) require multiple pumps.
+Future<void> _pumpEventQueue([int times = 5]) async {
+  for (var i = 0; i < times; i++) {
+    await Future<void>.delayed(Duration.zero);
+  }
 }

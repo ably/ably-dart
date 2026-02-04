@@ -1,6 +1,7 @@
 import '../message/message.dart';
 import '../pagination/paginated_result.dart';
 import '../presence/rest_presence.dart';
+import 'channel_details.dart';
 import 'rest_channel_options.dart';
 import 'rest_history_params.dart';
 
@@ -36,6 +37,14 @@ abstract class RestChannel {
   ///
   /// Spec: RSL2
   Future<PaginatedResult<Message>> history([RestHistoryParams? params]);
+
+  /// Retrieves the status of this channel.
+  ///
+  /// Returns a [ChannelDetails] object containing the channel's current
+  /// status and occupancy metrics.
+  ///
+  /// Spec: RSL8
+  Future<ChannelDetails> status();
 
   /// Sets options on this channel.
   Future<void> setOptions(RestChannelOptions options);

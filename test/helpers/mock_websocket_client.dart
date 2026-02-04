@@ -68,8 +68,8 @@ class MockWebSocketClient implements WebSocketClient {
       StreamController<PendingWebSocketConnection>.broadcast();
   final StreamController<ProtocolMessage> _messagesFromClient =
       StreamController<ProtocolMessage>.broadcast();
-  final StreamController<void> _closeRequests =
-      StreamController<void>.broadcast();
+  final StreamController<ClientCloseEvent> _clientCloses =
+      StreamController<ClientCloseEvent>.broadcast();
 
   /// Awaits the next connection attempt (UTS pattern).
   ///
@@ -88,24 +88,36 @@ class MockWebSocketClient implements WebSocketClient {
     return _messagesFromClient.stream.first.timeout(timeout);
   }
 
-  /// Awaits close request from client (UTS pattern).
-  Future<void> awaitCloseRequest({
+  /// Awaits client-initiated WebSocket close (UTS pattern).
+  ///
+  /// Returns a [ClientCloseEvent] containing the close code and reason.
+  Future<ClientCloseEvent> awaitClientClose({
     Duration timeout = const Duration(seconds: 5),
   }) {
-    return _closeRequests.stream.first.timeout(timeout);
+    return _clientCloses.stream.first.timeout(timeout);
   }
+
+  /// Returns all client close events from the event timeline.
+  List<MockEvent> get clientCloseEvents =>
+      events.where((e) => e.type == MockEventType.clientClose).toList();
 
   /// Initiates a WebSocket connection.
   ///
+  /// The [listener] is stored and will receive all events from the connection.
   /// The returned future completes when the test code responds via
   /// PendingWebSocketConnection methods.
   @override
-  Future<MockWebSocketConnection> connect(Uri url) async {
+  Future<MockWebSocketConnection> connect(
+    Uri url,
+    WebSocketListener listener,
+  ) async {
     final pendingConnection = PendingWebSocketConnection._(
       url: url,
       protocol: 'json', // Default protocol
       timestamp: DateTime.now(),
+      listener: listener,
       onMessageFromClient: onMessageFromClient,
+      mockClient: this,
     );
 
     // Record event
@@ -135,22 +147,17 @@ class MockWebSocketClient implements WebSocketClient {
       }
     });
 
-    // Forward close requests
-    connection._closeRequests.stream.listen((_) {
-      if (!_closeRequests.isClosed) {
-        _closeRequests.add(null);
+    // Forward client close events to the parent's stream (for awaitClientClose)
+    // Note: The event is already recorded directly in close() method
+    connection._clientCloses.stream.listen((closeEvent) {
+      // Forward to parent's stream for await pattern
+      if (!_clientCloses.isClosed) {
+        _clientCloses.add(closeEvent);
       }
     });
 
     // Store as active connection
     activeConnection = connection;
-
-    // Clear active connection when closed
-    connection._closeRequests.stream.listen((_) {
-      if (activeConnection == connection) {
-        activeConnection = null;
-      }
-    });
 
     return connection;
   }
@@ -159,7 +166,7 @@ class MockWebSocketClient implements WebSocketClient {
   void dispose() {
     _connectionAttempts.close();
     _messagesFromClient.close();
-    _closeRequests.close();
+    _clientCloses.close();
   }
 }
 
@@ -172,8 +179,10 @@ class PendingWebSocketConnection {
     required this.url,
     required this.protocol,
     required this.timestamp,
+    required this.listener,
     this.onMessageFromClient,
-  });
+    MockWebSocketClient? mockClient,
+  }) : _mockClient = mockClient;
 
   /// The URL being connected to.
   final Uri url;
@@ -184,19 +193,63 @@ class PendingWebSocketConnection {
   /// When the connection was attempted.
   final DateTime timestamp;
 
+  /// The listener that will receive all connection events.
+  final WebSocketListener listener;
+
   /// Optional handler for messages from client.
   final MessageFromClientHandler? onMessageFromClient;
+
+  /// Reference to the parent mock client.
+  final MockWebSocketClient? _mockClient;
 
   final Completer<MockWebSocketConnection> _completer = Completer();
 
   /// Responds with successful connection and sends CONNECTED message.
+  ///
+  /// The connection is established first (completer completes), then the
+  /// CONNECTED message is delivered asynchronously. This matches real
+  /// WebSocket behavior where the connection opens before messages arrive.
   void respondWithSuccess(ProtocolMessage connectedMessage) {
     if (_completer.isCompleted) return;
 
     final mockConnection = MockWebSocketConnection._(
-      onMessage: connectedMessage,
+      listener: listener,
       onMessageFromClient: onMessageFromClient,
+      mockClient: _mockClient,
     );
+
+    // Store the connection in the client so tests can access it
+    _mockClient?.activeConnection = mockConnection;
+
+    // Complete the connection first - this allows connect() to return
+    // and store the connection before the CONNECTED message is processed
+    _completer.complete(mockConnection);
+
+    // Send the CONNECTED message asynchronously - this matches real WebSocket
+    // behavior where the connection opens before messages arrive
+    scheduleMicrotask(() {
+      listener.onMessage(connectedMessage);
+    });
+  }
+
+  /// Responds with successful WebSocket connection but no protocol message.
+  ///
+  /// Use this to simulate a server that accepts the WebSocket connection
+  /// but never sends a CONNECTED message (e.g., unresponsive server).
+  /// The connection will hang until timeout.
+  void respondWithSilence() {
+    if (_completer.isCompleted) return;
+
+    final mockConnection = MockWebSocketConnection._(
+      listener: listener,
+      onMessageFromClient: onMessageFromClient,
+      mockClient: _mockClient,
+    );
+
+    // Store the connection so tests can access it
+    _mockClient?.activeConnection = mockConnection;
+
+    // Complete without sending any message - simulates unresponsive server
     _completer.complete(mockConnection);
   }
 
@@ -235,10 +288,20 @@ class PendingWebSocketConnection {
     if (_completer.isCompleted) return;
 
     final mockConnection = MockWebSocketConnection._(
-      onMessage: errorMessage,
-      autoClose: thenClose,
+      listener: listener,
       onMessageFromClient: onMessageFromClient,
+      mockClient: _mockClient,
     );
+
+    // Send the error message to the listener
+    listener.onMessage(errorMessage);
+
+    if (thenClose) {
+      // Close the connection after sending error
+      mockConnection._closed = true;
+      listener.onClose();
+    }
+
     _completer.complete(mockConnection);
   }
 }
@@ -249,45 +312,32 @@ class PendingWebSocketConnection {
 /// inject messages from server and inspect messages from client.
 class MockWebSocketConnection implements WebSocketConnection {
   MockWebSocketConnection._({
-    ProtocolMessage? onMessage,
-    bool autoClose = false,
+    required this.listener,
     this.onMessageFromClient,
-  }) {
-    if (onMessage != null) {
-      // Use a small delay to ensure listeners are attached
-      Future.delayed(Duration(milliseconds: 10), () {
-        if (!_closed) {
-          _messages.add(onMessage);
-          if (autoClose) {
-            close();
-          }
-        }
-      });
-    }
-  }
+    MockWebSocketClient? mockClient,
+  }) : _mockClient = mockClient;
+
+  /// The listener receiving all connection events.
+  final WebSocketListener listener;
 
   /// Handler for messages from client.
   final MessageFromClientHandler? onMessageFromClient;
 
-  /// Stream of incoming messages (server → client).
-  final StreamController<ProtocolMessage> _messages =
-      StreamController.broadcast();
+  /// Reference to parent mock client for event recording.
+  final MockWebSocketClient? _mockClient;
 
   /// Stream of outgoing messages (client → server).
   final StreamController<ProtocolMessage> _messagesFromClient =
       StreamController.broadcast();
 
-  /// Stream of close requests from client.
-  final StreamController<void> _closeRequests = StreamController.broadcast();
+  /// Stream of client-initiated close events.
+  final StreamController<ClientCloseEvent> _clientCloses =
+      StreamController.broadcast();
 
   /// All messages sent by client.
   final List<ProtocolMessage> sentMessages = [];
 
   bool _closed = false;
-
-  /// Stream of messages from server to client.
-  @override
-  Stream<ProtocolMessage> get messages => _messages.stream;
 
   /// Sends a message from client to server.
   @override
@@ -301,31 +351,73 @@ class MockWebSocketConnection implements WebSocketConnection {
   /// Test helper: Inject message from server to client.
   void sendToClient(ProtocolMessage message) {
     if (!_closed) {
-      _messages.add(message);
+      listener.onMessage(message);
     }
   }
 
-  /// Test helper: Simulate unexpected disconnect.
-  Future<void> simulateDisconnect([ErrorInfo? error]) async {
+  /// Test helper: Send a message and then close the connection.
+  ///
+  /// This simulates the server sending a final message (like DISCONNECTED
+  /// or ERROR) and then closing the WebSocket connection.
+  void sendToClientAndClose(ProtocolMessage message) {
+    sendToClient(message);
+    simulateDisconnect();
+  }
+
+  /// Test helper: Simulate server-initiated disconnect or transport failure.
+  ///
+  /// This records a [MockEventType.serverDisconnect] event.
+  void simulateDisconnect([ErrorInfo? error]) {
     if (_closed) return;
     _closed = true;
     if (error != null) {
-      _messages.addError(error);
+      listener.onError(error);
     }
-    await _messages.close();
-    await _messagesFromClient.close();
-    await _closeRequests.close();
+    listener.onClose();
+    _messagesFromClient.close();
+    _clientCloses.close();
   }
 
-  /// Closes the connection.
+  /// Closes the connection (client-initiated).
+  ///
+  /// This records a [MockEventType.clientClose] event with optional
+  /// close code and reason.
+  ///
+  /// Matches the behavior of the real dart:io WebSocket:
+  /// - close() is async and returns a Future
+  /// - listener.onClose() is called asynchronously (via scheduleMicrotask
+  ///   to simulate the stream's onDone behavior)
   @override
-  Future<void> close() async {
+  Future<void> close({int? code, String? reason}) async {
     if (_closed) return;
     _closed = true;
-    _closeRequests.add(null);
-    await _messages.close();
+
+    final closeEvent = ClientCloseEvent(code: code, reason: reason);
+
+    // Record directly in parent's event list (synchronous, guaranteed)
+    _mockClient?.events.add(MockEvent(
+      type: MockEventType.clientClose,
+      timestamp: DateTime.now(),
+      data: closeEvent,
+    ));
+
+    // Also emit to stream for await pattern
+    _clientCloses.add(closeEvent);
+
+    // Clear active connection in parent
+    if (_mockClient?.activeConnection == this) {
+      _mockClient?.activeConnection = null;
+    }
+
+    // Call onClose asynchronously - matches real WebSocket behavior where
+    // onDone fires after the close completes
+    scheduleMicrotask(() {
+      listener.onClose(closeCode: code, closeReason: reason);
+    });
+
+    // Cleanup streams
     await _messagesFromClient.close();
-    await _closeRequests.close();
+    await _clientCloses.close();
   }
 
   /// Whether the connection is closed.
@@ -334,13 +426,29 @@ class MockWebSocketConnection implements WebSocketConnection {
 
 /// Event types for UTS event timeline.
 enum MockEventType {
+  /// Client attempted to connect.
   connectionAttempt,
+
+  /// Connection established successfully.
   connectionSuccess,
+
+  /// Connection failed (refused, timeout, DNS error, etc.).
   connectionFailure,
+
+  /// Client sent a protocol message.
   messageFromClient,
+
+  /// Server sent a protocol message (test injected).
   messageToClient,
-  disconnect,
-  closeRequest,
+
+  /// WebSocket ping frame sent to client (test injected).
+  pingFrame,
+
+  /// Server closed the connection or transport failure.
+  serverDisconnect,
+
+  /// Client initiated WebSocket close.
+  clientClose,
 }
 
 /// Event record for UTS event timeline.
@@ -363,4 +471,21 @@ class MockEvent {
       'timestamp: $timestamp, '
       'data: $data'
       ')';
+}
+
+/// Event data for client-initiated WebSocket close.
+class ClientCloseEvent {
+  ClientCloseEvent({
+    this.code,
+    this.reason,
+  });
+
+  /// WebSocket close code (e.g., 1000 for normal closure).
+  final int? code;
+
+  /// Optional close reason.
+  final String? reason;
+
+  @override
+  String toString() => 'ClientCloseEvent(code: $code, reason: $reason)';
 }

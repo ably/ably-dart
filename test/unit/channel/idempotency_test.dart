@@ -4,6 +4,7 @@ import 'package:ably_dart/ably_dart.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/mock_http_client.dart';
+import '../../helpers/test_channel_name.dart';
 
 /// Idempotent Publishing Tests
 ///
@@ -30,6 +31,7 @@ void main() {
     group('RSL1k2 - Message ID format when idempotent publishing enabled', () {
       test('generates ID in <base64>:<serial> format', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSL1k2-format');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -53,7 +55,7 @@ void main() {
           ),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.publish(name: 'event', data: 'data');
 
@@ -79,6 +81,7 @@ void main() {
     group('RSL1k2 - Serial increments for batch publish', () {
       test('increments serial for each message in batch', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSL1k2-batch');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -102,7 +105,7 @@ void main() {
           ),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         final messages = [
           Message(name: 'event1', data: 'data1'),
@@ -135,6 +138,7 @@ void main() {
     group('RSL1k3 - Separate publishes get unique base IDs', () {
       test('generates different base IDs for separate calls', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSL1k3-unique');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -158,7 +162,7 @@ void main() {
           ),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.publish(name: 'event1', data: 'data1');
         await channel.publish(name: 'event2', data: 'data2');
@@ -177,6 +181,7 @@ void main() {
     group('RSL1k3 - No ID generated when idempotent publishing disabled', () {
       test('does not add ID when disabled', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSL1k3-disabled');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -200,7 +205,7 @@ void main() {
           ),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.publish(name: 'event', data: 'data');
 
@@ -215,6 +220,7 @@ void main() {
     group('RSL1k - Client-supplied ID preserved', () {
       test('does not overwrite client-supplied IDs', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSL1k-preserved');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -238,7 +244,7 @@ void main() {
           ),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.publish(
           message: Message(id: 'my-custom-id', name: 'event', data: 'data'),
@@ -256,6 +262,7 @@ void main() {
       test('uses same message ID when retrying after failure', () async {
         final capturedRequests = <CapturedRequest>[];
         var requestCount = 0;
+        final channelName = testChannelName('RSL1k2-retry');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -288,7 +295,7 @@ void main() {
           ),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.publish(name: 'event', data: 'data');
 
@@ -305,6 +312,7 @@ void main() {
     group('RSL1k - Mixed client and library IDs in batch', () {
       test('preserves client IDs and generates IDs for others', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSL1k-mixed');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -328,7 +336,7 @@ void main() {
           ),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         final messages = [
           Message(id: 'client-id-1', name: 'event1', data: 'data1'),

@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:clock/clock.dart';
 import 'package:http/http.dart' as http;
 
 import '../auth/auth.dart';
 import '../auth/client_options.dart';
+import '../error/ably_exception.dart';
 import '../error/error_info.dart';
 import '../impl/fallback/connectivity_checker.dart';
 import '../impl/fallback/error_classifier.dart';
@@ -20,7 +22,7 @@ import 'websocket_client.dart';
 /// Manages the connection to Ably Realtime.
 ///
 /// Spec: RTN
-class Connection {
+class Connection implements WebSocketListener {
   /// Creates a Connection instance.
   Connection({
     required ClientOptions options,
@@ -53,8 +55,11 @@ class Connection {
   String? _id;
   String? _key;
   int? _serial;
-  int? _connectionStateTtl;
+  // DF1a: Default connectionStateTtl is 120 seconds (120000ms)
+  // This is overridden by connectionDetails from CONNECTED message
+  int _connectionStateTtl = 120000;
   int? _maxIdleInterval; // RTN23a
+  ErrorInfo? _pendingDisconnectError; // Error to use when onClose is triggered
   DateTime? _disconnectedAt;
   DateTime? _lastActivityAt; // RTN23a - last message received time
   String? _currentHost; // RTN17e - track which host we're connected to
@@ -62,7 +67,6 @@ class Connection {
   int _retryAttempt = 0; // Track retry attempts for RTB1
 
   WebSocketConnection? _webSocketConnection;
-  StreamSubscription<ProtocolMessage>? _webSocketSubscription;
 
   final _stateChangeController =
       StreamController<ConnectionStateChange>.broadcast();
@@ -218,15 +222,35 @@ class Connection {
       } catch (e) {
         lastError = e;
 
+        // HandledErrorException means error was already processed (e.g., token error)
+        // Just exit the connection attempt - the handler took care of state transition
+        if (e is HandledErrorException) {
+          return;
+        }
+
+        // RTN14g: FatalErrorException signals ERROR message with fatal error
+        // Transition to FAILED immediately without trying fallback hosts
+        if (e is FatalErrorException) {
+          _timerManager.cancel(owner: this, name: 'connectionTimeout');
+          _transitionTo(ConnectionState.failed, error: e.errorInfo);
+          return;
+        }
+
         // Determine if we should retry with another host
         final error = _extractErrorInfo(e);
+
+        // RTN17f1: DISCONNECTED with 5xx status (500-504) should use fallback
+        if (ErrorClassifier.shouldDisconnectedUseFallback(error)) {
+          _hostSelector.markHostAsFailed(host);
+          continue;
+        }
 
         if (ErrorClassifier.shouldRetryWithFallback(error)) {
           // RTN17f: Mark host as failed and try next
           _hostSelector.markHostAsFailed(host);
           continue;
         } else {
-          // Fatal error - don't try other hosts
+          // Non-fatal, non-retriable error - go to DISCONNECTED
           _timerManager.cancel(owner: this, name: 'connectionTimeout');
           _handleConnectionError(e);
           return;
@@ -266,20 +290,13 @@ class Connection {
       callback: _onConnectionTimeout,
     );
 
-    // Connect WebSocket
-    _webSocketConnection = await _webSocketClient.connect(url);
-
     // Create completer to wait for CONNECTED or error
     final connectionCompleter = Completer<void>();
     _connectionCompleter = connectionCompleter;
 
-    // Listen to messages
-    _webSocketSubscription = _webSocketConnection!.messages.listen(
-      _handleProtocolMessage,
-      onError: _handleWebSocketError,
-      onDone: _handleWebSocketDone,
-      cancelOnError: false,
-    );
+    // Connect WebSocket - pass this as the listener
+    // The listener is attached before connect() returns, so no events are missed
+    _webSocketConnection = await _webSocketClient.connect(url, this);
 
     // Wait for CONNECTED or error response from Ably
     await connectionCompleter.future;
@@ -331,17 +348,16 @@ class Connection {
       }
     }
 
-    // Add authentication
-    if (_options.key != null) {
-      queryParams['key'] = _options.key!;
-    } else if (_options.token != null) {
-      queryParams['accessToken'] = _options.token!;
-    } else {
-      // Need to get token from auth
-      final tokenDetails = await _auth.authorize();
-      if (tokenDetails != null && tokenDetails.token != null) {
+    // Add authentication (RSA4: authCallback/authUrl/token take precedence over key)
+    if (_auth.method == AuthMethod.token) {
+      // Token auth - get valid token (reuses cached token if not expired)
+      final tokenDetails = await _auth.getValidToken();
+      if (tokenDetails.token != null) {
         queryParams['accessToken'] = tokenDetails.token!;
       }
+    } else if (_options.key != null) {
+      // Basic auth with API key
+      queryParams['key'] = _options.key!;
     }
 
     // Add clientId if set
@@ -359,10 +375,12 @@ class Connection {
     return uri.replace(queryParameters: queryParams);
   }
 
-  /// Handles incoming protocol messages.
-  void _handleProtocolMessage(ProtocolMessage message) {
+  // WebSocketListener implementation
+
+  @override
+  void onMessage(ProtocolMessage message) {
     // RTN23a: Any message from server resets idle timer
-    _lastActivityAt = DateTime.now();
+    _lastActivityAt = clock.now();
     _scheduleIdleTimeout();
 
     switch (message.action) {
@@ -383,30 +401,38 @@ class Connection {
     }
   }
 
-  /// Handles WebSocket errors.
-  void _handleWebSocketError(dynamic error) {
+  @override
+  void onError(Object error) {
     print('WebSocket error: $error');
-    // WebSocket errors will trigger onDone, so we handle it there
+    // WebSocket errors will trigger onClose, so we handle it there
   }
 
-  /// Handles WebSocket close.
-  void _handleWebSocketDone() {
-    if (_state == ConnectionState.closing || _state == ConnectionState.closed) {
-      // Expected close
+  @override
+  void onClose({int? closeCode, String? closeReason}) {
+    if (_state == ConnectionState.closing ||
+        _state == ConnectionState.closed ||
+        _state == ConnectionState.failed ||
+        _state == ConnectionState.disconnected) {
+      // Expected close, already in terminal state, or already handled
       return;
     }
 
-    // Unexpected disconnect (RTN15a)
-    final error = ErrorInfo(
-      code: 80003,
-      statusCode: 503,
-      message: 'Connection lost',
-    );
+    // Use pending error if set (e.g., from idle timeout), otherwise generic
+    final error = _pendingDisconnectError ??
+        ErrorInfo(
+          code: 80003,
+          statusCode: 503,
+          message: 'Connection lost',
+        );
+    _pendingDisconnectError = null; // Clear for next time
 
     // If we're in initial connection, complete with error for fallback retry
     if (_connectionCompleter != null && !_connectionCompleter!.isCompleted) {
-      _connectionCompleter!.completeError(error);
+      final completer = _connectionCompleter!;
       _connectionCompleter = null;
+      scheduleMicrotask(() {
+        completer.completeError(error);
+      });
       return;
     }
 
@@ -431,9 +457,9 @@ class Connection {
     _key = message.connectionKey ?? message.connectionDetails?.connectionKey;
     _serial = message.msgSerial ?? -1;
 
-    // Update connection state TTL
+    // Update connection state TTL (DF1a - override default if server provides one)
     if (message.connectionDetails?.connectionStateTtl != null) {
-      _connectionStateTtl = message.connectionDetails!.connectionStateTtl;
+      _connectionStateTtl = message.connectionDetails!.connectionStateTtl!;
     }
 
     // Update maxIdleInterval for heartbeat timeout (RTN23a)
@@ -503,8 +529,11 @@ class Connection {
     // If we're in initial connection and get DISCONNECTED, complete with error
     // so fallback hosts can be tried (RTN17f1)
     if (_connectionCompleter != null && !_connectionCompleter!.isCompleted) {
-      _connectionCompleter!.completeError(error);
+      final completer = _connectionCompleter!;
       _connectionCompleter = null;
+      scheduleMicrotask(() {
+        completer.completeError(error);
+      });
       _closeWebSocket();
       return;
     }
@@ -540,20 +569,36 @@ class Connection {
 
     // Error with empty channel is connection-level error
     if (message.channel == null || message.channel!.isEmpty) {
-      // If we're in initial connection and get ERROR, complete with error
-      // so fallback hosts can be tried (RTN17f)
-      if (_connectionCompleter != null && !_connectionCompleter!.isCompleted) {
-        _connectionCompleter!.completeError(error);
-        _connectionCompleter = null;
+      // RTN14b: Check if it's a token error - handle specially for renewal
+      if (_isTokenError(error)) {
+        // Complete with HandledErrorException to signal catch block to ignore
+        if (_connectionCompleter != null &&
+            !_connectionCompleter!.isCompleted) {
+          final completer = _connectionCompleter!;
+          _connectionCompleter = null;
+          scheduleMicrotask(() {
+            completer.completeError(const HandledErrorException());
+          });
+        }
         _closeWebSocket();
+        _handleTokenError(error);
         return;
       }
 
-      // Check if it's a token error during resume (RTN15c5)
-      if (_state == ConnectionState.connecting &&
-          _shouldResume &&
-          _isTokenError(error)) {
-        _handleTokenError(error);
+      // If we're in initial connection and get ERROR, complete with error
+      if (_connectionCompleter != null && !_connectionCompleter!.isCompleted) {
+        // RTN14g: Fatal errors should transition to FAILED, not retry
+        // Wrap in FatalErrorException to signal catch block not to retry
+        final errorToThrow =
+            _isFatalError(error) ? FatalErrorException(error) : error;
+        // Schedule the error completion asynchronously to avoid throwing
+        // during the synchronous listener callback
+        final completer = _connectionCompleter!;
+        _connectionCompleter = null;
+        scheduleMicrotask(() {
+          completer.completeError(errorToThrow);
+        });
+        _closeWebSocket();
         return;
       }
 
@@ -658,8 +703,11 @@ class Connection {
 
     // If we're in initial connection, complete with error for fallback retry
     if (_connectionCompleter != null && !_connectionCompleter!.isCompleted) {
-      _connectionCompleter!.completeError(error);
+      final completer = _connectionCompleter!;
       _connectionCompleter = null;
+      scheduleMicrotask(() {
+        completer.completeError(error);
+      });
       _closeWebSocket();
       return;
     }
@@ -685,6 +733,10 @@ class Connection {
   }
 
   /// Schedules a reconnection attempt (RTN14d).
+  ///
+  /// Per RTN15a/RTN15h3: If the connection was previously CONNECTED (indicated
+  /// by _shouldResume being true and _retryAttempt being 0), the first
+  /// reconnection attempt is immediate. Subsequent attempts use backoff delay.
   void _scheduleReconnect() {
     if (_state != ConnectionState.disconnected &&
         _state != ConnectionState.suspended) {
@@ -693,7 +745,26 @@ class Connection {
 
     // Check if we should transition to SUSPENDED (RTN14e)
     if (_state == ConnectionState.disconnected && _shouldCheckTtl()) {
+      _shouldResume = false;
       _transitionTo(ConnectionState.suspended, error: _errorReason);
+      // Continue to schedule retry from SUSPENDED state (RTN14f)
+    }
+
+    // RTN15a/RTN15h3: If we were previously connected and this is the first
+    // retry attempt, reconnect immediately (no delay)
+    final isImmediateReconnect = _shouldResume &&
+        _retryAttempt == 0 &&
+        _state == ConnectionState.disconnected;
+
+    if (isImmediateReconnect) {
+      // Immediate reconnection - use scheduleMicrotask to avoid stack overflow
+      // and allow current event processing to complete
+      scheduleMicrotask(() {
+        if (_state == ConnectionState.disconnected) {
+          _retryAttempt++;
+          _startConnection();
+        }
+      });
       return;
     }
 
@@ -719,6 +790,15 @@ class Connection {
       callback: () {
         if (_state == ConnectionState.disconnected ||
             _state == ConnectionState.suspended) {
+          // RTN14e: Check TTL before reconnecting from DISCONNECTED
+          // If TTL has elapsed, transition to SUSPENDED instead
+          if (_state == ConnectionState.disconnected && _shouldCheckTtl()) {
+            _shouldResume = false;
+            _transitionTo(ConnectionState.suspended, error: _errorReason);
+            // RTN14f: Continue retrying from SUSPENDED
+            _scheduleReconnect();
+            return;
+          }
           _retryAttempt++; // Increment for next retry
           _startConnection();
         }
@@ -733,25 +813,21 @@ class Connection {
 
   /// Checks if we should transition to SUSPENDED based on TTL.
   bool _shouldCheckTtl() {
-    if (_connectionStateTtl == null || _disconnectedAt == null) {
+    if (_disconnectedAt == null) {
       return false;
     }
 
-    final now = DateTime.now();
+    final now = clock.now();
     final elapsed = now.difference(_disconnectedAt!).inMilliseconds;
-    return elapsed >= _connectionStateTtl!;
+    return elapsed >= _connectionStateTtl;
   }
 
   /// Schedules a TTL check (RTN14e).
   void _scheduleTtlCheck() {
-    if (_connectionStateTtl == null) {
-      return;
-    }
+    _disconnectedAt ??= clock.now();
 
-    _disconnectedAt ??= DateTime.now();
-
-    final ttlRemaining = _connectionStateTtl! -
-        DateTime.now().difference(_disconnectedAt!).inMilliseconds;
+    final ttlRemaining = _connectionStateTtl -
+        clock.now().difference(_disconnectedAt!).inMilliseconds;
 
     if (ttlRemaining <= 0) {
       // Already past TTL
@@ -800,20 +876,24 @@ class Connection {
   }
 
   /// Handles idle timeout - no activity from server (RTN23a).
+  ///
+  /// When no activity is received for maxIdleInterval + realtimeRequestTimeout,
+  /// the client closes the WebSocket. The onClose handler will then transition
+  /// the connection to DISCONNECTED and trigger reconnection.
   void _onIdleTimeout() {
     if (_state != ConnectionState.connected) {
       return;
     }
 
-    final error = ErrorInfo(
+    // Store error for use in onClose handler
+    _pendingDisconnectError = ErrorInfo(
       code: 80003,
       statusCode: 408,
       message: 'Connection idle timeout - no activity from server',
     );
 
+    // Close the WebSocket - this triggers onClose which handles state transition
     _closeWebSocket();
-    _transitionTo(ConnectionState.disconnected, error: error);
-    _scheduleReconnect();
   }
 
   /// Sends a heartbeat message.
@@ -831,14 +911,31 @@ class Connection {
   }
 
   /// Closes the WebSocket connection.
-  Future<void> _closeWebSocket() async {
+  ///
+  /// Captures the connection reference immediately to ensure the close
+  /// completes even if _webSocketConnection is reassigned during async
+  /// operations (e.g., during reconnection).
+  ///
+  /// The connection reference is cleared synchronously, and close() is
+  /// called on the captured reference. This ensures that:
+  /// 1. New connections aren't affected by this close
+  /// 2. The onClose callback (if synchronous) triggers state transitions
+  Future<void> _closeWebSocket() {
     // Cancel idle timeout when closing connection
     _timerManager.cancel(owner: this, name: 'idleTimeout');
 
-    await _webSocketSubscription?.cancel();
-    _webSocketSubscription = null;
-    await _webSocketConnection?.close();
+    // Capture reference before clearing - ensures close completes
+    // even if reconnection assigns a new connection
+    final connection = _webSocketConnection;
     _webSocketConnection = null;
+
+    if (connection == null) {
+      return Future.value();
+    }
+
+    // close() may trigger onClose synchronously (in mock) or
+    // asynchronously (in real WebSocket)
+    return connection.close();
   }
 
   /// Transitions to a new state and emits a state change event.
@@ -873,9 +970,11 @@ class Connection {
       _disconnectedAt = null;
     }
 
-    // Track disconnection time for TTL
-    if (newState == ConnectionState.disconnected && previous != newState) {
-      _disconnectedAt = DateTime.now();
+    // Track disconnection time for TTL (RTN14e)
+    // Only set _disconnectedAt when first entering disconnected state,
+    // not when returning to it after failed reconnection attempts
+    if (newState == ConnectionState.disconnected && _disconnectedAt == null) {
+      _disconnectedAt = clock.now();
     }
 
     // Map state to event

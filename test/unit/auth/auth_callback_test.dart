@@ -2,6 +2,7 @@ import 'package:ably_dart/ably_dart.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/mock_http_client.dart';
+import '../../helpers/test_channel_name.dart';
 
 /// Auth Callback Tests
 ///
@@ -12,6 +13,7 @@ void main() {
       test('invokes callback with TokenParams and returns token', () async {
         final callbackInvocations = <TokenParams>[];
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSA8d');
 
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -45,7 +47,7 @@ void main() {
         );
 
         // Trigger auth by making a request
-        final channel = client.channels.get('test');
+        final channel = client.channels.get(channelName);
         await channel.publish(name: 'event', data: 'data');
 
         // Callback was invoked
@@ -66,6 +68,7 @@ void main() {
     group('RSA8d - authCallback returns different token types', () {
       test('accepts TokenDetails return type', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSA8d-details');
 
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -93,7 +96,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        await client.channels.get('test').publish(name: 'e', data: 'd');
+        await client.channels.get(channelName).publish(name: 'e', data: 'd');
 
         final request = capturedRequests[0];
         expect(
@@ -104,6 +107,7 @@ void main() {
 
       test('accepts String (token) return type', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSA8d-string');
 
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -128,7 +132,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        await client.channels.get('test').publish(name: 'e', data: 'd');
+        await client.channels.get(channelName).publish(name: 'e', data: 'd');
 
         final request = capturedRequests[0];
         expect(
@@ -139,6 +143,7 @@ void main() {
 
       test('accepts TokenRequest return type', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSA8d-request');
 
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -179,7 +184,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        await client.channels.get('test').publish(name: 'e', data: 'd');
+        await client.channels.get(channelName).publish(name: 'e', data: 'd');
 
         // First request should be token exchange
         expect(
@@ -198,6 +203,7 @@ void main() {
     group('RSA8c - authUrl queries URL for token', () {
       test('queries authUrl to obtain a token', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSA8c');
 
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -232,7 +238,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        await client.channels.get('test').publish(name: 'e', data: 'd');
+        await client.channels.get(channelName).publish(name: 'e', data: 'd');
 
         // First request goes to authUrl
         final authRequest = capturedRequests[0];
@@ -251,6 +257,7 @@ void main() {
     group('RSA8c1a - authUrl with GET method', () {
       test('sends TokenParams and authParams as query string', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSA8c1a');
 
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -286,7 +293,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        await client.channels.get('test').publish(name: 'e', data: 'd');
+        await client.channels.get(channelName).publish(name: 'e', data: 'd');
 
         final authRequest = capturedRequests[0];
 
@@ -300,6 +307,7 @@ void main() {
     group('RSA8c1b - authUrl with POST method', () {
       test('sends TokenParams and authParams as form-encoded body', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSA8c1b');
 
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -335,7 +343,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        await client.channels.get('test').publish(name: 'e', data: 'd');
+        await client.channels.get(channelName).publish(name: 'e', data: 'd');
 
         final authRequest = capturedRequests[0];
 
@@ -354,6 +362,7 @@ void main() {
     group('RSA8c1c - authUrl preserves existing query params', () {
       test('merges existing and new query params', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSA8c1c');
 
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -389,7 +398,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        await client.channels.get('test').publish(name: 'e', data: 'd');
+        await client.channels.get(channelName).publish(name: 'e', data: 'd');
 
         final authRequest = capturedRequests[0];
 
@@ -403,6 +412,7 @@ void main() {
     group('RSA8c2 - TokenParams take precedence over authParams', () {
       test('uses TokenParams values when names conflict', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSA8c2');
 
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -441,7 +451,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        await client.channels.get('test').publish(name: 'e', data: 'd');
+        await client.channels.get(channelName).publish(name: 'e', data: 'd');
 
         final authRequest = capturedRequests[0];
 

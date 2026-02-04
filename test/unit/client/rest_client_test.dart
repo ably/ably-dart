@@ -2,6 +2,7 @@ import 'package:ably_dart/ably_dart.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/mock_http_client.dart';
+import '../../helpers/test_channel_name.dart';
 
 /// REST Client Tests
 ///
@@ -172,6 +173,7 @@ void main() {
     group('RSC8a, RSC8b - Protocol selection', () {
       test('uses msgpack by default (useBinaryProtocol: true)', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSC8a');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -196,7 +198,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        await client.channels.get('test').publish(name: 'e', data: 'd');
+        await client.channels.get(channelName).publish(name: 'e', data: 'd');
 
         final request = capturedRequests[0];
         expect(
@@ -211,6 +213,7 @@ void main() {
 
       test('uses JSON when useBinaryProtocol is false', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSC8b');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -235,7 +238,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        await client.channels.get('test').publish(name: 'e', data: 'd');
+        await client.channels.get(channelName).publish(name: 'e', data: 'd');
 
         final request = capturedRequests[0];
         expect(
@@ -252,6 +255,7 @@ void main() {
     group('RSC8c - Accept and Content-Type headers', () {
       test('includes both Accept and Content-Type headers', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSC8c');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -276,7 +280,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        await client.channels.get('test').publish(name: 'e', data: 'd');
+        await client.channels.get(channelName).publish(name: 'e', data: 'd');
 
         final request = capturedRequests[0];
         expect(request.headers['Accept'], equals('application/json'));
@@ -424,9 +428,23 @@ void main() {
       });
 
       test('allows token auth over HTTP', () async {
+        final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSC18-http');
+
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            req.respondWith(200, {'time': 1234567890000});
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            // Return channel status response
+            req.respondWith(200, {
+              'channelId': channelName,
+              'status': {'isActive': true},
+            });
           },
         );
 
@@ -438,9 +456,17 @@ void main() {
           httpClient: mockHttp,
         );
 
+        // Use channel.status() which requires authentication
+        final status = await client.channels.get(channelName).status();
+
         // Should succeed - token auth over HTTP is permitted
-        final time = await client.time();
-        expect(time, isA<DateTime>());
+        expect(status.channelId, equals(channelName));
+
+        // Verify request was made over HTTP with Bearer token
+        final request = capturedRequests[0];
+        expect(request.url.scheme, equals('http'));
+        expect(request.headers['Authorization'],
+            equals('Bearer some-token-string'));
       });
     });
   });

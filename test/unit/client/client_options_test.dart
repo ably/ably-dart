@@ -48,9 +48,7 @@ void main() {
         final inputPreview = testCase.input.length > 20
             ? '${testCase.input.substring(0, 20)}...'
             : testCase.input;
-        test(
-            '$inputPreview is detected as ${testCase.expected}',
-            () {
+        test('$inputPreview is detected as ${testCase.expected}', () {
           if (testCase.expected == 'API key') {
             final options = ClientOptions.fromKey(testCase.input);
             expect(options.key, equals(testCase.input));
@@ -178,7 +176,11 @@ void main() {
 
     group('Rest.fromKey convenience constructor', () {
       test('creates Rest client from API key string', () {
-        mockHttp.queueResponse(200, {'time': 1234567890000});
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(200, {'time': 1234567890000});
+          },
+        );
 
         final client = Rest.fromKey(
           'appId.keyId:keySecret',

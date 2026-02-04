@@ -322,6 +322,126 @@ All tests reference specification IDs (RTN17a, RSC6, etc.) for traceability.
 - REST: RestImpl, RestChannelsImpl, RestChannelImpl
 - Realtime: RealtimeImpl, Connection, RealtimeChannels
 
+## Dart-Idiomatic Event Pattern
+
+The Ably features specification defines an `EventEmitter` interface (RTE3-RTE6) used by Connection, RealtimeChannel, and other objects. In Dart, we use **Streams** instead, which is the idiomatic Dart approach for observable events.
+
+### Spec EventEmitter vs Dart Streams
+
+| Spec EventEmitter | Dart Equivalent |
+|-------------------|-----------------|
+| `on(listener)` | `stream.listen(listener)` |
+| `on(event, listener)` | `on(event).listen(listener)` |
+| `once(listener)` | `stream.first.then(listener)` |
+| `once(event, listener)` | `on(event).first.then(listener)` |
+| `off(listener)` | `subscription.cancel()` |
+| `off()` | Cancel all subscriptions (user responsibility) |
+
+### Implementation Pattern
+
+For any class that emits events (Connection, RealtimeChannel, RealtimePresence):
+
+```dart
+class Connection {
+  // Private broadcast controller for emitting events
+  final _stateChangeController = StreamController<ConnectionStateChange>.broadcast();
+  
+  // Public stream accessor with optional filtering
+  Stream<ConnectionStateChange> on([ConnectionEvent? event]) {
+    if (event == null) {
+      return _stateChangeController.stream;
+    }
+    return _stateChangeController.stream.where((change) => change.event == event);
+  }
+  
+  // Internal: emit an event
+  void _emitStateChange(ConnectionStateChange change) {
+    _stateChangeController.add(change);
+  }
+  
+  // Cleanup
+  Future<void> close() async {
+    await _stateChangeController.close();
+  }
+}
+```
+
+### Usage Examples
+
+```dart
+// Listen to all state changes
+final subscription = connection.on().listen((change) {
+  print('State changed: ${change.previous} -> ${change.current}');
+});
+
+// Listen to specific event
+connection.on(ConnectionEvent.connected).listen((change) {
+  print('Connected!');
+});
+
+// One-time listener
+connection.on(ConnectionEvent.connected).first.then((change) {
+  print('Connected once!');
+});
+
+// Stop listening
+subscription.cancel();
+```
+
+### Why Streams Instead of EventEmitter
+
+1. **Dart idiom** - Streams are the standard async pattern in Dart
+2. **Type safety** - Generic streams provide compile-time type checking
+3. **Composability** - Streams work with `async/await`, `StreamBuilder`, etc.
+4. **Resource management** - `StreamSubscription.cancel()` is explicit and clear
+5. **Framework integration** - Flutter widgets can use `StreamBuilder` directly
+
+### Consistency Requirements
+
+All observable objects must follow this pattern:
+
+| Object | Event Type | Data Type | Method |
+|--------|------------|-----------|--------|
+| Connection | `ConnectionEvent` | `ConnectionStateChange` | `on([event])` |
+| RealtimeChannel | `ChannelEvent` | `ChannelStateChange` | `on([event])` |
+| RealtimePresence | `PresenceAction` | `PresenceMessage` | `subscribe([action])` |
+| RealtimeChannel (messages) | - | `Message` | `subscribe([name])` |
+
+### State Change Data Classes
+
+Each state change event includes:
+
+```dart
+class ConnectionStateChange {
+  final ConnectionEvent event;      // The event that occurred
+  final ConnectionState current;    // New state
+  final ConnectionState previous;   // Previous state  
+  final ErrorInfo? reason;          // Error info if applicable
+  final int? retryIn;               // Milliseconds until retry (if applicable)
+}
+```
+
+Channel state changes follow the same pattern with `ChannelEvent` and `ChannelState`.
+
+### Convenience Methods
+
+For common "wait for state" patterns, provide convenience methods:
+
+```dart
+/// Calls listener immediately if already in target state,
+/// otherwise waits for state transition.
+void whenState(
+  ConnectionState targetState,
+  void Function(ConnectionStateChange) listener,
+) {
+  if (state == targetState) {
+    listener(ConnectionStateChange(...));
+    return;
+  }
+  on().where((c) => c.current == targetState).first.then(listener);
+}
+```
+
 ## Future Architecture Considerations
 
 ### Realtime Channels

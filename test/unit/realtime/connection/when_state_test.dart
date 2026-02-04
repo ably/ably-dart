@@ -51,7 +51,7 @@ void main() {
       });
 
       // Callback should be invoked immediately or very quickly
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await Future<void>.delayed(Duration.zero);
 
       // Callback was invoked immediately
       expect(callbackInvoked, isTrue);
@@ -60,6 +60,7 @@ void main() {
       expect(callbackArg, isNull);
 
       await client.close();
+      mockWs.dispose();
     });
   });
 
@@ -109,7 +110,7 @@ void main() {
       await _awaitState(client.connection, ConnectionState.connected);
 
       // Give callback a moment to execute
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await Future<void>.delayed(Duration.zero);
 
       // Callback was invoked after state transition
       expect(callbackInvoked, isTrue);
@@ -126,6 +127,7 @@ void main() {
       expect(callbackArg!.current, equals(ConnectionState.connected));
 
       await client.close();
+      mockWs.dispose();
     });
 
     test('whenState only fires once per call', () async {
@@ -180,7 +182,7 @@ void main() {
 
       // Wait for first CONNECTED
       await _awaitState(client.connection, ConnectionState.connected);
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await Future<void>.delayed(Duration.zero);
 
       // Verify callback was invoked once
       expect(callbackCount, equals(1));
@@ -201,12 +203,13 @@ void main() {
         ConnectionState.connected,
         timeout: const Duration(seconds: 5),
       );
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await Future<void>.delayed(Duration.zero);
 
       // Callback was still only invoked once (not again on reconnection)
       expect(callbackCount, equals(1));
 
       await client.close();
+      mockWs.dispose();
     });
   });
 
@@ -255,7 +258,7 @@ void main() {
 
       // Wait for CONNECTED state
       await _awaitState(client.connection, ConnectionState.connected);
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await Future<void>.delayed(Duration.zero);
 
       // All whenState callbacks were invoked
       expect(callback1Invoked, isTrue);
@@ -263,6 +266,7 @@ void main() {
       expect(callback3Invoked, isTrue);
 
       await client.close();
+      mockWs.dispose();
     });
 
     test('whenState with already-passed state does not fire', () async {
@@ -301,12 +305,13 @@ void main() {
       });
 
       // Wait to see if callback is invoked
-      await Future<void>.delayed(const Duration(milliseconds: 200));
+      await Future<void>.delayed(Duration.zero);
 
       // Callback should NOT be invoked (we're not in CONNECTING state anymore)
       expect(callbackInvoked, isFalse);
 
       await client.close();
+      mockWs.dispose();
     });
   });
 
@@ -346,7 +351,7 @@ void main() {
       });
 
       // Initially in INITIALIZED
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await Future<void>.delayed(Duration.zero);
 
       // Should fire immediately for current state
       expect(initializedFired, isTrue);
@@ -362,7 +367,7 @@ void main() {
         ConnectionState.disconnected,
         timeout: const Duration(seconds: 5),
       );
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await Future<void>.delayed(Duration.zero);
 
       // All states were reached and callbacks invoked
       expect(initializedFired, isTrue);
@@ -370,6 +375,7 @@ void main() {
       expect(disconnectedFired, isTrue);
 
       await client.close();
+      mockWs.dispose();
     });
 
     test('whenState for FAILED state', () async {
@@ -407,13 +413,14 @@ void main() {
 
       // Wait for FAILED state
       await _awaitState(client.connection, ConnectionState.failed);
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await Future<void>.delayed(Duration.zero);
 
       expect(failedFired, isTrue);
       expect(failedChange, isNotNull);
       expect(failedChange!.current, equals(ConnectionState.failed));
 
       await client.close();
+      mockWs.dispose();
     });
 
     test('whenState for CLOSED state', () async {
@@ -456,9 +463,10 @@ void main() {
 
       // Wait for CLOSED state
       await _awaitState(client.connection, ConnectionState.closed);
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await Future<void>.delayed(Duration.zero);
 
       expect(closedFired, isTrue);
+      mockWs.dispose();
     });
   });
 }

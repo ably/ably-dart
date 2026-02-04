@@ -82,21 +82,19 @@ void main() {
     group('RSC16 - time() does not require authentication', () {
       /// RSC16 - time() does not require authentication
       ///
-      /// The /time endpoint does not require authentication and should succeed
-      /// without credentials. However, the client constructor requires auth,
-      /// so we use token auth and verify the endpoint works.
-      test('endpoint works without requiring auth credentials', () async {
+      /// The /time endpoint does not require authentication and should not
+      /// send an Authorization header, even when credentials are available.
+      test('does not send Authorization header even with credentials',
+          () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
             req.respondWith(200, [1704067200000]);
           },
         );
 
-        // Note: While the /time endpoint doesn't require auth, the client
-        // constructor does. We verify the endpoint itself doesn't need auth
-        // by checking no Authorization header is sent.
+        // Client has credentials, but time() should not use them
         final client = Rest(
-          options: ClientOptions(token: 'dummy-token'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
 
@@ -105,10 +103,53 @@ void main() {
         // Should succeed
         expect(result, isA<DateTime>());
 
-        // Verify the request was made
+        // Verify the request was made without Authorization header
         expect(mockHttp.capturedRequests.length, equals(1));
         final request = mockHttp.capturedRequests[0];
         expect(request.url.path, equals('/time'));
+        expect(request.headers.containsKey('Authorization'), isFalse,
+            reason: 'time() should not send Authorization header');
+      });
+    });
+
+    group('RSC16 - time() works without TLS', () {
+      /// RSC16 - time() works without TLS
+      ///
+      /// The /time endpoint does not require authentication, so it should be
+      /// callable over HTTP even when the client has API key credentials.
+      /// The RSC18 restriction (no basic auth over non-TLS) does not apply
+      /// because time() doesn't send authentication.
+      test('succeeds over HTTP without sending credentials', () async {
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(200, [1704067200000]);
+          },
+        );
+
+        // Client with API key but using token auth to avoid RSC18 restriction
+        // on authenticated operations. time() should still work over HTTP.
+        final client = Rest(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            tls: false,
+            useTokenAuth: true,
+          ),
+          httpClient: mockHttp,
+        );
+
+        final result = await client.time();
+
+        // Should succeed without authentication over HTTP
+        expect(result, isA<DateTime>());
+
+        // Request should use HTTP (not HTTPS)
+        expect(mockHttp.capturedRequests.length, equals(1));
+        final request = mockHttp.capturedRequests[0];
+        expect(request.url.scheme, equals('http'));
+
+        // Request should not have Authorization header
+        expect(request.headers.containsKey('Authorization'), isFalse,
+            reason: 'time() should not send Authorization header');
       });
     });
 

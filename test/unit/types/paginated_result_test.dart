@@ -2,33 +2,33 @@ import 'package:ably_dart/ably_dart.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/mock_http_client.dart';
+import '../../helpers/test_channel_name.dart';
 
 /// PaginatedResult Types Tests
 ///
 /// Spec points: TG1, TG2, TG3, TG4
 void main() {
   group('PaginatedResult', () {
-    late MockHttpClient mockHttp;
-
-    setUp(() {
-      mockHttp = MockHttpClient();
-    });
-
     group('TG1 - PaginatedResult items attribute', () {
       test('contains items array', () async {
-        mockHttp.queueResponse(
-          200,
-          [
-            {'id': 'item1', 'name': 'e1', 'data': 'd1'},
-            {'id': 'item2', 'name': 'e2', 'data': 'd2'},
-          ],
+        final channelName = testChannelName('TG1');
+        final mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(
+              200,
+              [
+                {'id': 'item1', 'name': 'e1', 'data': 'd1'},
+                {'id': 'item2', 'name': 'e2', 'data': 'd2'},
+              ],
+            );
+          },
         );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test');
+        final channel = client.channels.get(channelName);
 
         final result = await channel.history();
 
@@ -41,13 +41,19 @@ void main() {
 
     group('TG2 - hasNext() and isLast() methods', () {
       test('returns true when more pages exist', () async {
-        mockHttp.queueResponse(
-          200,
-          [
-            {'id': 'item1'},
-          ],
-          headers: {
-            'Link': '</channels/test/messages?cursor=next123>; rel="next"',
+        final channelName = testChannelName('TG2-hasNext');
+        final mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(
+              200,
+              [
+                {'id': 'item1'},
+              ],
+              headers: {
+                'Link':
+                    '</channels/$channelName/messages?cursor=next123>; rel="next"',
+              },
+            );
           },
         );
 
@@ -55,7 +61,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test');
+        final channel = client.channels.get(channelName);
 
         final result = await channel.history();
 
@@ -64,19 +70,24 @@ void main() {
       });
 
       test('returns false when no more pages', () async {
-        mockHttp.queueResponse(
-          200,
-          [
-            {'id': 'item1'},
-          ],
-          headers: {},
+        final channelName = testChannelName('TG2-isLast');
+        final mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(
+              200,
+              [
+                {'id': 'item1'},
+              ],
+              headers: {},
+            );
+          },
         );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test');
+        final channel = client.channels.get(channelName);
 
         final result = await channel.history();
 
@@ -87,31 +98,43 @@ void main() {
 
     group('TG3 - next() method', () {
       test('fetches the next page of results', () async {
-        // First page
-        mockHttp.queueResponse(
-          200,
-          [
-            {'id': 'page1-item1'},
-            {'id': 'page1-item2'},
-          ],
-          headers: {
-            'Link': '</channels/test/messages?cursor=abc123>; rel="next"',
+        var requestCount = 0;
+        final channelName = testChannelName('TG3');
+
+        final mockHttp = MockHttpClient(
+          onRequest: (req) {
+            requestCount++;
+            if (requestCount == 1) {
+              // First page
+              req.respondWith(
+                200,
+                [
+                  {'id': 'page1-item1'},
+                  {'id': 'page1-item2'},
+                ],
+                headers: {
+                  'Link':
+                      '</channels/$channelName/messages?cursor=abc123>; rel="next"',
+                },
+              );
+            } else {
+              // Second page
+              req.respondWith(
+                200,
+                [
+                  {'id': 'page2-item1'},
+                ],
+                headers: {},
+              );
+            }
           },
-        );
-        // Second page
-        mockHttp.queueResponse(
-          200,
-          [
-            {'id': 'page2-item1'},
-          ],
-          headers: {},
         );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test');
+        final channel = client.channels.get(channelName);
 
         final page1 = await channel.history();
         final page2 = await page1.next();
@@ -135,35 +158,48 @@ void main() {
 
     group('TG4 - first() method', () {
       test('returns to the first page', () async {
-        // Initial request
-        mockHttp.queueResponse(
-          200,
-          [
-            {'id': 'item1'},
-          ],
-          headers: {
-            'Link':
-                '</channels/test/messages?cursor=next>; rel="next", </channels/test/messages>; rel="first"',
-          },
-        );
-        // Next page
-        mockHttp.queueResponse(
-          200,
-          [
-            {'id': 'item2'},
-          ],
-          headers: {
-            'Link': '</channels/test/messages>; rel="first"',
-          },
-        );
-        // First page again
-        mockHttp.queueResponse(
-          200,
-          [
-            {'id': 'item1'},
-          ],
-          headers: {
-            'Link': '</channels/test/messages?cursor=next>; rel="next"',
+        var requestCount = 0;
+        final channelName = testChannelName('TG4');
+
+        final mockHttp = MockHttpClient(
+          onRequest: (req) {
+            requestCount++;
+            if (requestCount == 1) {
+              // Initial request
+              req.respondWith(
+                200,
+                [
+                  {'id': 'item1'},
+                ],
+                headers: {
+                  'Link':
+                      '</channels/$channelName/messages?cursor=next>; rel="next", </channels/$channelName/messages>; rel="first"',
+                },
+              );
+            } else if (requestCount == 2) {
+              // Next page
+              req.respondWith(
+                200,
+                [
+                  {'id': 'item2'},
+                ],
+                headers: {
+                  'Link': '</channels/$channelName/messages>; rel="first"',
+                },
+              );
+            } else {
+              // First page again
+              req.respondWith(
+                200,
+                [
+                  {'id': 'item1'},
+                ],
+                headers: {
+                  'Link':
+                      '</channels/$channelName/messages?cursor=next>; rel="next"',
+                },
+              );
+            }
           },
         );
 
@@ -171,7 +207,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test');
+        final channel = client.channels.get(channelName);
 
         final page1 = await channel.history();
         final page2 = await page1.next();
@@ -183,13 +219,18 @@ void main() {
 
     group('TG - Empty result', () {
       test('handles empty results correctly', () async {
-        mockHttp.queueResponse(200, [], headers: {});
+        final channelName = testChannelName('TG-empty');
+        final mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(200, [], headers: {});
+          },
+        );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test');
+        final channel = client.channels.get(channelName);
 
         final result = await channel.history();
 
@@ -226,21 +267,27 @@ void main() {
 
       for (final testCase in testCases) {
         test('parses ${testCase.description}', () async {
-          mockHttp.queueResponse(
-            200,
-            [
-              {'id': 'item'},
-            ],
-            headers: testCase.linkHeader != null
-                ? {'Link': testCase.linkHeader!}
-                : {},
+          final channelName = testChannelName(
+              'TG-link-${testCase.description.replaceAll(' ', '-')}');
+          final mockHttp = MockHttpClient(
+            onRequest: (req) {
+              req.respondWith(
+                200,
+                [
+                  {'id': 'item'},
+                ],
+                headers: testCase.linkHeader != null
+                    ? {'Link': testCase.linkHeader!}
+                    : {},
+              );
+            },
           );
 
           final client = Rest(
             options: ClientOptions.fromKey('appId.keyId:keySecret'),
             httpClient: mockHttp,
           );
-          final result = await client.channels.get('test').history();
+          final result = await client.channels.get(channelName).history();
 
           expect(result.hasNext(), equals(testCase.expectedHasNext));
         });
@@ -249,18 +296,23 @@ void main() {
 
     group('TG - PaginatedResult type parameter', () {
       test('items are correctly typed as Message', () async {
-        mockHttp.queueResponse(
-          200,
-          [
-            {'id': 'msg1', 'name': 'event', 'data': 'test'},
-          ],
+        final channelName = testChannelName('TG-type');
+        final mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(
+              200,
+              [
+                {'id': 'msg1', 'name': 'event', 'data': 'test'},
+              ],
+            );
+          },
         );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test');
+        final channel = client.channels.get(channelName);
 
         final historyResult = await channel.history();
 
@@ -270,19 +322,24 @@ void main() {
 
     group('TG - next() on last page', () {
       test('returns null when calling next on last page', () async {
-        mockHttp.queueResponse(
-          200,
-          [
-            {'id': 'item'},
-          ],
-          headers: {},
+        final channelName = testChannelName('TG-lastPage');
+        final mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(
+              200,
+              [
+                {'id': 'item'},
+              ],
+              headers: {},
+            );
+          },
         );
 
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test');
+        final channel = client.channels.get(channelName);
 
         final result = await channel.history();
         expect(result.isLast(), isTrue);
@@ -301,6 +358,7 @@ void main() {
       test('pagination requests include same auth credentials', () async {
         final capturedRequests = <CapturedRequest>[];
         var requestCount = 0;
+        final channelName = testChannelName('TG-auth');
 
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -320,7 +378,8 @@ void main() {
                   {'id': 'item1'},
                 ],
                 headers: {
-                  'Link': '</channels/test/messages?cursor=next>; rel="next"',
+                  'Link':
+                      '</channels/$channelName/messages?cursor=next>; rel="next"',
                 },
               );
             } else {
@@ -335,7 +394,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test');
+        final channel = client.channels.get(channelName);
 
         final page1 = await channel.history();
         await page1.next();
@@ -354,6 +413,7 @@ void main() {
       test('relative URLs are resolved against base REST host', () async {
         final capturedRequests = <CapturedRequest>[];
         var requestCount = 0;
+        final channelName = testChannelName('TG-relative');
 
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -373,7 +433,8 @@ void main() {
                   {'id': 'item1'},
                 ],
                 headers: {
-                  'Link': '</channels/test/messages?page=2>; rel="next"',
+                  'Link':
+                      '</channels/$channelName/messages?page=2>; rel="next"',
                 },
               );
             } else {
@@ -391,15 +452,15 @@ void main() {
           ),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test');
+        final channel = client.channels.get(channelName);
 
         final page1 = await channel.history();
         await page1.next();
 
         // Second request should use the same host
         expect(capturedRequests[1].url.host, equals('rest.ably.io'));
-        expect(
-            capturedRequests[1].url.path, contains('/channels/test/messages'));
+        expect(capturedRequests[1].url.path,
+            contains('/channels/$channelName/messages'));
         expect(capturedRequests[1].url.queryParameters['page'], equals('2'));
       });
     });
@@ -408,6 +469,7 @@ void main() {
       test('absolute URLs are used directly', () async {
         final capturedRequests = <CapturedRequest>[];
         var requestCount = 0;
+        final channelName = testChannelName('TG-absolute');
 
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -428,7 +490,7 @@ void main() {
                 ],
                 headers: {
                   'Link':
-                      '<https://rest.ably.io/channels/test/messages?cursor=abc>; rel="next"',
+                      '<https://rest.ably.io/channels/$channelName/messages?cursor=abc>; rel="next"',
                 },
               );
             } else {
@@ -443,7 +505,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test');
+        final channel = client.channels.get(channelName);
 
         final page1 = await channel.history();
         await page1.next();
@@ -457,14 +519,19 @@ void main() {
 
     group('TG - Multiple Link relations', () {
       test('parses multiple Link relations correctly', () async {
-        mockHttp.queueResponse(
-          200,
-          [
-            {'id': 'item1'},
-          ],
-          headers: {
-            'Link':
-                '</channels/test/messages?page=2>; rel="next", </channels/test/messages?page=1>; rel="first", </channels/test/messages?page=5>; rel="last"',
+        final channelName = testChannelName('TG-multiLink');
+        final mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(
+              200,
+              [
+                {'id': 'item1'},
+              ],
+              headers: {
+                'Link':
+                    '</channels/$channelName/messages?page=2>; rel="next", </channels/$channelName/messages?page=1>; rel="first", </channels/$channelName/messages?page=5>; rel="last"',
+              },
+            );
           },
         );
 
@@ -472,7 +539,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test');
+        final channel = client.channels.get(channelName);
 
         final result = await channel.history();
 
@@ -485,6 +552,7 @@ void main() {
       test('pagination requests include standard Ably headers', () async {
         final capturedRequests = <CapturedRequest>[];
         var requestCount = 0;
+        final channelName = testChannelName('TG-headers');
 
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -504,7 +572,8 @@ void main() {
                   {'id': 'item1'},
                 ],
                 headers: {
-                  'Link': '</channels/test/messages?cursor=next>; rel="next"',
+                  'Link':
+                      '</channels/$channelName/messages?cursor=next>; rel="next"',
                 },
               );
             } else {
@@ -519,7 +588,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test');
+        final channel = client.channels.get(channelName);
 
         final page1 = await channel.history();
         await page1.next();
@@ -536,6 +605,7 @@ void main() {
       test('404 error during pagination raises AblyException', () async {
         final capturedRequests = <CapturedRequest>[];
         var requestCount = 0;
+        final channelName = testChannelName('TG-error404');
 
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -556,7 +626,7 @@ void main() {
                 ],
                 headers: {
                   'Link':
-                      '</channels/test/messages?cursor=invalid>; rel="next"',
+                      '</channels/$channelName/messages?cursor=invalid>; rel="next"',
                 },
               );
             } else {
@@ -575,7 +645,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test');
+        final channel = client.channels.get(channelName);
 
         final page1 = await channel.history();
 
@@ -594,6 +664,7 @@ void main() {
       test('500 error during pagination raises AblyException', () async {
         final capturedRequests = <CapturedRequest>[];
         var requestCount = 0;
+        final channelName = testChannelName('TG-error500');
 
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -613,7 +684,8 @@ void main() {
                   {'id': 'item1'},
                 ],
                 headers: {
-                  'Link': '</channels/test/messages?cursor=next>; rel="next"',
+                  'Link':
+                      '</channels/$channelName/messages?cursor=next>; rel="next"',
                 },
               );
             } else {
@@ -632,7 +704,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test');
+        final channel = client.channels.get(channelName);
 
         final page1 = await channel.history();
 

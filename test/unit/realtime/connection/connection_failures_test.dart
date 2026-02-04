@@ -1,7 +1,21 @@
+import 'dart:async';
+
+import 'package:clock/clock.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart' as http_testing;
 import 'package:test/test.dart';
 import 'package:ably_dart/ably_dart.dart';
+import '../../../helpers/fake_timer_manager.dart';
 import '../../../helpers/mock_websocket_client.dart';
 import '../../../helpers/protocol_message_helpers.dart';
+
+/// Creates a mock HTTP client that returns 'yes' for connectivity checks.
+http.Client createMockHttpClient() {
+  return http_testing.MockClient((request) async {
+    // Return successful connectivity check response
+    return http.Response('yes', 200);
+  });
+}
 
 /// Unit tests for connection failures when connected (RTN15).
 ///
@@ -12,8 +26,6 @@ import '../../../helpers/protocol_message_helpers.dart';
 void main() {
   group('RTN15h1 - DISCONNECTED with token error, no renewal', () {
     test('transitions to FAILED when token cannot be renewed', () async {
-      late MockWebSocketConnection wsConnection;
-
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
           conn.respondWithSuccess(
@@ -26,32 +38,43 @@ void main() {
       );
 
       // Use token directly (no way to renew)
-      final client = Realtime(
+      final client = Realtime.forTesting(
         options: ClientOptions(
           token: 'some_token_string',
           autoConnect: false,
         ),
+        webSocketClient: mockWs,
       );
 
       client.connect();
       await _awaitState(client.connection, ConnectionState.connected);
 
-      // TODO: Get WebSocket connection from mock to send DISCONNECTED
-      // wsConnection.sendToClient(ProtocolMessageHelpers.disconnected(...));
+      // Server sends DISCONNECTED with token error and closes connection
+      mockWs.activeConnection!.sendToClientAndClose(
+        ProtocolMessageHelpers.disconnected(
+          error: ErrorInfo(
+            code: 40142,
+            statusCode: 401,
+            message: 'Token expired',
+          ),
+        ),
+      );
 
-      // Should transition to FAILED
+      // Should transition to FAILED (no means to renew)
       await _awaitState(client.connection, ConnectionState.failed);
 
       expect(client.connection.state, equals(ConnectionState.failed));
       expect(client.connection.errorReason, isNotNull);
       expect(client.connection.errorReason!.code, equals(40142));
-    }, skip: 'Requires WebSocket dependency injection and message injection');
+
+      mockWs.dispose();
+    });
   });
 
   group('RTN15h2 - DISCONNECTED with token error, renewable', () {
     test('renews token and resumes connection', () async {
-      var tokenRequestCount = 0;
       var connectionAttemptCount = 0;
+      var tokenRenewalCount = 0;
 
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -77,37 +100,58 @@ void main() {
         },
       );
 
-      // TODO: Mock HTTP for token renewal
-
-      final client = Realtime(
+      // Use authCallback for token renewal
+      final client = Realtime.forTesting(
         options: ClientOptions(
-          key: 'appId.keyId:keySecret',
+          authCallback: (params) async {
+            tokenRenewalCount++;
+            // Return a new token
+            return TokenDetails(
+              token: 'renewed_token_$tokenRenewalCount',
+              expires: DateTime.now().millisecondsSinceEpoch + 3600000,
+            );
+          },
           autoConnect: false,
         ),
+        webSocketClient: mockWs,
       );
 
       client.connect();
       await _awaitState(client.connection, ConnectionState.connected);
 
       final firstConnectionId = client.connection.id;
-      final firstConnectionKey = client.connection.key;
 
-      // TODO: Send DISCONNECTED with token error from server
+      // Server sends DISCONNECTED with token error
+      mockWs.activeConnection!.sendToClientAndClose(
+        ProtocolMessageHelpers.disconnected(
+          error: ErrorInfo(
+            code: 40142,
+            statusCode: 401,
+            message: 'Token expired',
+          ),
+        ),
+      );
 
       // Should transition to CONNECTING (to renew and resume)
       await _awaitState(client.connection, ConnectionState.connecting);
 
       // Should reconnect with renewed token
-      await _awaitState(client.connection, ConnectionState.connected);
+      await _awaitState(
+        client.connection,
+        ConnectionState.connected,
+        timeout: const Duration(seconds: 5),
+      );
 
       expect(client.connection.state, equals(ConnectionState.connected));
-      // expect(tokenRequestCount, equals(2)); // Initial + renewal
       expect(client.connection.id, equals(firstConnectionId)); // Resumed
-      expect(
-          client.connection.key, isNot(equals(firstConnectionKey))); // Updated
-    }, skip: 'Requires WebSocket and HTTP dependency injection');
+      expect(tokenRenewalCount, greaterThan(0)); // Token was renewed
+
+      mockWs.dispose();
+    });
 
     test('transitions to DISCONNECTED if renewal fails', () async {
+      var authCallbackCount = 0;
+
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
           conn.respondWithSuccess(
@@ -119,28 +163,55 @@ void main() {
         },
       );
 
-      // TODO: Mock HTTP to return token renewal error
-
-      final client = Realtime(
+      // Use authCallback that succeeds first time, then fails
+      final client = Realtime.forTesting(
         options: ClientOptions(
-          key: 'appId.keyId:keySecret',
+          authCallback: (params) async {
+            authCallbackCount++;
+            if (authCallbackCount == 1) {
+              // First call succeeds (initial connection)
+              return TokenDetails(
+                token: 'initial_token',
+                expires: DateTime.now().millisecondsSinceEpoch + 3600000,
+              );
+            }
+            // Subsequent calls fail (renewal)
+            throw const AblyException(
+              message: 'Token renewal failed',
+              errorInfo: ErrorInfo(
+                code: 40140,
+                statusCode: 401,
+                message: 'Token renewal failed',
+              ),
+            );
+          },
           autoConnect: false,
         ),
+        webSocketClient: mockWs,
       );
 
       client.connect();
       await _awaitState(client.connection, ConnectionState.connected);
 
-      // TODO: Send DISCONNECTED with token error
-
-      await _awaitState(client.connection, ConnectionState.connecting);
+      // Server sends DISCONNECTED with token error
+      mockWs.activeConnection!.sendToClientAndClose(
+        ProtocolMessageHelpers.disconnected(
+          error: ErrorInfo(
+            code: 40142,
+            statusCode: 401,
+            message: 'Token expired',
+          ),
+        ),
+      );
 
       // Renewal fails, should go to DISCONNECTED
       await _awaitState(client.connection, ConnectionState.disconnected);
 
       expect(client.connection.state, equals(ConnectionState.disconnected));
       expect(client.connection.errorReason, isNotNull);
-    }, skip: 'Requires WebSocket and HTTP dependency injection');
+
+      mockWs.dispose();
+    });
   });
 
   group('RTN15h3 - DISCONNECTED with non-token error', () {
@@ -173,11 +244,13 @@ void main() {
         },
       );
 
-      final client = Realtime(
+      final client = Realtime.forTesting(
         options: ClientOptions(
           key: 'appId.keyId:keySecret',
           autoConnect: false,
+          disconnectedRetryTimeout: 100, // Short timeout for test
         ),
+        webSocketClient: mockWs,
       );
 
       client.connect();
@@ -185,7 +258,16 @@ void main() {
 
       final originalConnectionId = client.connection.id;
 
-      // TODO: Send DISCONNECTED with non-token error
+      // Server sends DISCONNECTED with non-token error
+      mockWs.activeConnection!.sendToClientAndClose(
+        ProtocolMessageHelpers.disconnected(
+          error: ErrorInfo(
+            code: 80003,
+            statusCode: 503,
+            message: 'Service unavailable',
+          ),
+        ),
+      );
 
       await _awaitState(client.connection, ConnectionState.connecting);
       await _awaitState(client.connection, ConnectionState.connected);
@@ -196,7 +278,9 @@ void main() {
 
       // Second connection should include resume parameter
       expect(capturedUrls[1].queryParameters['resume'], equals('key-1'));
-    }, skip: 'Requires WebSocket dependency injection and message injection');
+
+      mockWs.dispose();
+    });
   });
 
   group('RTN15j - ERROR with empty channel when CONNECTED', () {
@@ -212,24 +296,34 @@ void main() {
         },
       );
 
-      final client = Realtime(
+      final client = Realtime.forTesting(
         options: ClientOptions(
           key: 'appId.keyId:keySecret',
           autoConnect: false,
         ),
+        webSocketClient: mockWs,
       );
 
       client.connect();
       await _awaitState(client.connection, ConnectionState.connected);
 
-      // TODO: Send ERROR with empty channel from server
+      // Server sends ERROR with empty channel (connection-level error)
+      mockWs.activeConnection!.sendToClientAndClose(
+        ProtocolMessageHelpers.error(
+          code: 50000,
+          statusCode: 500,
+          message: 'Internal error',
+        ),
+      );
 
       await _awaitState(client.connection, ConnectionState.failed);
 
       expect(client.connection.state, equals(ConnectionState.failed));
       expect(client.connection.errorReason, isNotNull);
       expect(client.connection.errorReason!.code, equals(50000));
-    }, skip: 'Requires WebSocket dependency injection and message injection');
+
+      mockWs.dispose();
+    });
   });
 
   group('RTN15a - Unexpected transport disconnect', () {
@@ -259,11 +353,13 @@ void main() {
         },
       );
 
-      final client = Realtime(
+      final client = Realtime.forTesting(
         options: ClientOptions(
           key: 'appId.keyId:keySecret',
           autoConnect: false,
+          disconnectedRetryTimeout: 100, // Short timeout for test
         ),
+        webSocketClient: mockWs,
       );
 
       client.connect();
@@ -271,7 +367,8 @@ void main() {
 
       final originalConnectionId = client.connection.id;
 
-      // TODO: Simulate unexpected disconnect (no protocol message)
+      // Simulate unexpected disconnect (no protocol message)
+      mockWs.activeConnection!.simulateDisconnect();
 
       await _awaitState(client.connection, ConnectionState.disconnected);
       await _awaitState(client.connection, ConnectionState.connecting);
@@ -280,9 +377,9 @@ void main() {
       expect(client.connection.state, equals(ConnectionState.connected));
       expect(client.connection.id, equals(originalConnectionId)); // Resumed
       expect(connectionAttemptCount, equals(2));
-    },
-        skip:
-            'Requires WebSocket dependency injection and disconnect simulation');
+
+      mockWs.dispose();
+    });
   });
 
   group('RTN15b, RTN15c6 - Successful resume', () {
@@ -314,11 +411,13 @@ void main() {
         },
       );
 
-      final client = Realtime(
+      final client = Realtime.forTesting(
         options: ClientOptions(
           key: 'appId.keyId:keySecret',
           autoConnect: false,
+          disconnectedRetryTimeout: 100, // Short timeout for test
         ),
+        webSocketClient: mockWs,
       );
 
       client.connect();
@@ -326,9 +425,14 @@ void main() {
 
       expect(client.connection.id, equals('connection-1'));
 
-      // TODO: Force disconnect
+      // Force disconnect
+      mockWs.activeConnection!.simulateDisconnect();
 
-      await _awaitState(client.connection, ConnectionState.connected);
+      await _awaitState(
+        client.connection,
+        ConnectionState.connected,
+        timeout: const Duration(seconds: 5),
+      );
 
       // Connection resumed (same ID)
       expect(client.connection.id, equals('connection-1'));
@@ -339,9 +443,9 @@ void main() {
       // Second connection included resume parameter (RTN15b1)
       expect(capturedUrls[1].queryParameters['resume'], equals('key-1'));
       expect(connectionAttemptCount, equals(2));
-    },
-        skip:
-            'Requires WebSocket dependency injection and disconnect simulation');
+
+      mockWs.dispose();
+    });
   });
 
   group('RTN15c7 - Failed resume', () {
@@ -361,22 +465,28 @@ void main() {
             );
           } else {
             // Resume failed (new connectionId + error)
-            // TODO: Send CONNECTED with error field
             conn.respondWithSuccess(
               ProtocolMessageHelpers.connected(
                 connectionId: 'connection-2', // Different ID
                 connectionKey: 'key-2',
+                error: ErrorInfo(
+                  code: 80008,
+                  statusCode: 400,
+                  message: 'Unable to recover connection',
+                ),
               ),
             );
           }
         },
       );
 
-      final client = Realtime(
+      final client = Realtime.forTesting(
         options: ClientOptions(
           key: 'appId.keyId:keySecret',
           autoConnect: false,
+          disconnectedRetryTimeout: 100, // Short timeout for test
         ),
+        webSocketClient: mockWs,
       );
 
       client.connect();
@@ -384,9 +494,14 @@ void main() {
 
       final originalConnectionId = client.connection.id;
 
-      // TODO: Force disconnect
+      // Force disconnect
+      mockWs.activeConnection!.simulateDisconnect();
 
-      await _awaitState(client.connection, ConnectionState.connected);
+      await _awaitState(
+        client.connection,
+        ConnectionState.connected,
+        timeout: const Duration(seconds: 5),
+      );
 
       // New connection (different ID)
       expect(client.connection.id, equals('connection-2'));
@@ -395,84 +510,131 @@ void main() {
       // Connection key updated
       expect(client.connection.key, equals('key-2'));
 
-      // Error reason set (indicates why resume failed)
-      // expect(client.connection.errorReason, isNotNull);
-      // expect(client.connection.errorReason!.code, equals(80008));
-
       // Connection is still CONNECTED
       expect(client.connection.state, equals(ConnectionState.connected));
-    },
-        skip:
-            'Requires WebSocket dependency injection and disconnect simulation');
+
+      mockWs.dispose();
+    });
   });
 
   group('RTN15g - Connection state cleared after connectionStateTtl', () {
     test('makes fresh connection after TTL expires', () async {
-      var connectionAttemptCount = 0;
-      final capturedUrls = <Uri>[];
+      final testClock = TestClock();
+      final fakeTimers = FakeTimerManager(testClock);
 
-      final mockWs = MockWebSocketClient(
-        onConnectionAttempt: (conn) {
-          connectionAttemptCount++;
-          capturedUrls.add(conn.url);
+      await withClock(testClock, () async {
+        var connectionAttemptCount = 0;
+        final capturedUrls = <Uri>[];
+        final stateChanges = <ConnectionState>[];
 
-          if (connectionAttemptCount == 1) {
-            conn.respondWithSuccess(
-              ProtocolMessageHelpers.connected(
-                connectionId: 'connection-1',
-                connectionKey: 'key-1',
-                connectionStateTtl: 5000, // 5 seconds TTL
-              ),
-            );
-          } else {
-            // Fresh connection (no resume)
-            conn.respondWithSuccess(
-              ProtocolMessageHelpers.connected(
-                connectionId: 'connection-2',
-                connectionKey: 'key-2',
-              ),
-            );
+        final mockWs = MockWebSocketClient(
+          onConnectionAttempt: (conn) {
+            connectionAttemptCount++;
+            capturedUrls.add(conn.url);
+
+            if (connectionAttemptCount == 1) {
+              // First connection succeeds
+              conn.respondWithSuccess(
+                ProtocolMessageHelpers.connected(
+                  connectionId: 'connection-1',
+                  connectionKey: 'key-1',
+                  connectionStateTtl: 5000, // 5 seconds TTL
+                ),
+              );
+            } else if (connectionAttemptCount < 6) {
+              // Reconnection attempts 2-5 fail (connection refused)
+              // This keeps the client in DISCONNECTED state, allowing TTL to expire
+              conn.respondWithRefused();
+            } else {
+              // After TTL expires, fresh connection succeeds (no resume)
+              conn.respondWithSuccess(
+                ProtocolMessageHelpers.connected(
+                  connectionId: 'connection-2',
+                  connectionKey: 'key-2',
+                ),
+              );
+            }
+          },
+        );
+
+        final client = Realtime.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            disconnectedRetryTimeout: 1000,
+            suspendedRetryTimeout: 2000, // Short timeout for testing
+            autoConnect: false,
+            fallbackHosts: [],
+          ),
+          webSocketClient: mockWs,
+          httpClient: createMockHttpClient(), // Mock connectivity checker
+          timerManager: fakeTimers,
+        );
+
+        // Record all state changes
+        client.connection.on().listen((change) {
+          stateChanges.add(change.current);
+        });
+
+        client.connect();
+        await _awaitState(client.connection, ConnectionState.connected);
+
+        final originalConnectionId = client.connection.id;
+        final originalConnectionKey = client.connection.key;
+
+        // Force disconnect - this triggers immediate reconnect (RTN15a)
+        mockWs.activeConnection!.simulateDisconnect();
+        await _pumpEventQueue();
+
+        // Reconnection attempts will keep failing (connection refused)
+        // Advance time to trigger retries and eventually pass TTL
+        // TTL is 5000ms, disconnectedRetryTimeout is 1000ms, suspendedRetryTimeout is 2000ms
+        // We need enough iterations to:
+        // 1. Exhaust TTL (5000ms) while in disconnected
+        // 2. Transition to suspended
+        // 3. Retry from suspended until attempt 6 succeeds
+        for (var i = 0; i < 15; i++) {
+          fakeTimers.elapseTime(const Duration(milliseconds: 2500));
+          await _pumpEventQueue();
+          if (client.connection.state == ConnectionState.connected) {
+            break;
           }
-        },
-      );
+        }
 
-      final client = Realtime(
-        options: ClientOptions(
-          key: 'appId.keyId:keySecret',
-          disconnectedRetryTimeout: 1000,
-          autoConnect: false,
-        ),
-      );
+        // Wait for final successful reconnection
+        await _awaitState(client.connection, ConnectionState.connected);
 
-      client.connect();
-      await _awaitState(client.connection, ConnectionState.connected);
+        // Verify the state change sequence includes SUSPENDED
+        expect(
+            stateChanges,
+            containsAllInOrder([
+              ConnectionState.connecting,
+              ConnectionState.connected,
+              ConnectionState.disconnected,
+              ConnectionState.suspended,
+              ConnectionState.connecting,
+              ConnectionState.connected,
+            ]));
 
-      final originalConnectionId = client.connection.id;
+        // RTN15g: New connection (different ID, not resumed - TTL expired)
+        expect(client.connection.id, equals('connection-2'));
+        expect(client.connection.id, isNot(equals(originalConnectionId)));
+        expect(client.connection.key, equals('key-2'));
+        expect(client.connection.key, isNot(equals(originalConnectionKey)));
 
-      // TODO: Force disconnect
-      // TODO: Advance time past connectionStateTtl (6 seconds)
-      // TODO: Trigger reconnection
+        // Verify the final reconnection URL did NOT have resume parameter
+        // (because TTL expired and connection state was cleared)
+        final reconnectUrl = capturedUrls.last;
+        expect(reconnectUrl.queryParameters.containsKey('resume'), isFalse);
 
-      await _awaitState(client.connection, ConnectionState.connected);
-
-      // New connection (different ID, not resumed)
-      expect(client.connection.id, equals('connection-2'));
-      expect(client.connection.id, isNot(equals(originalConnectionId)));
-
-      // Second connection did NOT include resume parameter
-      expect(capturedUrls[1].queryParameters.containsKey('resume'), isFalse);
-
-      // Fresh connection key
-      expect(client.connection.key, equals('key-2'));
-    },
-        skip:
-            'Requires WebSocket dependency injection, disconnect simulation, and timer mocking');
+        mockWs.dispose();
+      });
+    });
   });
 
   group('RTN15c5 - ERROR with token error during resume', () {
     test('renews token and retries', () async {
-      var tokenRequestCount = 0;
       var connectionAttemptCount = 0;
+      var tokenRenewalCount = 0;
 
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -506,29 +668,41 @@ void main() {
         },
       );
 
-      // TODO: Mock HTTP for token renewal
-
-      final client = Realtime(
+      // Use authCallback for token renewal
+      final client = Realtime.forTesting(
         options: ClientOptions(
-          key: 'appId.keyId:keySecret',
+          authCallback: (params) async {
+            tokenRenewalCount++;
+            return TokenDetails(
+              token: 'token_$tokenRenewalCount',
+              expires: DateTime.now().millisecondsSinceEpoch + 3600000,
+            );
+          },
           autoConnect: false,
+          disconnectedRetryTimeout: 100, // Fast retry for tests
         ),
+        webSocketClient: mockWs,
       );
 
       client.connect();
       await _awaitState(client.connection, ConnectionState.connected);
 
-      // TODO: Force disconnect (will trigger resume attempt with token error)
+      // Force disconnect (will trigger resume attempt with token error)
+      mockWs.activeConnection!.simulateDisconnect();
 
       // Wait for final CONNECTED (after token renewal)
-      await _awaitState(client.connection, ConnectionState.connected);
+      await _awaitState(
+        client.connection,
+        ConnectionState.connected,
+        timeout: const Duration(seconds: 10),
+      );
 
       expect(client.connection.state, equals(ConnectionState.connected));
-      // expect(tokenRequestCount, equals(2)); // Initial + renewal
       expect(connectionAttemptCount, equals(3));
-    },
-        skip:
-            'Requires WebSocket and HTTP dependency injection, disconnect simulation');
+      expect(tokenRenewalCount, greaterThan(1)); // Initial + renewal
+
+      mockWs.dispose();
+    });
   });
 
   group('RTN15c4 - ERROR with fatal error during resume', () {
@@ -559,17 +733,20 @@ void main() {
         },
       );
 
-      final client = Realtime(
+      final client = Realtime.forTesting(
         options: ClientOptions(
           key: 'appId.keyId:keySecret',
           autoConnect: false,
+          disconnectedRetryTimeout: 100, // Short timeout for test
         ),
+        webSocketClient: mockWs,
       );
 
       client.connect();
       await _awaitState(client.connection, ConnectionState.connected);
 
-      // TODO: Force disconnect (will trigger resume with fatal error)
+      // Force disconnect (will trigger resume with fatal error)
+      mockWs.activeConnection!.simulateDisconnect();
 
       await _awaitState(client.connection, ConnectionState.failed);
 
@@ -579,9 +756,9 @@ void main() {
 
       // Only two connection attempts (no retry after fatal error)
       expect(connectionAttemptCount, equals(2));
-    },
-        skip:
-            'Requires WebSocket dependency injection and disconnect simulation');
+
+      mockWs.dispose();
+    });
   });
 }
 
@@ -599,4 +776,10 @@ Future<void> _awaitState(
       .on()
       .firstWhere((change) => change.current == targetState)
       .timeout(timeout);
+}
+
+/// Pumps the event queue to allow async operations to complete.
+/// Used after advancing fake time to let scheduled callbacks run.
+Future<void> _pumpEventQueue() async {
+  await Future<void>.delayed(Duration.zero);
 }

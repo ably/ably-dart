@@ -210,10 +210,8 @@ void main() {
       // Call connect() again while CONNECTED - should be no-op
       client.connect();
 
-      // Wait briefly to ensure state doesn't change
-      await Future.delayed(Duration(seconds: 1));
-
-      // Should remain CONNECTED with same connection
+      // Should remain CONNECTED with same connection (synchronous check -
+      // connect() when already connected is a synchronous no-op)
       expect(client.connection.state, equals(ConnectionState.connected));
       expect(client.connection.id, equals(connectionId));
 

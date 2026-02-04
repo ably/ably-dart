@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:clock/clock.dart';
+
 import '../../auth/client_options.dart';
 import 'constants.dart';
 
@@ -69,8 +71,7 @@ class HostSelector {
 
     // Don't use fallbacks if within fallbackRetryTimeout of failure
     if (_fallbackHostsUnavailableSince != null) {
-      final elapsed =
-          DateTime.now().difference(_fallbackHostsUnavailableSince!);
+      final elapsed = clock.now().difference(_fallbackHostsUnavailableSince!);
       if (elapsed.inMilliseconds < _options.fallbackRetryTimeout) {
         return hosts;
       }
@@ -104,7 +105,7 @@ class HostSelector {
     final fallbacks = _options.fallbackHosts ?? defaultFallbackHosts;
     if (_failedHosts.length >= fallbacks.length + 1) {
       // +1 for primary host
-      _fallbackHostsUnavailableSince = DateTime.now();
+      _fallbackHostsUnavailableSince = clock.now();
     }
   }
 

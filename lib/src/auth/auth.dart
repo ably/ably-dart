@@ -30,6 +30,15 @@ abstract class Auth {
   /// Spec: RSA4
   AuthMethod get method;
 
+  /// The current token details, if any.
+  ///
+  /// Returns a [TokenDetails] representing the token currently in use by
+  /// the library. Returns null if there is no current token (e.g., when
+  /// using basic auth or before any token has been obtained).
+  ///
+  /// Spec: RSA16
+  TokenDetails? get tokenDetails;
+
   /// Obtains a new token, replacing any existing token.
   ///
   /// If [authOptions] is provided, it replaces the stored auth options
@@ -42,6 +51,15 @@ abstract class Auth {
     AuthOptions? authOptions,
     TokenParams? tokenParams,
   });
+
+  /// Returns the current valid token, or obtains a new one if needed.
+  ///
+  /// Unlike [authorize], this method returns the cached token if it exists
+  /// and has not expired, avoiding unnecessary token requests.
+  ///
+  /// This is used internally for connection authentication where we want
+  /// to reuse valid tokens across reconnection attempts.
+  Future<TokenDetails> getValidToken();
 
   /// Creates a signed [TokenRequest] that can be used to obtain a token.
   ///

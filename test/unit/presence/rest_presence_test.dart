@@ -4,6 +4,7 @@ import 'package:ably_dart/ably_dart.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/mock_http_client.dart';
+import '../../helpers/test_channel_name.dart';
 
 /// REST Presence Tests
 ///
@@ -18,21 +19,23 @@ void main() {
 
     group('RSP1 - Presence accessible via RestChannel', () {
       test('RSP1_1 - Presence accessible via RestChannel#presence', () async {
+        final channelName = testChannelName('RSP1-1');
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         expect(channel.presence, isA<RestPresence>());
       });
 
       test('RSP1_2 - Same presence object returned for same channel', () async {
+        final channelName = testChannelName('RSP1-2');
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         final presence1 = channel.presence;
         final presence2 = channel.presence;
@@ -44,6 +47,7 @@ void main() {
     group('RSP3 - Presence get()', () {
       test('RSP3_1 - Get sends GET request to presence endpoint', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSP3-1');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -62,17 +66,18 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.presence.get();
 
         final request = capturedRequests[0];
         expect(request.method, equals('GET'));
-        expect(request.url.path, equals('/channels/test-channel/presence'));
+        expect(request.url.path, equals('/channels/$channelName/presence'));
       });
 
       test('RSP3_2 - Get returns PresenceMessage objects with correct fields',
           () async {
+        final channelName = testChannelName('RSP3-2');
         mockHttp = MockHttpClient(
           onRequest: (req) {
             req.respondWith(200, [
@@ -101,7 +106,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         final result = await channel.presence.get();
 
@@ -123,6 +128,7 @@ void main() {
       });
 
       test('RSP3_3 - Get with no members returns empty list', () async {
+        final channelName = testChannelName('RSP3-3');
         mockHttp = MockHttpClient(
           onRequest: (req) {
             req.respondWith(200, []);
@@ -133,7 +139,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         final result = await channel.presence.get();
 
@@ -145,6 +151,7 @@ void main() {
     group('RSP3a - Presence get() parameters', () {
       test('RSP3a1_1 - Get with limit parameter', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSP3a1-1');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -165,7 +172,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.presence.get(RestPresenceParams(limit: 50));
 
@@ -175,6 +182,7 @@ void main() {
 
       test('RSP3a1_2 - Get limit defaults to 100', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSP3a1-2');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -193,7 +201,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.presence.get();
 
@@ -206,6 +214,7 @@ void main() {
 
       test('RSP3a2_1 - Get with clientId filter', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSP3a2-1');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -226,7 +235,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.presence.get(
           RestPresenceParams(clientId: 'filtered-client'),
@@ -241,6 +250,7 @@ void main() {
 
       test('RSP3a3_1 - Get with connectionId filter', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSP3a3-1');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -261,7 +271,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.presence.get(
           RestPresenceParams(connectionId: 'conn-abc'),
@@ -273,6 +283,7 @@ void main() {
 
       test('RSP3_Combined - Get with multiple filters', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSP3-combined');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -291,7 +302,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.presence.get(
           RestPresenceParams(
@@ -317,6 +328,7 @@ void main() {
     group('RSP4 - Presence history()', () {
       test('RSP4_1 - History sends GET to presence history endpoint', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSP4-1');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -335,7 +347,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.presence.history();
 
@@ -343,12 +355,13 @@ void main() {
         expect(request.method, equals('GET'));
         expect(
           request.url.path,
-          equals('/channels/test-channel/presence/history'),
+          equals('/channels/$channelName/presence/history'),
         );
       });
 
       test('RSP4a_1 - History returns PaginatedResult of PresenceMessage',
           () async {
+        final channelName = testChannelName('RSP4a-1');
         mockHttp = MockHttpClient(
           onRequest: (req) {
             req.respondWith(200, [
@@ -372,7 +385,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         final result = await channel.presence.history();
 
@@ -384,6 +397,7 @@ void main() {
 
       test('RSP4b1_1 - History with start parameter', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSP4b1-1');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -402,7 +416,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.presence.history(RestHistoryParams(start: 1609459200000));
 
@@ -412,6 +426,7 @@ void main() {
 
       test('RSP4b1_2 - History with end parameter', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSP4b1-2');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -430,7 +445,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.presence.history(RestHistoryParams(end: 1609459300000));
 
@@ -440,6 +455,7 @@ void main() {
 
       test('RSP4b2_1 - History with direction backwards (default)', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSP4b2-1');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -458,7 +474,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.presence.history();
 
@@ -474,6 +490,7 @@ void main() {
 
       test('RSP4b2_2 - History with direction forwards', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSP4b2-2');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -492,7 +509,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.presence.history(
           RestHistoryParams(direction: HistoryDirection.forwards),
@@ -504,6 +521,7 @@ void main() {
 
       test('RSP4b3_1 - History with limit parameter', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSP4b3-1');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -522,7 +540,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.presence.history(RestHistoryParams(limit: 50));
 
@@ -532,6 +550,7 @@ void main() {
 
       test('RSP4_Combined - History with all parameters', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSP4-combined');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -550,7 +569,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.presence.history(
           RestHistoryParams(
@@ -571,6 +590,7 @@ void main() {
 
     group('RSP5 - Data decoding', () {
       test('RSP5_1 - String data decoded as string', () async {
+        final channelName = testChannelName('RSP5-1');
         mockHttp = MockHttpClient(
           onRequest: (req) {
             req.respondWith(200, [
@@ -588,7 +608,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         final result = await channel.presence.get();
 
@@ -597,6 +617,7 @@ void main() {
       });
 
       test('RSP5_2 - JSON encoded data decoded to object', () async {
+        final channelName = testChannelName('RSP5-2');
         mockHttp = MockHttpClient(
           onRequest: (req) {
             req.respondWith(200, [
@@ -615,7 +636,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         final result = await channel.presence.get();
 
@@ -626,6 +647,7 @@ void main() {
       });
 
       test('RSP5_3 - Base64 encoded data decoded to binary', () async {
+        final channelName = testChannelName('RSP5-3');
         final originalBytes = [1, 2, 3, 4, 5];
         final base64Data = base64Encode(originalBytes);
 
@@ -647,7 +669,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         final result = await channel.presence.get();
 
@@ -661,6 +683,7 @@ void main() {
     group('RSP_Pagination - Presence pagination', () {
       test('RSP_Pagination_1 - Get returns paginated result with Link header',
           () async {
+        final channelName = testChannelName('RSP-page1');
         mockHttp = MockHttpClient(
           onRequest: (req) {
             req.respondWith(
@@ -671,7 +694,7 @@ void main() {
               ],
               headers: {
                 'Link':
-                    '</channels/test-channel/presence?cursor=abc>; rel="next", </channels/test-channel/presence>; rel="first"',
+                    '</channels/$channelName/presence?cursor=abc>; rel="next", </channels/$channelName/presence>; rel="first"',
               },
             );
           },
@@ -681,7 +704,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         final result = await channel.presence.get();
 
@@ -692,6 +715,7 @@ void main() {
 
       test('RSP_Pagination_2 - Get next page fetches from Link URL', () async {
         var requestCount = 0;
+        final channelName = testChannelName('RSP-page2');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -705,7 +729,7 @@ void main() {
                 ],
                 headers: {
                   'Link':
-                      '</channels/test-channel/presence?cursor=page2>; rel="next"',
+                      '</channels/$channelName/presence?cursor=page2>; rel="next"',
                 },
               );
             } else {
@@ -721,7 +745,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         final page1 = await channel.presence.get();
         expect(page1.items.length, equals(1));
@@ -738,6 +762,7 @@ void main() {
     group('RSP_Error - Presence error handling', () {
       test('RSP_Error_1 - Get with server error throws AblyException',
           () async {
+        final channelName = testChannelName('RSP-err1');
         // 403 Forbidden - client errors (4xx) are not retried
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -755,7 +780,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         expect(
           () => channel.presence.get(),
@@ -765,6 +790,7 @@ void main() {
 
       test('RSP_Error_2 - History with invalid auth throws AblyException',
           () async {
+        final channelName = testChannelName('RSP-err2');
         mockHttp = MockHttpClient(
           onRequest: (req) {
             req.respondWith(
@@ -788,7 +814,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         expect(
           () => channel.presence.history(),
@@ -806,6 +832,7 @@ void main() {
     group('RSP_Headers - Request headers', () {
       test('RSP_Headers_1 - Get includes standard headers', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSP-headers');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -824,7 +851,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.presence.get();
 
@@ -836,6 +863,7 @@ void main() {
 
     group('RSP_Action - Presence actions', () {
       test('RSP_Action_1 - All presence actions correctly mapped', () async {
+        final channelName = testChannelName('RSP-action');
         mockHttp = MockHttpClient(
           onRequest: (req) {
             req.respondWith(200, [
@@ -852,7 +880,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         final result = await channel.presence.get();
 

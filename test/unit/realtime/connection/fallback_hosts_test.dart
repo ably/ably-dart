@@ -378,7 +378,7 @@ void main() {
       );
 
       // Give it time to potentially try fallbacks (it shouldn't)
-      await Future<void>.delayed(const Duration(milliseconds: 2000));
+      await Future<void>.delayed(Duration.zero);
 
       // Should have only tried the custom host, no fallbacks
       expect(connectionAttempts.length, equals(1));

@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:meta/meta.dart';
 
 /// Contains the details of an Ably Token.
@@ -55,9 +56,11 @@ class TokenDetails {
       issued != null ? DateTime.fromMillisecondsSinceEpoch(issued!) : null;
 
   /// Returns true if this token has expired.
+  ///
+  /// Uses the `clock` package so tests can control time.
   bool get isExpired {
     if (expires == null) return false;
-    return DateTime.now().millisecondsSinceEpoch >= expires!;
+    return clock.now().millisecondsSinceEpoch >= expires!;
   }
 
   /// Converts this TokenDetails to a JSON map.

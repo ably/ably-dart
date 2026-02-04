@@ -1,5 +1,23 @@
 import 'protocol_message.dart';
 
+/// Listener interface for WebSocket events.
+///
+/// Passed to [WebSocketClient.connect] to receive all connection events.
+/// The listener is attached before the connection completes, ensuring
+/// no events are missed.
+abstract class WebSocketListener {
+  /// Called when a protocol message is received from the server.
+  void onMessage(ProtocolMessage message);
+
+  /// Called when an error occurs on the connection.
+  void onError(Object error);
+
+  /// Called when the connection is closed.
+  ///
+  /// [closeCode] and [closeReason] are provided if the server sent them.
+  void onClose({int? closeCode, String? closeReason});
+}
+
 /// Abstract WebSocket client interface.
 ///
 /// Provides abstraction between realtime client and WebSocket implementation.
@@ -9,22 +27,23 @@ import 'protocol_message.dart';
 abstract class WebSocketClient {
   /// Connects to the specified URL.
   ///
-  /// Returns a [WebSocketConnection] that can be used to send and receive
-  /// protocol messages.
-  Future<WebSocketConnection> connect(Uri url);
+  /// The [listener] is attached before the connection completes, ensuring
+  /// no events are missed. Returns a [WebSocketConnection] that can be used
+  /// to send messages and close the connection.
+  Future<WebSocketConnection> connect(Uri url, WebSocketListener listener);
 }
 
 /// Abstract WebSocket connection interface.
 ///
 /// Represents an established WebSocket connection with methods for
-/// sending and receiving protocol messages.
+/// sending messages and closing.
 abstract class WebSocketConnection {
-  /// Stream of incoming protocol messages from server.
-  Stream<ProtocolMessage> get messages;
-
   /// Sends a protocol message to the server.
   void send(ProtocolMessage message);
 
   /// Closes the connection.
-  Future<void> close();
+  ///
+  /// Optional [code] is the WebSocket close code (e.g., 1000 for normal).
+  /// Optional [reason] is a human-readable close reason.
+  Future<void> close({int? code, String? reason});
 }

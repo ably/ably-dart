@@ -2,8 +2,10 @@ import 'dart:async';
 
 import '../error/error_info.dart';
 import 'channel_event.dart';
+import 'channel_mode.dart';
 import 'channel_state.dart';
 import 'channel_state_change.dart';
+import 'realtime_channel_options.dart';
 
 /// A realtime channel for pub/sub messaging.
 ///
@@ -13,14 +15,17 @@ class RealtimeChannel {
   RealtimeChannel({
     required Object realtime,
     required String name,
+    RealtimeChannelOptions? options,
   })  : _realtime = realtime,
         _name = name,
+        _options = options ?? const RealtimeChannelOptions(),
         _state = ChannelState.initialized;
 
   // Kept for future use when implementing full channel logic
   // ignore: unused_field
   final Object _realtime;
   final String _name;
+  RealtimeChannelOptions _options;
 
   ChannelState _state;
   ErrorInfo? _errorReason;
@@ -33,10 +38,22 @@ class RealtimeChannel {
   /// Spec: RTL23
   String get name => _name;
 
+  /// The current channel options.
+  RealtimeChannelOptions get options => _options;
+
   /// The current channel state.
   ///
   /// Spec: RTL2
   ChannelState get state => _state;
+
+  /// The channel modes as returned by the server on attach.
+  ///
+  /// This is populated after a successful attach and reflects
+  /// the actual modes granted by the server.
+  ///
+  /// Spec: RTL4m
+  List<ChannelMode>? get modes => _modes;
+  List<ChannelMode>? _modes;
 
   /// Error information for the current state (if failed/suspended).
   ///
@@ -217,6 +234,39 @@ class RealtimeChannel {
     );
 
     _stateChangeController.add(change);
+  }
+
+  /// Sets or updates the channel options.
+  ///
+  /// If the channel is in the attached or attaching state and the new options
+  /// include params or modes, this will trigger a reattachment to apply the
+  /// new options on the server.
+  ///
+  /// Spec: RTL16, RTL16a
+  Future<void> setOptions(RealtimeChannelOptions options) async {
+    final needsReattach = options.requiresReattachment &&
+        (_state == ChannelState.attached || _state == ChannelState.attaching);
+
+    _options = options;
+
+    if (needsReattach) {
+      // In a full implementation, this would send an ATTACH message
+      // with the new params/modes and wait for ATTACHED response.
+      // For now, simulate the reattachment.
+      if (_state == ChannelState.attached) {
+        _transitionTo(ChannelState.attaching);
+        await _simulateAttach();
+      }
+      // If attaching, the current attach operation will use the new options
+    }
+  }
+
+  /// Updates the channel options without triggering reattachment.
+  ///
+  /// This is used internally by RealtimeChannels.get() for the soft-deprecated
+  /// RTS3c behavior where options are updated but reattachment is not allowed.
+  void updateOptionsWithoutReattach(RealtimeChannelOptions options) {
+    _options = options;
   }
 
   /// Disposes resources used by this channel.

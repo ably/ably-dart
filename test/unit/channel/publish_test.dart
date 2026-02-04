@@ -4,6 +4,7 @@ import 'package:ably_dart/ably_dart.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/mock_http_client.dart';
+import '../../helpers/test_channel_name.dart';
 
 /// REST Channel Publish Tests
 ///
@@ -20,6 +21,7 @@ void main() {
     group('RSL1a, RSL1b - Publish with name and data', () {
       test('sends a single message', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSL1a');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -40,7 +42,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.publish(name: 'greeting', data: 'hello');
 
@@ -48,7 +50,7 @@ void main() {
 
         // RSL1b - single message published
         expect(request.method, equals('POST'));
-        expect(request.url.path, equals('/channels/test-channel/messages'));
+        expect(request.url.path, equals('/channels/$channelName/messages'));
 
         final body = json.decode(request.body!) as List;
         expect(body.length, equals(1));
@@ -60,6 +62,7 @@ void main() {
     group('RSL1a, RSL1c - Publish with Message array', () {
       test('sends all messages in a single request', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSL1c');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -80,7 +83,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         final messages = [
           Message(name: 'event1', data: 'data1'),
@@ -124,6 +127,7 @@ void main() {
       for (final testCase in testCases) {
         test('handles ${testCase.description}', () async {
           final capturedRequests = <CapturedRequest>[];
+          final channelName = testChannelName('RSL1e');
 
           mockHttp = MockHttpClient(
             onRequest: (req) {
@@ -144,7 +148,7 @@ void main() {
             options: ClientOptions.fromKey('appId.keyId:keySecret'),
             httpClient: mockHttp,
           );
-          final channel = client.channels.get('test-channel');
+          final channel = client.channels.get(channelName);
 
           await channel.publish(name: testCase.name, data: testCase.data);
 
@@ -168,6 +172,7 @@ void main() {
     group('RSL1h - publish(name, data) signature', () {
       test('accepts name and data arguments', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSL1h');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -188,7 +193,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.publish(name: 'event', data: 'payload');
 
@@ -201,6 +206,7 @@ void main() {
 
     group('RSL1i - Message size limit', () {
       test('rejects messages exceeding maxMessageSize', () async {
+        final channelName = testChannelName('RSL1i-reject');
         final client = Rest(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
@@ -208,7 +214,7 @@ void main() {
           ),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         // Create data exceeding limit
         final largeData = 'x' * 2000;
@@ -227,6 +233,7 @@ void main() {
 
       test('accepts messages at or under maxMessageSize', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSL1i-accept');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -250,7 +257,7 @@ void main() {
           ),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         // Create data under limit
         final smallData = 'x' * 500;
@@ -263,6 +270,7 @@ void main() {
     group('RSL1j - All Message attributes transmitted', () {
       test('includes all valid Message attributes', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSL1j');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -283,7 +291,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         final message = Message(
           name: 'test-event',
@@ -311,6 +319,7 @@ void main() {
     group('RSL1l - Publish params as querystring', () {
       test('sends additional params as querystring', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSL1l');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -331,7 +340,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.publish(
           message: Message(name: 'event', data: 'data'),

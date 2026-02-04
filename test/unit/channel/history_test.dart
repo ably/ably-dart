@@ -2,6 +2,7 @@ import 'package:ably_dart/ably_dart.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/mock_http_client.dart';
+import '../../helpers/test_channel_name.dart';
 
 /// REST Channel History Tests
 ///
@@ -17,6 +18,7 @@ void main() {
     group('RSL2a - History returns PaginatedResult', () {
       test('returns PaginatedResult containing messages', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSL2a');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -48,7 +50,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         final result = await channel.history();
 
@@ -75,6 +77,7 @@ void main() {
       for (final testCase in testCases) {
         test('sends ${testCase.parameter}=${testCase.value}', () async {
           final capturedRequests = <CapturedRequest>[];
+          final channelName = testChannelName('RSL2b');
 
           mockHttp = MockHttpClient(
             onRequest: (req) {
@@ -93,7 +96,7 @@ void main() {
             options: ClientOptions.fromKey('appId.keyId:keySecret'),
             httpClient: mockHttp,
           );
-          final channel = client.channels.get('test-channel');
+          final channel = client.channels.get(channelName);
 
           await channel.history(
             RestHistoryParams.fromMap({testCase.parameter: testCase.value}),
@@ -111,6 +114,7 @@ void main() {
     group('RSL2b1 - Default direction is backwards', () {
       test('uses backwards direction by default', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSL2b1');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -129,7 +133,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.history();
 
@@ -146,6 +150,7 @@ void main() {
     group('RSL2b2 - Limit parameter', () {
       test('sends limit in query string', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSL2b2');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -168,7 +173,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.history(RestHistoryParams(limit: 10));
 
@@ -180,6 +185,7 @@ void main() {
     group('RSL2b3 - Default limit is 100', () {
       test('uses default limit of 100', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSL2b3');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -198,7 +204,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.history();
 
@@ -264,6 +270,7 @@ void main() {
     group('RSL2 - History with time range', () {
       test('sends start and end parameters', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSL2-time');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -284,7 +291,7 @@ void main() {
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
-        final channel = client.channels.get('test-channel');
+        final channel = client.channels.get(channelName);
 
         await channel.history(
           RestHistoryParams(start: 1000, end: 2000),

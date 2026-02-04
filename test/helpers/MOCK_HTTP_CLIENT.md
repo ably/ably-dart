@@ -151,21 +151,15 @@ void dispose()    // Clean up resources (call in tearDown)
 
 ## Examples
 
-See `/Users/paddy/data/worknew/dev/dart-experiments/ably-dart/test/helpers/mock_http_client_example.dart` for comprehensive examples including:
+See `mock_http_client_test.dart` for comprehensive working examples including:
 
 1. Basic handler-based request handling
-2. Connection-level control
+2. Connection-level control (refused, timeout, DNS errors)
 3. Awaitable pattern for coordinated testing
-4. Error simulation (connection refused, DNS errors, timeouts, delays)
+4. Request capture and inspection
+5. Delayed responses
 
-Run the examples:
-```bash
-dart run test/helpers/mock_http_client_example.dart
-```
-
-## Testing
-
-Run the test suite:
+Run the tests:
 ```bash
 dart test test/helpers/mock_http_client_test.dart
 ```

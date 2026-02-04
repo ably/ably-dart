@@ -4,6 +4,7 @@ import 'package:ably_dart/ably_dart.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/mock_http_client.dart';
+import '../../helpers/test_channel_name.dart';
 
 /// Auth Scheme Selection Tests
 ///
@@ -39,6 +40,7 @@ void main() {
     group('RSA2 - Basic auth when using API key', () {
       test('uses Basic authentication header', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSA2');
 
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -50,7 +52,10 @@ void main() {
               body: req.bodyAsString,
             ));
 
-            req.respondWith(200, {'time': 1234567890000});
+            req.respondWith(200, {
+              'channelId': channelName,
+              'status': {'isActive': true}
+            });
           },
         );
 
@@ -59,7 +64,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        await client.time();
+        await client.channels.get(channelName).status();
 
         final request = capturedRequests[0];
         final authHeader = request.headers['Authorization'];
@@ -77,6 +82,7 @@ void main() {
     group('RSA3 - Token auth when token provided', () {
       test('uses Bearer token authentication header', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSA3');
 
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -88,7 +94,10 @@ void main() {
               body: req.bodyAsString,
             ));
 
-            req.respondWith(200, {'time': 1234567890000});
+            req.respondWith(200, {
+              'channelId': channelName,
+              'status': {'isActive': true}
+            });
           },
         );
 
@@ -97,7 +106,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        await client.time();
+        await client.channels.get(channelName).status();
 
         final request = capturedRequests[0];
         expect(
@@ -108,6 +117,7 @@ void main() {
 
       test('extracts token from TokenDetails', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSA3-details');
 
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -119,7 +129,10 @@ void main() {
               body: req.bodyAsString,
             ));
 
-            req.respondWith(200, {'time': 1234567890000});
+            req.respondWith(200, {
+              'channelId': channelName,
+              'status': {'isActive': true}
+            });
           },
         );
 
@@ -133,7 +146,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        await client.time();
+        await client.channels.get(channelName).status();
 
         final request = capturedRequests[0];
         expect(
@@ -146,6 +159,7 @@ void main() {
     group('RSA4 - Auth method selection priority', () {
       test('RSA4a - authCallback takes precedence', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSA4a');
 
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -157,7 +171,10 @@ void main() {
               body: req.bodyAsString,
             ));
 
-            req.respondWith(200, {'time': 1234567890000});
+            req.respondWith(200, {
+              'channelId': channelName,
+              'status': {'isActive': true}
+            });
           },
         );
 
@@ -171,7 +188,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        await client.time();
+        await client.channels.get(channelName).status();
 
         final request = capturedRequests[0];
         expect(
@@ -182,6 +199,7 @@ void main() {
 
       test('RSA4b - key + clientId triggers token auth', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSA4b');
 
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -202,7 +220,10 @@ void main() {
               });
             } else {
               // Actual request
-              req.respondWith(200, {'time': 1234567890000});
+              req.respondWith(200, {
+                'channelId': channelName,
+                'status': {'isActive': true}
+              });
             }
           },
         );
@@ -215,7 +236,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        await client.time();
+        await client.channels.get(channelName).status();
 
         // First request should be token creation
         expect(
@@ -232,6 +253,7 @@ void main() {
 
       test('RSA4c - key only uses Basic auth', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSA4c');
 
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -243,7 +265,10 @@ void main() {
               body: req.bodyAsString,
             ));
 
-            req.respondWith(200, {'time': 1234567890000});
+            req.respondWith(200, {
+              'channelId': channelName,
+              'status': {'isActive': true}
+            });
           },
         );
 
@@ -252,7 +277,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        await client.time();
+        await client.channels.get(channelName).status();
 
         final request = capturedRequests[0];
         expect(request.headers['Authorization'], startsWith('Basic '));
@@ -260,6 +285,7 @@ void main() {
 
       test('authCallback takes precedence over key', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSA4-callback');
 
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -271,7 +297,10 @@ void main() {
               body: req.bodyAsString,
             ));
 
-            req.respondWith(200, {'time': 1234567890000});
+            req.respondWith(200, {
+              'channelId': channelName,
+              'status': {'isActive': true}
+            });
           },
         );
 
@@ -283,7 +312,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        await client.time();
+        await client.channels.get(channelName).status();
 
         final request = capturedRequests[0];
         expect(
@@ -294,6 +323,7 @@ void main() {
 
       test('explicit token takes precedence over key', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSA4-token');
 
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -305,7 +335,10 @@ void main() {
               body: req.bodyAsString,
             ));
 
-            req.respondWith(200, {'time': 1234567890000});
+            req.respondWith(200, {
+              'channelId': channelName,
+              'status': {'isActive': true}
+            });
           },
         );
 
@@ -317,7 +350,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        await client.time();
+        await client.channels.get(channelName).status();
 
         final request = capturedRequests[0];
         expect(

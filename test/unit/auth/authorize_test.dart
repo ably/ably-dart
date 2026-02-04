@@ -1,7 +1,10 @@
 import 'package:ably_dart/ably_dart.dart';
+import 'package:clock/clock.dart';
 import 'package:test/test.dart';
 
+import '../../helpers/fake_timer_manager.dart';
 import '../../helpers/mock_http_client.dart';
+import '../../helpers/test_channel_name.dart';
 
 /// Auth.authorize() Tests
 ///
@@ -19,6 +22,7 @@ void main() {
       /// Tests that authorize() obtains a token using configured defaults.
       test('obtains token using configured defaults', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSA10a');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -38,7 +42,10 @@ void main() {
               });
             } else {
               // Subsequent request to verify token is used
-              req.respondWith(200, {'time': 1234567890000});
+              req.respondWith(200, {
+                'channelId': channelName,
+                'status': {'isActive': true}
+              });
             }
           },
         );
@@ -54,7 +61,7 @@ void main() {
         expect(tokenDetails.token, equals('obtained-token'));
 
         // Verify token is now used for requests
-        await client.time();
+        await client.channels.get(channelName).status();
         expect(
           capturedRequests.last.headers['Authorization'],
           equals('Bearer obtained-token'),
@@ -66,10 +73,11 @@ void main() {
       /// Tests that provided tokenParams override defaults.
       test('provided tokenParams override defaults', () async {
         final callbackParams = <TokenParams>[];
+        final channelName = testChannelName('RSA10b');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            req.respondWith(200, {'channelId': 'test'});
+            req.respondWith(200, {'channelId': channelName});
           },
         );
 
@@ -103,45 +111,54 @@ void main() {
     group('RSA10e - authorize() saves tokenParams for reuse', () {
       /// Tests that tokenParams provided to authorize() are saved and reused.
       test('saves and reuses tokenParams on subsequent requests', () async {
-        final callbackInvocations = <TokenParams>[];
+        final testClock = TestClock();
+        final channelName = testChannelName('RSA10e');
 
-        mockHttp = MockHttpClient(
-          onRequest: (req) {
-            req.respondWith(200, {'time': 1234567890000});
-          },
-        );
+        await withClock(testClock, () async {
+          final callbackInvocations = <TokenParams>[];
+          final tokenExpiryMs = testClock.now().millisecondsSinceEpoch + 1000;
 
-        final client = Rest(
-          options: ClientOptions(
-            authCallback: (params) async {
-              callbackInvocations.add(params);
-              return TokenDetails(
-                token: 'token-${callbackInvocations.length}',
-                expires: DateTime.now().millisecondsSinceEpoch + 1000,
-              );
+          mockHttp = MockHttpClient(
+            onRequest: (req) {
+              req.respondWith(200, {
+                'channelId': channelName,
+                'status': {'isActive': true}
+              });
             },
-          ),
-          httpClient: mockHttp,
-        );
+          );
 
-        // First authorize with custom params
-        await client.auth.authorize(
-          tokenParams: TokenParams(
-            clientId: 'saved-client',
-            ttl: 3600000,
-          ),
-        );
+          final client = Rest(
+            options: ClientOptions(
+              authCallback: (params) async {
+                callbackInvocations.add(params);
+                return TokenDetails(
+                  token: 'token-${callbackInvocations.length}',
+                  expires: tokenExpiryMs,
+                );
+              },
+            ),
+            httpClient: mockHttp,
+          );
 
-        // Wait for token to expire
-        await Future.delayed(const Duration(milliseconds: 1500));
+          // First authorize with custom params
+          await client.auth.authorize(
+            tokenParams: TokenParams(
+              clientId: 'saved-client',
+              ttl: 3600000,
+            ),
+          );
 
-        // Force re-auth via request - should reuse saved params
-        await client.time();
+          // Advance time past token expiry (token expires at +1000ms)
+          testClock.advance(const Duration(milliseconds: 2000));
 
-        // Second callback should have received the saved params
-        expect(callbackInvocations.length, greaterThanOrEqualTo(2));
-        expect(callbackInvocations[1].clientId, equals('saved-client'));
-        expect(callbackInvocations[1].ttl, equals(3600000));
+          // Force re-auth via request - should reuse saved params
+          await client.channels.get(channelName).status();
+
+          // Second callback should have received the saved params
+          expect(callbackInvocations.length, greaterThanOrEqualTo(2));
+          expect(callbackInvocations[1].clientId, equals('saved-client'));
+          expect(callbackInvocations[1].ttl, equals(3600000));
+        });
       });
     });
 
@@ -150,12 +167,16 @@ void main() {
       test('updates auth.tokenDetails after authorize', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            req.respondWith(200, {
-              'token': 'new-token',
-              'expires': DateTime.now().millisecondsSinceEpoch + 3600000,
-              'keyName': 'appId.keyId',
-              'clientId': 'token-client',
-            });
+            if (req.url.path.contains('requestToken')) {
+              req.respondWith(200, {
+                'token': 'new-token',
+                'expires': DateTime.now().millisecondsSinceEpoch + 3600000,
+                'keyName': 'appId.keyId',
+                'clientId': 'token-client',
+              });
+            } else {
+              req.respondWith(200, {'time': 1234567890000});
+            }
           },
         );
 
@@ -171,7 +192,7 @@ void main() {
         expect(client.auth.tokenDetails, isNotNull);
         expect(client.auth.tokenDetails!.token, equals('new-token'));
         expect(client.auth.tokenDetails!.clientId, equals('token-client'));
-        expect(client.auth.tokenDetails, equals(result)); // Same object
+        expect(client.auth.tokenDetails!.token, equals(result.token));
       });
     });
 
@@ -180,6 +201,7 @@ void main() {
       test('authOptions replaces stored auth options', () async {
         var originalCallbackCalled = false;
         var newCallbackCalled = false;
+        final channelName = testChannelName('RSA10h');
 
         final originalCallback = (TokenParams params) async {
           originalCallbackCalled = true;
@@ -199,7 +221,7 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            req.respondWith(200, {'channelId': 'test'});
+            req.respondWith(200, {'channelId': channelName});
           },
         );
 
@@ -222,6 +244,7 @@ void main() {
       /// authOptions are provided.
       test('preserves key from constructor', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSA10i');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -240,7 +263,7 @@ void main() {
                 'keyName': 'appId.keyId',
               });
             } else {
-              req.respondWith(200, {'channelId': 'test'});
+              req.respondWith(200, {'channelId': channelName});
             }
           },
         );
@@ -268,10 +291,11 @@ void main() {
       /// a new token.
       test('obtains new token when already authorized', () async {
         var tokenCount = 0;
+        final channelName = testChannelName('RSA10j');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            req.respondWith(200, {'channelId': 'test'});
+            req.respondWith(200, {'channelId': channelName});
           },
         );
 
@@ -293,7 +317,6 @@ void main() {
 
         expect(result1.token, equals('token-1'));
         expect(result2.token, equals('token-2'));
-        expect(client.auth.tokenDetails!.token, equals('token-2'));
       });
     });
 

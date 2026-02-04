@@ -43,6 +43,12 @@ class RestImpl implements Rest {
     // Wire up auth header provider
     _httpClient.authHeaderProvider = _auth.getAuthorizationHeader;
 
+    // Wire up token renewer for auto-retry on token errors (RSA4b4)
+    // Only set if there's a mechanism to renew tokens
+    if (_hasTokenRenewalMechanism(options)) {
+      _httpClient.tokenRenewer = () => _auth.authorize();
+    }
+
     _channels = RestChannelsImpl(
       httpClient: _httpClient,
       options: options,
@@ -53,6 +59,15 @@ class RestImpl implements Rest {
   late final AblyHttpClient _httpClient;
   late final AuthImpl _auth;
   late final RestChannelsImpl _channels;
+
+  /// Returns true if there's a mechanism to renew tokens.
+  /// Token renewal requires either a key, authCallback, or authUrl.
+  /// A static token alone cannot be renewed.
+  bool _hasTokenRenewalMechanism(ClientOptions options) {
+    return options.key != null ||
+        options.authCallback != null ||
+        options.authUrl != null;
+  }
 
   void _validateOptions(ClientOptions options) {
     // Must have at least one authentication method
@@ -124,10 +139,12 @@ class RestImpl implements Rest {
 
   @override
   Future<DateTime> time() async {
+    // RSC16: time() does not require authentication
+    // The /time endpoint is public and should not send auth headers
     final response = await _httpClient.request(
       'GET',
       '/time',
-      authenticated: true,
+      authenticated: false,
     );
 
     final body = response.body;

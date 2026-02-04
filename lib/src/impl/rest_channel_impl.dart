@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import '../auth/client_options.dart';
+import '../channels/channel_details.dart';
 import '../channels/rest_channel.dart';
 import '../channels/rest_channel_options.dart';
 import '../channels/rest_history_params.dart';
@@ -79,7 +80,8 @@ class RestChannelImpl implements RestChannel {
       throw AblyException(
         message: 'Message size exceeds maximum',
         errorInfo: ErrorInfo(
-          message: 'Message size ${jsonBody.length} exceeds maximum ${_options.maxMessageSize}',
+          message:
+              'Message size ${jsonBody.length} exceeds maximum ${_options.maxMessageSize}',
           code: 40009,
           statusCode: 400,
         ),
@@ -197,6 +199,18 @@ class RestChannelImpl implements RestChannel {
       items: messages,
       fetcher: (nextUrl) => _fetchHistoryPage(nextUrl),
     );
+  }
+
+  @override
+  Future<ChannelDetails> status() async {
+    final path = '/channels/${Uri.encodeComponent(_name)}';
+
+    final response = await _httpClient.request(
+      'GET',
+      path,
+    );
+
+    return ChannelDetails.fromMap(response.body as Map<String, dynamic>);
   }
 
   @override

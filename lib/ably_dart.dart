@@ -22,12 +22,16 @@ export 'src/realtime/connection_event.dart';
 export 'src/realtime/connection_state_change.dart';
 export 'src/realtime/realtime_channels.dart';
 export 'src/realtime/realtime_channel.dart';
+export 'src/realtime/realtime_channel_options.dart';
+export 'src/realtime/channel_mode.dart';
+export 'src/realtime/derive_options.dart';
 export 'src/realtime/channel_state.dart';
 export 'src/realtime/channel_event.dart';
 export 'src/realtime/channel_state_change.dart';
 export 'src/realtime/protocol_message.dart';
 
 // Channels
+export 'src/channels/channel_details.dart';
 export 'src/channels/channels.dart';
 export 'src/channels/rest_channel.dart';
 export 'src/channels/rest_channel_options.dart';

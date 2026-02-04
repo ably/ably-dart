@@ -2,6 +2,7 @@ import 'package:ably_dart/ably_dart.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/mock_http_client.dart';
+import '../../helpers/test_channel_name.dart';
 
 /// Token Renewal Tests
 ///
@@ -23,6 +24,7 @@ void main() {
         final tokens = ['first-token', 'second-token'];
         final capturedRequests = <CapturedRequest>[];
         var requestCount = 0;
+        final channelName = testChannelName('RSA4b4-40142');
 
         final authCallback = (TokenParams params) async {
           final token = tokens[callbackCount];
@@ -55,7 +57,7 @@ void main() {
             } else {
               // Second request (after renewal) succeeds
               req.respondWith(200, [
-                {'channel': 'test'}
+                {'channel': channelName}
               ]);
             }
           },
@@ -66,7 +68,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        final result = await client.channels.get('test').history();
+        final result = await client.channels.get(channelName).history();
 
         // authCallback was called twice (initial + renewal)
         expect(callbackCount, equals(2));
@@ -96,6 +98,7 @@ void main() {
       test('obtains new token and retries on 40140 error', () async {
         var callbackCount = 0;
         var requestCount = 0;
+        final channelName = testChannelName('RSA4b4-40140');
 
         final authCallback = (TokenParams params) async {
           callbackCount++;
@@ -129,7 +132,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        await client.channels.get('test').history();
+        await client.channels.get(channelName).history();
 
         expect(callbackCount, equals(2));
         expect(requestCount, equals(2));
@@ -142,6 +145,7 @@ void main() {
       test('renews expired token pre-emptively', () async {
         var callbackCount = 0;
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSA14');
 
         final authCallback = (TokenParams params) async {
           callbackCount++;
@@ -181,7 +185,7 @@ void main() {
         await client.auth.authorize();
 
         // This should detect expired token and renew before request
-        await client.channels.get('test').history();
+        await client.channels.get(channelName).history();
 
         // Callback was called twice (initial + pre-emptive renewal)
         expect(callbackCount, equals(2));
@@ -204,6 +208,7 @@ void main() {
       /// (authCallback/authUrl/key) is available.
       test('does not retry without renewal mechanism', () async {
         var requestCount = 0;
+        final channelName = testChannelName('RSA4b4-no-renewal');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -225,7 +230,7 @@ void main() {
         );
 
         try {
-          await client.channels.get('test').history();
+          await client.channels.get(channelName).history();
           fail('Expected token expired error');
         } catch (e) {
           expect(e, isA<AblyException>());
@@ -243,6 +248,7 @@ void main() {
       test('renews token via authUrl on 40142 error', () async {
         final capturedRequests = <CapturedRequest>[];
         var requestCount = 0;
+        final channelName = testChannelName('RSA4b4-authUrl');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -290,18 +296,16 @@ void main() {
           httpClient: mockHttp,
         );
 
-        await client.channels.get('test').history();
+        await client.channels.get(channelName).history();
 
         // Two requests to authUrl
-        final authRequests = capturedRequests
-            .where((r) => r.url.host == 'example.com')
-            .toList();
+        final authRequests =
+            capturedRequests.where((r) => r.url.host == 'example.com').toList();
         expect(authRequests.length, equals(2));
 
         // Two requests to Ably API
-        final apiRequests = capturedRequests
-            .where((r) => r.url.host != 'example.com')
-            .toList();
+        final apiRequests =
+            capturedRequests.where((r) => r.url.host != 'example.com').toList();
         expect(apiRequests.length, equals(2));
 
         // Second API request used renewed token
@@ -318,6 +322,7 @@ void main() {
       test('stops retrying after max attempts', () async {
         var callbackCount = 0;
         var requestCount = 0;
+        final channelName = testChannelName('RSA4b4-limit');
 
         final authCallback = (TokenParams params) async {
           callbackCount++;
@@ -343,7 +348,7 @@ void main() {
         );
 
         try {
-          await client.channels.get('test').history();
+          await client.channels.get(channelName).history();
           fail('Expected error after max retries');
         } catch (e) {
           // Should eventually give up
@@ -354,7 +359,8 @@ void main() {
 
         // Should not retry indefinitely (implementation-specific limit)
         expect(callbackCount, lessThanOrEqualTo(3)); // Reasonable retry limit
-        expect(requestCount, lessThanOrEqualTo(3)); // Should stop making requests
+        expect(
+            requestCount, lessThanOrEqualTo(3)); // Should stop making requests
       });
     });
   });

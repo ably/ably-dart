@@ -2,6 +2,7 @@ import 'package:ably_dart/ably_dart.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/mock_http_client.dart';
+import '../../helpers/test_channel_name.dart';
 
 /// Client ID Tests
 ///
@@ -32,9 +33,13 @@ void main() {
       /// Tests that clientId is derived from TokenDetails when token auth
       /// is used.
       test('derived from TokenDetails when token auth is used', () async {
+        final channelName = testChannelName('RSA7b-token');
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            req.respondWith(200, {'time': 1234567890000});
+            req.respondWith(200, {
+              'channelId': channelName,
+              'status': {'isActive': true}
+            });
           },
         );
 
@@ -55,9 +60,13 @@ void main() {
       /// Tests that clientId is extracted from TokenDetails returned by
       /// authCallback.
       test('extracted from authCallback TokenDetails', () async {
+        final channelName = testChannelName('RSA7b-callback');
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            req.respondWith(200, {'time': 1234567890000});
+            req.respondWith(200, {
+              'channelId': channelName,
+              'status': {'isActive': true}
+            });
           },
         );
 
@@ -73,7 +82,7 @@ void main() {
         );
 
         // Trigger auth by making a request
-        await client.time();
+        await client.channels.get(channelName).status();
 
         expect(client.auth.clientId, equals('callback-client-id'));
       });
@@ -92,9 +101,13 @@ void main() {
 
       /// Tests that auth.clientId is null when token has no clientId.
       test('null when token has no clientId', () async {
+        final channelName = testChannelName('RSA7c-null');
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            req.respondWith(200, {'time': 1234567890000});
+            req.respondWith(200, {
+              'channelId': channelName,
+              'status': {'isActive': true}
+            });
           },
         );
 
@@ -117,10 +130,14 @@ void main() {
       /// Tests that clientId is passed to authCallback via TokenParams.
       test('passed to authCallback via TokenParams', () async {
         final receivedParams = <TokenParams>[];
+        final channelName = testChannelName('RSA12a');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            req.respondWith(200, {'time': 1234567890000});
+            req.respondWith(200, {
+              'channelId': channelName,
+              'status': {'isActive': true}
+            });
           },
         );
 
@@ -139,7 +156,7 @@ void main() {
         );
 
         // Trigger auth
-        await client.time();
+        await client.channels.get(channelName).status();
 
         expect(receivedParams.length, greaterThanOrEqualTo(1));
         expect(receivedParams[0].clientId, equals('library-client-id'));
@@ -150,6 +167,7 @@ void main() {
       /// Tests that clientId is sent as a parameter when using authUrl.
       test('sent as parameter when using authUrl', () async {
         final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSA12b');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -170,7 +188,10 @@ void main() {
                 headers: {'Content-Type': 'application/json'},
               );
             } else {
-              req.respondWith(200, {'time': 1234567890000});
+              req.respondWith(200, {
+                'channelId': channelName,
+                'status': {'isActive': true}
+              });
             }
           },
         );
@@ -183,7 +204,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        await client.time();
+        await client.channels.get(channelName).status();
 
         final authRequest = capturedRequests[0];
         expect(authRequest.url.host, equals('auth.example.com'));
@@ -206,10 +227,14 @@ void main() {
       /// token with different clientId.
       test('updated when authorize() returns new token', () async {
         var tokenCount = 0;
+        final channelName = testChannelName('RSA7-update');
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            req.respondWith(200, {'time': 1234567890000});
+            req.respondWith(200, {
+              'channelId': channelName,
+              'status': {'isActive': true}
+            });
           },
         );
 
@@ -228,7 +253,7 @@ void main() {
         );
 
         // First auth
-        await client.time();
+        await client.channels.get(channelName).status();
 
         expect(client.auth.clientId, equals('client-1'));
 
@@ -242,9 +267,13 @@ void main() {
     group('RSA12 - Wildcard clientId', () {
       /// Tests handling of wildcard * clientId.
       test('wildcard * clientId is preserved', () async {
+        final channelName = testChannelName('RSA12-wildcard');
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            req.respondWith(200, {'time': 1234567890000});
+            req.respondWith(200, {
+              'channelId': channelName,
+              'status': {'isActive': true}
+            });
           },
         );
 
@@ -267,9 +296,13 @@ void main() {
     group('RSA7 - clientId consistency between ClientOptions and token', () {
       /// Tests that clientId in ClientOptions matches token clientId.
       test('matching clientId in ClientOptions and token - success', () async {
+        final channelName = testChannelName('RSA7-match');
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            req.respondWith(200, {'time': 1234567890000});
+            req.respondWith(200, {
+              'channelId': channelName,
+              'status': {'isActive': true}
+            });
           },
         );
 
@@ -286,50 +319,56 @@ void main() {
         );
 
         // Should not throw
-        await client.time();
+        await client.channels.get(channelName).status();
         expect(client.auth.clientId, equals('client-a'));
       });
 
       /// Tests that mismatch between ClientOptions and token clientId causes
       /// an error.
       test('mismatched clientId in ClientOptions and token - error', () async {
+        final channelName = testChannelName('RSA7-mismatch');
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            req.respondWith(200, {'time': 1234567890000});
+            req.respondWith(200, {
+              'channelId': channelName,
+              'status': {'isActive': true}
+            });
           },
         );
 
-        final client = Rest(
-          options: ClientOptions(
-            clientId: 'client-a',
-            tokenDetails: TokenDetails(
-              token: 'mismatched-token',
-              expires: DateTime.now().millisecondsSinceEpoch + 3600000,
-              clientId: 'client-b', // Different from ClientOptions
+        // RSA7: Mismatch is detected during client construction
+        expect(
+          () => Rest(
+            options: ClientOptions(
+              clientId: 'client-a',
+              tokenDetails: TokenDetails(
+                token: 'mismatched-token',
+                expires: DateTime.now().millisecondsSinceEpoch + 3600000,
+                clientId: 'client-b', // Different from ClientOptions
+              ),
+            ),
+            httpClient: mockHttp,
+          ),
+          throwsA(
+            isA<AblyException>().having(
+              (e) => e.message?.toLowerCase(),
+              'message',
+              allOf(contains('clientid'), contains('mismatch')),
             ),
           ),
-          httpClient: mockHttp,
         );
-
-        try {
-          await client.time(); // Or any operation requiring auth
-          fail('Expected exception due to clientId mismatch');
-        } catch (e) {
-          expect(e, isA<AblyException>());
-          final ablyException = e as AblyException;
-          expect(
-            ablyException.message.toLowerCase(),
-            anyOf(contains('clientid'), contains('mismatch')),
-          );
-        }
       });
 
       /// Tests that ClientOptions clientId with null token clientId succeeds.
       test('ClientOptions clientId with null token clientId - success',
           () async {
+        final channelName = testChannelName('RSA7-null-token');
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            req.respondWith(200, {'time': 1234567890000});
+            req.respondWith(200, {
+              'channelId': channelName,
+              'status': {'isActive': true}
+            });
           },
         );
 
@@ -346,15 +385,19 @@ void main() {
         );
 
         // Should not throw - client keeps explicit clientId
-        await client.time();
+        await client.channels.get(channelName).status();
         expect(client.auth.clientId, equals('client-a'));
       });
 
       /// Tests that wildcard token clientId allows any ClientOptions clientId.
       test('ClientOptions clientId with wildcard token - success', () async {
+        final channelName = testChannelName('RSA7-wildcard');
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            req.respondWith(200, {'time': 1234567890000});
+            req.respondWith(200, {
+              'channelId': channelName,
+              'status': {'isActive': true}
+            });
           },
         );
 
@@ -371,16 +414,21 @@ void main() {
         );
 
         // Should not throw - wildcard allows any clientId
-        await client.time();
-        expect(client.auth.clientId, equals('*'));
+        await client.channels.get(channelName).status();
+        // RSA7: When token has wildcard, return the options clientId
+        expect(client.auth.clientId, equals('client-a'));
       });
 
       /// Tests that null ClientOptions clientId inherits from token.
       test('null ClientOptions clientId inherits from token - success',
           () async {
+        final channelName = testChannelName('RSA7-inherit');
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            req.respondWith(200, {'time': 1234567890000});
+            req.respondWith(200, {
+              'channelId': channelName,
+              'status': {'isActive': true}
+            });
           },
         );
 
@@ -397,7 +445,7 @@ void main() {
         );
 
         // Should inherit from token
-        await client.time();
+        await client.channels.get(channelName).status();
         expect(client.auth.clientId, equals('client-b'));
       });
     });
