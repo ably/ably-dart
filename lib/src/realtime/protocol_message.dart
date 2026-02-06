@@ -58,6 +58,7 @@ class ProtocolMessage {
     this.messages,
     this.presence,
     this.auth,
+    this.params,
   });
 
   /// The action this message represents.
@@ -102,6 +103,9 @@ class ProtocolMessage {
   /// Auth details for AUTH action.
   final dynamic auth;
 
+  /// Channel params (for ATTACH messages).
+  final Map<String, String>? params;
+
   /// Creates a ProtocolMessage from JSON.
   factory ProtocolMessage.fromJson(Map<String, dynamic> json) {
     return ProtocolMessage(
@@ -126,6 +130,9 @@ class ProtocolMessage {
       messages: json['messages'] as List<dynamic>?,
       presence: json['presence'] as List<dynamic>?,
       auth: json['auth'],
+      params: json['params'] != null
+          ? Map<String, String>.from(json['params'] as Map)
+          : null,
     );
   }
 
@@ -147,6 +154,7 @@ class ProtocolMessage {
       if (messages != null) 'messages': messages,
       if (presence != null) 'presence': presence,
       if (auth != null) 'auth': auth,
+      if (params != null) 'params': params,
     };
   }
 

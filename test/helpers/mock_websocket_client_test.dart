@@ -251,7 +251,7 @@ void main() {
       connection.close();
 
       // Await the close
-      await mock.awaitCloseRequest();
+      await mock.awaitClientClose();
       expect(connection.isClosed, true);
     });
 
@@ -291,6 +291,9 @@ void main() {
       final connection =
           await mock.connect(Uri.parse('wss://realtime.ably.io'), listener);
 
+      // Pump microtask queue so scheduleMicrotask-delivered CONNECTED arrives
+      await Future.value();
+
       // Listener received CONNECTED message
       expect(listener.messages.length, 1);
       expect(listener.messages[0].action, ProtocolAction.connected);
@@ -308,6 +311,9 @@ void main() {
       final listener = TestWebSocketListener();
       final connection =
           await mock.connect(Uri.parse('wss://realtime.ably.io'), listener);
+
+      // Pump microtask queue so scheduleMicrotask-delivered CONNECTED arrives
+      await Future.value();
 
       // Listener received CONNECTED
       expect(listener.messages.length, 1);
@@ -350,6 +356,9 @@ void main() {
       final listener = TestWebSocketListener();
       final connection =
           await mock.connect(Uri.parse('wss://realtime.ably.io'), listener);
+
+      // Pump microtask queue so scheduleMicrotask-delivered CONNECTED arrives
+      await Future.value();
 
       // Listener received CONNECTED
       expect(listener.messages.length, 1);
@@ -423,6 +432,9 @@ void main() {
       final connection =
           await mock.connect(Uri.parse('wss://realtime.ably.io'), listener);
 
+      // Pump microtask queue so scheduleMicrotask-delivered CONNECTED arrives
+      await Future.value();
+
       // Listener received CONNECTED
       expect(listener.messages.length, 1);
       expect(connection.isClosed, false);
@@ -452,6 +464,9 @@ void main() {
 
       final connection =
           await mock.connect(Uri.parse('wss://realtime.ably.io'), listener);
+
+      // Pump microtask queue so scheduleMicrotask-delivered CONNECTED arrives
+      await Future.value();
 
       // Listener received CONNECTED message
       expect(listener.messages.length, 1);

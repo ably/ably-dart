@@ -68,6 +68,14 @@ class Connection implements WebSocketListener {
 
   WebSocketConnection? _webSocketConnection;
 
+  /// Pending ping completers, keyed by the random id sent in the HEARTBEAT.
+  /// Each value is a record of (completer, startTime) for computing duration.
+  final Map<String, (Completer<Duration>, DateTime)> _pendingPings = {};
+
+  /// Callback for dispatching channel-scoped protocol messages.
+  /// Set by RealtimeImpl to route messages to the appropriate channel.
+  void Function(ProtocolMessage)? onChannelMessage;
+
   final _stateChangeController =
       StreamController<ConnectionStateChange>.broadcast();
 
@@ -187,6 +195,134 @@ class Connection implements WebSocketListener {
     }
   }
 
+  /// Pings the Ably service and returns the round-trip duration.
+  ///
+  /// Spec: RTN13
+  Future<Duration> ping() {
+    // RTN13b: Error in INITIALIZED, SUSPENDED, CLOSING, CLOSED, FAILED
+    switch (_state) {
+      case ConnectionState.initialized:
+      case ConnectionState.suspended:
+      case ConnectionState.closing:
+      case ConnectionState.closed:
+      case ConnectionState.failed:
+        return Future.error(
+          ErrorInfo(
+            code: 80000,
+            statusCode: 400,
+            message: 'Cannot ping in ${_state.name} state',
+          ),
+        );
+      case ConnectionState.connecting:
+      case ConnectionState.disconnected:
+        // RTN13d: Defer until CONNECTED
+        return _deferPing();
+      case ConnectionState.connected:
+        return _sendPing();
+    }
+  }
+
+  /// Defers a ping until the connection reaches CONNECTED state (RTN13d).
+  ///
+  /// If the connection transitions to a RTN13b error state instead,
+  /// the ping fails with an error.
+  Future<Duration> _deferPing() {
+    final completer = Completer<Duration>();
+
+    late StreamSubscription<ConnectionStateChange> subscription;
+    subscription = on().listen((change) {
+      if (change.current == ConnectionState.connected) {
+        subscription.cancel();
+        // Now send the ping
+        _sendPing().then(
+          completer.complete,
+          onError: completer.completeError,
+        );
+      } else if (change.current == ConnectionState.suspended ||
+          change.current == ConnectionState.closing ||
+          change.current == ConnectionState.closed ||
+          change.current == ConnectionState.failed) {
+        // RTN13b: Error if transitioned to an error state
+        subscription.cancel();
+        completer.completeError(
+          ErrorInfo(
+            code: 80000,
+            statusCode: 400,
+            message: 'Cannot ping: connection transitioned to '
+                '${change.current.name}',
+          ),
+        );
+      }
+    });
+
+    return completer.future;
+  }
+
+  /// Sends a HEARTBEAT with a random id and waits for matching response.
+  ///
+  /// RTN13a: Send HEARTBEAT and measure round-trip time.
+  /// RTN13c: Timeout after realtimeRequestTimeout.
+  /// RTN13e: Include random id for disambiguation.
+  Future<Duration> _sendPing() {
+    // RTN13e: Generate random id
+    final pingId = _generatePingId();
+    final startTime = clock.now();
+    final completer = Completer<Duration>();
+
+    _pendingPings[pingId] = (completer, startTime);
+
+    // RTN13c: Timeout after realtimeRequestTimeout
+    _timerManager.schedule(
+      owner: this,
+      name: 'ping_$pingId',
+      duration: Duration(milliseconds: _options.realtimeRequestTimeout),
+      callback: () {
+        if (_pendingPings.containsKey(pingId)) {
+          _pendingPings.remove(pingId);
+          if (!completer.isCompleted) {
+            completer.completeError(
+              ErrorInfo(
+                code: 80014,
+                statusCode: 408,
+                message: 'Ping timeout',
+              ),
+            );
+          }
+        }
+      },
+    );
+
+    // Send HEARTBEAT with id
+    try {
+      final message = ProtocolMessage(
+        action: ProtocolAction.heartbeat,
+        id: pingId,
+      );
+      _webSocketConnection!.send(message);
+    } catch (e) {
+      _pendingPings.remove(pingId);
+      _timerManager.cancel(owner: this, name: 'ping_$pingId');
+      if (!completer.isCompleted) {
+        completer.completeError(
+          ErrorInfo(
+            code: 80000,
+            statusCode: 500,
+            message: 'Failed to send ping: $e',
+          ),
+        );
+      }
+    }
+
+    return completer.future;
+  }
+
+  /// Generates a random string id for ping disambiguation (RTN13e).
+  String _generatePingId() {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    return List.generate(12, (_) => chars[_random.nextInt(chars.length)])
+        .join();
+  }
+
   /// Starts a new connection attempt.
   ///
   /// Tries primary host first, then fallback hosts if primary fails.
@@ -229,10 +365,9 @@ class Connection implements WebSocketListener {
         }
 
         // RTN14g: FatalErrorException signals ERROR message with fatal error
-        // Transition to FAILED immediately without trying fallback hosts
+        // _handleError already transitioned to FAILED; just clean up and exit.
         if (e is FatalErrorException) {
           _timerManager.cancel(owner: this, name: 'connectionTimeout');
-          _transitionTo(ConnectionState.failed, error: e.errorInfo);
           return;
         }
 
@@ -393,10 +528,11 @@ class Connection implements WebSocketListener {
       case ProtocolAction.error:
         _handleError(message);
       case ProtocolAction.heartbeat:
-        // Echo heartbeat back
-        _sendHeartbeat();
+        _handleHeartbeat(message);
       default:
-        // Other message types handled by channels
+        if (message.channel != null && onChannelMessage != null) {
+          onChannelMessage!(message);
+        }
         break;
     }
   }
@@ -567,7 +703,15 @@ class Connection implements WebSocketListener {
           message: 'Unknown error',
         );
 
-    // Error with empty channel is connection-level error
+    // Channel-scoped error - dispatch to channel
+    if (message.channel != null && message.channel!.isNotEmpty) {
+      if (onChannelMessage != null) {
+        onChannelMessage!(message);
+      }
+      return;
+    }
+
+    // Connection-level error
     if (message.channel == null || message.channel!.isEmpty) {
       // RTN14b: Check if it's a token error - handle specially for renewal
       if (_isTokenError(error)) {
@@ -587,14 +731,18 @@ class Connection implements WebSocketListener {
 
       // If we're in initial connection and get ERROR, complete with error
       if (_connectionCompleter != null && !_connectionCompleter!.isCompleted) {
-        // RTN14g: Fatal errors should transition to FAILED, not retry
-        // Wrap in FatalErrorException to signal catch block not to retry
-        final errorToThrow =
-            _isFatalError(error) ? FatalErrorException(error) : error;
+        // RTN14g: Any non-token ERROR during connection opening is fatal.
+        // Always use FatalErrorException so _startConnection transitions
+        // to FAILED without retrying fallback hosts.
+        final errorToThrow = FatalErrorException(error);
         // Schedule the error completion asynchronously to avoid throwing
         // during the synchronous listener callback
         final completer = _connectionCompleter!;
         _connectionCompleter = null;
+        // Transition to FAILED immediately so that any subsequent onClose
+        // callback (from mock or real WebSocket) sees the terminal state
+        // and returns early instead of scheduling a reconnect.
+        _transitionTo(ConnectionState.failed, error: error);
         scheduleMicrotask(() {
           completer.completeError(errorToThrow);
         });
@@ -602,16 +750,10 @@ class Connection implements WebSocketListener {
         return;
       }
 
-      // Check if it's a fatal error
-      if (_isFatalError(error)) {
-        _closeWebSocket();
-        _transitionTo(ConnectionState.failed, error: error);
-      } else {
-        // Recoverable error
-        _shouldResume = true;
-        _transitionTo(ConnectionState.disconnected, error: error);
-        _scheduleReconnect();
-      }
+      // RTN15j: Any non-token connection-level ERROR while connected is fatal.
+      // Token errors are already handled above by _handleTokenError.
+      _closeWebSocket();
+      _transitionTo(ConnectionState.failed, error: error);
     }
   }
 
@@ -636,21 +778,6 @@ class Connection implements WebSocketListener {
         error.code == 40141 ||
         error.code == 40142 ||
         error.statusCode == 401;
-  }
-
-  /// Checks if error is fatal (non-recoverable).
-  bool _isFatalError(ErrorInfo error) {
-    // 5xxxx errors are generally fatal
-    if (error.code != null && error.code! >= 50000 && error.code! < 60000) {
-      return true;
-    }
-
-    // 400 errors (except token errors) are fatal
-    if (error.statusCode == 400 && !_isTokenError(error)) {
-      return true;
-    }
-
-    return false;
   }
 
   /// Checks if we can renew the token.
@@ -896,6 +1023,26 @@ class Connection implements WebSocketListener {
     _closeWebSocket();
   }
 
+  /// Handles incoming HEARTBEAT messages.
+  ///
+  /// If the heartbeat has an id matching a pending ping (RTN13e),
+  /// resolves that ping with the round-trip duration. Otherwise,
+  /// echoes the heartbeat back (server-initiated keepalive).
+  void _handleHeartbeat(ProtocolMessage message) {
+    if (message.id != null && _pendingPings.containsKey(message.id)) {
+      // RTN13e: Matching response to a ping
+      final pingId = message.id!;
+      final (completer, startTime) = _pendingPings.remove(pingId)!;
+      _timerManager.cancel(owner: this, name: 'ping_$pingId');
+      if (!completer.isCompleted) {
+        completer.complete(clock.now().difference(startTime));
+      }
+    } else {
+      // Server-initiated heartbeat — echo back
+      _sendHeartbeat();
+    }
+  }
+
   /// Sends a heartbeat message.
   void _sendHeartbeat() {
     if (_webSocketConnection == null) {
@@ -960,14 +1107,27 @@ class Connection implements WebSocketListener {
       _errorReason = null;
     }
 
-    // Clear connection details when in terminal states
+    // RTN8c, RTN9c: Clear id and key in CLOSED, CLOSING, FAILED, SUSPENDED
     if (newState == ConnectionState.closed ||
-        newState == ConnectionState.failed) {
+        newState == ConnectionState.closing ||
+        newState == ConnectionState.failed ||
+        newState == ConnectionState.suspended) {
       _id = null;
       _key = null;
+    }
+
+    // Clear additional connection details in terminal states
+    if (newState == ConnectionState.closed ||
+        newState == ConnectionState.failed) {
       _serial = null;
       _shouldResume = false;
       _disconnectedAt = null;
+      // Fail any pending pings
+      _failPendingPings(ErrorInfo(
+        code: 80000,
+        statusCode: 400,
+        message: 'Connection transitioned to ${newState.name}',
+      ));
     }
 
     // Track disconnection time for TTL (RTN14e)
@@ -991,8 +1151,41 @@ class Connection implements WebSocketListener {
     _stateChangeController.add(change);
   }
 
+  /// Sends a protocol message to the server.
+  ///
+  /// Used by channels to send ATTACH/DETACH messages.
+  void sendMessage(ProtocolMessage message) {
+    if (_webSocketConnection == null) {
+      throw AblyException(
+        errorInfo: ErrorInfo(
+          code: 80000,
+          message: 'Not connected',
+          statusCode: 400,
+        ),
+      );
+    }
+    _webSocketConnection!.send(message);
+  }
+
+  /// Fails all pending pings with the given error.
+  void _failPendingPings(ErrorInfo error) {
+    for (final entry in _pendingPings.entries) {
+      _timerManager.cancel(owner: this, name: 'ping_${entry.key}');
+      final (completer, _) = entry.value;
+      if (!completer.isCompleted) {
+        completer.completeError(error);
+      }
+    }
+    _pendingPings.clear();
+  }
+
   /// Disposes resources used by this connection.
   void dispose() {
+    _failPendingPings(ErrorInfo(
+      code: 80000,
+      statusCode: 400,
+      message: 'Connection disposed',
+    ));
     _closeWebSocket();
     _timerManager.cancelAll(owner: this);
     _stateChangeController.close();

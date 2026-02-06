@@ -8,14 +8,24 @@ import '../../helpers/test_channel_name.dart';
 void main() {
   group('Realtime Client - UTS Tests', () {
     test('RTC2 - connection attribute exists', () {
-      final realtime = Realtime.fromKey('fake.key:secret');
+      final realtime = Realtime(
+        options: ClientOptions(
+          key: 'fake.key:secret',
+          autoConnect: false,
+        ),
+      );
 
       expect(realtime.connection, isNotNull);
       expect(realtime.connection, isA<Connection>());
     });
 
     test('RTC3 - channels attribute exists and can get channels', () {
-      final realtime = Realtime.fromKey('fake.key:secret');
+      final realtime = Realtime(
+        options: ClientOptions(
+          key: 'fake.key:secret',
+          autoConnect: false,
+        ),
+      );
       final channelName = testChannelName('RTC3');
 
       expect(realtime.channels, isNotNull);
@@ -38,7 +48,12 @@ void main() {
     });
 
     test('RTC4 - auth attribute exists', () {
-      final realtime = Realtime.fromKey('fake.key:secret');
+      final realtime = Realtime(
+        options: ClientOptions(
+          key: 'fake.key:secret',
+          autoConnect: false,
+        ),
+      );
 
       expect(realtime.auth, isNotNull);
       expect(realtime.auth, isA<Auth>());
@@ -46,7 +61,12 @@ void main() {
 
     test('RTC17 - clientId attribute returns auth clientId', () {
       // Test with no clientId
-      final realtime1 = Realtime.fromKey('fake.key:secret');
+      final realtime1 = Realtime(
+        options: ClientOptions(
+          key: 'fake.key:secret',
+          autoConnect: false,
+        ),
+      );
       expect(realtime1.clientId, isNull);
 
       // Test with clientId in options
@@ -54,6 +74,7 @@ void main() {
         options: ClientOptions(
           key: 'fake.key:secret',
           clientId: 'test-client-id',
+          autoConnect: false,
         ),
       );
       expect(realtime2.clientId, equals('test-client-id'));
@@ -61,7 +82,12 @@ void main() {
 
     test('RTC1a - echoMessages option in query parameters', () {
       // Test default value (true)
-      final realtime1 = Realtime.fromKey('fake.key:secret');
+      final realtime1 = Realtime(
+        options: ClientOptions(
+          key: 'fake.key:secret',
+          autoConnect: false,
+        ),
+      );
       expect(realtime1.options.echoMessages, isTrue);
 
       // Test explicit true
@@ -69,6 +95,7 @@ void main() {
         options: ClientOptions(
           key: 'fake.key:secret',
           echoMessages: true,
+          autoConnect: false,
         ),
       );
       expect(realtime2.options.echoMessages, isTrue);
@@ -78,18 +105,29 @@ void main() {
         options: ClientOptions(
           key: 'fake.key:secret',
           echoMessages: false,
+          autoConnect: false,
         ),
       );
       expect(realtime3.options.echoMessages, isFalse);
     });
 
     test('Connection initial state is initialized', () {
-      final realtime = Realtime.fromKey('fake.key:secret');
+      final realtime = Realtime(
+        options: ClientOptions(
+          key: 'fake.key:secret',
+          autoConnect: false,
+        ),
+      );
       expect(realtime.connection.state, equals(ConnectionState.initialized));
     });
 
     test('Channel initial state is initialized', () {
-      final realtime = Realtime.fromKey('fake.key:secret');
+      final realtime = Realtime(
+        options: ClientOptions(
+          key: 'fake.key:secret',
+          autoConnect: false,
+        ),
+      );
       final channelName = testChannelName('RTC-init');
       final channel = realtime.channels.get(channelName);
       expect(channel.state, equals(ChannelState.initialized));
@@ -140,17 +178,47 @@ void main() {
     });
 
     test('Channel state changes can be observed', () async {
-      final realtime = Realtime.fromKey('fake.key:secret');
       final channelName = testChannelName('RTC-state');
+
+      late final MockWebSocketClient mockWs;
+      mockWs = MockWebSocketClient(
+        onConnectionAttempt: (conn) {
+          conn.respondWithSuccess(
+            ProtocolMessageHelpers.connected(
+              connectionId: 'test-connection',
+              connectionKey: 'test-key',
+            ),
+          );
+        },
+        onMessageFromClient: (msg) {
+          if (msg.action == ProtocolAction.attach) {
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessageHelpers.attached(channel: msg.channel!),
+            );
+          }
+        },
+      );
+
+      final realtime = Realtime.forTesting(
+        options: ClientOptions(
+          key: 'fake.key:secret',
+          autoConnect: false,
+        ),
+        webSocketClient: mockWs,
+      );
+
+      realtime.connect();
+      await realtime.connection
+          .on(ConnectionEvent.connected)
+          .first
+          .timeout(const Duration(seconds: 5));
+
       final channel = realtime.channels.get(channelName);
 
       final stateChanges = <ChannelStateChange>[];
       final subscription = channel.on().listen((change) {
         stateChanges.add(change);
       });
-
-      // Wait a bit for listener to be ready
-      await Future<void>.delayed(Duration.zero);
 
       await channel.attach();
 
@@ -163,6 +231,8 @@ void main() {
       expect(stateChanges.last.current, equals(ChannelState.attached));
 
       await subscription.cancel();
+      await realtime.close();
+      mockWs.dispose();
     });
 
     test('Connection on(event) filters by event type', () async {
@@ -212,17 +282,47 @@ void main() {
     });
 
     test('Channel on(event) filters by event type', () async {
-      final realtime = Realtime.fromKey('fake.key:secret');
       final channelName = testChannelName('RTC-filter');
+
+      late final MockWebSocketClient mockWs;
+      mockWs = MockWebSocketClient(
+        onConnectionAttempt: (conn) {
+          conn.respondWithSuccess(
+            ProtocolMessageHelpers.connected(
+              connectionId: 'test-connection',
+              connectionKey: 'test-key',
+            ),
+          );
+        },
+        onMessageFromClient: (msg) {
+          if (msg.action == ProtocolAction.attach) {
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessageHelpers.attached(channel: msg.channel!),
+            );
+          }
+        },
+      );
+
+      final realtime = Realtime.forTesting(
+        options: ClientOptions(
+          key: 'fake.key:secret',
+          autoConnect: false,
+        ),
+        webSocketClient: mockWs,
+      );
+
+      realtime.connect();
+      await realtime.connection
+          .on(ConnectionEvent.connected)
+          .first
+          .timeout(const Duration(seconds: 5));
+
       final channel = realtime.channels.get(channelName);
 
       final attachedEvents = <ChannelStateChange>[];
       final subscription = channel.on(ChannelEvent.attached).listen((change) {
         attachedEvents.add(change);
       });
-
-      // Wait a bit for listener to be ready
-      await Future<void>.delayed(Duration.zero);
 
       await channel.attach();
 
@@ -235,11 +335,50 @@ void main() {
       expect(attachedEvents.first.current, equals(ChannelState.attached));
 
       await subscription.cancel();
+      await realtime.close();
+      mockWs.dispose();
     });
 
     test('Channel release detaches and removes channel', () async {
-      final realtime = Realtime.fromKey('fake.key:secret');
       final channelName = testChannelName('RTC-release');
+
+      late final MockWebSocketClient mockWs;
+      mockWs = MockWebSocketClient(
+        onConnectionAttempt: (conn) {
+          conn.respondWithSuccess(
+            ProtocolMessageHelpers.connected(
+              connectionId: 'test-connection',
+              connectionKey: 'test-key',
+            ),
+          );
+        },
+        onMessageFromClient: (msg) {
+          if (msg.action == ProtocolAction.attach) {
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessageHelpers.attached(channel: msg.channel!),
+            );
+          } else if (msg.action == ProtocolAction.detach) {
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessageHelpers.detached(channel: msg.channel!),
+            );
+          }
+        },
+      );
+
+      final realtime = Realtime.forTesting(
+        options: ClientOptions(
+          key: 'fake.key:secret',
+          autoConnect: false,
+        ),
+        webSocketClient: mockWs,
+      );
+
+      realtime.connect();
+      await realtime.connection
+          .on(ConnectionEvent.connected)
+          .first
+          .timeout(const Duration(seconds: 5));
+
       final channel = realtime.channels.get(channelName);
 
       await channel.attach();
@@ -249,6 +388,9 @@ void main() {
       await realtime.channels.release(channelName);
 
       expect(realtime.channels.exists(channelName), isFalse);
+
+      await realtime.close();
+      mockWs.dispose();
     });
 
     test('Realtime.close closes connection', () async {
@@ -272,6 +414,7 @@ void main() {
         key: 'fake.key:secret',
         clientId: 'test-client',
         echoMessages: false,
+        autoConnect: false,
       );
 
       final realtime = Realtime(options: options);
@@ -284,6 +427,7 @@ void main() {
     test('Constructor with key parameter overrides options', () {
       final options = ClientOptions(
         key: 'old.key:secret',
+        autoConnect: false,
       );
 
       final realtime = Realtime(

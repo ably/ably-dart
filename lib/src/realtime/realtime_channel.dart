@@ -1,11 +1,39 @@
 import 'dart:async';
 
+import '../auth/client_options.dart';
+import '../error/ably_exception.dart';
 import '../error/error_info.dart';
+import '../message/message.dart';
 import 'channel_event.dart';
 import 'channel_mode.dart';
 import 'channel_state.dart';
 import 'channel_state_change.dart';
+import 'connection.dart';
+import 'connection_event.dart';
+import 'connection_state.dart';
+import 'protocol_message.dart';
 import 'realtime_channel_options.dart';
+import 'timer_manager.dart';
+
+/// Properties of a realtime channel's state.
+///
+/// Spec: RTL15, CP1, CP2
+class ChannelProperties {
+  /// The `channelSerial` from the most recent ATTACHED ProtocolMessage.
+  ///
+  /// Used for `untilAttach` queries (RTL10b).
+  ///
+  /// Spec: RTL15a, CP2a
+  String? attachSerial;
+
+  /// The last `channelSerial` received on the channel.
+  ///
+  /// Updated from MESSAGE, PRESENCE, ANNOTATION, OBJECT, or ATTACHED
+  /// actions. Cleared when the channel enters DETACHED, SUSPENDED, or FAILED.
+  ///
+  /// Spec: RTL15b, CP2b
+  String? channelSerial;
+}
 
 /// A realtime channel for pub/sub messaging.
 ///
@@ -13,22 +41,41 @@ import 'realtime_channel_options.dart';
 class RealtimeChannel {
   /// Creates a RealtimeChannel instance.
   RealtimeChannel({
-    required Object realtime,
+    required Connection connection,
+    required TimerManager timerManager,
     required String name,
-    RealtimeChannelOptions? options,
-  })  : _realtime = realtime,
+    required ClientOptions options,
+    RealtimeChannelOptions? channelOptions,
+  })  : _connection = connection,
+        _timerManager = timerManager,
         _name = name,
-        _options = options ?? const RealtimeChannelOptions(),
+        _clientOptions = options,
+        _options = channelOptions ?? const RealtimeChannelOptions(),
         _state = ChannelState.initialized;
 
-  // Kept for future use when implementing full channel logic
-  // ignore: unused_field
-  final Object _realtime;
+  final Connection _connection;
+  final TimerManager _timerManager;
+  final ClientOptions _clientOptions;
   final String _name;
   RealtimeChannelOptions _options;
 
   ChannelState _state;
   ErrorInfo? _errorReason;
+
+  /// Channel properties (RTL15).
+  final ChannelProperties properties = ChannelProperties();
+
+  /// Whether this channel has ever been attached (for ATTACH_RESUME flag, RTL4j).
+  bool _hasBeenAttached = false;
+
+  /// Message subscribers (RTL7, RTL8).
+  final List<_Subscription> _subscribers = [];
+
+  /// Pending attach operation.
+  Completer<void>? _attachCompleter;
+
+  /// Pending detach operation.
+  Completer<void>? _detachCompleter;
 
   final _stateChangeController =
       StreamController<ChannelStateChange>.broadcast();
@@ -75,6 +122,59 @@ class RealtimeChannel {
         .where((change) => change.event == event);
   }
 
+  /// Subscribes to messages on this channel.
+  ///
+  /// If [name] is provided, the listener only receives messages whose
+  /// `name` field matches. If [name] is null, the listener receives all
+  /// messages.
+  ///
+  /// If `attachOnSubscribe` is true (the default) and the channel is in
+  /// INITIALIZED, DETACHED, or DETACHING state, an implicit attach is
+  /// triggered. The listener is always registered regardless of the
+  /// attach result.
+  ///
+  /// Spec: RTL7, RTL7a, RTL7b, RTL7g, RTL7h
+  void subscribe(void Function(Message) listener, {String? name}) {
+    // Register the listener
+    _subscribers.add(_Subscription(listener: listener, name: name));
+
+    // RTL7g: Implicit attach when attachOnSubscribe is true
+    if (_options.attachOnSubscribe) {
+      if (_state == ChannelState.initialized ||
+          _state == ChannelState.detached ||
+          _state == ChannelState.detaching) {
+        // Fire-and-forget — RTL7g says listener is registered regardless
+        // of attach result.
+        unawaited(attach().catchError((_) {}));
+      }
+    }
+  }
+
+  /// Unsubscribes from messages on this channel.
+  ///
+  /// If both [listener] and [name] are null, all subscriptions are removed.
+  /// If only [listener] is provided, that listener is removed from all-message
+  /// subscriptions. If both [listener] and [name] are provided, that specific
+  /// name subscription for that listener is removed.
+  ///
+  /// Spec: RTL8, RTL8a, RTL8b, RTL8c
+  void unsubscribe({void Function(Message)? listener, String? name}) {
+    if (listener == null && name == null) {
+      // RTL8c: Remove all subscriptions
+      _subscribers.clear();
+      return;
+    }
+
+    _subscribers.removeWhere((sub) {
+      if (name != null) {
+        // RTL8b: Remove by listener + name
+        return sub.listener == listener && sub.name == name;
+      }
+      // RTL8a: Remove by listener (all-message subscription only)
+      return sub.listener == listener && sub.name == null;
+    });
+  }
+
   /// Attaches to this channel.
   ///
   /// If already attached, this is a no-op.
@@ -87,8 +187,17 @@ class RealtimeChannel {
         return;
 
       case ChannelState.attaching:
-        // Already attaching - wait for completion
-        await _waitForState(ChannelState.attached);
+        // Already attaching - wait for completion (RTL4h)
+        final result = await on().firstWhere((change) =>
+            change.current == ChannelState.attached ||
+            change.current == ChannelState.suspended ||
+            change.current == ChannelState.failed);
+        if (result.current != ChannelState.attached) {
+          throw AblyException(
+            errorInfo: result.reason ??
+                ErrorInfo(code: 90007, message: 'Channel attach failed'),
+          );
+        }
         return;
 
       case ChannelState.failed:
@@ -97,23 +206,53 @@ class RealtimeChannel {
         break;
 
       case ChannelState.detaching:
-        // Wait for detach to complete, then attach
-        await _waitForState(ChannelState.detached);
+        // Wait for detach to complete, then attach (RTL4h)
+        await on().firstWhere((change) =>
+            change.current == ChannelState.detached ||
+            change.current == ChannelState.failed);
         break;
 
       default:
         break;
     }
 
+    // Check connection state (RTL4b)
+    final connState = _connection.state;
+    if (connState == ConnectionState.closed ||
+        connState == ConnectionState.closing ||
+        connState == ConnectionState.failed ||
+        connState == ConnectionState.suspended) {
+      throw AblyException(
+        errorInfo: ErrorInfo(
+          code: 90001,
+          message: 'Cannot attach when connection is $connState',
+          statusCode: 400,
+        ),
+      );
+    }
+
     // Transition to attaching
     _transitionTo(ChannelState.attaching);
 
-    // In a full implementation, this would:
-    // 1. Check connection state
-    // 2. Send ATTACH protocol message
-    // 3. Wait for ATTACHED response
-    // For now, simulate successful attach
-    await _simulateAttach();
+    // Set _attachCompleter before awaiting CONNECTED so that
+    // handleConnectionConnected (RTL3d) can see this channel is
+    // already managed by an explicit attach() call and skip it.
+    final completer = Completer<void>();
+    _attachCompleter = completer;
+
+    // If connection is not yet connected, queue and wait (RTL4i)
+    if (_connection.state != ConnectionState.connected) {
+      // RTL4i: Implicitly initiate connection if not yet started
+      if (_connection.state == ConnectionState.initialized) {
+        unawaited(_connection.connect());
+      }
+      await _connection.on(ConnectionEvent.connected).first;
+    }
+
+    _sendAttachMessage();
+    _startAttachTimeout();
+
+    await completer.future;
   }
 
   /// Detaches from this channel.
@@ -129,70 +268,445 @@ class RealtimeChannel {
         return;
 
       case ChannelState.detaching:
-        // Already detaching - wait for completion
-        await _waitForState(ChannelState.detached);
+        // Already detaching - wait for completion (RTL5i)
+        await on().firstWhere((change) =>
+            change.current == ChannelState.detached ||
+            change.current == ChannelState.attached ||
+            change.current == ChannelState.failed);
         return;
 
       case ChannelState.failed:
-        // Transition directly to detached (RTL5g)
+        // Cannot detach from failed state (RTL5b)
+        throw AblyException(
+          errorInfo: ErrorInfo(
+            code: 90001,
+            message: 'Cannot detach from failed state',
+            statusCode: 400,
+          ),
+        );
+
+      case ChannelState.suspended:
+        // Transition directly to detached (RTL5j)
+        _timerManager.cancelAll(owner: this);
         _transitionTo(ChannelState.detached);
         return;
 
       case ChannelState.attaching:
-        // Wait for attach to complete, then detach
-        await _waitForState(ChannelState.attached);
+        // If connection isn't connected, skip waiting — fall through to
+        // the RTL5l check which transitions directly to detached.
+        if (_connection.state != ConnectionState.connected) {
+          break;
+        }
+        // Wait for attach to complete, then detach (RTL5i)
+        final attachResult = await on().firstWhere((change) =>
+            change.current == ChannelState.attached ||
+            change.current == ChannelState.suspended ||
+            change.current == ChannelState.failed ||
+            change.current == ChannelState.detached);
+        // If attach failed, the channel may already be in a state
+        // where detach is a no-op
+        if (attachResult.current == ChannelState.detached ||
+            _state == ChannelState.initialized) {
+          return;
+        }
+        if (attachResult.current == ChannelState.failed) {
+          throw AblyException(
+            errorInfo: ErrorInfo(
+              code: 90001,
+              message: 'Cannot detach from failed state',
+              statusCode: 400,
+            ),
+          );
+        }
         break;
 
       default:
         break;
     }
 
+    // If connection not connected, transition directly (RTL5l)
+    if (_connection.state != ConnectionState.connected) {
+      _transitionTo(ChannelState.detached);
+      return;
+    }
+
     // Transition to detaching
     _transitionTo(ChannelState.detaching);
 
-    // In a full implementation, this would:
-    // 1. Send DETACH protocol message
-    // 2. Wait for DETACHED response
-    // For now, simulate successful detach
-    await _simulateDetach();
+    final completer = Completer<void>();
+    _detachCompleter = completer;
+    _sendDetachMessage();
+    _startDetachTimeout();
+
+    await completer.future;
   }
 
-  /// Simulates an attach operation for basic implementation.
-  Future<void> _simulateAttach() async {
-    // Simulate network delay
-    await Future<void>.delayed(const Duration(milliseconds: 10));
+  /// Handles connection entering FAILED state (RTL3a).
+  ///
+  /// Channels in ATTACHING or ATTACHED transition to FAILED.
+  void handleConnectionFailed(ErrorInfo? error) {
+    if (_state == ChannelState.attaching || _state == ChannelState.attached) {
+      _timerManager.cancelAll(owner: this);
+      _transitionTo(ChannelState.failed, error: error);
+      _failPendingOperations(
+        error ?? const ErrorInfo(code: 80000, message: 'Connection failed'),
+      );
+    }
+  }
 
-    // Check if still attaching (might have been cancelled)
-    if (_state != ChannelState.attaching) {
+  /// Handles connection entering CLOSED state (RTL3b).
+  ///
+  /// Channels in ATTACHING or ATTACHED transition to DETACHED.
+  void handleConnectionClosed() {
+    if (_state == ChannelState.attaching || _state == ChannelState.attached) {
+      _timerManager.cancelAll(owner: this);
+      _transitionTo(ChannelState.detached);
+      _failPendingOperations(
+        const ErrorInfo(code: 80017, message: 'Connection closed'),
+      );
+    }
+  }
+
+  /// Handles connection entering SUSPENDED state (RTL3c).
+  ///
+  /// Channels in ATTACHING or ATTACHED transition to SUSPENDED.
+  void handleConnectionSuspended(ErrorInfo? error) {
+    if (_state == ChannelState.attaching || _state == ChannelState.attached) {
+      _timerManager.cancelAll(owner: this);
+      _transitionTo(ChannelState.suspended, error: error);
+      _failPendingOperations(
+        error ?? const ErrorInfo(code: 80002, message: 'Connection suspended'),
+      );
+    }
+  }
+
+  /// Handles connection entering CONNECTED state (RTL3d).
+  ///
+  /// Channels in ATTACHING, ATTACHED, or SUSPENDED re-attach via RTL4c.
+  /// Channels in ATTACHING with a pending attach completer are already
+  /// being managed by an explicit attach() call (RTL4i) and should not
+  /// be re-attached here.
+  void handleConnectionConnected() {
+    if (_state == ChannelState.attached || _state == ChannelState.suspended) {
+      _timerManager.cancelAll(owner: this);
+      _transitionTo(ChannelState.attaching);
+      _attachCompleter = Completer<void>();
+      _attachCompleter!.future.ignore();
+      _sendAttachMessage();
+      _startAttachTimeout();
+    } else if (_state == ChannelState.attaching && _attachCompleter == null) {
+      // ATTACHING without a pending completer means the channel was left
+      // in ATTACHING by a previous connection attempt that dropped.
+      _sendAttachMessage();
+      _startAttachTimeout();
+    }
+  }
+
+  /// Fails pending attach/detach operations with an error.
+  void _failPendingOperations(ErrorInfo error) {
+    final exception = AblyException(errorInfo: error);
+    if (_attachCompleter != null && !_attachCompleter!.isCompleted) {
+      _attachCompleter!.completeError(exception);
+    }
+    _attachCompleter = null;
+    if (_detachCompleter != null && !_detachCompleter!.isCompleted) {
+      _detachCompleter!.completeError(exception);
+    }
+    _detachCompleter = null;
+  }
+
+  /// Handles an incoming protocol message dispatched from the connection.
+  void handleProtocolMessage(ProtocolMessage message) {
+    // RTL15b: Update channelSerial from MESSAGE/PRESENCE actions
+    if (message.action == ProtocolAction.message ||
+        message.action == ProtocolAction.presence) {
+      if (message.channelSerial != null) {
+        properties.channelSerial = message.channelSerial;
+      }
+    }
+
+    switch (message.action) {
+      case ProtocolAction.attached:
+        _handleAttached(message);
+      case ProtocolAction.detached:
+        _handleDetached(message);
+      case ProtocolAction.error:
+        _handleError(message);
+      case ProtocolAction.message:
+        _handleMessage(message);
+      default:
+        break;
+    }
+  }
+
+  /// Handles ATTACHED protocol message.
+  void _handleAttached(ProtocolMessage message) {
+    _timerManager.cancel(owner: this, name: 'attachTimeout');
+    _timerManager.cancel(owner: this, name: 'channelRetry');
+
+    // RTL15a: Update attachSerial from ATTACHED response
+    properties.attachSerial = message.channelSerial;
+    // RTL15b: Update channelSerial from ATTACHED action
+    if (message.channelSerial != null) {
+      properties.channelSerial = message.channelSerial;
+    }
+
+    // Decode modes from flags (RTL4m)
+    if (message.flags != null) {
+      _modes = decodeModeFlags(message.flags!);
+    }
+
+    // Determine resumed/hasBacklog from flags (TR3c, TR3b)
+    final resumed = (message.flags ?? 0) & flagResumed != 0;
+    final hasBacklog = (message.flags ?? 0) & flagHasBacklog != 0 ? true : null;
+
+    if (_state == ChannelState.attached) {
+      // Already attached - emit UPDATE event (RTL2g)
+      _emitUpdate(resumed: resumed, hasBacklog: hasBacklog);
       return;
     }
 
-    // Simulate successful attach
-    _transitionTo(ChannelState.attached);
-  }
-
-  /// Simulates a detach operation for basic implementation.
-  Future<void> _simulateDetach() async {
-    // Simulate network delay
-    await Future<void>.delayed(const Duration(milliseconds: 10));
-
-    // Check if still detaching (might have been cancelled)
-    if (_state != ChannelState.detaching) {
+    if (_state == ChannelState.detached) {
+      // Unexpected ATTACHED while detached - send DETACH (RTL5k)
+      // Do NOT set _hasBeenAttached — we never entered attached state
+      _sendDetachMessage();
       return;
     }
 
-    // Simulate successful detach
-    _transitionTo(ChannelState.detached);
-  }
-
-  /// Waits for the channel to reach a specific state.
-  Future<void> _waitForState(ChannelState targetState) async {
-    if (_state == targetState) {
+    if (_state == ChannelState.detaching) {
+      // ATTACHED received while detaching - send another DETACH (RTL5k)
+      _sendDetachMessage();
       return;
     }
 
-    await _stateChangeController.stream
-        .firstWhere((change) => change.current == targetState);
+    _hasBeenAttached = true;
+    _transitionTo(
+      ChannelState.attached,
+      resumed: resumed,
+      hasBacklog: hasBacklog,
+    );
+
+    // Complete pending attach
+    if (_attachCompleter != null && !_attachCompleter!.isCompleted) {
+      _attachCompleter!.complete();
+    }
+    _attachCompleter = null;
+  }
+
+  /// Handles DETACHED protocol message.
+  ///
+  /// If the channel is DETACHING (explicit detach), this completes the normal
+  /// detach flow (RTL5). Otherwise it is a server-initiated DETACHED and
+  /// RTL13 applies.
+  void _handleDetached(ProtocolMessage message) {
+    if (_state == ChannelState.detaching) {
+      // Normal detach flow (RTL5)
+      _timerManager.cancel(owner: this, name: 'detachTimeout');
+      _transitionTo(ChannelState.detached);
+
+      if (_detachCompleter != null && !_detachCompleter!.isCompleted) {
+        _detachCompleter!.complete();
+      }
+      _detachCompleter = null;
+      return;
+    }
+
+    // Server-initiated DETACHED (RTL13)
+    final error = message.error;
+
+    if (_state == ChannelState.attached || _state == ChannelState.suspended) {
+      // RTL13a: Immediately attempt to reattach
+      _timerManager.cancelAll(owner: this);
+      _transitionTo(ChannelState.attaching, error: error);
+      _attachCompleter = Completer<void>();
+      _attachCompleter!.future.ignore();
+      _sendAttachMessage();
+      _startAttachTimeout();
+    } else if (_state == ChannelState.attaching) {
+      // RTL13b: Already ATTACHING — go directly to SUSPENDED with retry
+      _timerManager.cancelAll(owner: this);
+      _failPendingOperations(
+        error ?? const ErrorInfo(code: 90007, message: 'Server detached'),
+      );
+      _transitionTo(ChannelState.suspended, error: error);
+      _scheduleChannelRetry();
+    }
+  }
+
+  /// Handles channel-scoped ERROR protocol message.
+  void _handleError(ProtocolMessage message) {
+    _timerManager.cancel(owner: this, name: 'attachTimeout');
+    _timerManager.cancel(owner: this, name: 'detachTimeout');
+    _timerManager.cancel(owner: this, name: 'channelRetry');
+
+    final error =
+        message.error ?? const ErrorInfo(code: 50000, message: 'Channel error');
+
+    _transitionTo(ChannelState.failed, error: message.error);
+
+    // Complete pending operations with error so attach()/detach() callers
+    // receive the exception.
+    final exception = AblyException(errorInfo: error);
+    if (_attachCompleter != null && !_attachCompleter!.isCompleted) {
+      _attachCompleter!.completeError(exception);
+    }
+    _attachCompleter = null;
+    if (_detachCompleter != null && !_detachCompleter!.isCompleted) {
+      _detachCompleter!.completeError(exception);
+    }
+    _detachCompleter = null;
+  }
+
+  /// Handles incoming MESSAGE protocol message.
+  ///
+  /// Delivers individual messages to subscribers, filtering by name
+  /// for name-specific subscriptions. Only delivers when the channel
+  /// is ATTACHED (RTL17). Filters out self-echoed messages when
+  /// echoMessages is false (RTL7f).
+  void _handleMessage(ProtocolMessage protocolMessage) {
+    // RTL17: Only deliver when ATTACHED
+    if (_state != ChannelState.attached) {
+      return;
+    }
+
+    // RTL7f: Filter out messages from this connection when echoMessages is false
+    if (!_clientOptions.echoMessages &&
+        protocolMessage.connectionId == _connection.id) {
+      return;
+    }
+
+    final rawMessages = protocolMessage.messages;
+    if (rawMessages == null) return;
+
+    for (final raw in rawMessages) {
+      final message =
+          raw is Message ? raw : Message.fromMap(raw as Map<String, dynamic>);
+      for (final sub in _subscribers) {
+        if (sub.name == null || sub.name == message.name) {
+          sub.listener(message);
+        }
+      }
+    }
+  }
+
+  /// Sends an ATTACH protocol message.
+  void _sendAttachMessage() {
+    var flags = 0;
+
+    // Encode modes as flags (RTL4l)
+    if (_options.modes != null && _options.modes!.isNotEmpty) {
+      flags |= encodeModeFlags(_options.modes!);
+    }
+
+    // Set ATTACH_RESUME if previously attached (RTL4j)
+    if (_hasBeenAttached) {
+      flags |= flagAttachResume;
+    }
+
+    _connection.sendMessage(ProtocolMessage(
+      action: ProtocolAction.attach,
+      channel: _name,
+      channelSerial: properties.channelSerial,
+      flags: flags != 0 ? flags : null,
+      params: _options.params,
+    ));
+  }
+
+  /// Sends a DETACH protocol message.
+  void _sendDetachMessage() {
+    _connection.sendMessage(ProtocolMessage(
+      action: ProtocolAction.detach,
+      channel: _name,
+    ));
+  }
+
+  /// Starts the attach timeout timer (RTL4f).
+  void _startAttachTimeout() {
+    _timerManager.schedule(
+      owner: this,
+      name: 'attachTimeout',
+      duration: Duration(milliseconds: _clientOptions.realtimeRequestTimeout),
+      callback: () {
+        if (_state != ChannelState.attaching) return;
+
+        final error = ErrorInfo(
+          code: 90007,
+          message: 'Channel attach timed out',
+        );
+        _transitionTo(ChannelState.suspended, error: error);
+
+        if (_attachCompleter != null && !_attachCompleter!.isCompleted) {
+          _attachCompleter!.completeError(
+            AblyException(errorInfo: error),
+          );
+        }
+        _attachCompleter = null;
+
+        // RTL13b: Schedule automatic retry from SUSPENDED
+        _scheduleChannelRetry();
+      },
+    );
+  }
+
+  /// Schedules automatic channel retry from SUSPENDED state (RTL13b).
+  void _scheduleChannelRetry() {
+    if (_connection.state != ConnectionState.connected) return;
+
+    _timerManager.schedule(
+      owner: this,
+      name: 'channelRetry',
+      duration: Duration(
+        milliseconds: _clientOptions.suspendedRetryTimeout,
+      ),
+      callback: () {
+        if (_state == ChannelState.suspended &&
+            _connection.state == ConnectionState.connected) {
+          _transitionTo(ChannelState.attaching);
+          _attachCompleter = Completer<void>();
+          _attachCompleter!.future.ignore();
+          _sendAttachMessage();
+          _startAttachTimeout();
+        }
+      },
+    );
+  }
+
+  /// Starts the detach timeout timer (RTL5f).
+  void _startDetachTimeout() {
+    _timerManager.schedule(
+      owner: this,
+      name: 'detachTimeout',
+      duration: Duration(milliseconds: _clientOptions.realtimeRequestTimeout),
+      callback: () {
+        if (_state != ChannelState.detaching) return;
+
+        final error = ErrorInfo(
+          code: 90007,
+          message: 'Channel detach timed out',
+        );
+
+        // Return to previous state (attached) — RTL5f
+        _transitionTo(ChannelState.attached);
+
+        if (_detachCompleter != null && !_detachCompleter!.isCompleted) {
+          _detachCompleter!.completeError(
+            AblyException(errorInfo: error),
+          );
+        }
+        _detachCompleter = null;
+      },
+    );
+  }
+
+  /// Emits an UPDATE event when ATTACHED received while already attached (RTL2g).
+  void _emitUpdate({bool resumed = false, bool? hasBacklog}) {
+    _stateChangeController.add(ChannelStateChange(
+      event: ChannelEvent.update,
+      current: ChannelState.attached,
+      previous: ChannelState.attached,
+      resumed: resumed,
+      hasBacklog: hasBacklog,
+    ));
   }
 
   /// Transitions to a new state and emits a state change event.
@@ -202,12 +716,19 @@ class RealtimeChannel {
     bool resumed = false,
     bool? hasBacklog,
   }) {
-    if (_state == newState) {
+    if (_state == newState && error == null) {
       return;
     }
 
     final previous = _state;
     _state = newState;
+
+    // RTL15b1: Clear channelSerial on DETACHED, SUSPENDED, or FAILED
+    if (newState == ChannelState.detached ||
+        newState == ChannelState.suspended ||
+        newState == ChannelState.failed) {
+      properties.channelSerial = null;
+    }
 
     // Update error reason if provided
     if (error != null) {
@@ -218,11 +739,8 @@ class RealtimeChannel {
       _errorReason = null;
     }
 
-    // Map state to event (state changes emit events of the same name)
-    final event = ChannelEvent.values.firstWhere(
-      (e) => e.name == newState.name,
-      orElse: () => ChannelEvent.update,
-    );
+    // Map state to event
+    final event = ChannelEventExtension.fromState(newState);
 
     final change = ChannelStateChange(
       event: event,
@@ -250,12 +768,15 @@ class RealtimeChannel {
     _options = options;
 
     if (needsReattach) {
-      // In a full implementation, this would send an ATTACH message
-      // with the new params/modes and wait for ATTACHED response.
-      // For now, simulate the reattachment.
       if (_state == ChannelState.attached) {
         _transitionTo(ChannelState.attaching);
-        await _simulateAttach();
+
+        final completer = Completer<void>();
+        _attachCompleter = completer;
+        _sendAttachMessage();
+        _startAttachTimeout();
+
+        await completer.future;
       }
       // If attaching, the current attach operation will use the new options
     }
@@ -271,6 +792,19 @@ class RealtimeChannel {
 
   /// Disposes resources used by this channel.
   void dispose() {
+    _timerManager.cancelAll(owner: this);
+    _subscribers.clear();
     _stateChangeController.close();
   }
+}
+
+/// A message subscription registered via [RealtimeChannel.subscribe].
+class _Subscription {
+  _Subscription({required this.listener, this.name});
+
+  /// The callback to invoke when a matching message arrives.
+  final void Function(Message) listener;
+
+  /// If non-null, only messages with this name are delivered.
+  final String? name;
 }

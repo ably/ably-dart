@@ -27,14 +27,14 @@ void main() {
   });
 
   group('FakeTimerManager', () {
-    test('fires one-shot timer when time elapses', () {
+    test('fires one-shot timer when time elapses', () async {
       final testClock = TestClock(DateTime(2024, 1, 1, 12, 0));
       final fakeTimers = FakeTimerManager(testClock);
 
       var fired = false;
       final owner = Object();
 
-      withClock(testClock, () {
+      await withClock(testClock, () async {
         fakeTimers.schedule(
           owner: owner,
           name: 'test',
@@ -46,22 +46,24 @@ void main() {
 
         // Advance less than 5 seconds - should not fire
         fakeTimers.elapseTime(const Duration(seconds: 3));
+        await _pumpEventQueue();
         expect(fired, isFalse);
 
         // Advance past 5 seconds - should fire
         fakeTimers.elapseTime(const Duration(seconds: 3));
+        await _pumpEventQueue();
         expect(fired, isTrue);
       });
     });
 
-    test('fires multiple timers in order', () {
+    test('fires multiple timers in order', () async {
       final testClock = TestClock(DateTime(2024, 1, 1, 12, 0));
       final fakeTimers = FakeTimerManager(testClock);
 
       final firedOrder = <String>[];
       final owner = Object();
 
-      withClock(testClock, () {
+      await withClock(testClock, () async {
         fakeTimers.schedule(
           owner: owner,
           name: 'second',
@@ -76,19 +78,20 @@ void main() {
         );
 
         fakeTimers.elapseTime(const Duration(seconds: 15));
+        await _pumpEventQueue();
 
         expect(firedOrder, ['first', 'second']);
       });
     });
 
-    test('cancel removes timer', () {
+    test('cancel removes timer', () async {
       final testClock = TestClock(DateTime(2024, 1, 1, 12, 0));
       final fakeTimers = FakeTimerManager(testClock);
 
       var fired = false;
       final owner = Object();
 
-      withClock(testClock, () {
+      await withClock(testClock, () async {
         fakeTimers.schedule(
           owner: owner,
           name: 'test',
@@ -98,12 +101,13 @@ void main() {
 
         fakeTimers.cancel(owner: owner, name: 'test');
         fakeTimers.elapseTime(const Duration(seconds: 10));
+        await _pumpEventQueue();
 
         expect(fired, isFalse);
       });
     });
 
-    test('cancelAll removes all timers for owner', () {
+    test('cancelAll removes all timers for owner', () async {
       final testClock = TestClock(DateTime(2024, 1, 1, 12, 0));
       final fakeTimers = FakeTimerManager(testClock);
 
@@ -111,7 +115,7 @@ void main() {
       var fired2 = false;
       final owner = Object();
 
-      withClock(testClock, () {
+      await withClock(testClock, () async {
         fakeTimers.schedule(
           owner: owner,
           name: 'test1',
@@ -127,19 +131,20 @@ void main() {
 
         fakeTimers.cancelAll(owner: owner);
         fakeTimers.elapseTime(const Duration(seconds: 10));
+        await _pumpEventQueue();
 
         expect(fired1, isFalse);
         expect(fired2, isFalse);
       });
     });
 
-    test('isActive returns correct state', () {
+    test('isActive returns correct state', () async {
       final testClock = TestClock(DateTime(2024, 1, 1, 12, 0));
       final fakeTimers = FakeTimerManager(testClock);
 
       final owner = Object();
 
-      withClock(testClock, () {
+      await withClock(testClock, () async {
         expect(fakeTimers.isActive(owner: owner, name: 'test'), isFalse);
 
         fakeTimers.schedule(
@@ -153,6 +158,8 @@ void main() {
 
         fakeTimers.elapseTime(const Duration(seconds: 10));
 
+        // isActive should be false immediately (timer removed from map)
+        // even though callback hasn't fired yet
         expect(fakeTimers.isActive(owner: owner, name: 'test'), isFalse);
       });
     });
@@ -177,4 +184,9 @@ void main() {
       });
     });
   });
+}
+
+/// Pumps the event queue to allow async operations to complete.
+Future<void> _pumpEventQueue() async {
+  await Future<void>.delayed(Duration.zero);
 }

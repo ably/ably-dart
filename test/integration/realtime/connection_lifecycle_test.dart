@@ -183,6 +183,29 @@ void main() {
     });
   });
 
+  group('RTN14g - Invalid API key causes FAILED state', () {
+    test('connection with invalid key transitions to FAILED', () async {
+      final client = Realtime(
+        options: ClientOptions(
+          key: 'fake.key:secret',
+          autoConnect: false,
+        ),
+      );
+
+      client.connect();
+
+      await _awaitState(
+        client.connection,
+        ConnectionState.failed,
+        timeout: const Duration(seconds: 10),
+      );
+
+      expect(client.connection.state, equals(ConnectionState.failed));
+      expect(client.connection.errorReason, isNotNull);
+      expect(client.connection.errorReason!.code, equals(40400));
+    });
+  });
+
   group('RTN11e - Connect when already connecting/connected', () {
     test('calling connect() when already connecting is a no-op', () async {
       final client = Realtime(

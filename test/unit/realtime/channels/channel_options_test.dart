@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:ably_dart/ably_dart.dart';
 import 'package:test/test.dart';
 
+import '../../../helpers/mock_websocket_client.dart';
+import '../../../helpers/protocol_message_helpers.dart';
 import '../../../helpers/test_channel_name.dart';
 
 /// Tests for ChannelOptions and derived channels.
@@ -102,13 +104,32 @@ void main() {
 
   group('RealtimeChannels with options - UTS Tests', () {
     late Realtime client;
+    late MockWebSocketClient mockWs;
 
     setUp(() {
-      client = Realtime(
+      mockWs = MockWebSocketClient(
+        onConnectionAttempt: (conn) {
+          conn.respondWithSuccess(
+            ProtocolMessageHelpers.connected(),
+          );
+        },
+        onMessageFromClient: (msg) {
+          if (msg.action == ProtocolAction.attach) {
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessageHelpers.attached(
+                channel: msg.channel!,
+              ),
+            );
+          }
+        },
+      );
+
+      client = Realtime.forTesting(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,
         ),
+        webSocketClient: mockWs,
       );
     });
 
@@ -175,20 +196,57 @@ void main() {
         expect(channel.options.params, isNull);
       });
 
-      test('throws error when modes change on attached channel', () async {
+      test('throws error when modes change on attaching channel', () async {
         final channelName = testChannelName('RTS3c1-modes');
 
-        final channel = client.channels.get(channelName);
-        await channel.attach();
+        // Use a separate mock that doesn't auto-respond to ATTACH
+        // so the channel stays in attaching state.
+        final noRespondMockWs = MockWebSocketClient(
+          onConnectionAttempt: (conn) {
+            conn.respondWithSuccess(
+              ProtocolMessageHelpers.connected(),
+            );
+          },
+          onMessageFromClient: (msg) {
+            // Don't respond to ATTACH — channel stays attaching
+          },
+        );
+
+        final localClient = Realtime.forTesting(
+          options: ClientOptions(
+            key: 'fake.key:secret',
+            autoConnect: false,
+          ),
+          webSocketClient: noRespondMockWs,
+        );
+
+        localClient.connect();
+        await _awaitConnectionState(
+          localClient.connection,
+          ConnectionState.connected,
+        );
+
+        final channel = localClient.channels.get(channelName);
+
+        // Put channel in attaching state (don't await)
+        // ignore: unawaited_futures
+        channel.attach();
+        await _awaitChannelState(channel, ChannelState.attaching);
 
         final newOptions = RealtimeChannelOptions(
           modes: [ChannelMode.subscribe],
         );
 
         expect(
-          () => client.channels.get(channelName, newOptions),
-          throwsA(isA<AblyException>()),
+          () => localClient.channels.get(channelName, newOptions),
+          throwsA(isA<AblyException>().having(
+            (e) => e.code,
+            'code',
+            equals(40000),
+          )),
         );
+
+        noRespondMockWs.dispose();
       });
 
       test('allows non-reattachment options on attached channel', () async {
@@ -386,4 +444,36 @@ void main() {
       expect(ChannelMode.values, contains(ChannelMode.objectPublish));
     });
   });
+}
+
+/// Waits for connection to reach the specified state.
+Future<void> _awaitConnectionState(
+  Connection connection,
+  ConnectionState targetState, {
+  Duration timeout = const Duration(seconds: 5),
+}) async {
+  if (connection.state == targetState) {
+    return;
+  }
+
+  await connection
+      .on()
+      .firstWhere((change) => change.current == targetState)
+      .timeout(timeout);
+}
+
+/// Waits for channel to reach the specified state.
+Future<void> _awaitChannelState(
+  RealtimeChannel channel,
+  ChannelState targetState, {
+  Duration timeout = const Duration(seconds: 5),
+}) async {
+  if (channel.state == targetState) {
+    return;
+  }
+
+  await channel
+      .on()
+      .firstWhere((change) => change.current == targetState)
+      .timeout(timeout);
 }

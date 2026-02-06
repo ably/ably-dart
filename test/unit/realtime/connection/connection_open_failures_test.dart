@@ -382,7 +382,7 @@ void main() {
   });
 
   group('RTN14g - ERROR protocol message with empty channel', () {
-    test('transitions to FAILED on connection-level ERROR', () async {
+    test('transitions to FAILED on connection-level ERROR (5xx)', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
           conn.respondWithError(
@@ -416,6 +416,47 @@ void main() {
         client.connection.errorReason!.message,
         equals('Internal server error'),
       );
+
+      mockWs.dispose();
+    });
+
+    test('transitions to FAILED for 4xx non-token ERROR (e.g. 40400)',
+        () async {
+      // This is the real-world case: invalid API key causes the server to
+      // respond with code 40400 / statusCode 404. Per RTN14g, any non-token
+      // ERROR during connection opening is fatal.
+      var connectionAttemptCount = 0;
+
+      final mockWs = MockWebSocketClient(
+        onConnectionAttempt: (conn) {
+          connectionAttemptCount++;
+          conn.respondWithError(
+            ProtocolMessageHelpers.error(
+              code: 40400,
+              statusCode: 404,
+              message: 'No application found',
+            ),
+          );
+        },
+      );
+
+      final client = Realtime.forTesting(
+        options: ClientOptions(
+          key: 'invalid.key:secret',
+          autoConnect: false,
+        ),
+        webSocketClient: mockWs,
+      );
+
+      client.connect();
+      await _awaitState(client.connection, ConnectionState.failed);
+
+      expect(client.connection.state, equals(ConnectionState.failed));
+      expect(client.connection.errorReason, isNotNull);
+      expect(client.connection.errorReason!.code, equals(40400));
+      expect(client.connection.errorReason!.statusCode, equals(404));
+      // Must NOT retry — only one connection attempt
+      expect(connectionAttemptCount, equals(1));
 
       mockWs.dispose();
     });

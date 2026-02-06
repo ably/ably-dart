@@ -194,7 +194,10 @@ class FakeTimerManager implements TimerManager {
 
     for (final entry in expiredTimers) {
       _timers.remove(entry.key);
-      entry.value.callback();
+      // Schedule callback asynchronously via microtask, matching real Timer
+      // behavior. This prevents synchronous execution chains that cause
+      // unhandled Future errors in tests.
+      scheduleMicrotask(entry.value.callback);
     }
 
     // Fire periodic timers
@@ -208,7 +211,10 @@ class FakeTimerManager implements TimerManager {
       // Fire as many times as needed to catch up
       while (!periodicEntry.nextFireAt.isAfter(now) &&
           !periodicEntry.timer.isCancelled) {
-        periodicEntry.callback(periodicEntry.timer);
+        // Schedule callback asynchronously via microtask
+        final timer = periodicEntry.timer;
+        final cb = periodicEntry.callback;
+        scheduleMicrotask(() => cb(timer));
         periodicEntry.nextFireAt =
             periodicEntry.nextFireAt.add(periodicEntry.period);
       }

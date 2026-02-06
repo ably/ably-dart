@@ -1,11 +1,17 @@
+import 'dart:async';
 import 'dart:convert';
 
+import '../auth/client_options.dart';
 import '../error/ably_exception.dart';
 import '../error/error_info.dart';
 import 'channel_state.dart';
+import 'connection.dart';
+import 'connection_state.dart';
+import 'connection_state_change.dart';
 import 'derive_options.dart';
 import 'realtime_channel.dart';
 import 'realtime_channel_options.dart';
+import 'timer_manager.dart';
 
 /// Collection of realtime channels.
 ///
@@ -13,11 +19,21 @@ import 'realtime_channel_options.dart';
 class RealtimeChannels {
   /// Creates a RealtimeChannels collection.
   RealtimeChannels({
-    required Object realtime,
-  }) : _realtime = realtime;
+    required Connection connection,
+    required TimerManager timerManager,
+    required ClientOptions options,
+  })  : _connection = connection,
+        _timerManager = timerManager,
+        _options = options {
+    // RTL3: Propagate connection state changes to channels
+    _connectionSubscription = _connection.on().listen(_onConnectionStateChange);
+  }
 
-  final Object _realtime;
+  final Connection _connection;
+  final TimerManager _timerManager;
+  final ClientOptions _options;
   final Map<String, RealtimeChannel> _channels = {};
+  late final StreamSubscription<ConnectionStateChange> _connectionSubscription;
 
   /// Gets or creates a channel with the given name.
   ///
@@ -58,9 +74,11 @@ class RealtimeChannels {
 
     // RTS3a, RTS3b: Create new channel with options
     final channel = RealtimeChannel(
-      realtime: _realtime,
+      connection: _connection,
+      timerManager: _timerManager,
       name: name,
-      options: options,
+      options: _options,
+      channelOptions: options,
     );
     _channels[name] = channel;
     return channel;
@@ -72,6 +90,9 @@ class RealtimeChannels {
   ///
   /// Spec: RTS3a
   RealtimeChannel operator [](String name) => get(name);
+
+  /// Returns an existing channel or null without creating one.
+  RealtimeChannel? getIfExists(String name) => _channels[name];
 
   /// Creates a derived channel with a filter expression.
   ///
@@ -156,8 +177,43 @@ class RealtimeChannels {
   /// Spec: RTS2
   Iterable<String> get names => _channels.keys;
 
+  /// Handles connection state changes (RTL3).
+  void _onConnectionStateChange(ConnectionStateChange stateChange) {
+    final current = stateChange.current;
+    final errorReason = _connection.errorReason;
+
+    switch (current) {
+      case ConnectionState.failed:
+        // RTL3a: ATTACHING/ATTACHED → FAILED
+        for (final channel in _channels.values) {
+          channel.handleConnectionFailed(errorReason);
+        }
+      case ConnectionState.closed:
+        // RTL3b: ATTACHING/ATTACHED → DETACHED
+        for (final channel in _channels.values) {
+          channel.handleConnectionClosed();
+        }
+      case ConnectionState.suspended:
+        // RTL3c: ATTACHING/ATTACHED → SUSPENDED
+        for (final channel in _channels.values) {
+          channel.handleConnectionSuspended(errorReason);
+        }
+      case ConnectionState.connected:
+        // RTL3d: ATTACHING/ATTACHED/SUSPENDED → re-attach
+        for (final channel in _channels.values) {
+          channel.handleConnectionConnected();
+        }
+      case ConnectionState.disconnected:
+        // RTL3e: No effect on channels
+        break;
+      default:
+        break;
+    }
+  }
+
   /// Disposes all channels in the collection.
   void dispose() {
+    _connectionSubscription.cancel();
     for (final channel in _channels.values) {
       channel.dispose();
     }

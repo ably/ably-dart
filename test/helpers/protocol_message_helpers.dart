@@ -77,10 +77,14 @@ class ProtocolMessageHelpers {
   }
 
   /// Creates a DETACHED protocol message.
-  static ProtocolMessage detached({required String channel}) {
+  static ProtocolMessage detached({
+    required String channel,
+    ErrorInfo? error,
+  }) {
     return ProtocolMessage(
       action: ProtocolAction.detached,
       channel: channel,
+      error: error,
     );
   }
 
@@ -93,8 +97,8 @@ class ProtocolMessageHelpers {
   }
 
   /// Creates a HEARTBEAT protocol message.
-  static ProtocolMessage heartbeat() {
-    return ProtocolMessage(action: ProtocolAction.heartbeat);
+  static ProtocolMessage heartbeat({String? id}) {
+    return ProtocolMessage(action: ProtocolAction.heartbeat, id: id);
   }
 
   /// Creates an ACK protocol message.
@@ -110,16 +114,30 @@ class ProtocolMessageHelpers {
     required String channel,
     String? name,
     dynamic data,
+    String? channelSerial,
   }) {
     return ProtocolMessage(
       action: ProtocolAction.message,
       channel: channel,
+      channelSerial: channelSerial,
       messages: [
         Message(
           name: name,
           data: data,
         ),
       ],
+    );
+  }
+
+  /// Creates a PRESENCE protocol message.
+  static ProtocolMessage presence({
+    required String channel,
+    String? channelSerial,
+  }) {
+    return ProtocolMessage(
+      action: ProtocolAction.presence,
+      channel: channel,
+      channelSerial: channelSerial,
     );
   }
 }

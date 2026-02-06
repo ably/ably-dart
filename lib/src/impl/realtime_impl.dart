@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import '../auth/auth.dart';
 import '../auth/client_options.dart';
 import '../realtime/connection.dart';
+import '../realtime/protocol_message.dart';
 import '../realtime/realtime.dart';
 import '../realtime/realtime_channels.dart';
 import '../realtime/timer_manager.dart';
@@ -72,8 +73,13 @@ class RealtimeImpl implements Realtime {
 
     // Initialize channels
     _channels = RealtimeChannels(
-      realtime: this,
+      connection: _connection,
+      timerManager: timerManager,
+      options: _options,
     );
+
+    // Wire up channel message dispatch
+    _connection.onChannelMessage = _dispatchChannelMessage;
 
     // Auto-connect if enabled (RTC1c)
     if (_options.autoConnect) {
@@ -106,5 +112,11 @@ class RealtimeImpl implements Realtime {
   Future<void> close() async {
     await _connection.close();
     timerManager.dispose();
+  }
+
+  void _dispatchChannelMessage(ProtocolMessage message) {
+    if (message.channel == null) return;
+    final channel = _channels.getIfExists(message.channel!);
+    channel?.handleProtocolMessage(message);
   }
 }

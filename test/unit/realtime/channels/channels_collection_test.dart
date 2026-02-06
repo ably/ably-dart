@@ -1,6 +1,8 @@
 import 'package:ably_dart/ably_dart.dart';
 import 'package:test/test.dart';
 
+import '../../../helpers/mock_websocket_client.dart';
+import '../../../helpers/protocol_message_helpers.dart';
 import '../../../helpers/test_channel_name.dart';
 
 /// Tests for RealtimeChannels collection management.
@@ -9,13 +11,34 @@ import '../../../helpers/test_channel_name.dart';
 void main() {
   group('RealtimeChannels Collection - UTS Tests', () {
     late Realtime client;
+    late MockWebSocketClient mockWs;
 
     setUp(() {
-      client = Realtime(
+      mockWs = MockWebSocketClient(
+        onConnectionAttempt: (conn) {
+          conn.respondWithSuccess(
+            ProtocolMessageHelpers.connected(),
+          );
+        },
+        onMessageFromClient: (msg) {
+          if (msg.action == ProtocolAction.attach) {
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessageHelpers.attached(channel: msg.channel!),
+            );
+          } else if (msg.action == ProtocolAction.detach) {
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessageHelpers.detached(channel: msg.channel!),
+            );
+          }
+        },
+      );
+
+      client = Realtime.forTesting(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,
         ),
+        webSocketClient: mockWs,
       );
     });
 
