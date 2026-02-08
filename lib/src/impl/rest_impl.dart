@@ -4,7 +4,6 @@ import '../batch/batch_publish_spec.dart';
 import '../batch/batch_result.dart';
 import '../channels/channels.dart';
 import '../rest/rest.dart';
-import '../pagination/http_paginated_response.dart';
 import 'base_client_impl.dart';
 import 'rest_channels_impl.dart';
 
@@ -25,98 +24,6 @@ class RestImpl extends BaseClientImpl implements Rest {
 
   @override
   RestChannels get channels => _channels;
-
-  @override
-  Future<HttpPaginatedResponse<dynamic>> request(
-    String method,
-    String path, {
-    int? version,
-    Map<String, String>? params,
-    Map<String, String>? headers,
-    Object? body,
-  }) async {
-    // Ensure path starts with /
-    final normalizedPath = path.startsWith('/') ? path : '/$path';
-
-    // Build query parameters
-    final queryParams = Map<String, String>.from(params ?? {});
-
-    // Make the request
-    final response = await ablyHttpClient.request(
-      method,
-      normalizedPath,
-      queryParams: queryParams.isNotEmpty ? queryParams : null,
-      body: body,
-      authenticated: true,
-      customHeaders: headers,
-      customVersion: version,
-    );
-
-    // Parse response items
-    final responseBody = response.body;
-    List<dynamic> items;
-
-    if (responseBody is List) {
-      items = responseBody;
-    } else if (responseBody == null) {
-      items = [];
-    } else {
-      // Non-array response - wrap in a list
-      items = [responseBody];
-    }
-
-    // Store the original path for pagination
-    final originalPath = normalizedPath;
-
-    return HttpPaginatedResponseImpl.fromResponse(
-      statusCode: response.statusCode,
-      headers: response.headers,
-      items: items,
-      firstUrl: originalPath,
-      fetcher: (url) => _fetchPage(url, method, headers, version),
-    );
-  }
-
-  Future<HttpPaginatedResponse<dynamic>> _fetchPage(
-    String url,
-    String method,
-    Map<String, String>? headers,
-    int? version,
-  ) async {
-    final uri = Uri.parse(url);
-    final path = uri.path;
-    final queryParams = uri.queryParameters.isNotEmpty
-        ? Map<String, String>.from(uri.queryParameters)
-        : null;
-
-    final response = await ablyHttpClient.request(
-      method,
-      path,
-      queryParams: queryParams,
-      authenticated: true,
-      customHeaders: headers,
-      customVersion: version,
-    );
-
-    final responseBody = response.body;
-    List<dynamic> items;
-
-    if (responseBody is List) {
-      items = responseBody;
-    } else if (responseBody == null) {
-      items = [];
-    } else {
-      items = [responseBody];
-    }
-
-    return HttpPaginatedResponseImpl.fromResponse(
-      statusCode: response.statusCode,
-      headers: response.headers,
-      items: items,
-      firstUrl: path,
-      fetcher: (nextUrl) => _fetchPage(nextUrl, method, headers, version),
-    );
-  }
 
   @override
   Future<List<BatchResult>> batchPublish(

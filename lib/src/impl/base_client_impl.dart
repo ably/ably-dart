@@ -5,6 +5,7 @@ import '../auth/auth.dart';
 import '../auth/client_options.dart';
 import '../error/ably_exception.dart';
 import '../error/error_info.dart';
+import '../pagination/http_paginated_response.dart';
 import '../pagination/paginated_result.dart';
 import '../stats/stats.dart';
 import 'auth_impl.dart';
@@ -168,6 +169,98 @@ abstract class BaseClientImpl {
     }
 
     return DateTime.fromMillisecondsSinceEpoch(timestamp);
+  }
+
+  /// Makes an arbitrary HTTP request to the Ably REST API.
+  ///
+  /// Spec: RSC19, RTC9
+  Future<HttpPaginatedResponse<dynamic>> request(
+    String method,
+    String path, {
+    int? version,
+    Map<String, String>? params,
+    Map<String, String>? headers,
+    Object? body,
+  }) async {
+    // Ensure path starts with /
+    final normalizedPath = path.startsWith('/') ? path : '/$path';
+
+    // Build query parameters
+    final queryParams = Map<String, String>.from(params ?? {});
+
+    // Make the request
+    final response = await ablyHttpClient.request(
+      method,
+      normalizedPath,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
+      body: body,
+      authenticated: true,
+      customHeaders: headers,
+      customVersion: version,
+    );
+
+    // Parse response items
+    final responseBody = response.body;
+    List<dynamic> items;
+
+    if (responseBody is List) {
+      items = responseBody;
+    } else if (responseBody == null) {
+      items = [];
+    } else {
+      // Non-array response - wrap in a list
+      items = [responseBody];
+    }
+
+    return HttpPaginatedResponseImpl.fromResponse(
+      statusCode: response.statusCode,
+      headers: response.headers,
+      items: items,
+      firstUrl: normalizedPath,
+      fetcher: (url) => _fetchRequestPage(url, method, headers, version),
+    );
+  }
+
+  Future<HttpPaginatedResponse<dynamic>> _fetchRequestPage(
+    String url,
+    String method,
+    Map<String, String>? headers,
+    int? version,
+  ) async {
+    final uri = Uri.parse(url);
+    final path = uri.path;
+    final queryParams = uri.queryParameters.isNotEmpty
+        ? Map<String, String>.from(uri.queryParameters)
+        : null;
+
+    final response = await ablyHttpClient.request(
+      method,
+      path,
+      queryParams: queryParams,
+      authenticated: true,
+      customHeaders: headers,
+      customVersion: version,
+    );
+
+    final responseBody = response.body;
+    List<dynamic> items;
+
+    if (responseBody is List) {
+      items = responseBody;
+    } else if (responseBody == null) {
+      items = [];
+    } else {
+      items = [responseBody];
+    }
+
+    return HttpPaginatedResponseImpl.fromResponse(
+      statusCode: response.statusCode,
+      headers: response.headers,
+      items: items,
+      firstUrl: path,
+      fetcher: (nextUrl) =>
+          _fetchRequestPage(nextUrl, method, headers, version),
+    );
   }
 
   /// Gets application statistics.

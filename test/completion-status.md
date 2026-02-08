@@ -47,7 +47,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | RSC16 | Time function | Yes — `unit/client/time_test.dart` | Yes |
 | RSC17 | ClientId attribute | | |
 | RSC18 | TLS configuration | Yes — `unit/client/rest_client_test.dart`, `unit/client/time_test.dart` | Yes |
-| RSC19 | Request function (RSC19a–RSC19f1) | Yes — `unit/client/request_test.dart` | Yes |
+| RSC19 | Request function (RSC19a–RSC19f1) | Yes — `unit/client/request_test.dart` (shared via TestClient) | Yes |
 | RSC20 | Deprecated exception reporting (RSC20a–RSC20f) | | |
 | RSC21 | Push object attribute | | |
 | RSC22 | BatchPublish (RSC22a–RSC22d) | Yes — `unit/client/batch_publish_test.dart` | Yes |
@@ -154,7 +154,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | RTC6 | Time function (RTC6a) | Yes — `unit/client/time_test.dart` (shared via TestClient) | Yes |
 | RTC7 | Uses configured timeouts | | |
 | RTC8 | Authorize function for realtime (RTC8a–RTC8c) | | |
-| RTC9 | Request function | | |
+| RTC9 | Request function | Yes — `unit/client/request_test.dart` (shared via TestClient) | Yes |
 | RTC10–RTC11 | Deleted | | |
 | RTC12 | Same constructors as RestClient | | Yes |
 | RTC13 | Push object attribute | | |
@@ -328,7 +328,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | TAN1–TAN3 | Annotation | | |
 | TR1–TR4 | ProtocolMessage | | |
 | TG1–TG7 | PaginatedResult | Yes — `unit/types/paginated_result_test.dart` | Yes |
-| HP1–HP8 | HttpPaginatedResponse | Yes — `unit/client/request_test.dart` | Yes |
+| HP1–HP8 | HttpPaginatedResponse | Yes — `unit/client/request_test.dart` (shared via TestClient) | Yes |
 | TE1–TE6 | TokenRequest | Yes — `unit/types/token_types_test.dart` | Yes |
 | TD1–TD7 | TokenDetails | Yes — `unit/types/token_types_test.dart` | Yes |
 | TN1–TN3 | Token string | | |

@@ -4,6 +4,7 @@ import 'package:meta/meta.dart';
 import '../auth/auth.dart';
 import '../auth/client_options.dart';
 import '../impl/realtime_impl.dart';
+import '../pagination/http_paginated_response.dart';
 import '../pagination/paginated_result.dart';
 import '../stats/stats.dart';
 import 'connection.dart';
@@ -122,6 +123,20 @@ abstract class Realtime {
     StatsDirection? direction,
     int? limit,
     StatsUnit? unit,
+  });
+
+  /// Makes an arbitrary HTTP request to the Ably REST API.
+  ///
+  /// This is a direct proxy to the REST request() method (RSC19).
+  ///
+  /// Spec: RTC9
+  Future<HttpPaginatedResponse<dynamic>> request(
+    String method,
+    String path, {
+    int? version,
+    Map<String, String>? params,
+    Map<String, String>? headers,
+    Object? body,
   });
 
   /// Explicitly initiates a connection to Ably.
