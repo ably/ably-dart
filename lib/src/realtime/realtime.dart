@@ -4,6 +4,8 @@ import 'package:meta/meta.dart';
 import '../auth/auth.dart';
 import '../auth/client_options.dart';
 import '../impl/realtime_impl.dart';
+import '../pagination/paginated_result.dart';
+import '../stats/stats.dart';
 import 'connection.dart';
 import 'realtime_channels.dart';
 import 'timer_manager.dart';
@@ -108,6 +110,19 @@ abstract class Realtime {
   ///
   /// Spec: RTC6, RTC6a
   Future<DateTime> time();
+
+  /// Gets application statistics.
+  ///
+  /// This is a direct proxy to the REST stats() method (RSC6).
+  ///
+  /// Spec: RTC5, RTC5a, RTC5b
+  Future<PaginatedResult<Stats>> stats({
+    DateTime? start,
+    DateTime? end,
+    StatsDirection? direction,
+    int? limit,
+    StatsUnit? unit,
+  });
 
   /// Explicitly initiates a connection to Ably.
   ///

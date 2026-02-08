@@ -5,8 +5,11 @@ import '../auth/auth.dart';
 import '../auth/client_options.dart';
 import '../error/ably_exception.dart';
 import '../error/error_info.dart';
+import '../pagination/paginated_result.dart';
+import '../stats/stats.dart';
 import 'auth_impl.dart';
 import 'http/http_client.dart';
+import 'paginated_result_impl.dart';
 
 /// Shared base class for Rest and Realtime client implementations.
 ///
@@ -165,5 +168,77 @@ abstract class BaseClientImpl {
     }
 
     return DateTime.fromMillisecondsSinceEpoch(timestamp);
+  }
+
+  /// Gets application statistics.
+  ///
+  /// Returns a [PaginatedResult] containing [Stats] objects.
+  ///
+  /// Spec: RSC6, RTC5a
+  Future<PaginatedResult<Stats>> stats({
+    DateTime? start,
+    DateTime? end,
+    StatsDirection? direction,
+    int? limit,
+    StatsUnit? unit,
+  }) async {
+    final queryParams = <String, String>{};
+    if (start != null) {
+      queryParams['start'] = start.millisecondsSinceEpoch.toString();
+    }
+    if (end != null) {
+      queryParams['end'] = end.millisecondsSinceEpoch.toString();
+    }
+    if (direction != null) {
+      queryParams['direction'] = direction.name;
+    }
+    if (limit != null) {
+      queryParams['limit'] = limit.toString();
+    }
+    if (unit != null) {
+      queryParams['unit'] = unit.name;
+    }
+
+    final response = await ablyHttpClient.request(
+      'GET',
+      '/stats',
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
+      authenticated: true,
+    );
+
+    final items = _parseStats(response.body);
+
+    return PaginatedResultImpl.fromResponse<Stats>(
+      response: response,
+      items: items,
+      fetcher: (url) => _fetchStatsPage(url),
+    );
+  }
+
+  Future<PaginatedResult<Stats>> _fetchStatsPage(String url) async {
+    final uri = Uri.parse(url);
+
+    final response = await ablyHttpClient.request(
+      'GET',
+      uri.path,
+      queryParams: uri.queryParameters.isNotEmpty
+          ? Map<String, String>.from(uri.queryParameters)
+          : null,
+      authenticated: true,
+    );
+
+    final items = _parseStats(response.body);
+
+    return PaginatedResultImpl.fromResponse<Stats>(
+      response: response,
+      items: items,
+      fetcher: (nextUrl) => _fetchStatsPage(nextUrl),
+    );
+  }
+
+  List<Stats> _parseStats(dynamic body) {
+    if (body == null) return [];
+    if (body is! List) return [];
+    return body.cast<Map<String, dynamic>>().map(Stats.fromMap).toList();
   }
 }

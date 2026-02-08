@@ -8,6 +8,8 @@ import '../batch/batch_result.dart';
 import '../channels/channels.dart';
 import '../impl/rest_impl.dart';
 import '../pagination/http_paginated_response.dart';
+import '../pagination/paginated_result.dart';
+import '../stats/stats.dart';
 
 /// The Ably REST client.
 ///
@@ -66,6 +68,19 @@ abstract class Rest {
   ///
   /// Useful for ensuring accurate timestamps in token requests.
   Future<DateTime> time();
+
+  /// Gets application statistics.
+  ///
+  /// Returns a [PaginatedResult] containing [Stats] objects.
+  ///
+  /// Spec: RSC6
+  Future<PaginatedResult<Stats>> stats({
+    DateTime? start,
+    DateTime? end,
+    StatsDirection? direction,
+    int? limit,
+    StatsUnit? unit,
+  });
 
   /// Makes an arbitrary HTTP request to the Ably REST API.
   ///

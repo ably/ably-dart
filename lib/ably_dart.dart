@@ -49,6 +49,9 @@ export 'src/message/presence_message.dart';
 export 'src/message/message_extras.dart';
 export 'src/message/delta_extras.dart';
 
+// Stats
+export 'src/stats/stats.dart';
+
 // Batch operations
 export 'src/batch/batch_publish_spec.dart';
 export 'src/batch/batch_result.dart';

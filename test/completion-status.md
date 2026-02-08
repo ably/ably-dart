@@ -37,7 +37,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | RSC3 | Log level configuration | | |
 | RSC4 | Custom logger | | |
 | RSC5 | Auth object attribute | | |
-| RSC6 | Stats function (RSC6a–RSC6b4) | | Yes |
+| RSC6 | Stats function (RSC6a–RSC6b4) | Yes — `unit/client/stats_test.dart` (shared via TestClient) | Yes |
 | RSC7 | HTTP request headers (RSC7a–RSC7d7) | Yes — `unit/client/rest_client_test.dart` | Yes |
 | RSC8 | Protocol support (RSC8a–RSC8e2) | Yes — `unit/client/rest_client_test.dart` | Yes |
 | RSC9 | Auth usage for authentication | | |
@@ -150,7 +150,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | RTC2 | Connection object attribute | Yes — `unit/realtime/realtime_client_test.dart` | Yes |
 | RTC3 | Channels object attribute | Yes — `unit/realtime/realtime_client_test.dart` | Yes |
 | RTC4 | Auth object attribute (RTC4a) | Yes — `unit/realtime/realtime_client_test.dart` | Yes |
-| RTC5 | Stats function (RTC5a–RTC5b) | | Yes |
+| RTC5 | Stats function (RTC5a–RTC5b) | Yes — `unit/client/stats_test.dart` (shared via TestClient) | Yes |
 | RTC6 | Time function (RTC6a) | Yes — `unit/client/time_test.dart` (shared via TestClient) | Yes |
 | RTC7 | Uses configured timeouts | | |
 | RTC8 | Authorize function for realtime (RTC8a–RTC8c) | | |
@@ -391,7 +391,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | Area | Spec groups | With Dart test | With UTS spec | Notes |
 |------|-------------|----------------|---------------|-------|
 | **Endpoint config** (REC) | 3 | 3 | 3 | Full |
-| **REST client** (RSC) | 18 | 8 | 9 | Missing: RSC6 (stats), RSC15 (fallback) |
+| **REST client** (RSC) | 18 | 9 | 9 | Missing: RSC15 (fallback) |
 | **REST auth** (RSA) | 15 | 10 | 10 | Aligned with UTS |
 | **REST channels** (RSN) | 4 | 0 | 0 | |
 | **REST channel** (RSL) | 13 | 6 | 6 | Aligned with UTS |
