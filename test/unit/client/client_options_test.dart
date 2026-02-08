@@ -70,7 +70,7 @@ void main() {
     group('RSC1b - Invalid Arguments Error', () {
       test('throws error 40106 when no auth configured', () {
         expect(
-          () => Rest(
+          () => Rest.forTesting(
             options: ClientOptions(),
             httpClient: mockHttp,
           ),
@@ -86,7 +86,7 @@ void main() {
 
       test('throws error when useTokenAuth: true but no token means', () {
         expect(
-          () => Rest(
+          () => Rest.forTesting(
             options: ClientOptions(useTokenAuth: true),
             httpClient: mockHttp,
           ),
@@ -102,7 +102,7 @@ void main() {
 
       test('throws error when only clientId provided', () {
         expect(
-          () => Rest(
+          () => Rest.forTesting(
             options: ClientOptions(clientId: 'test'),
             httpClient: mockHttp,
           ),
@@ -129,7 +129,7 @@ void main() {
           logLevel: LogLevel.verbose,
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: options,
           httpClient: mockHttp,
         );
@@ -182,8 +182,8 @@ void main() {
           },
         );
 
-        final client = Rest.fromKey(
-          'appId.keyId:keySecret',
+        final client = Rest.forTesting(
+          options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
 

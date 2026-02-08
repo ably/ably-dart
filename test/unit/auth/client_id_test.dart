@@ -43,7 +43,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions(
             tokenDetails: TokenDetails(
               token: 'token-with-clientId',
@@ -70,7 +70,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions(
             authCallback: (params) async => TokenDetails(
               token: 'callback-token',
@@ -111,7 +111,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions(
             tokenDetails: TokenDetails(
               token: 'token-without-clientId',
@@ -141,7 +141,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions(
             authCallback: (params) async {
               receivedParams.add(params);
@@ -196,7 +196,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions(
             authUrl: 'https://auth.example.com/token',
             clientId: 'url-client-id',
@@ -238,7 +238,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions(
             authCallback: (params) async {
               tokenCount++;
@@ -277,7 +277,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions(
             tokenDetails: TokenDetails(
               token: 'wildcard-token',
@@ -306,7 +306,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions(
             clientId: 'client-a',
             tokenDetails: TokenDetails(
@@ -338,7 +338,7 @@ void main() {
 
         // RSA7: Mismatch is detected during client construction
         expect(
-          () => Rest(
+          () => Rest.forTesting(
             options: ClientOptions(
               clientId: 'client-a',
               tokenDetails: TokenDetails(
@@ -372,7 +372,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions(
             clientId: 'client-a',
             tokenDetails: TokenDetails(
@@ -401,7 +401,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions(
             clientId: 'client-a',
             tokenDetails: TokenDetails(
@@ -432,7 +432,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions(
             // No clientId in ClientOptions
             tokenDetails: TokenDetails(

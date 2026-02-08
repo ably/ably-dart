@@ -101,6 +101,14 @@ abstract class Realtime {
   /// Spec: RTC17
   String? get clientId;
 
+  /// Retrieves the server time from the Ably service.
+  ///
+  /// This is a direct proxy to the REST time() method (RSC16).
+  /// The request does not require authentication.
+  ///
+  /// Spec: RTC6, RTC6a
+  Future<DateTime> time();
+
   /// Explicitly initiates a connection to Ably.
   ///
   /// If already connected or connecting, this is a no-op.

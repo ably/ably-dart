@@ -1,4 +1,5 @@
 import 'package:http/http.dart' as http;
+import 'package:meta/meta.dart';
 
 import '../auth/auth.dart';
 import '../auth/client_options.dart';
@@ -17,14 +18,11 @@ import '../pagination/http_paginated_response.dart';
 abstract class Rest {
   /// Creates a REST client with the given options.
   ///
-  /// For testing, you can optionally provide an [httpClient].
-  ///
   /// Spec: RSC1
   factory Rest({
     required ClientOptions options,
-    http.Client? httpClient,
   }) {
-    return RestImpl(options: options, httpClient: httpClient);
+    return RestImpl(options: options);
   }
 
   /// Creates a REST client from an API key.
@@ -34,11 +32,21 @@ abstract class Rest {
   /// Rest(options: ClientOptions.fromKey(key))
   /// ```
   ///
-  /// For testing, you can optionally provide an [httpClient].
-  ///
   /// Spec: RSC1
-  factory Rest.fromKey(String key, {http.Client? httpClient}) {
-    return Rest(options: ClientOptions.fromKey(key), httpClient: httpClient);
+  factory Rest.fromKey(String key) {
+    return Rest(options: ClientOptions.fromKey(key));
+  }
+
+  /// Creates a REST client with test configuration.
+  ///
+  /// This factory is only for testing purposes and allows injection of
+  /// a mock [httpClient].
+  @visibleForTesting
+  factory Rest.forTesting({
+    required ClientOptions options,
+    http.Client? httpClient,
+  }) {
+    return RestImpl(options: options, httpClient: httpClient);
   }
 
   /// The client options.

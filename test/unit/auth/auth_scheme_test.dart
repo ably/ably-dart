@@ -59,7 +59,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
@@ -101,7 +101,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions(token: 'my-token-string'),
           httpClient: mockHttp,
         );
@@ -136,7 +136,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions(
             tokenDetails: TokenDetails(
               token: 'token-from-details',
@@ -178,7 +178,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions(
             authCallback: (params) async => TokenDetails(
               token: 'callback-token',
@@ -228,7 +228,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             clientId: 'my-client',
@@ -272,7 +272,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
@@ -304,7 +304,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             authCallback: (params) async => 'callback-wins',
@@ -342,7 +342,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             token: 'explicit-token',

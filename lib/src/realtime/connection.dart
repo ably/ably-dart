@@ -1099,8 +1099,11 @@ class Connection implements WebSocketListener {
     }
 
     // close() may trigger onClose synchronously (in mock) or
-    // asynchronously (in real WebSocket)
-    return connection.close();
+    // asynchronously (in real WebSocket).
+    // Ignore errors during close — SocketException etc. are expected
+    // when the socket is already being torn down, and this method is
+    // often called without await from synchronous error handlers.
+    return connection.close().catchError((_) {});
   }
 
   /// Transitions to a new state and emits a state change event.

@@ -203,6 +203,8 @@ void main() {
       expect(client.connection.state, equals(ConnectionState.failed));
       expect(client.connection.errorReason, isNotNull);
       expect(client.connection.errorReason!.code, equals(40400));
+
+      await client.close();
     });
   });
 

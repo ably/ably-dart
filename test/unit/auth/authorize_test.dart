@@ -50,7 +50,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
@@ -81,7 +81,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions(
             authCallback: (params) async {
               callbackParams.add(params);
@@ -127,7 +127,7 @@ void main() {
             },
           );
 
-          final client = Rest(
+          final client = Rest.forTesting(
             options: ClientOptions(
               authCallback: (params) async {
                 callbackInvocations.add(params);
@@ -180,7 +180,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
@@ -225,7 +225,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions(authCallback: originalCallback),
           httpClient: mockHttp,
         );
@@ -268,7 +268,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
@@ -299,7 +299,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions(
             authCallback: (params) async {
               tokenCount++;
@@ -348,7 +348,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
@@ -382,7 +382,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions.fromKey('invalid.key:secret'),
           httpClient: mockHttp,
         );

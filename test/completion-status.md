@@ -150,8 +150,8 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | RTC2 | Connection object attribute | Yes — `unit/realtime/realtime_client_test.dart` | Yes |
 | RTC3 | Channels object attribute | Yes — `unit/realtime/realtime_client_test.dart` | Yes |
 | RTC4 | Auth object attribute (RTC4a) | Yes — `unit/realtime/realtime_client_test.dart` | Yes |
-| RTC5 | Stats function (RTC5a–RTC5b) | | |
-| RTC6 | Time function (RTC6a) | | |
+| RTC5 | Stats function (RTC5a–RTC5b) | | Yes |
+| RTC6 | Time function (RTC6a) | Yes — `unit/client/time_test.dart` (shared via TestClient) | Yes |
 | RTC7 | Uses configured timeouts | | |
 | RTC8 | Authorize function for realtime (RTC8a–RTC8c) | | |
 | RTC9 | Request function | | |

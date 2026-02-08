@@ -38,7 +38,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
@@ -79,7 +79,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
@@ -144,7 +144,7 @@ void main() {
             },
           );
 
-          final client = Rest(
+          final client = Rest.forTesting(
             options: ClientOptions.fromKey('appId.keyId:keySecret'),
             httpClient: mockHttp,
           );
@@ -189,7 +189,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
@@ -207,7 +207,7 @@ void main() {
     group('RSL1i - Message size limit', () {
       test('rejects messages exceeding maxMessageSize', () async {
         final channelName = testChannelName('RSL1i-reject');
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             maxMessageSize: 1024, // 1KB limit for testing
@@ -250,7 +250,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             maxMessageSize: 1024,
@@ -287,7 +287,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
@@ -336,7 +336,7 @@ void main() {
           },
         );
 
-        final client = Rest(
+        final client = Rest.forTesting(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
@@ -393,7 +393,7 @@ void main() {
           },
         );
 
-        final clientWithId = Rest(
+        final clientWithId = Rest.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             clientId: 'lib-client',
@@ -439,7 +439,7 @@ void main() {
           },
         );
 
-        final clientWithId = Rest(
+        final clientWithId = Rest.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             clientId: 'lib-client',
@@ -478,7 +478,7 @@ void main() {
           },
         );
 
-        final clientNoId = Rest(
+        final clientNoId = Rest.forTesting(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
