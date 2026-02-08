@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:ably_dart/src/error/error_info.dart';
@@ -12,6 +13,12 @@ typedef ConnectionAttemptHandler = void Function(
 
 /// Callback for handling messages from client.
 typedef MessageFromClientHandler = void Function(ProtocolMessage message);
+
+/// Callback for handling raw text WebSocket data frames.
+///
+/// Called with the JSON string that would be sent over the wire.
+/// This is called in addition to [MessageFromClientHandler].
+typedef TextDataFrameHandler = void Function(String text);
 
 /// Mock WebSocket client that implements the UTS specification pattern.
 ///
@@ -49,6 +56,7 @@ class MockWebSocketClient implements WebSocketClient {
   MockWebSocketClient({
     this.onConnectionAttempt,
     this.onMessageFromClient,
+    this.onTextDataFrame,
   });
 
   /// Handler called for each connection attempt.
@@ -56,6 +64,12 @@ class MockWebSocketClient implements WebSocketClient {
 
   /// Handler called for each message from client.
   final MessageFromClientHandler? onMessageFromClient;
+
+  /// Handler called with raw JSON text for each message sent by client.
+  ///
+  /// This simulates access to the raw WebSocket text data frame before
+  /// decoding. Called in addition to [onMessageFromClient].
+  final TextDataFrameHandler? onTextDataFrame;
 
   /// Event timeline (UTS requirement) - chronological sequence of all events.
   final List<MockEvent> events = [];
@@ -117,6 +131,7 @@ class MockWebSocketClient implements WebSocketClient {
       timestamp: DateTime.now(),
       listener: listener,
       onMessageFromClient: onMessageFromClient,
+      onTextDataFrame: onTextDataFrame,
       mockClient: this,
     );
 
@@ -181,6 +196,7 @@ class PendingWebSocketConnection {
     required this.timestamp,
     required this.listener,
     this.onMessageFromClient,
+    this.onTextDataFrame,
     MockWebSocketClient? mockClient,
   }) : _mockClient = mockClient;
 
@@ -199,6 +215,9 @@ class PendingWebSocketConnection {
   /// Optional handler for messages from client.
   final MessageFromClientHandler? onMessageFromClient;
 
+  /// Optional handler for raw text data frames.
+  final TextDataFrameHandler? onTextDataFrame;
+
   /// Reference to the parent mock client.
   final MockWebSocketClient? _mockClient;
 
@@ -215,6 +234,7 @@ class PendingWebSocketConnection {
     final mockConnection = MockWebSocketConnection._(
       listener: listener,
       onMessageFromClient: onMessageFromClient,
+      onTextDataFrame: onTextDataFrame,
       mockClient: _mockClient,
     );
 
@@ -243,6 +263,7 @@ class PendingWebSocketConnection {
     final mockConnection = MockWebSocketConnection._(
       listener: listener,
       onMessageFromClient: onMessageFromClient,
+      onTextDataFrame: onTextDataFrame,
       mockClient: _mockClient,
     );
 
@@ -290,6 +311,7 @@ class PendingWebSocketConnection {
     final mockConnection = MockWebSocketConnection._(
       listener: listener,
       onMessageFromClient: onMessageFromClient,
+      onTextDataFrame: onTextDataFrame,
       mockClient: _mockClient,
     );
 
@@ -314,6 +336,7 @@ class MockWebSocketConnection implements WebSocketConnection {
   MockWebSocketConnection._({
     required this.listener,
     this.onMessageFromClient,
+    this.onTextDataFrame,
     MockWebSocketClient? mockClient,
   }) : _mockClient = mockClient;
 
@@ -322,6 +345,9 @@ class MockWebSocketConnection implements WebSocketConnection {
 
   /// Handler for messages from client.
   final MessageFromClientHandler? onMessageFromClient;
+
+  /// Handler for raw text data frames.
+  final TextDataFrameHandler? onTextDataFrame;
 
   /// Reference to parent mock client for event recording.
   final MockWebSocketClient? _mockClient;
@@ -345,6 +371,12 @@ class MockWebSocketConnection implements WebSocketConnection {
     if (_closed) throw StateError('Connection closed');
     sentMessages.add(message);
     _messagesFromClient.add(message);
+
+    // Call raw text frame handler with the JSON that would be sent on the wire
+    if (onTextDataFrame != null) {
+      onTextDataFrame!(jsonEncode(message.toJson()));
+    }
+
     onMessageFromClient?.call(message);
   }
 

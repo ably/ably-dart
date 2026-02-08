@@ -1,5 +1,6 @@
 import 'package:ably_dart/src/error/error_info.dart';
 import 'package:ably_dart/src/realtime/protocol_message.dart';
+import 'package:ably_dart/src/realtime/publish_result.dart';
 import 'package:ably_dart/src/message/message.dart';
 
 /// Helper functions for creating common protocol messages in tests.
@@ -102,10 +103,16 @@ class ProtocolMessageHelpers {
   }
 
   /// Creates an ACK protocol message.
-  static ProtocolMessage ack({required int msgSerial}) {
+  static ProtocolMessage ack({
+    required int msgSerial,
+    int count = 1,
+    List<PublishResult>? res,
+  }) {
     return ProtocolMessage(
       action: ProtocolAction.ack,
       msgSerial: msgSerial,
+      count: count,
+      res: res,
     );
   }
 

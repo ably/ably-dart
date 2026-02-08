@@ -12,6 +12,7 @@ import 'connection.dart';
 import 'connection_event.dart';
 import 'connection_state.dart';
 import 'protocol_message.dart';
+import 'publish_result.dart';
 import 'realtime_channel_options.dart';
 import 'timer_manager.dart';
 
@@ -173,6 +174,98 @@ class RealtimeChannel {
       // RTL8a: Remove by listener (all-message subscription only)
       return sub.listener == listener && sub.name == null;
     });
+  }
+
+  /// Publishes a message on this channel.
+  ///
+  /// Either provide [name] and/or [data], a single [message], or a list of
+  /// [messages]. Only one of these forms may be used at a time.
+  ///
+  /// Returns a [PublishResult] containing the message serials from the ACK
+  /// response (RTL6j).
+  ///
+  /// RTL6c state conditions determine whether the message is sent immediately,
+  /// queued, or rejected:
+  /// - RTL6c1: If connection is CONNECTED and channel is neither SUSPENDED
+  ///   nor FAILED, messages are sent immediately.
+  /// - RTL6c2: If connection is INITIALIZED, CONNECTING, or DISCONNECTED,
+  ///   and channel is neither SUSPENDED nor FAILED, and queueMessages is true,
+  ///   messages are queued.
+  /// - RTL6c4: Otherwise an error is raised.
+  /// - RTL6c5: Publish does NOT trigger an implicit attach.
+  ///
+  /// Spec: RTL6, RTL6j
+  Future<PublishResult> publish({
+    String? name,
+    Object? data,
+    Message? message,
+    List<Message>? messages,
+  }) async {
+    // RTL6c4: Fail if channel is SUSPENDED or FAILED
+    if (_state == ChannelState.suspended || _state == ChannelState.failed) {
+      throw AblyException(
+        errorInfo: ErrorInfo(
+          code: 90001,
+          message: 'Cannot publish when channel is $_state',
+          statusCode: 400,
+        ),
+      );
+    }
+
+    // Build the list of Message objects to publish
+    final List<Message> messageList;
+    if (messages != null) {
+      // RTL6i2: Array of messages
+      messageList = messages;
+    } else if (message != null) {
+      // RTL6i1: Single Message object
+      messageList = [message];
+    } else {
+      // RTL6i1/RTL6i3: name and/or data (either or both may be null)
+      messageList = [Message(name: name, data: data)];
+    }
+
+    // Build protocol message with Message.toMap() for proper encoding (RTL6i3)
+    final protocolMessage = ProtocolMessage(
+      action: ProtocolAction.message,
+      channel: _name,
+      messages: messageList.map((m) => m.toMap()).toList(),
+    );
+
+    final connState = _connection.state;
+
+    // RTL6c1: Send immediately if CONNECTED
+    if (connState == ConnectionState.connected) {
+      return _connection.sendPublishMessage(protocolMessage);
+    }
+
+    // RTL6c2: Queue if INITIALIZED, CONNECTING, or DISCONNECTED
+    // (and queueMessages is true)
+    if (connState == ConnectionState.initialized ||
+        connState == ConnectionState.connecting ||
+        connState == ConnectionState.disconnected) {
+      if (_clientOptions.queueMessages) {
+        return _connection.queueMessage(protocolMessage);
+      }
+      // queueMessages is false — fail
+      throw AblyException(
+        errorInfo: ErrorInfo(
+          code: 90001,
+          message: 'Cannot publish when connection is $connState and '
+              'queueMessages is false',
+          statusCode: 400,
+        ),
+      );
+    }
+
+    // RTL6c4: All other connection states (SUSPENDED, CLOSED, CLOSING, FAILED)
+    throw AblyException(
+      errorInfo: ErrorInfo(
+        code: 90001,
+        message: 'Cannot publish when connection is $connState',
+        statusCode: 400,
+      ),
+    );
   }
 
   /// Attaches to this channel.

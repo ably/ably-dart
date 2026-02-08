@@ -55,6 +55,7 @@ class ClientOptions extends AuthOptions {
     Map<String, String>? agents,
     String? connectivityCheckUrl,
     bool echoMessages = true,
+    bool queueMessages = true,
     bool autoConnect = true,
     int realtimeRequestTimeout = 10000,
     int disconnectedRetryTimeout = 15000,
@@ -138,6 +139,7 @@ class ClientOptions extends AuthOptions {
       agents: agents,
       connectivityCheckUrl: connectivityCheckUrl,
       echoMessages: echoMessages,
+      queueMessages: queueMessages,
       autoConnect: autoConnect,
       realtimeRequestTimeout: realtimeRequestTimeout,
       disconnectedRetryTimeout: disconnectedRetryTimeout,
@@ -183,6 +185,7 @@ class ClientOptions extends AuthOptions {
     this.agents,
     this.connectivityCheckUrl,
     this.echoMessages = true,
+    this.queueMessages = true,
     this.autoConnect = true,
     this.realtimeRequestTimeout = 10000,
     this.disconnectedRetryTimeout = 15000,
@@ -317,6 +320,16 @@ class ClientOptions extends AuthOptions {
   ///
   /// Spec: RTC1a
   final bool echoMessages;
+
+  /// Whether to queue messages when the connection is not CONNECTED.
+  ///
+  /// When true (default), messages published while the connection is
+  /// INITIALIZED, CONNECTING, or DISCONNECTED are queued and sent once
+  /// the connection becomes CONNECTED. When false, publishing in those
+  /// states fails immediately.
+  ///
+  /// Spec: RTL6c2
+  final bool queueMessages;
 
   /// Whether to automatically connect when the Realtime client is created.
   ///
@@ -553,6 +566,7 @@ class ClientOptions extends AuthOptions {
     Map<String, String>? agents,
     String? connectivityCheckUrl,
     bool? echoMessages,
+    bool? queueMessages,
     bool? autoConnect,
     int? realtimeRequestTimeout,
     int? disconnectedRetryTimeout,
@@ -595,6 +609,7 @@ class ClientOptions extends AuthOptions {
       agents: agents ?? this.agents,
       connectivityCheckUrl: connectivityCheckUrl ?? this.connectivityCheckUrl,
       echoMessages: echoMessages ?? this.echoMessages,
+      queueMessages: queueMessages ?? this.queueMessages,
       autoConnect: autoConnect ?? this.autoConnect,
       realtimeRequestTimeout:
           realtimeRequestTimeout ?? this.realtimeRequestTimeout,

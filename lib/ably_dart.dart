@@ -29,6 +29,7 @@ export 'src/realtime/channel_state.dart';
 export 'src/realtime/channel_event.dart';
 export 'src/realtime/channel_state_change.dart';
 export 'src/realtime/protocol_message.dart';
+export 'src/realtime/publish_result.dart';
 
 // Channels
 export 'src/channels/channel_details.dart';

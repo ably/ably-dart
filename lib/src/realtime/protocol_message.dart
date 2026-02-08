@@ -1,4 +1,5 @@
 import '../error/error_info.dart';
+import 'publish_result.dart';
 
 /// Protocol message actions.
 enum ProtocolAction {
@@ -59,6 +60,8 @@ class ProtocolMessage {
     this.presence,
     this.auth,
     this.params,
+    this.count,
+    this.res,
   });
 
   /// The action this message represents.
@@ -106,6 +109,19 @@ class ProtocolMessage {
   /// Channel params (for ATTACH messages).
   final Map<String, String>? params;
 
+  /// Number of messages being acknowledged (for ACK/NACK).
+  ///
+  /// Spec: TR4g
+  final int? count;
+
+  /// Array of PublishResult objects (for ACK messages).
+  ///
+  /// Contains one PublishResult per acknowledged ProtocolMessage in order,
+  /// each containing the serials of the messages that were published.
+  ///
+  /// Spec: TR4s
+  final List<PublishResult>? res;
+
   /// Creates a ProtocolMessage from JSON.
   factory ProtocolMessage.fromJson(Map<String, dynamic> json) {
     return ProtocolMessage(
@@ -133,6 +149,12 @@ class ProtocolMessage {
       params: json['params'] != null
           ? Map<String, String>.from(json['params'] as Map)
           : null,
+      count: json['count'] as int?,
+      res: json['res'] != null
+          ? (json['res'] as List)
+              .map((e) => PublishResult.fromMap(e as Map<String, dynamic>))
+              .toList()
+          : null,
     );
   }
 
@@ -155,6 +177,8 @@ class ProtocolMessage {
       if (presence != null) 'presence': presence,
       if (auth != null) 'auth': auth,
       if (params != null) 'params': params,
+      if (count != null) 'count': count,
+      if (res != null) 'res': res,
     };
   }
 

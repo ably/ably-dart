@@ -16,6 +16,7 @@ import 'connection_state.dart';
 import 'connection_state_change.dart';
 import 'io_websocket_client.dart';
 import 'protocol_message.dart';
+import 'publish_result.dart';
 import 'timer_manager.dart';
 import 'websocket_client.dart';
 
@@ -71,6 +72,16 @@ class Connection implements WebSocketListener {
   /// Pending ping completers, keyed by the random id sent in the HEARTBEAT.
   /// Each value is a record of (completer, startTime) for computing duration.
   final Map<String, (Completer<Duration>, DateTime)> _pendingPings = {};
+
+  /// Next msgSerial to assign to outgoing MESSAGE/PRESENCE ProtocolMessages.
+  ///
+  /// Spec: RTN7b
+  int _nextMsgSerial = 0;
+
+  /// Messages awaiting ACK/NACK from Ably, keyed by msgSerial.
+  ///
+  /// Spec: RTN7a
+  final Map<int, _PendingMessage> _pendingMessages = {};
 
   /// Callback for dispatching channel-scoped protocol messages.
   /// Set by RealtimeImpl to route messages to the appropriate channel.
@@ -529,6 +540,10 @@ class Connection implements WebSocketListener {
         _handleError(message);
       case ProtocolAction.heartbeat:
         _handleHeartbeat(message);
+      case ProtocolAction.ack:
+        _handleAck(message);
+      case ProtocolAction.nack:
+        _handleNack(message);
       default:
         if (message.channel != null && onChannelMessage != null) {
           onChannelMessage!(message);
@@ -643,6 +658,9 @@ class Connection implements WebSocketListener {
 
     // Start idle timeout after successful connection (RTN23a)
     _scheduleIdleTimeout();
+
+    // RTL6c2: Flush queued messages now that we're connected
+    _flushMessageQueue();
 
     // Complete connection attempt
     if (_connectionCompleter != null && !_connectionCompleter!.isCompleted) {
@@ -1116,12 +1134,27 @@ class Connection implements WebSocketListener {
       _key = null;
     }
 
+    // RTN7e: Fail pending messages on SUSPENDED, CLOSED, FAILED
+    if (newState == ConnectionState.suspended ||
+        newState == ConnectionState.closed ||
+        newState == ConnectionState.failed) {
+      final msgError = error ??
+          ErrorInfo(
+            code: 80000,
+            statusCode: 400,
+            message: 'Connection transitioned to ${newState.name}',
+          );
+      _failPendingMessages(msgError);
+      _failQueuedMessages(msgError);
+    }
+
     // Clear additional connection details in terminal states
     if (newState == ConnectionState.closed ||
         newState == ConnectionState.failed) {
       _serial = null;
       _shouldResume = false;
       _disconnectedAt = null;
+      _nextMsgSerial = 0; // RTN11d
       // Fail any pending pings
       _failPendingPings(ErrorInfo(
         code: 80000,
@@ -1153,7 +1186,7 @@ class Connection implements WebSocketListener {
 
   /// Sends a protocol message to the server.
   ///
-  /// Used by channels to send ATTACH/DETACH messages.
+  /// Used by channels to send ATTACH/DETACH messages (no ACK tracking).
   void sendMessage(ProtocolMessage message) {
     if (_webSocketConnection == null) {
       throw AblyException(
@@ -1165,6 +1198,156 @@ class Connection implements WebSocketListener {
       );
     }
     _webSocketConnection!.send(message);
+  }
+
+  /// Sends a publish protocol message and returns a future that completes
+  /// when the ACK is received from the server.
+  ///
+  /// Assigns a unique `msgSerial` (RTN7b), registers the message in
+  /// `_pendingMessages`, and sends it over the transport.
+  ///
+  /// Spec: RTN7a, RTN7b, RTL6j
+  Future<PublishResult> sendPublishMessage(ProtocolMessage message) {
+    if (_webSocketConnection == null) {
+      throw AblyException(
+        errorInfo: ErrorInfo(
+          code: 80000,
+          message: 'Not connected',
+          statusCode: 400,
+        ),
+      );
+    }
+
+    final serial = _nextMsgSerial++;
+    final messageWithSerial = ProtocolMessage(
+      action: message.action,
+      channel: message.channel,
+      messages: message.messages,
+      msgSerial: serial,
+      flags: message.flags,
+      params: message.params,
+    );
+
+    final completer = Completer<PublishResult>();
+    _pendingMessages[serial] = _PendingMessage(
+      message: messageWithSerial,
+      completer: completer,
+    );
+
+    _webSocketConnection!.send(messageWithSerial);
+    return completer.future;
+  }
+
+  /// Queues a protocol message to be sent when the connection becomes CONNECTED.
+  ///
+  /// Returns a future that completes when the ACK is received after the
+  /// message is eventually sent.
+  ///
+  /// Spec: RTL6c2
+  Future<PublishResult> queueMessage(ProtocolMessage message) {
+    final completer = Completer<PublishResult>();
+    _messageQueue.add((message, completer));
+    return completer.future;
+  }
+
+  /// The connection-wide message queue for messages waiting to be sent.
+  ///
+  /// Each entry is a (ProtocolMessage, Completer) tuple so the caller
+  /// gets a future that resolves when the ACK eventually arrives.
+  final List<(ProtocolMessage, Completer<PublishResult>)> _messageQueue = [];
+
+  /// Flushes queued messages by sending them over the active connection.
+  ///
+  /// Called when the connection transitions to CONNECTED. Each queued message
+  /// is sent via [sendPublishMessage] which assigns a msgSerial and registers
+  /// it for ACK tracking. The queued completer is chained to the send future.
+  void _flushMessageQueue() {
+    if (_webSocketConnection == null || _messageQueue.isEmpty) return;
+    final entries =
+        List<(ProtocolMessage, Completer<PublishResult>)>.from(_messageQueue);
+    _messageQueue.clear();
+    for (final (message, queuedCompleter) in entries) {
+      final sendFuture = sendPublishMessage(message);
+      sendFuture.then(
+        queuedCompleter.complete,
+        onError: queuedCompleter.completeError,
+      );
+    }
+  }
+
+  /// Handles an ACK protocol message from the server.
+  ///
+  /// Resolves `count` pending messages starting from `message.msgSerial`
+  /// with the corresponding `PublishResult` from `message.res`.
+  ///
+  /// Spec: RTN7a
+  void _handleAck(ProtocolMessage message) {
+    final startSerial = message.msgSerial ?? 0;
+    final count = message.count ?? 1;
+    final resList = message.res;
+
+    for (var i = 0; i < count; i++) {
+      final serial = startSerial + i;
+      final pending = _pendingMessages.remove(serial);
+      if (pending != null && !pending.completer.isCompleted) {
+        final result = (resList != null && i < resList.length)
+            ? resList[i]
+            : const PublishResult(serials: []);
+        pending.completer.complete(result);
+      }
+    }
+  }
+
+  /// Handles a NACK protocol message from the server.
+  ///
+  /// Fails `count` pending messages starting from `message.msgSerial`
+  /// with the error from the NACK.
+  ///
+  /// Spec: RTN7a
+  void _handleNack(ProtocolMessage message) {
+    final startSerial = message.msgSerial ?? 0;
+    final count = message.count ?? 1;
+    final error = message.error ??
+        const ErrorInfo(
+          code: 50000,
+          statusCode: 500,
+          message: 'Message publish failed (NACK)',
+        );
+
+    for (var i = 0; i < count; i++) {
+      final serial = startSerial + i;
+      final pending = _pendingMessages.remove(serial);
+      if (pending != null && !pending.completer.isCompleted) {
+        pending.completer.completeError(
+          AblyException(errorInfo: error),
+        );
+      }
+    }
+  }
+
+  /// Fails all pending publish messages with the given error.
+  ///
+  /// Used when the connection enters a state where pending messages
+  /// cannot be delivered (RTN7d, RTN7e).
+  void _failPendingMessages(ErrorInfo error) {
+    final exception = AblyException(errorInfo: error);
+    for (final pending in _pendingMessages.values) {
+      if (!pending.completer.isCompleted) {
+        pending.completer.completeError(exception);
+      }
+    }
+    _pendingMessages.clear();
+  }
+
+  /// Fails all queued messages with the given error.
+  void _failQueuedMessages(ErrorInfo error) {
+    final exception = AblyException(errorInfo: error);
+    for (final (_, completer) in _messageQueue) {
+      if (!completer.isCompleted) {
+        completer.completeError(exception);
+      }
+    }
+    _messageQueue.clear();
   }
 
   /// Fails all pending pings with the given error.
@@ -1181,13 +1364,24 @@ class Connection implements WebSocketListener {
 
   /// Disposes resources used by this connection.
   void dispose() {
-    _failPendingPings(ErrorInfo(
+    final disposeError = ErrorInfo(
       code: 80000,
       statusCode: 400,
       message: 'Connection disposed',
-    ));
+    );
+    _failPendingPings(disposeError);
+    _failPendingMessages(disposeError);
+    _failQueuedMessages(disposeError);
     _closeWebSocket();
     _timerManager.cancelAll(owner: this);
     _stateChangeController.close();
   }
+}
+
+/// A message awaiting ACK/NACK from Ably.
+class _PendingMessage {
+  _PendingMessage({required this.message, required this.completer});
+
+  final ProtocolMessage message;
+  final Completer<PublishResult> completer;
 }
