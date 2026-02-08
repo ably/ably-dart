@@ -637,16 +637,21 @@ class Connection implements WebSocketListener {
     }
 
     // Check if resume succeeded or failed
-    if (previousId != null && _id != previousId) {
+    final isFailedResume = previousId != null && _id != previousId;
+
+    if (isFailedResume) {
       // Resume failed - got new connection ID (RTN15c7)
       _shouldResume = false;
 
-      // Could set error reason to indicate resume failure
-      final resumeError = ErrorInfo(
-        code: 80008,
-        statusCode: 400,
-        message: 'Resume failed',
-      );
+      // RTN15c7: Reset msgSerial counter on failed resume
+      _nextMsgSerial = 0;
+
+      final resumeError = message.error ??
+          ErrorInfo(
+            code: 80008,
+            statusCode: 400,
+            message: 'Resume failed',
+          );
 
       _transitionTo(ConnectionState.connected, error: resumeError);
     } else {
@@ -658,6 +663,9 @@ class Connection implements WebSocketListener {
 
     // Start idle timeout after successful connection (RTN23a)
     _scheduleIdleTimeout();
+
+    // RTN19a: Resend pending messages (awaiting ACK/NACK) on new transport
+    _resendPendingMessages(resumeFailed: isFailedResume);
 
     // RTL6c2: Flush queued messages now that we're connected
     _flushMessageQueue();
@@ -1151,6 +1159,18 @@ class Connection implements WebSocketListener {
       _failQueuedMessages(msgError);
     }
 
+    // RTN7d: If queueMessages is false, fail pending messages on DISCONNECTED
+    if (newState == ConnectionState.disconnected && !_options.queueMessages) {
+      final msgError = error ??
+          ErrorInfo(
+            code: 80000,
+            statusCode: 400,
+            message: 'Connection transitioned to ${newState.name}',
+          );
+      _failPendingMessages(msgError);
+      _failQueuedMessages(msgError);
+    }
+
     // Clear additional connection details in terminal states
     if (newState == ConnectionState.closed ||
         newState == ConnectionState.failed) {
@@ -1275,6 +1295,50 @@ class Connection implements WebSocketListener {
         queuedCompleter.complete,
         onError: queuedCompleter.completeError,
       );
+    }
+  }
+
+  /// Resends pending messages (awaiting ACK/NACK) on the new transport.
+  ///
+  /// RTN19a: After a transport disconnect and reconnect, messages that were
+  /// awaiting ACK/NACK must be resent so the server can respond.
+  ///
+  /// RTN19a2: On successful resume (same connectionId), keep original
+  /// msgSerial values. On failed resume (new connectionId), assign new
+  /// msgSerial values from the reset counter.
+  void _resendPendingMessages({required bool resumeFailed}) {
+    if (_webSocketConnection == null || _pendingMessages.isEmpty) return;
+
+    // Take all pending messages, sorted by original msgSerial
+    final entries = _pendingMessages.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
+    _pendingMessages.clear();
+
+    for (final entry in entries) {
+      final pending = entry.value;
+      final originalMessage = pending.message;
+
+      if (resumeFailed) {
+        // RTN19a2: Failed resume — assign new msgSerial from reset counter
+        final newSerial = _nextMsgSerial++;
+        final resendMessage = ProtocolMessage(
+          action: originalMessage.action,
+          channel: originalMessage.channel,
+          messages: originalMessage.messages,
+          msgSerial: newSerial,
+          flags: originalMessage.flags,
+          params: originalMessage.params,
+        );
+        _pendingMessages[newSerial] = _PendingMessage(
+          message: resendMessage,
+          completer: pending.completer,
+        );
+        _webSocketConnection!.send(resendMessage);
+      } else {
+        // RTN19a2: Successful resume — keep same msgSerial
+        _pendingMessages[entry.key] = pending;
+        _webSocketConnection!.send(originalMessage);
+      }
     }
   }
 

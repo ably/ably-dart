@@ -759,6 +759,7 @@ void main() {
         expect(e, isA<AblyException>());
       }
 
+      await client.close();
       mockWs.dispose();
     });
   });
@@ -1388,6 +1389,986 @@ void main() {
       }
 
       mockWs.dispose();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // RTN7e - Pending publishes fail on SUSPENDED/CLOSED/FAILED
+  // ---------------------------------------------------------------------------
+
+  group('RTN7e - Pending publishes fail when connection enters CLOSED', () {
+    test('pending publish fails when client.close() is called', () async {
+      final channelName = testChannelName('RTN7e-closed');
+
+      late final MockWebSocketClient mockWs;
+      mockWs = MockWebSocketClient(
+        onConnectionAttempt: (conn) {
+          conn.respondWithSuccess(ProtocolMessageHelpers.connected());
+        },
+        onMessageFromClient: (msg) {
+          if (msg.action == ProtocolAction.attach) {
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessageHelpers.attached(channel: channelName),
+            );
+          }
+          // Do NOT send ACK for MESSAGE — leave pending
+        },
+      );
+
+      final client = Realtime.forTesting(
+        options: ClientOptions(
+          key: 'appId.keyId:keySecret',
+          autoConnect: false,
+        ),
+        webSocketClient: mockWs,
+      );
+
+      final channel = client.channels.get(
+        channelName,
+        const RealtimeChannelOptions(attachOnSubscribe: false),
+      );
+
+      client.connect();
+      await _awaitConnectionState(
+        client.connection,
+        ConnectionState.connected,
+      );
+      await channel.attach();
+
+      // Publish but don't ACK — message stays pending
+      final publishFuture = channel.publish(name: 'pending', data: 'data');
+
+      // Close the connection
+      await client.close();
+      expect(client.connection.state, equals(ConnectionState.closed));
+
+      // The pending publish should now fail
+      try {
+        await publishFuture;
+        fail('Expected AblyException');
+      } catch (e) {
+        expect(e, isA<AblyException>());
+      }
+
+      mockWs.dispose();
+    });
+  });
+
+  group('RTN7e - Pending publishes fail when connection enters FAILED', () {
+    test('pending publish fails when server sends fatal ERROR', () async {
+      final channelName = testChannelName('RTN7e-failed');
+
+      late final MockWebSocketClient mockWs;
+      mockWs = MockWebSocketClient(
+        onConnectionAttempt: (conn) {
+          conn.respondWithSuccess(ProtocolMessageHelpers.connected());
+        },
+        onMessageFromClient: (msg) {
+          if (msg.action == ProtocolAction.attach) {
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessageHelpers.attached(channel: channelName),
+            );
+          } else if (msg.action == ProtocolAction.message) {
+            // Respond with fatal ERROR instead of ACK
+            // Schedule asynchronously so the publish future is returned first
+            scheduleMicrotask(() {
+              mockWs.activeConnection?.sendToClientAndClose(ProtocolMessage(
+                action: ProtocolAction.error,
+                error: const ErrorInfo(
+                  code: 80000,
+                  message: 'Fatal error',
+                ),
+              ));
+            });
+          }
+        },
+      );
+
+      final client = Realtime.forTesting(
+        options: ClientOptions(
+          key: 'appId.keyId:keySecret',
+          autoConnect: false,
+        ),
+        webSocketClient: mockWs,
+      );
+
+      final channel = client.channels.get(
+        channelName,
+        const RealtimeChannelOptions(attachOnSubscribe: false),
+      );
+
+      client.connect();
+      await _awaitConnectionState(
+        client.connection,
+        ConnectionState.connected,
+      );
+      await channel.attach();
+
+      // Publish — server will respond with fatal ERROR asynchronously
+      try {
+        await channel.publish(name: 'pending', data: 'data');
+        fail('Expected AblyException');
+      } catch (e) {
+        expect(e, isA<AblyException>());
+      }
+
+      expect(client.connection.state, equals(ConnectionState.failed));
+
+      mockWs.dispose();
+    });
+  });
+
+  group('RTN7e - Pending publishes fail when connection enters SUSPENDED', () {
+    test('pending publish fails when connection becomes SUSPENDED', () async {
+      final channelName = testChannelName('RTN7e-suspended');
+
+      final testClock = TestClock();
+      final fakeTimers = FakeTimerManager(testClock);
+
+      await withClock(testClock, () async {
+        var isFirstConnection = true;
+
+        late final MockWebSocketClient mockWs;
+        mockWs = MockWebSocketClient(
+          onConnectionAttempt: (conn) {
+            if (isFirstConnection) {
+              isFirstConnection = false;
+              conn.respondWithSuccess(ProtocolMessageHelpers.connected());
+            } else {
+              // Refuse all reconnection attempts
+              conn.respondWithRefused();
+            }
+          },
+          onMessageFromClient: (msg) {
+            if (msg.action == ProtocolAction.attach) {
+              mockWs.activeConnection!.sendToClient(
+                ProtocolMessageHelpers.attached(channel: channelName),
+              );
+            }
+            // Do NOT send ACK for MESSAGE — leave pending
+          },
+        );
+
+        final client = Realtime.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            autoConnect: false,
+            disconnectedRetryTimeout: 1000,
+            fallbackHosts: [],
+          ),
+          webSocketClient: mockWs,
+          timerManager: fakeTimers,
+        );
+
+        final channel = client.channels.get(
+          channelName,
+          const RealtimeChannelOptions(attachOnSubscribe: false),
+        );
+
+        client.connect();
+        await _awaitConnectionState(
+          client.connection,
+          ConnectionState.connected,
+        );
+        await channel.attach();
+
+        // Publish but don't ACK — message stays pending.
+        // Capture error eagerly to prevent unhandled error in test zone.
+        Object? publishError;
+        unawaited(channel
+            .publish(name: 'pending', data: 'data')
+            .then((_) => null)
+            .catchError((Object e) {
+          publishError = e;
+          return null;
+        }));
+
+        // Disconnect — reconnection attempts will be refused
+        mockWs.activeConnection!.simulateDisconnect();
+        await _pumpEventQueue();
+
+        // Wait for DISCONNECTED state
+        await _awaitConnectionState(
+          client.connection,
+          ConnectionState.disconnected,
+        );
+
+        // Advance time past connectionStateTtl (120s default) to reach SUSPENDED
+        fakeTimers.elapseTime(const Duration(seconds: 121));
+        await _pumpEventQueue();
+
+        await _awaitConnectionState(
+          client.connection,
+          ConnectionState.suspended,
+        );
+
+        // Give time for the error to propagate
+        await _pumpEventQueue();
+
+        // The pending publish should have failed
+        expect(publishError, isA<AblyException>());
+
+        mockWs.dispose();
+      });
+    });
+  });
+
+  group('RTN7e - Multiple pending publishes all fail on state change', () {
+    test('all pending publishes fail when connection closes', () async {
+      final channelName = testChannelName('RTN7e-multi');
+
+      late final MockWebSocketClient mockWs;
+      mockWs = MockWebSocketClient(
+        onConnectionAttempt: (conn) {
+          conn.respondWithSuccess(ProtocolMessageHelpers.connected());
+        },
+        onMessageFromClient: (msg) {
+          if (msg.action == ProtocolAction.attach) {
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessageHelpers.attached(channel: channelName),
+            );
+          }
+          // Do NOT send ACK for MESSAGE — leave all pending
+        },
+      );
+
+      final client = Realtime.forTesting(
+        options: ClientOptions(
+          key: 'appId.keyId:keySecret',
+          autoConnect: false,
+        ),
+        webSocketClient: mockWs,
+      );
+
+      final channel = client.channels.get(
+        channelName,
+        const RealtimeChannelOptions(attachOnSubscribe: false),
+      );
+
+      client.connect();
+      await _awaitConnectionState(
+        client.connection,
+        ConnectionState.connected,
+      );
+      await channel.attach();
+
+      // Publish multiple messages, none will be ACK'd
+      final future1 = channel.publish(name: 'msg1', data: 'data1');
+      final future2 = channel.publish(name: 'msg2', data: 'data2');
+      final future3 = channel.publish(name: 'msg3', data: 'data3');
+
+      // Close the connection
+      await client.close();
+
+      // All pending publishes should fail
+      for (final future in [future1, future2, future3]) {
+        try {
+          await future;
+          fail('Expected AblyException');
+        } catch (e) {
+          expect(e, isA<AblyException>());
+        }
+      }
+
+      mockWs.dispose();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // RTN7d - queueMessages=false fails pending on DISCONNECTED
+  // ---------------------------------------------------------------------------
+
+  group(
+      'RTN7d - Pending publishes fail on DISCONNECTED when queueMessages=false',
+      () {
+    test('pending publish fails immediately on DISCONNECTED', () async {
+      final channelName = testChannelName('RTN7d');
+
+      late final MockWebSocketClient mockWs;
+      mockWs = MockWebSocketClient(
+        onConnectionAttempt: (conn) {
+          conn.respondWithSuccess(ProtocolMessageHelpers.connected());
+        },
+        onMessageFromClient: (msg) {
+          if (msg.action == ProtocolAction.attach) {
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessageHelpers.attached(channel: channelName),
+            );
+          }
+          // Do NOT send ACK for MESSAGE — leave pending
+        },
+      );
+
+      final client = Realtime.forTesting(
+        options: ClientOptions(
+          key: 'appId.keyId:keySecret',
+          autoConnect: false,
+          queueMessages: false,
+        ),
+        webSocketClient: mockWs,
+      );
+
+      final channel = client.channels.get(
+        channelName,
+        const RealtimeChannelOptions(attachOnSubscribe: false),
+      );
+
+      client.connect();
+      await _awaitConnectionState(
+        client.connection,
+        ConnectionState.connected,
+      );
+      await channel.attach();
+
+      // Publish but don't ACK — message stays pending.
+      // Capture error eagerly to prevent unhandled error in test zone.
+      Object? publishError;
+      unawaited(channel
+          .publish(name: 'pending', data: 'data')
+          .then((_) => null)
+          .catchError((Object e) {
+        publishError = e;
+        return null;
+      }));
+
+      // Disconnect — triggers DISCONNECTED state
+      mockWs.activeConnection!.simulateDisconnect();
+      await _pumpEventQueue();
+
+      // The pending publish should have failed on DISCONNECTED
+      expect(publishError, isA<AblyException>());
+
+      mockWs.dispose();
+    });
+  });
+
+  group(
+      'RTN7d - Pending publishes survive DISCONNECTED when queueMessages=true',
+      () {
+    test('pending publish succeeds after reconnect', () async {
+      final channelName = testChannelName('RTN7d-default');
+
+      final testClock = TestClock();
+      final fakeTimers = FakeTimerManager(testClock);
+
+      await withClock(testClock, () async {
+        var connectionCount = 0;
+
+        late final MockWebSocketClient mockWs;
+        mockWs = MockWebSocketClient(
+          onConnectionAttempt: (conn) {
+            connectionCount++;
+            conn.respondWithSuccess(ProtocolMessageHelpers.connected());
+          },
+          onMessageFromClient: (msg) {
+            if (msg.action == ProtocolAction.attach) {
+              mockWs.activeConnection!.sendToClient(
+                ProtocolMessageHelpers.attached(channel: channelName),
+              );
+            } else if (msg.action == ProtocolAction.message) {
+              if (connectionCount >= 2) {
+                // ACK on reconnection
+                mockWs.activeConnection!.sendToClient(
+                  ProtocolMessageHelpers.ack(
+                    msgSerial: msg.msgSerial!,
+                    count: 1,
+                    res: [
+                      PublishResult(serials: const ['serial-ack']),
+                    ],
+                  ),
+                );
+              }
+              // First connection: do NOT ACK — leave pending
+            }
+          },
+        );
+
+        final client = Realtime.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            autoConnect: false,
+          ),
+          webSocketClient: mockWs,
+          timerManager: fakeTimers,
+        );
+
+        final channel = client.channels.get(
+          channelName,
+          const RealtimeChannelOptions(attachOnSubscribe: false),
+        );
+
+        client.connect();
+        await _awaitConnectionState(
+          client.connection,
+          ConnectionState.connected,
+        );
+        await channel.attach();
+
+        // Publish but don't ACK — message stays pending
+        final publishFuture = channel.publish(name: 'pending', data: 'data');
+
+        // Disconnect
+        mockWs.activeConnection!.simulateDisconnect();
+        await _pumpEventQueue();
+
+        // Reconnect
+        fakeTimers.elapseTime(const Duration(seconds: 2));
+        await _pumpEventQueue();
+        await _awaitConnectionState(
+          client.connection,
+          ConnectionState.connected,
+        );
+
+        // The publish should eventually succeed (resent and ACK'd)
+        final result = await publishFuture;
+
+        expect(result, isA<PublishResult>());
+        expect(result.serials[0], equals('serial-ack'));
+
+        mockWs.dispose();
+      });
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // RTN19a - Pending messages resent on new transport after disconnect
+  // ---------------------------------------------------------------------------
+
+  group('RTN19a - Pending messages resent on new transport', () {
+    test('message is resent on second transport after disconnect', () async {
+      final channelName = testChannelName('RTN19a');
+      final capturedMessages = <({ProtocolMessage msg, int connection})>[];
+
+      final testClock = TestClock();
+      final fakeTimers = FakeTimerManager(testClock);
+
+      await withClock(testClock, () async {
+        var connectionCount = 0;
+
+        late final MockWebSocketClient mockWs;
+        mockWs = MockWebSocketClient(
+          onConnectionAttempt: (conn) {
+            connectionCount++;
+            conn.respondWithSuccess(ProtocolMessageHelpers.connected());
+          },
+          onMessageFromClient: (msg) {
+            if (msg.action == ProtocolAction.attach) {
+              mockWs.activeConnection!.sendToClient(
+                ProtocolMessageHelpers.attached(channel: channelName),
+              );
+            } else if (msg.action == ProtocolAction.message) {
+              capturedMessages.add(
+                (msg: msg, connection: connectionCount),
+              );
+              if (connectionCount >= 2) {
+                // ACK on second connection
+                mockWs.activeConnection!.sendToClient(
+                  ProtocolMessageHelpers.ack(
+                    msgSerial: msg.msgSerial!,
+                    count: 1,
+                    res: [
+                      PublishResult(serials: const ['serial-resent']),
+                    ],
+                  ),
+                );
+              }
+              // First connection: do NOT ACK
+            }
+          },
+        );
+
+        final client = Realtime.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            autoConnect: false,
+          ),
+          webSocketClient: mockWs,
+          timerManager: fakeTimers,
+        );
+
+        final channel = client.channels.get(
+          channelName,
+          const RealtimeChannelOptions(attachOnSubscribe: false),
+        );
+
+        client.connect();
+        await _awaitConnectionState(
+          client.connection,
+          ConnectionState.connected,
+        );
+        await channel.attach();
+
+        // Publish — sent on first transport, no ACK
+        final publishFuture = channel.publish(
+          name: 'resend-me',
+          data: 'data',
+        );
+
+        // Verify sent on first transport
+        final firstTransportMsgs =
+            capturedMessages.where((m) => m.connection == 1).toList();
+        expect(firstTransportMsgs, hasLength(1));
+
+        // Disconnect
+        mockWs.activeConnection!.simulateDisconnect();
+        await _pumpEventQueue();
+
+        // Reconnect
+        fakeTimers.elapseTime(const Duration(seconds: 2));
+        await _pumpEventQueue();
+        await _awaitConnectionState(
+          client.connection,
+          ConnectionState.connected,
+        );
+
+        // The publish should succeed (resent and ACK'd on new transport)
+        final result = await publishFuture;
+
+        // Message should have been sent on both transports
+        final secondTransportMsgs = capturedMessages
+            .where((m) =>
+                m.connection == 2 && m.msg.action == ProtocolAction.message)
+            .toList();
+        expect(secondTransportMsgs, isNotEmpty);
+
+        // The resent message should have the same content
+        final resentMsgs = secondTransportMsgs[0].msg.messages!;
+        final resentMsg = resentMsgs[0] as Map<String, dynamic>;
+        expect(resentMsg['name'], equals('resend-me'));
+
+        // Publish resolved successfully
+        expect(result.serials[0], equals('serial-resent'));
+
+        mockWs.dispose();
+      });
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // RTN19a2 - msgSerial handling on resume vs failed resume
+  // ---------------------------------------------------------------------------
+
+  group('RTN19a2 - Resent messages keep same msgSerial on successful resume',
+      () {
+    test('msgSerial is preserved when connectionId stays the same', () async {
+      final channelName = testChannelName('RTN19a2-resume');
+      final capturedMessages = <({ProtocolMessage msg, int connection})>[];
+      const originalConnectionId = 'connection-abc';
+
+      final testClock = TestClock();
+      final fakeTimers = FakeTimerManager(testClock);
+
+      await withClock(testClock, () async {
+        var connectionCount = 0;
+
+        late final MockWebSocketClient mockWs;
+        mockWs = MockWebSocketClient(
+          onConnectionAttempt: (conn) {
+            connectionCount++;
+            // Both connections use same connectionId = successful resume
+            conn.respondWithSuccess(ProtocolMessageHelpers.connected(
+              connectionId: originalConnectionId,
+              connectionKey: 'key-$connectionCount',
+            ));
+          },
+          onMessageFromClient: (msg) {
+            if (msg.action == ProtocolAction.attach) {
+              mockWs.activeConnection!.sendToClient(
+                ProtocolMessageHelpers.attached(channel: channelName),
+              );
+            } else if (msg.action == ProtocolAction.message) {
+              capturedMessages.add(
+                (msg: msg, connection: connectionCount),
+              );
+              if (connectionCount >= 2) {
+                mockWs.activeConnection!.sendToClient(
+                  ProtocolMessageHelpers.ack(
+                    msgSerial: msg.msgSerial!,
+                    count: 1,
+                    res: [
+                      PublishResult(serials: const ['serial-resumed']),
+                    ],
+                  ),
+                );
+              }
+            }
+          },
+        );
+
+        final client = Realtime.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            autoConnect: false,
+          ),
+          webSocketClient: mockWs,
+          timerManager: fakeTimers,
+        );
+
+        final channel = client.channels.get(
+          channelName,
+          const RealtimeChannelOptions(attachOnSubscribe: false),
+        );
+
+        client.connect();
+        await _awaitConnectionState(
+          client.connection,
+          ConnectionState.connected,
+        );
+        await channel.attach();
+
+        // Publish two messages — neither will be ACK'd
+        final future1 = channel.publish(name: 'msg1', data: 'data1');
+        final future2 = channel.publish(name: 'msg2', data: 'data2');
+
+        // Capture original msgSerials
+        final firstTransportMsgs = capturedMessages
+            .where((m) =>
+                m.connection == 1 && m.msg.action == ProtocolAction.message)
+            .toList();
+        final originalSerial1 = firstTransportMsgs[0].msg.msgSerial!;
+        final originalSerial2 = firstTransportMsgs[1].msg.msgSerial!;
+
+        // Disconnect and reconnect (successful resume — same connectionId)
+        mockWs.activeConnection!.simulateDisconnect();
+        await _pumpEventQueue();
+
+        fakeTimers.elapseTime(const Duration(seconds: 2));
+        await _pumpEventQueue();
+        await _awaitConnectionState(
+          client.connection,
+          ConnectionState.connected,
+        );
+
+        await future1;
+        await future2;
+
+        // Messages resent on second transport should have the SAME msgSerials
+        final secondTransportMsgs = capturedMessages
+            .where((m) =>
+                m.connection == 2 && m.msg.action == ProtocolAction.message)
+            .toList();
+        expect(secondTransportMsgs, hasLength(2));
+        expect(secondTransportMsgs[0].msg.msgSerial, equals(originalSerial1));
+        expect(secondTransportMsgs[1].msg.msgSerial, equals(originalSerial2));
+
+        mockWs.dispose();
+      });
+    });
+  });
+
+  group('RTN19a2 - Resent messages get new msgSerial on failed resume', () {
+    test('msgSerial resets to 0 when connectionId changes', () async {
+      final channelName = testChannelName('RTN19a2-failed');
+      final capturedMessages = <({ProtocolMessage msg, int connection})>[];
+
+      final testClock = TestClock();
+      final fakeTimers = FakeTimerManager(testClock);
+
+      await withClock(testClock, () async {
+        var connectionCount = 0;
+
+        late final MockWebSocketClient mockWs;
+        mockWs = MockWebSocketClient(
+          onConnectionAttempt: (conn) {
+            connectionCount++;
+            if (connectionCount == 1) {
+              conn.respondWithSuccess(ProtocolMessageHelpers.connected(
+                connectionId: 'connection-first',
+                connectionKey: 'key-first',
+              ));
+            } else {
+              // Failed resume — different connectionId + error (RTN15c7)
+              conn.respondWithSuccess(ProtocolMessageHelpers.connected(
+                connectionId: 'connection-new',
+                connectionKey: 'key-new',
+                error: const ErrorInfo(
+                  code: 80018,
+                  message: 'Connection not resumable',
+                ),
+              ));
+            }
+          },
+          onMessageFromClient: (msg) {
+            if (msg.action == ProtocolAction.attach) {
+              mockWs.activeConnection!.sendToClient(
+                ProtocolMessageHelpers.attached(channel: channelName),
+              );
+            } else if (msg.action == ProtocolAction.message) {
+              capturedMessages.add(
+                (msg: msg, connection: connectionCount),
+              );
+              if (connectionCount >= 2) {
+                mockWs.activeConnection!.sendToClient(
+                  ProtocolMessageHelpers.ack(
+                    msgSerial: msg.msgSerial!,
+                    count: 1,
+                    res: [
+                      PublishResult(serials: const ['serial-new']),
+                    ],
+                  ),
+                );
+              }
+            }
+          },
+        );
+
+        final client = Realtime.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            autoConnect: false,
+          ),
+          webSocketClient: mockWs,
+          timerManager: fakeTimers,
+        );
+
+        final channel = client.channels.get(
+          channelName,
+          const RealtimeChannelOptions(attachOnSubscribe: false),
+        );
+
+        client.connect();
+        await _awaitConnectionState(
+          client.connection,
+          ConnectionState.connected,
+        );
+        await channel.attach();
+
+        // Publish two messages with msgSerials 0 and 1 — neither ACK'd
+        final future1 = channel.publish(name: 'msg1', data: 'data1');
+        final future2 = channel.publish(name: 'msg2', data: 'data2');
+
+        // Verify original serials
+        final firstTransportMsgs = capturedMessages
+            .where((m) =>
+                m.connection == 1 && m.msg.action == ProtocolAction.message)
+            .toList();
+        expect(firstTransportMsgs[0].msg.msgSerial, equals(0));
+        expect(firstTransportMsgs[1].msg.msgSerial, equals(1));
+
+        // Disconnect and reconnect (failed resume — different connectionId)
+        mockWs.activeConnection!.simulateDisconnect();
+        await _pumpEventQueue();
+
+        fakeTimers.elapseTime(const Duration(seconds: 2));
+        await _pumpEventQueue();
+        await _awaitConnectionState(
+          client.connection,
+          ConnectionState.connected,
+        );
+
+        await future1;
+        await future2;
+
+        // Messages resent on second transport should have NEW msgSerials
+        // starting from 0 (RTN15c7 resets the internal counter)
+        final secondTransportMsgs = capturedMessages
+            .where((m) =>
+                m.connection == 2 && m.msg.action == ProtocolAction.message)
+            .toList();
+        expect(secondTransportMsgs, hasLength(2));
+        expect(secondTransportMsgs[0].msg.msgSerial, equals(0));
+        expect(secondTransportMsgs[1].msg.msgSerial, equals(1));
+
+        mockWs.dispose();
+      });
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // RTN19b - Pending ATTACH/DETACH resent on new transport
+  // ---------------------------------------------------------------------------
+
+  group('RTN19b - Pending ATTACH resent on new transport', () {
+    test('ATTACH is resent after disconnect and reconnect', () async {
+      final channelName = testChannelName('RTN19b-attach');
+      final capturedAttachMessages =
+          <({ProtocolMessage msg, int connection})>[];
+
+      final testClock = TestClock();
+      final fakeTimers = FakeTimerManager(testClock);
+
+      await withClock(testClock, () async {
+        var connectionCount = 0;
+
+        late final MockWebSocketClient mockWs;
+        mockWs = MockWebSocketClient(
+          onConnectionAttempt: (conn) {
+            connectionCount++;
+            conn.respondWithSuccess(ProtocolMessageHelpers.connected());
+          },
+          onMessageFromClient: (msg) {
+            if (msg.action == ProtocolAction.attach) {
+              capturedAttachMessages.add(
+                (msg: msg, connection: connectionCount),
+              );
+              if (connectionCount >= 2) {
+                // Respond with ATTACHED on second connection
+                mockWs.activeConnection!.sendToClient(
+                  ProtocolMessageHelpers.attached(channel: msg.channel!),
+                );
+              }
+              // First connection: don't respond — leave channel ATTACHING
+            }
+          },
+        );
+
+        final client = Realtime.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            autoConnect: false,
+            realtimeRequestTimeout: 60000, // Long timeout to avoid timeout
+          ),
+          webSocketClient: mockWs,
+          timerManager: fakeTimers,
+        );
+
+        final channel = client.channels.get(
+          channelName,
+          const RealtimeChannelOptions(attachOnSubscribe: false),
+        );
+
+        client.connect();
+        await _awaitConnectionState(
+          client.connection,
+          ConnectionState.connected,
+        );
+
+        // Start attach but don't respond — channel stays ATTACHING
+        final attachFuture = channel.attach();
+        await _awaitChannelState(channel, ChannelState.attaching);
+
+        // Verify ATTACH was sent on first transport
+        final firstTransportAttaches =
+            capturedAttachMessages.where((m) => m.connection == 1).toList();
+        expect(firstTransportAttaches, hasLength(1));
+        expect(firstTransportAttaches[0].msg.channel, equals(channelName));
+
+        // Disconnect and reconnect
+        mockWs.activeConnection!.simulateDisconnect();
+        await _pumpEventQueue();
+
+        fakeTimers.elapseTime(const Duration(seconds: 2));
+        await _pumpEventQueue();
+        await _awaitConnectionState(
+          client.connection,
+          ConnectionState.connected,
+        );
+
+        // Attach should complete (resent and responded to on new transport)
+        await attachFuture;
+
+        expect(channel.state, equals(ChannelState.attached));
+
+        // ATTACH should have been resent on second transport
+        final secondTransportAttaches =
+            capturedAttachMessages.where((m) => m.connection == 2).toList();
+        expect(secondTransportAttaches, isNotEmpty);
+        expect(
+          secondTransportAttaches[0].msg.channel,
+          equals(channelName),
+        );
+
+        mockWs.dispose();
+      });
+    });
+  });
+
+  group('RTN19b - Pending DETACH resent on new transport', () {
+    test('DETACH is resent after disconnect and reconnect', () async {
+      final channelName = testChannelName('RTN19b-detach');
+      final capturedDetachMessages =
+          <({ProtocolMessage msg, int connection})>[];
+
+      final testClock = TestClock();
+      final fakeTimers = FakeTimerManager(testClock);
+
+      await withClock(testClock, () async {
+        var connectionCount = 0;
+
+        late final MockWebSocketClient mockWs;
+        mockWs = MockWebSocketClient(
+          onConnectionAttempt: (conn) {
+            connectionCount++;
+            conn.respondWithSuccess(ProtocolMessageHelpers.connected());
+          },
+          onMessageFromClient: (msg) {
+            if (msg.action == ProtocolAction.attach) {
+              mockWs.activeConnection!.sendToClient(
+                ProtocolMessageHelpers.attached(channel: msg.channel!),
+              );
+            } else if (msg.action == ProtocolAction.detach) {
+              capturedDetachMessages.add(
+                (msg: msg, connection: connectionCount),
+              );
+              if (connectionCount >= 2) {
+                // Respond with DETACHED on second connection
+                mockWs.activeConnection!.sendToClient(
+                  ProtocolMessageHelpers.detached(channel: msg.channel!),
+                );
+              }
+              // First connection: don't respond — leave channel DETACHING
+            }
+          },
+        );
+
+        final client = Realtime.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            autoConnect: false,
+            realtimeRequestTimeout: 60000, // Long timeout to avoid timeout
+          ),
+          webSocketClient: mockWs,
+          timerManager: fakeTimers,
+        );
+
+        final channel = client.channels.get(
+          channelName,
+          const RealtimeChannelOptions(attachOnSubscribe: false),
+        );
+
+        client.connect();
+        await _awaitConnectionState(
+          client.connection,
+          ConnectionState.connected,
+        );
+        await channel.attach();
+
+        // Start detach but don't respond — channel stays DETACHING
+        final detachFuture = channel.detach();
+        await _awaitChannelState(channel, ChannelState.detaching);
+
+        // Verify DETACH was sent on first transport
+        final firstTransportDetaches =
+            capturedDetachMessages.where((m) => m.connection == 1).toList();
+        expect(firstTransportDetaches, hasLength(1));
+
+        // Disconnect and reconnect
+        mockWs.activeConnection!.simulateDisconnect();
+        await _pumpEventQueue();
+
+        fakeTimers.elapseTime(const Duration(seconds: 2));
+        await _pumpEventQueue();
+        await _awaitConnectionState(
+          client.connection,
+          ConnectionState.connected,
+        );
+
+        // Detach should complete (resent and responded to on new transport)
+        await detachFuture;
+
+        expect(channel.state, equals(ChannelState.detached));
+
+        // DETACH should have been resent on second transport
+        final secondTransportDetaches =
+            capturedDetachMessages.where((m) => m.connection == 2).toList();
+        expect(secondTransportDetaches, isNotEmpty);
+        expect(
+          secondTransportDetaches[0].msg.channel,
+          equals(channelName),
+        );
+
+        mockWs.dispose();
+      });
     });
   });
 }

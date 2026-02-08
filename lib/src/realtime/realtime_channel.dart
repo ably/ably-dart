@@ -487,11 +487,16 @@ class RealtimeChannel {
       _attachCompleter!.future.ignore();
       _sendAttachMessage();
       _startAttachTimeout();
-    } else if (_state == ChannelState.attaching && _attachCompleter == null) {
-      // ATTACHING without a pending completer means the channel was left
-      // in ATTACHING by a previous connection attempt that dropped.
+    } else if (_state == ChannelState.attaching) {
+      // RTN19b: Resend ATTACH on new transport for channels still ATTACHING.
+      // Cancel any existing attach timeout from the old transport.
+      _timerManager.cancelAll(owner: this);
       _sendAttachMessage();
       _startAttachTimeout();
+    } else if (_state == ChannelState.detaching) {
+      // RTN19b: Resend DETACH for channels still in DETACHING state
+      _sendDetachMessage();
+      _startDetachTimeout();
     }
   }
 
