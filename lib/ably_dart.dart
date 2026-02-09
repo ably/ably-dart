@@ -73,3 +73,4 @@ export 'src/crypto/cipher_params.dart';
 // Logging
 export 'src/logging/log_level.dart';
 export 'src/logging/log_handler.dart';
+export 'src/logging/logger.dart';

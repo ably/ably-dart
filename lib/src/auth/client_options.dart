@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../logging/log_handler.dart';
 import '../logging/log_level.dart';
 import 'auth_options.dart';
 import 'token_details.dart';
@@ -32,7 +33,8 @@ class ClientOptions extends AuthOptions {
     bool? useTokenAuth,
     // ClientOptions specific fields
     String? clientId,
-    LogLevel logLevel = LogLevel.info,
+    LogLevel logLevel = LogLevel.warn,
+    LogHandler? logHandler,
     bool tls = true,
     String? endpoint,
     String? restHost,
@@ -117,6 +119,7 @@ class ClientOptions extends AuthOptions {
       useTokenAuth: useTokenAuth,
       clientId: clientId,
       logLevel: logLevel,
+      logHandler: logHandler,
       tls: tls,
       endpoint: endpoint,
       restHost: restHost,
@@ -162,7 +165,8 @@ class ClientOptions extends AuthOptions {
     super.useTokenAuth,
     // ClientOptions specific fields
     this.clientId,
-    this.logLevel = LogLevel.info,
+    this.logLevel = LogLevel.warn,
+    this.logHandler,
     this.tls = true,
     this.endpoint,
     this.restHost,
@@ -219,8 +223,15 @@ class ClientOptions extends AuthOptions {
   /// all messages and presence events.
   final String? clientId;
 
-  /// Log level for SDK logging.
+  /// Log level for SDK logging (TO3b).
+  ///
+  /// Defaults to [LogLevel.warn] (RSC2).
   final LogLevel logLevel;
+
+  /// Custom log handler (TO3c).
+  ///
+  /// If not provided, logs are printed to stdout.
+  final LogHandler? logHandler;
 
   /// Whether to use TLS for connections.
   ///
@@ -544,6 +555,7 @@ class ClientOptions extends AuthOptions {
     bool? useTokenAuth,
     String? clientId,
     LogLevel? logLevel,
+    LogHandler? logHandler,
     bool? tls,
     String? endpoint,
     String? restHost,
@@ -585,6 +597,7 @@ class ClientOptions extends AuthOptions {
       useTokenAuth: useTokenAuth ?? this.useTokenAuth,
       clientId: clientId ?? this.clientId,
       logLevel: logLevel ?? this.logLevel,
+      logHandler: logHandler ?? this.logHandler,
       tls: tls ?? this.tls,
       endpoint: endpoint ?? this.endpoint,
       restHost: restHost ?? this.restHost,

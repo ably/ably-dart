@@ -9,6 +9,7 @@ import '../channels/rest_channel_options.dart';
 import '../channels/rest_history_params.dart';
 import '../error/ably_exception.dart';
 import '../error/error_info.dart';
+import '../logging/logger.dart';
 import '../message/message.dart';
 import '../pagination/paginated_result.dart';
 import '../presence/rest_presence.dart';
@@ -22,10 +23,12 @@ class RestChannelImpl implements RestChannel {
     required String name,
     required AblyHttpClient httpClient,
     required ClientOptions options,
+    required Logger logger,
     RestChannelOptions? channelOptions,
   })  : _name = name,
         _httpClient = httpClient,
         _options = options,
+        _logger = logger,
         _channelOptions = channelOptions,
         _random = Random() {
     _restApi = ChannelRestApi(channelName: name, httpClient: httpClient);
@@ -38,6 +41,7 @@ class RestChannelImpl implements RestChannel {
   final String _name;
   final AblyHttpClient _httpClient;
   final ClientOptions _options;
+  final Logger _logger;
   RestChannelOptions? _channelOptions;
   late final ChannelRestApi _restApi;
   late final RestPresenceImpl _presence;
@@ -73,12 +77,21 @@ class RestChannelImpl implements RestChannel {
       messagesToPublish.add(Message(name: name, data: data));
     }
 
+    _logger.info('publish() called', {
+      'channel': _name,
+      'messageCount': messagesToPublish.length,
+    });
+
     // Encode messages for publishing
     final encodedMessages = messagesToPublish.map(_encodeMessage).toList();
 
     // Check message size
     final jsonBody = json.encode(encodedMessages);
     if (jsonBody.length > _options.maxMessageSize) {
+      _logger.error('Message exceeds maxMessageSize', {
+        'size': jsonBody.length,
+        'max': _options.maxMessageSize,
+      });
       throw AblyException(
         message: 'Message size exceeds maximum',
         errorInfo: ErrorInfo(
@@ -92,6 +105,7 @@ class RestChannelImpl implements RestChannel {
 
     // Add idempotency IDs if enabled (RSL1k)
     if (_options.idempotentRestPublishing) {
+      _logger.debug('Added idempotent IDs');
       _addIdempotencyIds(encodedMessages);
     }
 

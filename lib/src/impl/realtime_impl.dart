@@ -23,6 +23,9 @@ class RealtimeImpl extends BaseClientImpl implements Realtime {
     _initialize();
   }
 
+  @override
+  String get _clientType => 'realtime';
+
   final WebSocketClient? _webSocketClient;
   final TimerManager? _timerManager;
   late final TimerManager timerManager;
@@ -39,6 +42,7 @@ class RealtimeImpl extends BaseClientImpl implements Realtime {
       timerManager: timerManager,
       webSocketClient: _webSocketClient,
       httpClient: rawHttpClient, // Pass through for ConnectivityChecker
+      logger: logger,
     );
 
     // Initialize channels
@@ -47,6 +51,7 @@ class RealtimeImpl extends BaseClientImpl implements Realtime {
       timerManager: timerManager,
       options: options,
       httpClient: ablyHttpClient,
+      logger: logger,
     );
 
     // Wire up channel message dispatch

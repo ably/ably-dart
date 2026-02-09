@@ -2,6 +2,7 @@ import '../auth/client_options.dart';
 import '../channels/channels.dart';
 import '../channels/rest_channel.dart';
 import '../channels/rest_channel_options.dart';
+import '../logging/logger.dart';
 import 'http/http_client.dart';
 import 'rest_channel_impl.dart';
 
@@ -10,11 +11,14 @@ class RestChannelsImpl extends Iterable<RestChannel> implements RestChannels {
   RestChannelsImpl({
     required AblyHttpClient httpClient,
     required ClientOptions options,
+    required Logger logger,
   })  : _httpClient = httpClient,
-        _options = options;
+        _options = options,
+        _logger = logger;
 
   final AblyHttpClient _httpClient;
   final ClientOptions _options;
+  final Logger _logger;
   final Map<String, RestChannelImpl> _channels = {};
 
   @override
@@ -25,6 +29,7 @@ class RestChannelsImpl extends Iterable<RestChannel> implements RestChannels {
         name: name,
         httpClient: _httpClient,
         options: _options,
+        logger: _logger,
         channelOptions: options,
       );
       _channels[name] = channel;

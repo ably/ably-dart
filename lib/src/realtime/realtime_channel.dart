@@ -7,6 +7,7 @@ import '../channels/rest_history_params.dart';
 import '../error/ably_exception.dart';
 import '../error/error_info.dart';
 import '../impl/channel_rest_api.dart';
+import '../logging/logger.dart';
 import '../message/message.dart';
 import '../pagination/paginated_result.dart';
 import 'channel_event.dart';
@@ -52,12 +53,14 @@ class RealtimeChannel {
     required String name,
     required ClientOptions options,
     required ChannelRestApi restApi,
+    required Logger logger,
     RealtimeChannelOptions? channelOptions,
   })  : _connection = connection,
         _timerManager = timerManager,
         _name = name,
         _clientOptions = options,
         _restApi = restApi,
+        _logger = logger,
         _options = channelOptions ?? const RealtimeChannelOptions(),
         _state = ChannelState.initialized;
 
@@ -65,6 +68,7 @@ class RealtimeChannel {
   final TimerManager _timerManager;
   final ClientOptions _clientOptions;
   final ChannelRestApi _restApi;
+  final Logger _logger;
   final String _name;
   RealtimeChannelOptions _options;
 
@@ -144,6 +148,7 @@ class RealtimeChannel {
   ///
   /// Spec: RTL7, RTL7a, RTL7b, RTL7g, RTL7h
   void subscribe(void Function(Message) listener, {String? name}) {
+    _logger.info('subscribe() called', {'channel': _name});
     // Register the listener
     _subscribers.add(_Subscription(listener: listener, name: name));
 
@@ -209,6 +214,7 @@ class RealtimeChannel {
     Message? message,
     List<Message>? messages,
   }) async {
+    _logger.info('publish() called', {'channel': _name});
     // RTL6c4: Fail if channel is SUSPENDED or FAILED
     if (_state == ChannelState.suspended || _state == ChannelState.failed) {
       throw AblyException(
@@ -315,6 +321,7 @@ class RealtimeChannel {
   ///
   /// Spec: RTL4
   Future<void> attach() async {
+    _logger.info('attach() called', {'channel': _name});
     switch (_state) {
       case ChannelState.attached:
         // Already attached - no-op (RTL4a)
@@ -395,6 +402,7 @@ class RealtimeChannel {
   ///
   /// Spec: RTL5
   Future<void> detach() async {
+    _logger.info('detach() called', {'channel': _name});
     switch (_state) {
       case ChannelState.initialized:
       case ChannelState.detached:
@@ -652,6 +660,10 @@ class RealtimeChannel {
 
     // Server-initiated DETACHED (RTL13)
     final error = message.error;
+    _logger.warn('Server-initiated DETACHED', {
+      'channel': _name,
+      if (error != null) 'reason': error.message,
+    });
 
     if (_state == ChannelState.attached || _state == ChannelState.suspended) {
       // RTL13a: Immediately attempt to reattach
@@ -730,6 +742,7 @@ class RealtimeChannel {
 
   /// Sends an ATTACH protocol message.
   void _sendAttachMessage() {
+    _logger.debug('Sending ATTACH', {'channel': _name});
     var flags = 0;
 
     // Encode modes as flags (RTL4l)
@@ -753,6 +766,7 @@ class RealtimeChannel {
 
   /// Sends a DETACH protocol message.
   void _sendDetachMessage() {
+    _logger.debug('Sending DETACH', {'channel': _name});
     _connection.sendMessage(ProtocolMessage(
       action: ProtocolAction.detach,
       channel: _name,
@@ -768,6 +782,7 @@ class RealtimeChannel {
       callback: () {
         if (_state != ChannelState.attaching) return;
 
+        _logger.debug('Attach timeout', {'channel': _name});
         final error = ErrorInfo(
           code: 90007,
           message: 'Channel attach timed out',
@@ -791,6 +806,10 @@ class RealtimeChannel {
   void _scheduleChannelRetry() {
     if (_connection.state != ConnectionState.connected) return;
 
+    _logger.debug('Channel retry scheduled', {
+      'channel': _name,
+      'delayMs': _clientOptions.suspendedRetryTimeout,
+    });
     _timerManager.schedule(
       owner: this,
       name: 'channelRetry',
@@ -861,6 +880,26 @@ class RealtimeChannel {
 
     final previous = _state;
     _state = newState;
+
+    _logger.info('Channel state changed', {
+      'channel': _name,
+      'from': previous.name,
+      'to': newState.name,
+      if (error != null) 'reason': error.message,
+    });
+
+    // Log warn/error for specific states
+    if (newState == ChannelState.suspended) {
+      _logger.warn('Channel SUSPENDED', {
+        'channel': _name,
+        if (error != null) 'reason': error.message,
+      });
+    } else if (newState == ChannelState.failed) {
+      _logger.error('Channel FAILED', {
+        'channel': _name,
+        if (error != null) 'reason': error.message,
+      });
+    }
 
     // RTL15b1: Clear channelSerial on DETACHED, SUSPENDED, or FAILED
     if (newState == ChannelState.detached ||

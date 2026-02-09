@@ -6,6 +6,7 @@ import '../error/ably_exception.dart';
 import '../error/error_info.dart';
 import '../impl/channel_rest_api.dart';
 import '../impl/http/http_client.dart';
+import '../logging/logger.dart';
 import 'channel_state.dart';
 import 'connection.dart';
 import 'connection_state.dart';
@@ -25,10 +26,12 @@ class RealtimeChannels {
     required TimerManager timerManager,
     required ClientOptions options,
     required AblyHttpClient httpClient,
+    required Logger logger,
   })  : _connection = connection,
         _timerManager = timerManager,
         _options = options,
-        _httpClient = httpClient {
+        _httpClient = httpClient,
+        _logger = logger {
     // RTL3: Propagate connection state changes to channels
     _connectionSubscription = _connection.on().listen(_onConnectionStateChange);
   }
@@ -37,6 +40,7 @@ class RealtimeChannels {
   final TimerManager _timerManager;
   final ClientOptions _options;
   final AblyHttpClient _httpClient;
+  final Logger _logger;
   final Map<String, RealtimeChannel> _channels = {};
   late final StreamSubscription<ConnectionStateChange> _connectionSubscription;
 
@@ -84,9 +88,11 @@ class RealtimeChannels {
       name: name,
       options: _options,
       restApi: ChannelRestApi(channelName: name, httpClient: _httpClient),
+      logger: _logger,
       channelOptions: options,
     );
     _channels[name] = channel;
+    _logger.debug('Channel created', {'channel': name});
     return channel;
   }
 
@@ -172,6 +178,7 @@ class RealtimeChannels {
   Future<void> release(String name) async {
     final channel = _channels[name];
     if (channel != null) {
+      _logger.debug('Channel released', {'channel': name});
       // Detach the channel if it's attached
       await channel.detach();
       _channels.remove(name);

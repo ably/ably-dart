@@ -33,9 +33,9 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | Spec item | Description | Dart test | UTS spec |
 |-----------|-------------|-----------|----------|
 | RSC1 | Constructor options (RSC1a–RSC1c) | Yes — `unit/client/client_options_test.dart` | Yes |
-| RSC2 | Logger default | | |
-| RSC3 | Log level configuration | | |
-| RSC4 | Custom logger | | |
+| RSC2 | Logger default | Yes — `unit/client/logging_test.dart` | Yes |
+| RSC3 | Log level configuration | Yes — `unit/client/logging_test.dart` | Yes |
+| RSC4 | Custom logger | Yes — `unit/client/logging_test.dart` | Yes |
 | RSC5 | Auth object attribute | | |
 | RSC6 | Stats function (RSC6a–RSC6b4) | Yes — `unit/client/stats_test.dart` (shared via TestClient) | Yes |
 | RSC7 | HTTP request headers (RSC7a–RSC7d7) | Yes — `unit/client/rest_client_test.dart` | Yes |
@@ -391,7 +391,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | Area | Spec groups | With Dart test | With UTS spec | Notes |
 |------|-------------|----------------|---------------|-------|
 | **Endpoint config** (REC) | 3 | 3 | 3 | Full |
-| **REST client** (RSC) | 18 | 10 | 10 | Missing: RSC15 (fallback) |
+| **REST client** (RSC) | 18 | 13 | 13 | Missing: RSC15 (fallback) |
 | **REST auth** (RSA) | 15 | 10 | 10 | Aligned with UTS |
 | **REST channels** (RSN) | 4 | 4 | 4 | Full |
 | **REST channel** (RSL) | 13 | 7 | 6 | RSL8 via ChannelRestApi |

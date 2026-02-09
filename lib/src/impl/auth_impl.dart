@@ -13,6 +13,7 @@ import '../auth/token_params.dart';
 import '../auth/token_request.dart';
 import '../error/ably_exception.dart';
 import '../error/error_info.dart';
+import '../logging/logger.dart';
 import 'http/http_client.dart';
 
 /// Implementation of the Auth interface.
@@ -20,15 +21,18 @@ class AuthImpl implements Auth {
   AuthImpl({
     required ClientOptions options,
     required AblyHttpClient httpClient,
+    required Logger logger,
     http.Client? rawHttpClient,
   })  : _options = options,
         _httpClient = httpClient,
+        _logger = logger,
         _rawHttpClient = rawHttpClient ?? http.Client() {
     _initialize();
   }
 
   final ClientOptions _options;
   final AblyHttpClient _httpClient;
+  final Logger _logger;
   final http.Client _rawHttpClient;
 
   TokenDetails? _currentToken;
@@ -43,6 +47,7 @@ class AuthImpl implements Auth {
     } else if (_options.token != null) {
       _currentToken = TokenDetails(token: _options.token);
     }
+    _logAuthMethod();
   }
 
   /// RSA7: Validates that clientId in ClientOptions is consistent with
@@ -96,6 +101,11 @@ class AuthImpl implements Auth {
       return AuthMethod.token;
     }
     return AuthMethod.basic;
+  }
+
+  /// Logs auth method selection on first access. Called during initialization.
+  void _logAuthMethod() {
+    _logger.info('Auth method selected', {'method': method.name});
   }
 
   @override
@@ -168,6 +178,7 @@ class AuthImpl implements Auth {
     AuthOptions? authOptions,
     TokenParams? tokenParams,
   }) async {
+    _logger.info('authorize() called');
     // RSA10: Authorize and store token
     // If authOptions provided, replace stored options
     if (authOptions != null) {
@@ -193,6 +204,11 @@ class AuthImpl implements Auth {
         authOptions: authOptions ?? _storedAuthOptions,
         tokenParams: effectiveParams,
       );
+      _logger.info('Token obtained', {
+        if (_currentToken!.expires != null)
+          'expiresIn':
+              _currentToken!.expires! - clock.now().millisecondsSinceEpoch,
+      });
       return _currentToken!;
     } catch (e) {
       // If renewal fails, token remains null (RSA16d)
@@ -205,8 +221,12 @@ class AuthImpl implements Auth {
   Future<TokenDetails> getValidToken() async {
     // Return cached token if valid (not expired)
     if (_currentToken != null && !_currentToken!.isExpired) {
+      _logger.debug('Using cached token', {
+        if (_currentToken!.expires != null) 'expires': _currentToken!.expires,
+      });
       return _currentToken!;
     }
+    _logger.warn('Token expired, renewing');
     // Otherwise get a new token
     return authorize();
   }
@@ -306,19 +326,26 @@ class AuthImpl implements Auth {
     // Try different token acquisition methods in order
     // 1. authCallback
     if (effectiveOptions.authCallback != null) {
+      _logger.debug('Requesting token', {'via': 'callback'});
       return _requestTokenFromCallback(effectiveOptions, effectiveParams);
     }
 
     // 2. authUrl
     if (effectiveOptions.authUrl != null) {
+      _logger.debug('Requesting token', {'via': 'url'});
       return _requestTokenFromUrl(effectiveOptions, effectiveParams);
     }
 
     // 3. Direct token request using API key
     if (effectiveOptions.key != null || _options.key != null) {
+      _logger.debug('Requesting token', {'via': 'ably'});
       return _requestTokenFromAbly(effectiveOptions, effectiveParams);
     }
 
+    _logger.error('Authorization failed', {
+      'code': 40101,
+      'message': 'No authentication method available',
+    });
     throw const AblyException(
       message: 'No authentication method available',
       errorInfo: ErrorInfo(

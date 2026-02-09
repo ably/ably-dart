@@ -7,6 +7,8 @@ import 'package:http/http.dart' as http;
 import '../../auth/client_options.dart';
 import '../../error/ably_exception.dart';
 import '../../error/error_info.dart';
+import '../../logging/log_level.dart';
+import '../../logging/logger.dart';
 import '../fallback/error_classifier.dart';
 import '../fallback/host_selector.dart';
 import 'constants.dart';
@@ -58,14 +60,18 @@ class AblyHttpClient {
     http.Client? httpClient,
     AuthHeaderProvider? authHeaderProvider,
     HostSelector? hostSelector,
+    required Logger logger,
   })  : _options = options,
         _httpClient = httpClient ?? http.Client(),
         _authHeaderProvider = authHeaderProvider,
-        _hostSelector = hostSelector ?? HostSelector(options: options);
+        _logger = logger,
+        _hostSelector =
+            hostSelector ?? HostSelector(options: options, logger: logger);
 
   final ClientOptions _options;
   final http.Client _httpClient;
   final AuthHeaderProvider? _authHeaderProvider;
+  final Logger _logger;
   final HostSelector _hostSelector;
   final Random _random = Random();
 
@@ -123,7 +129,8 @@ class AblyHttpClient {
     );
     AblyException? lastException;
 
-    for (final host in hosts) {
+    for (var i = 0; i < hosts.length; i++) {
+      final host = hosts[i];
       try {
         final response = await _makeRequest(
           method,
@@ -151,7 +158,9 @@ class AblyHttpClient {
             tokenRenewer != null &&
             e.errorInfo != null &&
             ErrorClassifier.isTokenError(e.errorInfo!)) {
-          // Renew token and retry
+          _logger.debug('Token error, renewing', {
+            'code': e.errorInfo!.code,
+          });
           await tokenRenewer!();
           return _requestWithTokenRetry(
             method,
@@ -172,8 +181,22 @@ class AblyHttpClient {
 
         // Mark this host as failed
         _hostSelector.markHostAsFailed(host);
+
+        final nextHost = i + 1 < hosts.length ? hosts[i + 1] : null;
+        if (nextHost != null) {
+          _logger.warn('HTTP request failed, trying fallback', {
+            'statusCode': e.errorInfo?.statusCode,
+            'host': host,
+            'nextHost': nextHost,
+          });
+        }
       }
     }
+
+    _logger.error('HTTP request failed, no more hosts', {
+      'statusCode': lastException?.errorInfo?.statusCode,
+      'host': hosts.isNotEmpty ? hosts.last : null,
+    });
 
     throw lastException ??
         const AblyException(
@@ -195,6 +218,12 @@ class AblyHttpClient {
     Map<String, String>? customHeaders,
     int? customVersion,
   }) async {
+    _logger.debug('HTTP request', {
+      'method': method,
+      'host': host,
+      'path': path,
+    });
+
     // Build URL
     final scheme = _options.tls ? 'https' : 'http';
     final port = _options.effectivePort;
@@ -251,6 +280,14 @@ class AblyHttpClient {
         request.body = json.encode(body);
       }
 
+      if (_logger.shouldLog(LogLevel.verbose)) {
+        _logger.verbose('HTTP request detail', {
+          'url': uri.toString(),
+          'headers': headers.keys.toList(),
+          'bodyLength': body != null ? request.body.length : 0,
+        });
+      }
+
       final streamedResponse = await _httpClient
           .send(request)
           .timeout(Duration(milliseconds: _options.httpRequestTimeout));
@@ -280,6 +317,18 @@ class AblyHttpClient {
     response.headers.forEach((key, value) {
       normalizedHeaders[key.toLowerCase()] = value;
     });
+
+    _logger.debug('HTTP response', {
+      'statusCode': response.statusCode,
+      'host': host,
+    });
+
+    if (_logger.shouldLog(LogLevel.verbose)) {
+      _logger.verbose('HTTP response detail', {
+        'headers': normalizedHeaders.keys.toList(),
+        'bodyLength': response.body.length,
+      });
+    }
 
     // Check Content-Type for supported types (RSC8e)
     final responseContentType = normalizedHeaders['content-type'] ?? '';

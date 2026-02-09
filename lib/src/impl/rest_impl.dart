@@ -17,6 +17,7 @@ class RestImpl extends BaseClientImpl implements Rest {
     _channels = RestChannelsImpl(
       httpClient: ablyHttpClient,
       options: options,
+      logger: logger,
     );
   }
 

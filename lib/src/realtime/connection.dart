@@ -11,6 +11,8 @@ import '../error/error_info.dart';
 import '../impl/fallback/connectivity_checker.dart';
 import '../impl/fallback/error_classifier.dart';
 import '../impl/fallback/host_selector.dart';
+import '../logging/log_level.dart';
+import '../logging/logger.dart';
 import 'connection_event.dart';
 import 'connection_state.dart';
 import 'connection_state_change.dart';
@@ -29,6 +31,7 @@ class Connection implements WebSocketListener {
     required ClientOptions options,
     required Auth auth,
     required TimerManager timerManager,
+    required Logger logger,
     WebSocketClient? webSocketClient,
     http.Client? httpClient,
     HostSelector? hostSelector,
@@ -36,8 +39,10 @@ class Connection implements WebSocketListener {
   })  : _options = options,
         _auth = auth,
         _timerManager = timerManager,
+        _logger = logger,
         _webSocketClient = webSocketClient ?? IOWebSocketClient(),
-        _hostSelector = hostSelector ?? HostSelector(options: options),
+        _hostSelector =
+            hostSelector ?? HostSelector(options: options, logger: logger),
         _connectivityChecker =
             connectivityChecker ?? ConnectivityChecker(httpClient: httpClient),
         _state = ConnectionState.initialized;
@@ -45,6 +50,7 @@ class Connection implements WebSocketListener {
   final ClientOptions _options;
   final Auth _auth;
   final TimerManager _timerManager;
+  final Logger _logger;
   final WebSocketClient _webSocketClient;
   final HostSelector _hostSelector;
   final ConnectivityChecker _connectivityChecker;
@@ -164,6 +170,7 @@ class Connection implements WebSocketListener {
   ///
   /// Spec: RTN11
   Future<void> connect() async {
+    _logger.info('connect() called');
     switch (_state) {
       case ConnectionState.initialized:
       case ConnectionState.closed:
@@ -186,6 +193,7 @@ class Connection implements WebSocketListener {
   ///
   /// Spec: RTN12
   Future<void> close() async {
+    _logger.info('close() called');
     switch (_state) {
       case ConnectionState.initialized:
         // Never connected - transition directly to closed
@@ -210,6 +218,7 @@ class Connection implements WebSocketListener {
   ///
   /// Spec: RTN13
   Future<Duration> ping() {
+    _logger.info('ping() called');
     // RTN13b: Error in INITIALIZED, SUSPENDED, CLOSING, CLOSED, FAILED
     switch (_state) {
       case ConnectionState.initialized:
@@ -356,6 +365,7 @@ class Connection implements WebSocketListener {
     // Try each host in sequence
     for (final host in hosts) {
       try {
+        _logger.debug('Connecting to host', {'host': host});
         await _connectToHost(host);
 
         // Success! Clear failure tracking if using fallback (RSC15f)
@@ -387,12 +397,20 @@ class Connection implements WebSocketListener {
 
         // RTN17f1: DISCONNECTED with 5xx status (500-504) should use fallback
         if (ErrorClassifier.shouldDisconnectedUseFallback(error)) {
+          _logger.warn('Connection attempt failed', {
+            'host': host,
+            'error': error.message,
+          });
           _hostSelector.markHostAsFailed(host);
           continue;
         }
 
         if (ErrorClassifier.shouldRetryWithFallback(error)) {
           // RTN17f: Mark host as failed and try next
+          _logger.warn('Connection attempt failed', {
+            'host': host,
+            'error': error.message,
+          });
           _hostSelector.markHostAsFailed(host);
           continue;
         } else {
@@ -525,6 +543,15 @@ class Connection implements WebSocketListener {
 
   @override
   void onMessage(ProtocolMessage message) {
+    if (_logger.shouldLog(LogLevel.verbose)) {
+      _logger.verbose('Protocol message received', {
+        'action': message.action?.name,
+        if (message.channel != null) 'channel': message.channel,
+        if (message.msgSerial != null) 'serial': message.msgSerial,
+        if (message.flags != null) 'flags': message.flags,
+      });
+    }
+
     // RTN23a: Any message from server resets idle timer
     _lastActivityAt = clock.now();
     _scheduleIdleTimeout();
@@ -554,7 +581,7 @@ class Connection implements WebSocketListener {
 
   @override
   void onError(Object error) {
-    print('WebSocket error: $error');
+    _logger.warn('WebSocket error', {'error': error.toString()});
     // WebSocket errors will trigger onClose, so we handle it there
   }
 
@@ -607,6 +634,11 @@ class Connection implements WebSocketListener {
     _id = message.connectionId;
     _key = message.connectionKey ?? message.connectionDetails?.connectionKey;
     _serial = message.msgSerial ?? -1;
+
+    _logger.info('Connection established', {
+      'connectionId': _id,
+      'connectionKey': _key,
+    });
 
     // Update connection state TTL (DF1a - override default if server provides one)
     if (message.connectionDetails?.connectionStateTtl != null) {
@@ -785,6 +817,7 @@ class Connection implements WebSocketListener {
 
   /// Handles token errors (RTN14b, RTN15h).
   void _handleTokenError(ErrorInfo error) {
+    _logger.warn('Token error, renewing', {'code': error.code});
     // Check if we can renew the token
     if (_canRenewToken()) {
       // Try to renew token and reconnect (RTN15h2)
@@ -936,6 +969,8 @@ class Connection implements WebSocketListener {
     final retryDelay =
         (baseTimeout * backoffCoefficient * jitterCoefficient).round();
 
+    _logger.debug('Scheduling reconnect', {'delayMs': retryDelay});
+
     _timerManager.schedule(
       owner: this,
       name: 'retry',
@@ -1038,6 +1073,8 @@ class Connection implements WebSocketListener {
       return;
     }
 
+    _logger.debug('Idle timeout, sending heartbeat');
+
     // Store error for use in onClose handler
     _pendingDisconnectError = ErrorInfo(
       code: 80003,
@@ -1079,7 +1116,7 @@ class Connection implements WebSocketListener {
       final message = ProtocolMessage(action: ProtocolAction.heartbeat);
       _webSocketConnection!.send(message);
     } catch (e) {
-      print('Error sending heartbeat: $e');
+      _logger.warn('Error sending heartbeat', {'error': e.toString()});
     }
   }
 
@@ -1127,6 +1164,12 @@ class Connection implements WebSocketListener {
     final previous = _state;
     _state = newState;
 
+    _logger.info('Connection state changed', {
+      'from': previous.name,
+      'to': newState.name,
+      if (error != null) 'reason': error.message,
+    });
+
     // Update error reason if provided
     if (error != null) {
       _errorReason = error;
@@ -1134,6 +1177,21 @@ class Connection implements WebSocketListener {
         newState == ConnectionState.closed) {
       // Clear error when successfully connected or explicitly closed
       _errorReason = null;
+    }
+
+    // Log warn/error for specific states
+    if (newState == ConnectionState.disconnected) {
+      _logger.warn('Connection DISCONNECTED, will retry', {
+        if (error != null) 'reason': error.message,
+      });
+    } else if (newState == ConnectionState.suspended) {
+      _logger.warn('Connection SUSPENDED', {
+        if (error != null) 'reason': error.message,
+      });
+    } else if (newState == ConnectionState.failed) {
+      _logger.error('Connection FAILED', {
+        if (error != null) 'reason': error.message,
+      });
     }
 
     // RTN8c, RTN9c: Clear id and key in CLOSED, CLOSING, FAILED, SUSPENDED
@@ -1220,6 +1278,14 @@ class Connection implements WebSocketListener {
         ),
       );
     }
+    if (_logger.shouldLog(LogLevel.verbose)) {
+      _logger.verbose('Protocol message sent', {
+        'action': message.action?.name,
+        if (message.channel != null) 'channel': message.channel,
+        if (message.msgSerial != null) 'serial': message.msgSerial,
+        if (message.flags != null) 'flags': message.flags,
+      });
+    }
     _webSocketConnection!.send(message);
   }
 
@@ -1286,6 +1352,7 @@ class Connection implements WebSocketListener {
   /// it for ACK tracking. The queued completer is chained to the send future.
   void _flushMessageQueue() {
     if (_webSocketConnection == null || _messageQueue.isEmpty) return;
+    _logger.debug('Sending queued messages', {'count': _messageQueue.length});
     final entries =
         List<(ProtocolMessage, Completer<PublishResult>)>.from(_messageQueue);
     _messageQueue.clear();
@@ -1308,6 +1375,9 @@ class Connection implements WebSocketListener {
   /// msgSerial values from the reset counter.
   void _resendPendingMessages({required bool resumeFailed}) {
     if (_webSocketConnection == null || _pendingMessages.isEmpty) return;
+    _logger.debug('Resending pending messages', {
+      'count': _pendingMessages.length,
+    });
 
     // Take all pending messages, sorted by original msgSerial
     final entries = _pendingMessages.entries.toList()

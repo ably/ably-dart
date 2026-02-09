@@ -5,6 +5,7 @@ import '../auth/auth.dart';
 import '../auth/client_options.dart';
 import '../error/ably_exception.dart';
 import '../error/error_info.dart';
+import '../logging/logger.dart';
 import '../pagination/http_paginated_response.dart';
 import '../pagination/paginated_result.dart';
 import '../stats/stats.dart';
@@ -24,17 +25,24 @@ abstract class BaseClientImpl {
   }) : _options = options {
     _validateOptions(options);
 
+    logger = Logger(
+      level: options.logLevel,
+      handler: options.logHandler,
+    );
+
     rawHttpClient = httpClient ?? http.Client();
 
     ablyHttpClient = AblyHttpClient(
       options: options,
       httpClient: rawHttpClient,
+      logger: logger,
     );
 
     authImpl = AuthImpl(
       options: options,
       httpClient: ablyHttpClient,
       rawHttpClient: rawHttpClient,
+      logger: logger,
     );
 
     // Wire up auth header provider
@@ -44,9 +52,18 @@ abstract class BaseClientImpl {
     if (_hasTokenRenewalMechanism(options)) {
       ablyHttpClient.tokenRenewer = () => authImpl.authorize();
     }
+
+    logger.info('Client created', {'type': _clientType});
   }
 
+  /// The client type name for logging. Overridden by subclasses.
+  String get _clientType => 'rest';
+
   final ClientOptions _options;
+
+  /// The logger instance, created from options and shared with all components.
+  @protected
+  late final Logger logger;
 
   /// The raw HTTP client, available to subclasses for dependency injection.
   @protected

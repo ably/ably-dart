@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:clock/clock.dart';
 
 import '../../auth/client_options.dart';
+import '../../logging/log_level.dart';
+import '../../logging/logger.dart';
 import 'constants.dart';
 
 /// Manages host selection for fallback behavior.
@@ -15,11 +17,14 @@ import 'constants.dart';
 class HostSelector {
   HostSelector({
     required ClientOptions options,
+    required Logger logger,
     Random? random,
   })  : _options = options,
+        _logger = logger,
         _random = random ?? Random();
 
   final ClientOptions _options;
+  final Logger _logger;
   final Random _random;
 
   // Track fallback host failures
@@ -89,6 +94,10 @@ class HostSelector {
     final maxRetries = _options.httpMaxRetryCount;
     hosts.addAll(availableFallbacks.take(maxRetries));
 
+    if (_logger.shouldLog(LogLevel.verbose)) {
+      _logger.verbose('Host try order', {'hosts': hosts});
+    }
+
     return hosts;
   }
 
@@ -97,6 +106,7 @@ class HostSelector {
   /// Failed hosts will be excluded from future host selection until
   /// the failure tracking is cleared.
   void markHostAsFailed(String host) {
+    _logger.debug('Host marked as failed', {'host': host});
     if (!_failedHosts.contains(host)) {
       _failedHosts.add(host);
     }
