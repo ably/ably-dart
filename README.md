@@ -7,13 +7,14 @@ Pure Dart implementation of the [Ably](https://ably.com) realtime messaging SDK.
 This package provides a pure Dart client for the Ably realtime messaging platform. It implements the [Ably client library specification](https://sdk.ably.com/builds/ably/specification/main/features/) and serves as the foundation for [ably-flutter](https://github.com/ably/ably-flutter).
 
 **Key Features:**
-- ✅ REST API (time, stats, request, batch publish)
-- ✅ Realtime connection management with automatic fallback
-- ✅ Authentication (API keys, token auth, callbacks, authUrl)
-- ✅ Channel operations (publish, history)
-- ✅ Presence queries
-- ✅ Pagination support
-- ⏳ Realtime channels (in development)
+- REST API (time, stats, request, batch publish)
+- Realtime connection management with automatic fallback
+- Authentication (API keys, token auth, JWT, callbacks, authUrl)
+- In-band reauthorization (RTC8)
+- Automatic token renewal on expiry
+- Channel operations (attach, detach, subscribe, publish, history)
+- Presence queries
+- Pagination support
 
 ## Installation
 
@@ -81,8 +82,9 @@ lib/src/
 ├── impl/              # Concrete implementations
 │   ├── rest_impl.dart
 │   ├── realtime_impl.dart
-│   ├── auth_impl.dart        # Shared authentication
-│   └── http/                 # Shared HTTP client
+│   ├── auth_impl.dart         # Shared authentication
+│   ├── realtime_auth.dart     # Realtime auth wrapper (RTC8)
+│   └── http/                  # Shared HTTP client
 ├── auth/              # Authentication types
 ├── channels/          # Channel interfaces
 ├── message/           # Message types
@@ -158,39 +160,42 @@ See [test/helpers/MOCK_HTTP_CLIENT.md](test/helpers/MOCK_HTTP_CLIENT.md) for det
 This SDK implements the [Universal Test Specification (UTS)](https://github.com/ably/ably-common/tree/main/test-resources) for Ably client libraries.
 
 **Current Test Status:**
-- 310+ tests passing
-- 19 tests skipped (awaiting features)
-- ~13 tests failing (under investigation)
+- 750 unit tests, all passing
+- 13 integration tests (Ably sandbox), all passing
+- 763 total, 0 failures
 
 All tests reference Ably specification points (e.g., `RTN17a`, `RSC6`, `REC2c1`) making it easy to trace implementation to requirements.
 
-See [TEST_IMPLEMENTATION_STATUS.md](TEST_IMPLEMENTATION_STATUS.md) for detailed coverage.
+See [test/completion-status.md](test/completion-status.md) for detailed spec coverage.
 
 ## Implementation Status
 
-### ✅ Complete
+### Complete
 
 - **REST Client** - Full API coverage (time, stats, request, batch publish)
-- **Authentication** - API key, token auth, callbacks, authUrl
-- **Realtime Connection** - Full state machine with fallback hosts
-- **Fallback Hosts** - Automatic fallback on connection failures (REC1, REC2, REC3, RTN17)
-- **Token Renewal** - Automatic token renewal on expiry
+- **Authentication** - API key, token auth, JWT, callbacks, authUrl (RSA1-RSA16)
+- **In-band Reauthorization** - `auth.authorize()` on connected client (RTC8)
+- **Token Renewal** - Automatic renewal on expiry, correct token error scoping (RSC10, RSC10b)
+- **Token Request Signing** - `createTokenRequest()` with server-deferred defaults (RSA5, RSA6, RSA9)
+- **Realtime Connection** - Full state machine with fallback hosts (RTN14, RTN15, RTN17)
+- **Realtime Channels** - Attach, detach, subscribe, publish (RTL4-RTL8, RTL13, RTL14)
 - **Heartbeat & Updates** - Connection health monitoring (RTN23, RTN24)
 - **State Management** - Observable state changes (RTN26)
+- **REST Presence** - Get and history queries (RSP1-RSP5)
+- **Pagination** - Full paginated result support (TG1-TG7)
 
-### ⏳ In Development
+### Not Implemented
 
-- **Realtime Channels** - Attach, detach, subscribe, publish
-- **Realtime Presence** - Presence set operations
-- **Message Queueing** - Offline message queueing
-
-See [REALTIME_IMPLEMENTATION_COMPLETE.md](REALTIME_IMPLEMENTATION_COMPLETE.md) for detailed status.
+- **Server-Initiated Reauth** - RTN22 (UTS spec exists)
+- **Realtime Presence** - Enter/leave/update operations (RTP)
+- **Message Encryption** - RSL5, RSE1-RSE2
+- **Push Notifications** - RSH1-RSH8
+- **Msgpack** - Binary protocol not supported; JSON only
 
 ## Documentation
 
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** - System architecture and design decisions
-- **[REALTIME_IMPLEMENTATION_COMPLETE.md](REALTIME_IMPLEMENTATION_COMPLETE.md)** - Implementation status
-- **[TEST_IMPLEMENTATION_STATUS.md](TEST_IMPLEMENTATION_STATUS.md)** - Test coverage details
+- **[test/completion-status.md](test/completion-status.md)** - Spec-by-spec test coverage matrix
 - **[test/helpers/MOCK_HTTP_CLIENT.md](test/helpers/MOCK_HTTP_CLIENT.md)** - Mock infrastructure reference
 - **[Ably Specification](https://sdk.ably.com/builds/ably/specification/main/features/)** - Official spec
 
