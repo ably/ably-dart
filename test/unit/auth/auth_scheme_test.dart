@@ -8,7 +8,7 @@ import '../../helpers/test_channel_name.dart';
 
 /// Auth Scheme Selection Tests
 ///
-/// Spec points: RSA1, RSA2, RSA3, RSA4, RSA4a, RSA4b, RSA4c
+/// Spec points: RSA1, RSA2, RSA3, RSA4, RSA4a, RSA4b, RSA4c, RSA11
 void main() {
   group('Auth Scheme Selection', () {
     group('RSA1 - API key format validation', () {
@@ -37,7 +37,7 @@ void main() {
       }
     });
 
-    group('RSA2 - Basic auth when using API key', () {
+    group('RSA2, RSA11 - Basic auth when using API key', () {
       test('uses Basic authentication header', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSA2');

@@ -6,14 +6,34 @@ import '../../helpers/test_channel_name.dart';
 
 /// REST Client Tests
 ///
-/// Spec points: RSC7, RSC7b, RSC7c, RSC7d, RSC7e, RSC8, RSC8a, RSC8b, RSC8c,
-///              RSC8d, RSC8e, RSC13, RSC18
+/// Spec points: RSC5, RSC7, RSC7b, RSC7c, RSC7d, RSC7e, RSC8, RSC8a, RSC8b,
+///              RSC8c, RSC8d, RSC8e, RSC13, RSC17, RSC18
 void main() {
   group('REST Client', () {
     late MockHttpClient mockHttp;
 
     setUp(() {
       mockHttp = MockHttpClient();
+    });
+
+    test('RSC5 - auth attribute exists', () {
+      final rest = Rest(
+        options: ClientOptions(key: 'fake.key:secret'),
+      );
+
+      expect(rest.auth, isNotNull);
+      expect(rest.auth, isA<Auth>());
+    });
+
+    test('RSC17 - clientId from options is set on auth', () {
+      final rest = Rest(
+        options: ClientOptions(
+          key: 'fake.key:secret',
+          clientId: 'explicit-client-id',
+        ),
+      );
+
+      expect(rest.auth.clientId, equals('explicit-client-id'));
     });
 
     group('RSC7e - X-Ably-Version header', () {

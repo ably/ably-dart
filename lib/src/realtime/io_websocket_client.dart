@@ -24,7 +24,13 @@ class IOWebSocketConnection implements WebSocketConnection {
     // Set up subscription immediately - listener is already attached
     _subscription = _ws.listen(
       _handleMessage,
-      onError: _listener.onError,
+      onError: (Object error) {
+        // Suppress errors after intentional close (e.g. SocketException
+        // from reading a closed socket during teardown).
+        if (!_closed) {
+          _listener.onError(error);
+        }
+      },
       onDone: () {
         _closed = true;
         _listener.onClose(
@@ -69,6 +75,21 @@ class IOWebSocketConnection implements WebSocketConnection {
     if (_closed) return;
     _closed = true;
     await _subscription.cancel();
-    await _ws.close(code ?? io.WebSocketStatus.normalClosure, reason);
+    // Run close in an error zone to catch SocketExceptions that dart:io
+    // posts asynchronously when the close handshake tries to read the
+    // close frame from an already-closed socket (e.g. after FAILED state).
+    final completer = Completer<void>();
+    runZonedGuarded(() async {
+      try {
+        await _ws.close(code ?? io.WebSocketStatus.normalClosure, reason);
+      } catch (_) {
+        // Swallow synchronous/Future errors from close
+      }
+      if (!completer.isCompleted) completer.complete();
+    }, (error, stack) {
+      // Swallow async SocketExceptions from dart:io internals
+      if (!completer.isCompleted) completer.complete();
+    });
+    await completer.future;
   }
 }

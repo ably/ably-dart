@@ -10,15 +10,14 @@ import '../../error/error_info.dart';
 class ErrorClassifier {
   /// Checks if an error is a token error that may be renewable.
   ///
-  /// Token errors have codes in range 40140-40149 or status code 401.
+  /// Token errors have codes in range 40140-40149.
   ///
   /// Spec: RTN14b, RTN15h, RSA4b
   static bool isTokenError(ErrorInfo error) {
-    if (error.statusCode == 401) return true;
-
     final code = error.code;
     if (code == null) return false;
 
+    // RSC10b: Only error codes 40140-40149 are token errors
     return code >= 40140 && code < 40150;
   }
 

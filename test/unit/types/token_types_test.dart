@@ -81,9 +81,21 @@ void main() {
         expect(params.ttl, equals(3600000));
       });
 
+      test('TK1 - ttl defaults to null when not specified', () {
+        // RSA5 depends on this — null means "let server decide"
+        final params = TokenParams();
+        expect(params.ttl, isNull);
+      });
+
       test('TK2 - capability attribute', () {
         final params = TokenParams(capability: '{"*":["subscribe"]}');
         expect(params.capability, equals('{"*":["subscribe"]}'));
+      });
+
+      test('TK2 - capability defaults to null when not specified', () {
+        // RSA6 depends on this — null means "use key capabilities"
+        final params = TokenParams();
+        expect(params.capability, isNull);
       });
 
       test('TK3 - clientId attribute', () {
@@ -156,6 +168,16 @@ void main() {
         expect(request.ttl, equals(3600000));
       });
 
+      test('TE2 - ttl defaults to null when not specified', () {
+        // RSA5 depends on this — createTokenRequest must be able to omit ttl
+        final request = TokenRequest(
+          keyName: 'appId.keyId',
+          timestamp: 1234567890000,
+          nonce: 'nonce-2b',
+        );
+        expect(request.ttl, isNull);
+      });
+
       test('TE3 - capability attribute', () {
         final request = TokenRequest(
           keyName: 'appId.keyId',
@@ -164,6 +186,16 @@ void main() {
           nonce: 'nonce-3',
         );
         expect(request.capability, equals('{"*":["*"]}'));
+      });
+
+      test('TE3 - capability defaults to null when not specified', () {
+        // RSA6 depends on this — createTokenRequest must be able to omit capability
+        final request = TokenRequest(
+          keyName: 'appId.keyId',
+          timestamp: 1234567890000,
+          nonce: 'nonce-3b',
+        );
+        expect(request.capability, isNull);
       });
 
       test('TE4 - clientId attribute', () {

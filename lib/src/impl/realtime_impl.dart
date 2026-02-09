@@ -1,3 +1,4 @@
+import '../auth/auth.dart';
 import '../realtime/connection.dart';
 import '../realtime/protocol_message.dart';
 import '../realtime/realtime.dart';
@@ -5,6 +6,7 @@ import '../realtime/realtime_channels.dart';
 import '../realtime/timer_manager.dart';
 import '../realtime/websocket_client.dart';
 import 'base_client_impl.dart';
+import 'realtime_auth.dart';
 
 /// Implementation of the Ably Realtime client.
 ///
@@ -31,6 +33,7 @@ class RealtimeImpl extends BaseClientImpl implements Realtime {
   late final TimerManager timerManager;
   late final Connection _connection;
   late final RealtimeChannels _channels;
+  late final RealtimeAuth _realtimeAuth;
 
   void _initialize() {
     timerManager = _timerManager ?? TimerManager();
@@ -57,12 +60,21 @@ class RealtimeImpl extends BaseClientImpl implements Realtime {
     // Wire up channel message dispatch
     _connection.onChannelMessage = _dispatchChannelMessage;
 
+    // RTC8: Wrap auth with realtime-specific authorize behavior
+    _realtimeAuth = RealtimeAuth(
+      authImpl: authImpl,
+      connection: _connection,
+    );
+
     // Auto-connect if enabled (RTC1c)
     if (options.autoConnect) {
       // Schedule connect for next event loop to allow constructor to complete
       Future.microtask(() => _connection.connect());
     }
   }
+
+  @override
+  Auth get auth => _realtimeAuth;
 
   @override
   Connection get connection => _connection;

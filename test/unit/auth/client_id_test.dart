@@ -6,7 +6,8 @@ import '../../helpers/test_channel_name.dart';
 
 /// Client ID Tests
 ///
-/// Spec points: RSA7, RSA7a, RSA7b, RSA7c, RSA12, RSA12a, RSA12b
+/// Spec points: RSA7, RSA7a, RSA7b, RSA7c, RSA12, RSA12a, RSA12b,
+///              RSA15, RSA15a, RSA15b, RSA15c
 void main() {
   group('Client ID', () {
     late MockHttpClient mockHttp;
@@ -293,7 +294,8 @@ void main() {
       });
     });
 
-    group('RSA7 - clientId consistency between ClientOptions and token', () {
+    group('RSA7, RSA15 - clientId consistency between ClientOptions and token',
+        () {
       /// Tests that clientId in ClientOptions matches token clientId.
       test('matching clientId in ClientOptions and token - success', () async {
         final channelName = testChannelName('RSA7-match');

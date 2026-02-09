@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 
 import '../auth/auth.dart';
 import '../auth/client_options.dart';
+import '../auth/token_details.dart';
 import '../error/ably_exception.dart';
 import '../error/error_info.dart';
 import '../impl/fallback/connectivity_checker.dart';
@@ -72,6 +73,8 @@ class Connection implements WebSocketListener {
   String? _currentHost; // RTN17e - track which host we're connected to
   bool _shouldResume = false;
   int _retryAttempt = 0; // Track retry attempts for RTB1
+  Completer<void>? _pendingAuthCompleter; // RTC8a: awaiting AUTH response
+  bool _abortingForReauth = false; // RTC8b: suppress onClose during abort
 
   WebSocketConnection? _webSocketConnection;
 
@@ -212,6 +215,99 @@ class Connection implements WebSocketListener {
         // Already closing/closed - no-op
         break;
     }
+  }
+
+  /// Performs in-band reauthorization after a new token has been obtained.
+  ///
+  /// The behavior depends on the current connection state:
+  /// - CONNECTED: sends AUTH protocol message, waits for server response (RTC8a)
+  /// - CONNECTING: aborts current attempt, reconnects with new token (RTC8b)
+  /// - INITIALIZED/CLOSED/FAILED: initiates connection (RTC8c)
+  /// - DISCONNECTED/SUSPENDED: reconnects
+  /// - CLOSING: no-op
+  ///
+  /// Spec: RTC8
+  Future<void> reauthorize(TokenDetails token) async {
+    switch (_state) {
+      case ConnectionState.connected:
+        await _sendAuthAndWait(token);
+
+      case ConnectionState.connecting:
+        await _abortAndReconnect();
+
+      case ConnectionState.initialized:
+      case ConnectionState.closed:
+      case ConnectionState.failed:
+        await connect();
+        _throwIfFailed();
+
+      case ConnectionState.disconnected:
+      case ConnectionState.suspended:
+        await connect();
+        _throwIfFailed();
+
+      case ConnectionState.closing:
+        break;
+    }
+  }
+
+  /// Throws if the connection is in FAILED state.
+  ///
+  /// Used after connect/reconnect attempts in [reauthorize] to propagate
+  /// connection failures to the caller.
+  void _throwIfFailed() {
+    if (_state == ConnectionState.failed) {
+      throw AblyException(
+        errorInfo: _errorReason ??
+            ErrorInfo(
+              code: 80000,
+              statusCode: 500,
+              message: 'Connection failed during reauthorization',
+            ),
+      );
+    }
+  }
+
+  /// Sends an AUTH protocol message and waits for the server response.
+  ///
+  /// The server responds with either CONNECTED (success, emits UPDATE event)
+  /// or ERROR (failure, connection enters FAILED).
+  ///
+  /// Spec: RTC8a
+  Future<void> _sendAuthAndWait(TokenDetails token) async {
+    final completer = Completer<void>();
+    _pendingAuthCompleter = completer;
+
+    final message = ProtocolMessage(
+      action: ProtocolAction.auth,
+      auth: {'accessToken': token.token},
+    );
+    _webSocketConnection!.send(message);
+
+    await completer.future;
+  }
+
+  /// Aborts the current CONNECTING attempt and reconnects with a new token.
+  ///
+  /// Sets [_abortingForReauth] to suppress the normal onClose handling
+  /// (which would transition to DISCONNECTED and schedule a reconnect).
+  ///
+  /// Spec: RTC8b
+  Future<void> _abortAndReconnect() async {
+    _abortingForReauth = true;
+    await _closeWebSocket();
+
+    // Unblock the pending _startConnection() / _connectToHost() call
+    if (_connectionCompleter != null && !_connectionCompleter!.isCompleted) {
+      _connectionCompleter!.completeError(const HandledErrorException());
+      _connectionCompleter = null;
+    }
+    _abortingForReauth = false;
+
+    // Start new connection — _buildWebSocketUrl() calls _auth.getValidToken()
+    // which returns the token already stored by authImpl.authorize()
+    await _startConnection();
+    _throwIfFailed();
   }
 
   /// Pings the Ably service and returns the round-trip duration.
@@ -587,6 +683,9 @@ class Connection implements WebSocketListener {
 
   @override
   void onClose({int? closeCode, String? closeReason}) {
+    // RTC8b: Suppress normal onClose handling during reauth abort
+    if (_abortingForReauth) return;
+
     if (_state == ConnectionState.closing ||
         _state == ConnectionState.closed ||
         _state == ConnectionState.failed ||
@@ -665,6 +764,13 @@ class Connection implements WebSocketListener {
           reason: message.error, // RTN24: include error if present
         ),
       );
+
+      // RTC8a1: Resolve pending auth completer if this is a reauth response
+      if (_pendingAuthCompleter != null &&
+          !_pendingAuthCompleter!.isCompleted) {
+        _pendingAuthCompleter!.complete();
+        _pendingAuthCompleter = null;
+      }
       return;
     }
 
@@ -812,6 +918,15 @@ class Connection implements WebSocketListener {
       // Token errors are already handled above by _handleTokenError.
       _closeWebSocket();
       _transitionTo(ConnectionState.failed, error: error);
+
+      // RTC8a2: Resolve pending auth completer with error
+      if (_pendingAuthCompleter != null &&
+          !_pendingAuthCompleter!.isCompleted) {
+        _pendingAuthCompleter!.completeError(
+          AblyException(errorInfo: error),
+        );
+        _pendingAuthCompleter = null;
+      }
     }
   }
 
@@ -831,12 +946,9 @@ class Connection implements WebSocketListener {
     }
   }
 
-  /// Checks if error is a token error.
+  /// Checks if error is a token error (40140-40149).
   bool _isTokenError(ErrorInfo error) {
-    return error.code == 40140 ||
-        error.code == 40141 ||
-        error.code == 40142 ||
-        error.statusCode == 401;
+    return ErrorClassifier.isTokenError(error);
   }
 
   /// Checks if we can renew the token.
@@ -1509,6 +1621,12 @@ class Connection implements WebSocketListener {
     _failPendingPings(disposeError);
     _failPendingMessages(disposeError);
     _failQueuedMessages(disposeError);
+    if (_pendingAuthCompleter != null && !_pendingAuthCompleter!.isCompleted) {
+      _pendingAuthCompleter!.completeError(
+        AblyException(errorInfo: disposeError),
+      );
+      _pendingAuthCompleter = null;
+    }
     _closeWebSocket();
     _timerManager.cancelAll(owner: this);
     _stateChangeController.close();

@@ -286,18 +286,22 @@ class AuthImpl implements Auth {
     }
 
     // Build the token request
-    final ttl = effectiveParams.ttl ?? 3600000; // Default 1 hour
-    final capability = effectiveParams.capability ?? '{"*":["*"]}';
+    // RSA5/RSA6: ttl and capability are nullable — null means server decides
+    final ttl = effectiveParams.ttl;
+    final capability = effectiveParams.capability;
     final requestClientId = effectiveParams.clientId ?? _options.clientId;
 
     // Create the signing text (RSA9g)
+    // Null values produce empty string in the signing text.
+    // Trailing newline is required (matches ably-js and ably-python).
     final signText = [
       keyName,
-      ttl.toString(),
-      capability,
+      ttl?.toString() ?? '',
+      capability ?? '',
       requestClientId ?? '',
       timestamp.toString(),
       nonce,
+      '', // trailing newline
     ].join('\n');
 
     // Sign with HMAC-SHA256 (RSA9h)
@@ -489,7 +493,7 @@ class AuthImpl implements Auth {
       'POST',
       '/keys/${tokenRequest.keyName}/requestToken',
       body: tokenRequest.toMap(),
-      authenticated: false, // Token requests are self-authenticating
+      authenticated: false, // Token requests are self-authenticating via MAC
     );
 
     return TokenDetails.fromMap(response.body as Map<String, dynamic>);

@@ -36,16 +36,16 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | RSC2 | Logger default | Yes — `unit/client/logging_test.dart` | Yes |
 | RSC3 | Log level configuration | Yes — `unit/client/logging_test.dart` | Yes |
 | RSC4 | Custom logger | Yes — `unit/client/logging_test.dart` | Yes |
-| RSC5 | Auth object attribute | | |
+| RSC5 | Auth object attribute | Yes — `unit/client/rest_client_test.dart` | Yes |
 | RSC6 | Stats function (RSC6a–RSC6b4) | Yes — `unit/client/stats_test.dart` (shared via TestClient) | Yes |
 | RSC7 | HTTP request headers (RSC7a–RSC7d7) | Yes — `unit/client/rest_client_test.dart` | Yes |
 | RSC8 | Protocol support (RSC8a–RSC8e2) | Yes — `unit/client/rest_client_test.dart` | Yes |
 | RSC9 | Auth usage for authentication | | |
-| RSC10 | Token error retry handling | | |
+| RSC10 | Token error retry handling | Yes — `unit/auth/token_renewal_rsc10_test.dart`, `integration/rest/auth_test.dart` | Yes |
 | RSC13 | Connection and request timeouts | Yes — `unit/client/rest_client_test.dart` | Yes |
 | RSC15 | Host fallback behaviour (RSC15a–RSC15n) | | Yes |
 | RSC16 | Time function | Yes — `unit/client/time_test.dart` | Yes |
-| RSC17 | ClientId attribute | | |
+| RSC17 | ClientId attribute | Yes — `unit/client/rest_client_test.dart` | Yes |
 | RSC18 | TLS configuration | Yes — `unit/client/rest_client_test.dart`, `unit/client/time_test.dart` | Yes |
 | RSC19 | Request function (RSC19a–RSC19f1) | Yes — `unit/client/request_test.dart` (shared via TestClient) | Yes |
 | RSC20 | Deprecated exception reporting (RSC20a–RSC20f) | | |
@@ -63,17 +63,17 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | RSA1 | Basic Auth requires HTTPS | Yes — `unit/auth/auth_scheme_test.dart` | Yes |
 | RSA2 | Basic Auth default | Yes — `unit/auth/auth_scheme_test.dart` | Yes |
 | RSA3 | Token Auth support (RSA3a–RSA3d) | Yes — `unit/auth/auth_scheme_test.dart` | Yes |
-| RSA4 | Token Auth selection logic (RSA4a–RSA4g) | Partial — `unit/auth/auth_scheme_test.dart` (RSA4a–RSA4c), `unit/auth/token_renewal_test.dart` (RSA4b4), `unit/realtime/auth/connection_auth_test.dart` (RSA4) | Partial |
-| RSA5 | TTL for tokens | | |
-| RSA6 | Capability JSON | | |
-| RSA7 | ClientId and authenticated clients (RSA7a–RSA7e2) | Partial — `unit/auth/client_id_test.dart` (RSA7, RSA7a–RSA7c) | Partial |
-| RSA8 | RequestToken function (RSA8a–RSA8g) | Partial — `unit/auth/auth_callback_test.dart` (RSA8c, RSA8d), `unit/realtime/auth/connection_auth_test.dart` (RSA8d) | Partial |
-| RSA9 | CreateTokenRequest (RSA9a–RSA9i) | | Partial |
+| RSA4 | Token Auth selection logic (RSA4a–RSA4g) | Partial — `unit/auth/auth_scheme_test.dart` (RSA4a–RSA4c), `unit/auth/token_renewal_test.dart` (RSA4b4), `unit/realtime/auth/connection_auth_test.dart` (RSA4), `integration/rest/auth_test.dart` (RSA4) | Partial |
+| RSA5 | TTL for tokens | Yes — `unit/auth/token_request_params_test.dart` | Yes |
+| RSA6 | Capability JSON | Yes — `unit/auth/token_request_params_test.dart` | Yes |
+| RSA7 | ClientId and authenticated clients (RSA7a–RSA7e2) | Partial — `unit/auth/client_id_test.dart` (RSA7, RSA7a–RSA7c), `integration/realtime/auth_test.dart` (RSA7) | Partial |
+| RSA8 | RequestToken function (RSA8a–RSA8g) | Partial — `unit/auth/auth_callback_test.dart` (RSA8c, RSA8d), `unit/realtime/auth/connection_auth_test.dart` (RSA8d), `integration/rest/auth_test.dart` (RSA8), `integration/realtime/auth_test.dart` (RSA8) | Partial |
+| RSA9 | CreateTokenRequest (RSA9a–RSA9i) | Yes — `unit/auth/token_request_params_test.dart` (RSA9) | Partial |
 | RSA10 | Authorize function (RSA10a–RSA10l) | Yes — `unit/auth/authorize_test.dart` | Yes |
-| RSA11 | Base64 encoded API key | | |
+| RSA11 | Base64 encoded API key | Yes — `unit/auth/auth_scheme_test.dart` (with RSA2) | Yes |
 | RSA12 | Auth#clientId attribute (RSA12a–RSA12b) | Yes — `unit/auth/client_id_test.dart` | Yes |
 | RSA14 | Error when token auth selected without token | Yes — `unit/auth/token_renewal_test.dart` | Yes |
-| RSA15 | ClientId validation (RSA15a–RSA15c) | | |
+| RSA15 | ClientId validation (RSA15a–RSA15c) | Yes — `unit/auth/client_id_test.dart` (RSA15a, RSA15b, RSA15c REST), `integration/realtime/auth_test.dart` (RSA15c Realtime) | Yes |
 | RSA16 | TokenDetails attribute (RSA16a–RSA16d) | Yes — `unit/auth/token_details_test.dart` | Yes |
 | RSA17 | RevokeTokens (RSA17a–RSA17g) | | |
 
@@ -153,7 +153,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | RTC5 | Stats function (RTC5a–RTC5b) | Yes — `unit/client/stats_test.dart` (shared via TestClient) | Yes |
 | RTC6 | Time function (RTC6a) | Yes — `unit/client/time_test.dart` (shared via TestClient) | Yes |
 | RTC7 | Uses configured timeouts | | |
-| RTC8 | Authorize function for realtime (RTC8a–RTC8c) | | |
+| RTC8 | Authorize function for realtime (RTC8a–RTC8c) | Yes — `unit/realtime/auth/realtime_authorize_test.dart`, `integration/realtime/auth_test.dart` | Yes |
 | RTC9 | Request function | Yes — `unit/client/request_test.dart` (shared via TestClient) | Yes |
 | RTC10–RTC11 | Deleted | | |
 | RTC12 | Same constructors as RestClient | | Yes |
@@ -391,14 +391,14 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | Area | Spec groups | With Dart test | With UTS spec | Notes |
 |------|-------------|----------------|---------------|-------|
 | **Endpoint config** (REC) | 3 | 3 | 3 | Full |
-| **REST client** (RSC) | 18 | 13 | 13 | Missing: RSC15 (fallback) |
-| **REST auth** (RSA) | 15 | 10 | 10 | Aligned with UTS |
+| **REST client** (RSC) | 18 | 16 | 15 | Missing: RSC15 (fallback) |
+| **REST auth** (RSA) | 15 | 15 | 15 | Full (RSA17 is RevokeTokens — not implemented) |
 | **REST channels** (RSN) | 4 | 4 | 4 | Full |
 | **REST channel** (RSL) | 13 | 7 | 6 | RSL8 via ChannelRestApi |
 | **REST presence** (RSP) | 5 | 4 | 4 | Aligned with UTS |
 | **REST encryption** (RSE) | 2 | 0 | 0 | |
 | **REST annotations** (RSAN) | 3 | 0 | 0 | |
-| **Realtime client** (RTC) | 14 | 7 | 8 | Missing: RTC12 |
+| **Realtime client** (RTC) | 14 | 11 | 12 | RTC8 added |
 | **Connection** (RTN) | 23 | 16 | 18 | Missing: RTN16, RTN21 full coverage |
 | **Realtime channels** (RTS) | 5 | 5 | 5 | Full |
 | **Realtime channel** (RTL) | 24 | 15 | 15 | RTL10 partial (RTL10d pending) |
