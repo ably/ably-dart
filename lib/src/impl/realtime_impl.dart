@@ -46,6 +46,7 @@ class RealtimeImpl extends BaseClientImpl implements Realtime {
       connection: _connection,
       timerManager: timerManager,
       options: options,
+      httpClient: ablyHttpClient,
     );
 
     // Wire up channel message dispatch

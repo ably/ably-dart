@@ -53,7 +53,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | RSC22 | BatchPublish (RSC22a–RSC22d) | Yes — `unit/client/batch_publish_test.dart` | Yes |
 | RSC23 | Deleted | | |
 | RSC24 | BatchPresence | | |
-| RSC25 | Request endpoint | | |
+| RSC25 | Request endpoint | Yes — `unit/client/request_endpoint_test.dart` | Yes |
 | RSC26 | CreateWrapperSDKProxy (RSC26a–RSC26c) | | |
 
 ### Auth
@@ -81,7 +81,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 
 | Spec item | Description | Dart test | UTS spec |
 |-----------|-------------|-----------|----------|
-| RSN1–RSN4 | REST channels collection (RSN1–RSN4c) | | |
+| RSN1–RSN4 | REST channels collection (RSN1–RSN4c) | Yes — `unit/channel/channels_collection_test.dart` | Yes |
 
 ### RestChannel
 
@@ -95,7 +95,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | RSL5 | Message encryption (RSL5a–RSL5c) | | |
 | RSL6 | Message decoding (RSL6a–RSL6b) | Yes — `unit/encoding/message_encoding_test.dart` | Yes |
 | RSL7 | SetOptions function | | |
-| RSL8 | Status function (RSL8a) | | |
+| RSL8 | Status function (RSL8a) | Yes — `unit/realtime/channels/channel_history_test.dart` (via ChannelRestApi) | |
 | RSL9 | Name attribute | | |
 | RSL10 | Annotations attribute | | |
 | RSL11 | GetMessage function (RSL11a–RSL11c) | | |
@@ -173,7 +173,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | RTN4 | Connection event emission (RTN4a–RTN4i) | Partial — `integration/realtime/connection_lifecycle_test.dart` (RTN4b, RTN4c) | Partial |
 | RTN5 | Concurrency test (50+ clients) | | |
 | RTN6 | Successful connection definition | | |
-| RTN7 | ACK and NACK handling (RTN7a–RTN7e) | Partial — `unit/realtime/channels/channel_publish_test.dart` covers RTN7a, RTN7b (via RTL6j tests) | Partial |
+| RTN7 | ACK and NACK handling (RTN7a–RTN7e) | Yes — `unit/realtime/channels/channel_publish_test.dart` (RTN7a, RTN7b via RTL6j; RTN7d, RTN7e) | Yes |
 | RTN8 | Connection#id attribute (RTN8a–RTN8c) | Yes — `unit/realtime/connection/connection_id_key_test.dart` | Yes |
 | RTN9 | Connection#key attribute (RTN9a–RTN9c) | Yes — `unit/realtime/connection/connection_id_key_test.dart` | Yes |
 | RTN11 | Connect function (RTN11a–RTN11f) | Partial — `integration/realtime/connection_lifecycle_test.dart` (RTN11, RTN11e) | Partial |
@@ -183,7 +183,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | RTN15 | Connection failures when CONNECTED (RTN15a–RTN15j) | Yes — `unit/realtime/connection/connection_failures_test.dart` | Yes |
 | RTN16 | Connection recovery (RTN16a–RTN16m1) | | Partial |
 | RTN17 | Domain selection and fallback (RTN17a–RTN17j) | Yes — `unit/realtime/connection/fallback_hosts_test.dart` | Yes |
-| RTN19 | Transport state side effects (RTN19a–RTN19b) | | |
+| RTN19 | Transport state side effects (RTN19a–RTN19b) | Yes — `unit/realtime/channels/channel_publish_test.dart` (RTN19a, RTN19a2, RTN19b) | Yes |
 | RTN20 | OS network change handling (RTN20a–RTN20c) | | |
 | RTN21 | ConnectionDetails override defaults | Partial — `integration/realtime/connection_lifecycle_test.dart` (RTN21) | Partial |
 | RTN22 | Re-authentication request handling (RTN22a) | | |
@@ -216,7 +216,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | RTL7 | Subscribe function (RTL7a–RTL7h) | Yes — `unit/realtime/channels/channel_subscribe_test.dart` | Yes |
 | RTL8 | Unsubscribe function (RTL8a–RTL8c) | Yes — `unit/realtime/channels/channel_subscribe_test.dart` | Yes |
 | RTL9 | Presence attribute (RTL9a) | | |
-| RTL10 | History function (RTL10a–RTL10d) | | |
+| RTL10 | History function (RTL10a–RTL10d) | Partial — `unit/realtime/channels/channel_history_test.dart` (RTL10a, RTL10b, RTL10c); integration RTL10d pending | Partial |
 | RTL11 | Channel state effect on presence (RTL11a) | | |
 | RTL12 | Additional ATTACHED message handling | | |
 | RTL13 | Server-initiated DETACHED handling (RTL13a–RTL13c) | Yes — `unit/realtime/channels/channel_server_initiated_detach_test.dart` | Yes |
@@ -391,17 +391,17 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | Area | Spec groups | With Dart test | With UTS spec | Notes |
 |------|-------------|----------------|---------------|-------|
 | **Endpoint config** (REC) | 3 | 3 | 3 | Full |
-| **REST client** (RSC) | 18 | 9 | 9 | Missing: RSC15 (fallback) |
+| **REST client** (RSC) | 18 | 10 | 10 | Missing: RSC15 (fallback) |
 | **REST auth** (RSA) | 15 | 10 | 10 | Aligned with UTS |
-| **REST channels** (RSN) | 4 | 0 | 0 | |
-| **REST channel** (RSL) | 13 | 6 | 6 | Aligned with UTS |
+| **REST channels** (RSN) | 4 | 4 | 4 | Full |
+| **REST channel** (RSL) | 13 | 7 | 6 | RSL8 via ChannelRestApi |
 | **REST presence** (RSP) | 5 | 4 | 4 | Aligned with UTS |
 | **REST encryption** (RSE) | 2 | 0 | 0 | |
 | **REST annotations** (RSAN) | 3 | 0 | 0 | |
 | **Realtime client** (RTC) | 14 | 7 | 8 | Missing: RTC12 |
-| **Connection** (RTN) | 23 | 14 | 16 | Missing: RTN16, RTN21 full coverage |
+| **Connection** (RTN) | 23 | 16 | 18 | Missing: RTN16, RTN21 full coverage |
 | **Realtime channels** (RTS) | 5 | 5 | 5 | Full |
-| **Realtime channel** (RTL) | 24 | 14 | 14 | |
+| **Realtime channel** (RTL) | 24 | 15 | 15 | RTL10 partial (RTL10d pending) |
 | **Realtime presence** (RTP) | 15 | 0 | 0 | |
 | **Realtime annotations** (RTAN) | 5 | 0 | 0 | |
 | **EventEmitter** (RTE) | 6 | 0 | 0 | |

@@ -4,6 +4,8 @@ import 'dart:convert';
 import '../auth/client_options.dart';
 import '../error/ably_exception.dart';
 import '../error/error_info.dart';
+import '../impl/channel_rest_api.dart';
+import '../impl/http/http_client.dart';
 import 'channel_state.dart';
 import 'connection.dart';
 import 'connection_state.dart';
@@ -22,9 +24,11 @@ class RealtimeChannels {
     required Connection connection,
     required TimerManager timerManager,
     required ClientOptions options,
+    required AblyHttpClient httpClient,
   })  : _connection = connection,
         _timerManager = timerManager,
-        _options = options {
+        _options = options,
+        _httpClient = httpClient {
     // RTL3: Propagate connection state changes to channels
     _connectionSubscription = _connection.on().listen(_onConnectionStateChange);
   }
@@ -32,6 +36,7 @@ class RealtimeChannels {
   final Connection _connection;
   final TimerManager _timerManager;
   final ClientOptions _options;
+  final AblyHttpClient _httpClient;
   final Map<String, RealtimeChannel> _channels = {};
   late final StreamSubscription<ConnectionStateChange> _connectionSubscription;
 
@@ -78,6 +83,7 @@ class RealtimeChannels {
       timerManager: _timerManager,
       name: name,
       options: _options,
+      restApi: ChannelRestApi(channelName: name, httpClient: _httpClient),
       channelOptions: options,
     );
     _channels[name] = channel;

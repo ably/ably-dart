@@ -1,9 +1,14 @@
 import 'dart:async';
 
 import '../auth/client_options.dart';
+import '../channels/channel_details.dart';
+import '../channels/realtime_history_params.dart';
+import '../channels/rest_history_params.dart';
 import '../error/ably_exception.dart';
 import '../error/error_info.dart';
+import '../impl/channel_rest_api.dart';
 import '../message/message.dart';
+import '../pagination/paginated_result.dart';
 import 'channel_event.dart';
 import 'channel_mode.dart';
 import 'channel_state.dart';
@@ -46,17 +51,20 @@ class RealtimeChannel {
     required TimerManager timerManager,
     required String name,
     required ClientOptions options,
+    required ChannelRestApi restApi,
     RealtimeChannelOptions? channelOptions,
   })  : _connection = connection,
         _timerManager = timerManager,
         _name = name,
         _clientOptions = options,
+        _restApi = restApi,
         _options = channelOptions ?? const RealtimeChannelOptions(),
         _state = ChannelState.initialized;
 
   final Connection _connection;
   final TimerManager _timerManager;
   final ClientOptions _clientOptions;
+  final ChannelRestApi _restApi;
   final String _name;
   RealtimeChannelOptions _options;
 
@@ -267,6 +275,39 @@ class RealtimeChannel {
       ),
     );
   }
+
+  /// Retrieves message history for this channel via the REST API.
+  ///
+  /// Accepts [RestHistoryParams] or [RealtimeHistoryParams]. If
+  /// [RealtimeHistoryParams.untilAttach] is true, the query is restricted
+  /// to messages prior to the channel's attach point using `fromSerial`.
+  ///
+  /// Spec: RTL10, RTL10a, RTL10b, RTL10c
+  Future<PaginatedResult<Message>> history([RestHistoryParams? params]) async {
+    Map<String, String>? extraQueryParams;
+
+    if (params is RealtimeHistoryParams && params.untilAttach) {
+      // RTL10b: untilAttach requires an attached channel with attachSerial
+      final attachSerial = properties.attachSerial;
+      if (attachSerial == null) {
+        throw const AblyException(
+          errorInfo: ErrorInfo(
+            code: 91000,
+            message: 'Cannot use untilAttach: channel has no attachSerial',
+            statusCode: 400,
+          ),
+        );
+      }
+      extraQueryParams = {'fromSerial': attachSerial};
+    }
+
+    return _restApi.history(params, extraQueryParams);
+  }
+
+  /// Retrieves the channel's current status and occupancy via the REST API.
+  ///
+  /// Spec: RSL8
+  Future<ChannelDetails> status() => _restApi.status();
 
   /// Attaches to this channel.
   ///

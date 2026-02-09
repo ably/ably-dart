@@ -12,8 +12,8 @@ import '../error/error_info.dart';
 import '../message/message.dart';
 import '../pagination/paginated_result.dart';
 import '../presence/rest_presence.dart';
+import 'channel_rest_api.dart';
 import 'http/http_client.dart';
-import 'paginated_result_impl.dart';
 import 'rest_presence_impl.dart';
 
 /// Implementation of RestChannel.
@@ -28,6 +28,7 @@ class RestChannelImpl implements RestChannel {
         _options = options,
         _channelOptions = channelOptions,
         _random = Random() {
+    _restApi = ChannelRestApi(channelName: name, httpClient: httpClient);
     _presence = RestPresenceImpl(
       channelName: name,
       httpClient: httpClient,
@@ -38,6 +39,7 @@ class RestChannelImpl implements RestChannel {
   final AblyHttpClient _httpClient;
   final ClientOptions _options;
   RestChannelOptions? _channelOptions;
+  late final ChannelRestApi _restApi;
   late final RestPresenceImpl _presence;
   final Random _random;
 
@@ -161,57 +163,11 @@ class RestChannelImpl implements RestChannel {
   }
 
   @override
-  Future<PaginatedResult<Message>> history([RestHistoryParams? params]) async {
-    final path = '/channels/${Uri.encodeComponent(_name)}/messages';
-    final queryParams = params?.toQueryParams() ?? {};
-
-    final response = await _httpClient.request(
-      'GET',
-      path,
-      queryParams: queryParams,
-    );
-
-    final messages = PaginatedResultParser.parseMessages(response.body);
-
-    return PaginatedResultImpl.fromResponse<Message>(
-      response: response,
-      items: messages,
-      fetcher: (url) => _fetchHistoryPage(url),
-    );
-  }
-
-  Future<PaginatedResult<Message>> _fetchHistoryPage(String url) async {
-    // Parse the URL to extract path and query params
-    final uri = Uri.parse(url);
-
-    final response = await _httpClient.request(
-      'GET',
-      uri.path,
-      queryParams: uri.queryParameters.isNotEmpty
-          ? Map<String, String>.from(uri.queryParameters)
-          : null,
-    );
-
-    final messages = PaginatedResultParser.parseMessages(response.body);
-
-    return PaginatedResultImpl.fromResponse<Message>(
-      response: response,
-      items: messages,
-      fetcher: (nextUrl) => _fetchHistoryPage(nextUrl),
-    );
-  }
+  Future<PaginatedResult<Message>> history([RestHistoryParams? params]) =>
+      _restApi.history(params);
 
   @override
-  Future<ChannelDetails> status() async {
-    final path = '/channels/${Uri.encodeComponent(_name)}';
-
-    final response = await _httpClient.request(
-      'GET',
-      path,
-    );
-
-    return ChannelDetails.fromMap(response.body as Map<String, dynamic>);
-  }
+  Future<ChannelDetails> status() => _restApi.status();
 
   @override
   Future<void> setOptions(RestChannelOptions options) async {

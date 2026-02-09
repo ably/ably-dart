@@ -36,6 +36,7 @@ export 'src/channels/channel_details.dart';
 export 'src/channels/channels.dart';
 export 'src/channels/rest_channel.dart';
 export 'src/channels/rest_channel_options.dart';
+export 'src/channels/realtime_history_params.dart';
 export 'src/channels/rest_history_params.dart';
 
 // Presence
