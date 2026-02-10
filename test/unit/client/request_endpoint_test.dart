@@ -137,7 +137,8 @@ void main() {
       expect(mockHttp.capturedRequests.length, equals(1));
       final request = mockHttp.capturedRequests[0];
       expect(request.url.host, equals(client.options.effectiveRestHost));
-      expect(request.url.path, equals('/channels/$channelName/messages'));
+      expect(request.url.path,
+          equals('/channels/${Uri.encodeComponent(channelName)}/messages'));
       expect(request.method, equals('GET'));
     });
   });

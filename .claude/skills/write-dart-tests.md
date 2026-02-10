@@ -700,6 +700,7 @@ When adding a new Dart test file, update the completion status matrix at `test/c
 9. For state sequence tests: record changes in a list, verify with `containsAllInOrder`
 10. Ensure error codes are distinctive enough for provenance assertions
 11. Update `test/completion-status.md` when adding new test files
+12. Use `Uri.encodeComponent()` for variable path segments in URL assertions — use `equals()` not `contains()`
 
 ## Mapping UTS Pseudocode to Dart
 
@@ -720,6 +721,7 @@ When adding a new Dart test file, update the completion status matrix at `test/c
 | `operation FAILS WITH error` | `try { await op(); fail('Expected error'); } catch (e) { expect(e, isA<AblyException>()); }` |
 | `CONTAINS_IN_ORDER [a, b, c]` | `expect(list, containsAllInOrder([a, b, c]))` |
 | `enable_fake_timers()` | `final testClock = TestClock(); final fakeTimers = FakeTimerManager(testClock); await withClock(testClock, () async { ... });` |
+| `encode_uri_component(value)` | `Uri.encodeComponent(value)` |
 
 ## Quick Reference: Imports
 

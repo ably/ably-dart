@@ -50,7 +50,8 @@ void main() {
 
         // RSL1b - single message published
         expect(request.method, equals('POST'));
-        expect(request.url.path, equals('/channels/$channelName/messages'));
+        expect(request.url.path,
+            equals('/channels/${Uri.encodeComponent(channelName)}/messages'));
 
         final body = json.decode(request.body!) as List;
         expect(body.length, equals(1));

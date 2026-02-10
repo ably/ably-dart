@@ -78,7 +78,8 @@ void main() {
 
       // Two HTTP requests were made (original + retry)
       final channelRequests = capturedRequests
-          .where((r) => r.url.path.contains('/channels/'))
+          .where((r) =>
+              r.url.path == '/channels/${Uri.encodeComponent(channelName)}')
           .toList();
       expect(channelRequests.length, equals(2));
 

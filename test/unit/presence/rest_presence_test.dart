@@ -72,7 +72,8 @@ void main() {
 
         final request = capturedRequests[0];
         expect(request.method, equals('GET'));
-        expect(request.url.path, equals('/channels/$channelName/presence'));
+        expect(request.url.path,
+            equals('/channels/${Uri.encodeComponent(channelName)}/presence'));
       });
 
       test('RSP3_2 - Get returns PresenceMessage objects with correct fields',
@@ -355,7 +356,8 @@ void main() {
         expect(request.method, equals('GET'));
         expect(
           request.url.path,
-          equals('/channels/$channelName/presence/history'),
+          equals(
+              '/channels/${Uri.encodeComponent(channelName)}/presence/history'),
         );
       });
 

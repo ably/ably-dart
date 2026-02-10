@@ -193,7 +193,9 @@ void main() {
         // Only ONE HTTP request to the API (history)
         // No failed request with expired token
         final requestsToChannels = capturedRequests
-            .where((r) => r.url.path.contains('/channels/'))
+            .where((r) =>
+                r.url.path ==
+                '/channels/${Uri.encodeComponent(channelName)}/messages')
             .toList();
         expect(requestsToChannels.length, equals(1));
         expect(

@@ -77,7 +77,7 @@ void main() {
       expect(capturedRequests[0].method, equals('GET'));
       expect(
         capturedRequests[0].url.path,
-        contains('/channels/$channelName/messages'),
+        equals('/channels/${Uri.encodeComponent(channelName)}/messages'),
       );
 
       mockWs.dispose();
@@ -407,12 +407,7 @@ void main() {
       expect(capturedRequests[0].method, equals('GET'));
       expect(
         capturedRequests[0].url.path,
-        contains('/channels/$channelName'),
-      );
-      // Should NOT end with /messages (that's history)
-      expect(
-        capturedRequests[0].url.path,
-        isNot(contains('/messages')),
+        equals('/channels/${Uri.encodeComponent(channelName)}'),
       );
 
       mockWs.dispose();
