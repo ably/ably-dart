@@ -218,7 +218,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | RTL9 | Presence attribute (RTL9a) | | |
 | RTL10 | History function (RTL10a–RTL10d) | Partial — `unit/realtime/channels/channel_history_test.dart` (RTL10a, RTL10b, RTL10c); integration RTL10d pending | Partial |
 | RTL11 | Channel state effect on presence (RTL11a) | | |
-| RTL12 | Additional ATTACHED message handling | | |
+| RTL12 | Additional ATTACHED message handling | Yes — `unit/realtime/channels/channel_additional_attached_test.dart` | Yes |
 | RTL13 | Server-initiated DETACHED handling (RTL13a–RTL13c) | Yes — `unit/realtime/channels/channel_server_initiated_detach_test.dart` | Yes |
 | RTL14 | ERROR message handling | Yes — `unit/realtime/channels/channel_error_test.dart` | Yes |
 | RTL15 | Channel#properties attribute (RTL15a–RTL15b1) | Yes — `unit/realtime/channels/channel_properties_test.dart` | Yes |

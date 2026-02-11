@@ -299,21 +299,22 @@ void main() {
       final updateEvents = <ChannelStateChange>[];
       channel.on(ChannelEvent.update).listen(updateEvents.add);
 
-      // Server sends another ATTACHED while already attached (e.g., after resume)
-      // RESUMED flag (TR3c) indicates resumed attachment
+      // Server sends another ATTACHED without RESUMED flag
+      // (e.g., loss of message continuity after transport resume)
+      // Per RTL12, this triggers UPDATE because resumed=false
       mockWs.activeConnection!.sendToClient(
-        ProtocolMessageHelpers.attached(
-            channel: channelName, flags: flagResumed),
+        ProtocolMessageHelpers.attached(channel: channelName),
       );
 
       // Allow event to be processed
       await Future<void>.delayed(Duration.zero);
 
       expect(channel.state, equals(ChannelState.attached));
-      expect(updateEvents.length, greaterThanOrEqualTo(1));
+      expect(updateEvents.length, equals(1));
       expect(updateEvents[0].event, equals(ChannelEvent.update));
       expect(updateEvents[0].current, equals(ChannelState.attached));
       expect(updateEvents[0].previous, equals(ChannelState.attached));
+      expect(updateEvents[0].resumed, isFalse);
 
       mockWs.dispose();
     });

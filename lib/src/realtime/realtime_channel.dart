@@ -630,7 +630,6 @@ class RealtimeChannel {
     final wasAlreadyAttached = _state == ChannelState.attached;
 
     if (wasAlreadyAttached) {
-      // Already attached - emit UPDATE event (RTL2g)
       // Handle presence before emitting update
       final shouldReenter = _presence.handleAttached(
         message.flags,
@@ -641,7 +640,13 @@ class RealtimeChannel {
           emitUpdate: _stateChangeController.add,
         );
       }
-      _emitUpdate(resumed: resumed, hasBacklog: hasBacklog);
+      // RTL12: Only emit UPDATE if resumed flag is false (loss of continuity)
+      if (!resumed) {
+        _emitUpdate(
+          reason: message.error,
+          hasBacklog: hasBacklog,
+        );
+      }
       return;
     }
 
@@ -903,13 +908,13 @@ class RealtimeChannel {
     );
   }
 
-  /// Emits an UPDATE event when ATTACHED received while already attached (RTL2g).
-  void _emitUpdate({bool resumed = false, bool? hasBacklog}) {
+  /// Emits an UPDATE event when ATTACHED received while already attached (RTL12).
+  void _emitUpdate({ErrorInfo? reason, bool? hasBacklog}) {
     _stateChangeController.add(ChannelStateChange(
       event: ChannelEvent.update,
       current: ChannelState.attached,
       previous: ChannelState.attached,
-      resumed: resumed,
+      reason: reason,
       hasBacklog: hasBacklog,
     ));
   }
