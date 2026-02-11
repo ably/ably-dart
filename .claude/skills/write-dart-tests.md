@@ -17,6 +17,15 @@ Every Dart test corresponds to a UTS spec in `../uts/test/`. The UTS spec define
 
 This skill covers the **Dart-specific implementation** of those specs.
 
+### Keeping UTS and Dart in Sync
+
+When fixing a bug or gap in a Dart test, **always check if the corresponding UTS spec has the same issue**. Common cases:
+- Mock missing a field (e.g. `data: p.data` in echo) — fix in both UTS and Dart
+- Loop index bugs (e.g. hardcoded `:0` instead of `:${idx}`) — fix in both
+- Test patterns that only work in Dart (e.g. `authCallback` for clientId) — fine to differ, but note in the UTS spec if relevant
+
+Similarly, when updating a UTS spec, check if the Dart test needs a corresponding update.
+
 ## File Structure and Conventions
 
 ### Test File Location

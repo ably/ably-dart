@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 
 import '../auth/auth.dart';
 import '../auth/client_options.dart';
+import '../batch/batch_presence_result.dart';
 import '../batch/batch_publish_spec.dart';
 import '../batch/batch_result.dart';
 import '../channels/channels.dart';
@@ -124,6 +125,19 @@ abstract class Rest {
     Object spec, {
     Map<String, String>? params,
   });
+
+  /// Retrieves presence state for multiple channels in a single request.
+  ///
+  /// Takes an array of channel name strings and sends them as a
+  /// comma-separated `channels` query parameter in a GET request to
+  /// `/presence`.
+  ///
+  /// Returns a [BatchPresenceResponse] containing per-channel results,
+  /// each either a [BatchPresenceSuccessResult] with presence members
+  /// or a [BatchPresenceFailureResult] with an error.
+  ///
+  /// Spec: RSC24
+  Future<BatchPresenceResponse> batchPresence(List<String> channels);
 
   /// Closes this client and releases any resources.
   Future<void> close();

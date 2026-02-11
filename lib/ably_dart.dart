@@ -56,6 +56,7 @@ export 'src/message/delta_extras.dart';
 export 'src/stats/stats.dart';
 
 // Batch operations
+export 'src/batch/batch_presence_result.dart';
 export 'src/batch/batch_publish_spec.dart';
 export 'src/batch/batch_result.dart';
 

@@ -1,8 +1,11 @@
 import 'dart:math';
 
+import '../batch/batch_presence_result.dart';
 import '../batch/batch_publish_spec.dart';
 import '../batch/batch_result.dart';
 import '../channels/channels.dart';
+import '../error/ably_exception.dart';
+import '../error/error_info.dart';
 import '../rest/rest.dart';
 import 'base_client_impl.dart';
 import 'rest_channels_impl.dart';
@@ -97,6 +100,50 @@ class RestImpl extends BaseClientImpl implements Rest {
     final bytes = List<int>.generate(9, (_) => random.nextInt(256));
     final base = bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
     return '$base:$index';
+  }
+
+  @override
+  Future<BatchPresenceResponse> batchPresence(List<String> channels) async {
+    final channelsParam = channels.join(',');
+
+    final response = await ablyHttpClient.request(
+      'GET',
+      '/presence',
+      queryParams: {'channels': channelsParam},
+      returnErrorBody: true,
+    );
+
+    final responseBody = response.body;
+
+    // All success: HTTP 200, body is a plain array of per-channel results
+    if (responseBody is List) {
+      return BatchPresenceResponse.fromList(responseBody);
+    }
+
+    // Mixed/failure: HTTP 400, body is {error: ..., batchResponse: [...]}
+    if (responseBody is Map<String, dynamic> &&
+        responseBody.containsKey('batchResponse')) {
+      return BatchPresenceResponse.fromList(
+        responseBody['batchResponse'] as List,
+      );
+    }
+
+    // Server error without batchResponse — propagate as exception
+    if (responseBody is Map<String, dynamic> &&
+        responseBody.containsKey('error')) {
+      final errorInfo =
+          ErrorInfo.fromMap(responseBody['error'] as Map<String, dynamic>);
+      throw AblyException.fromErrorInfo(errorInfo);
+    }
+
+    throw AblyException(
+      message: 'Unexpected batchPresence response format',
+      errorInfo: ErrorInfo(
+        message: 'Unexpected response body type: ${responseBody.runtimeType}',
+        statusCode: response.statusCode,
+        code: 50000,
+      ),
+    );
   }
 
   @override

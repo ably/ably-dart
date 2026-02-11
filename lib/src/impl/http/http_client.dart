@@ -93,6 +93,7 @@ class AblyHttpClient {
     bool authenticated = true,
     Map<String, String>? customHeaders,
     int? customVersion,
+    bool returnErrorBody = false,
   }) async {
     return _requestWithTokenRetry(
       method,
@@ -103,6 +104,7 @@ class AblyHttpClient {
       customHeaders: customHeaders,
       customVersion: customVersion,
       tokenRetryAttempted: false,
+      returnErrorBody: returnErrorBody,
     );
   }
 
@@ -115,6 +117,7 @@ class AblyHttpClient {
     Map<String, String>? customHeaders,
     int? customVersion,
     required bool tokenRetryAttempted,
+    bool returnErrorBody = false,
   }) async {
     final effectiveQueryParams = Map<String, String>.from(queryParams ?? {});
 
@@ -141,6 +144,7 @@ class AblyHttpClient {
           authenticated: authenticated,
           customHeaders: customHeaders,
           customVersion: customVersion,
+          returnErrorBody: returnErrorBody,
         );
 
         // If we used a fallback host successfully, clear failure tracking
@@ -171,6 +175,7 @@ class AblyHttpClient {
             customHeaders: customHeaders,
             customVersion: customVersion,
             tokenRetryAttempted: true,
+            returnErrorBody: returnErrorBody,
           );
         }
 
@@ -217,6 +222,7 @@ class AblyHttpClient {
     bool authenticated = true,
     Map<String, String>? customHeaders,
     int? customVersion,
+    bool returnErrorBody = false,
   }) async {
     _logger.debug('HTTP request', {
       'method': method,
@@ -360,7 +366,7 @@ class AblyHttpClient {
     );
 
     // Check for errors
-    if (!ablyResponse.isSuccess) {
+    if (!ablyResponse.isSuccess && !returnErrorBody) {
       throw _parseError(ablyResponse, queryParams?['request_id']);
     }
 
