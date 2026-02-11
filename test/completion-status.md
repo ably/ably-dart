@@ -242,24 +242,24 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 
 | Spec item | Description | Dart test | UTS spec |
 |-----------|-------------|-----------|----------|
-| RTP1 | HAS_PRESENCE flag and SYNC | | |
-| RTP2 | PresenceMap maintenance (RTP2a–RTP2h2) | | |
-| RTP4 | Large member count test | | |
-| RTP5 | Channel state side effects (RTP5a–RTP5f) | | |
-| RTP6 | Subscribe function (RTP6a–RTP6e) | | |
-| RTP7 | Unsubscribe function (RTP7a–RTP7c) | | |
-| RTP8 | Enter function (RTP8a–RTP8j) | | |
-| RTP9 | Update function (RTP9a–RTP9e) | | |
-| RTP10 | Leave function (RTP10a–RTP10e) | | |
-| RTP11 | Get function (RTP11a–RTP11d) | | |
-| RTP12 | History function (RTP12a–RTP12d) | | |
-| RTP13 | SyncComplete attribute | | |
-| RTP14 | EnterClient function (RTP14a–RTP14d) | | |
-| RTP15 | EnterClient/UpdateClient/LeaveClient (RTP15a–RTP15f) | | |
-| RTP16 | Connection state conditions (RTP16a–RTP16c) | | |
-| RTP17 | Internal PresenceMap (RTP17a–RTP17j) | | |
-| RTP18 | Server-initiated sync (RTP18a–RTP18c) | | |
-| RTP19 | PresenceMap cleanup on sync (RTP19a) | | |
+| RTP1 | HAS_PRESENCE flag and SYNC | Yes — `unit/realtime/presence/realtime_presence_channel_state_test.dart` | Yes |
+| RTP2 | PresenceMap maintenance (RTP2a–RTP2h2) | Yes — `unit/realtime/presence/presence_map_test.dart` | Yes |
+| RTP4 | Large member count test | Yes — `unit/realtime/presence/realtime_presence_enter_test.dart`, `integration/realtime/presence_lifecycle_test.dart` | Yes |
+| RTP5 | Channel state side effects (RTP5a–RTP5f) | Yes — `unit/realtime/presence/realtime_presence_channel_state_test.dart` | Yes |
+| RTP6 | Subscribe function (RTP6a–RTP6e) | Yes — `unit/realtime/presence/realtime_presence_subscribe_test.dart`, `integration/realtime/presence_lifecycle_test.dart` | Yes |
+| RTP7 | Unsubscribe function (RTP7a–RTP7c) | Yes — `unit/realtime/presence/realtime_presence_subscribe_test.dart` | Yes |
+| RTP8 | Enter function (RTP8a–RTP8j) | Yes — `unit/realtime/presence/realtime_presence_enter_test.dart`, `integration/realtime/presence_lifecycle_test.dart` | Yes |
+| RTP9 | Update function (RTP9a–RTP9e) | Yes — `unit/realtime/presence/realtime_presence_enter_test.dart`, `integration/realtime/presence_lifecycle_test.dart` | Yes |
+| RTP10 | Leave function (RTP10a–RTP10e) | Yes — `unit/realtime/presence/realtime_presence_enter_test.dart`, `integration/realtime/presence_lifecycle_test.dart` | Yes |
+| RTP11 | Get function (RTP11a–RTP11d) | Yes — `unit/realtime/presence/realtime_presence_get_test.dart`, `integration/realtime/presence_lifecycle_test.dart` | Yes |
+| RTP12 | History function (RTP12a–RTP12d) | Yes — `unit/realtime/presence/realtime_presence_history_test.dart` | Yes |
+| RTP13 | SyncComplete attribute | Yes — `unit/realtime/presence/realtime_presence_channel_state_test.dart` | Yes |
+| RTP14 | EnterClient function (RTP14a–RTP14d) | Yes — `unit/realtime/presence/realtime_presence_enter_test.dart` | Yes |
+| RTP15 | EnterClient/UpdateClient/LeaveClient (RTP15a–RTP15f) | Yes — `unit/realtime/presence/realtime_presence_enter_test.dart` | Yes |
+| RTP16 | Connection state conditions (RTP16a–RTP16c) | Yes — `unit/realtime/presence/realtime_presence_enter_test.dart` | Yes |
+| RTP17 | Internal PresenceMap and re-entry (RTP17a–RTP17j) | Yes — `unit/realtime/presence/local_presence_map_test.dart` (RTP17, RTP17b, RTP17h), `unit/realtime/presence/realtime_presence_reentry_test.dart` (RTP17a, RTP17e, RTP17g, RTP17g1, RTP17i) | Yes |
+| RTP18 | Server-initiated sync (RTP18a–RTP18c) | Yes — `unit/realtime/presence/presence_sync_test.dart` | Yes |
+| RTP19 | PresenceMap cleanup on sync (RTP19a) | Yes — `unit/realtime/presence/presence_sync_test.dart`, `unit/realtime/presence/realtime_presence_channel_state_test.dart` | Yes |
 
 ### RealtimeAnnotations
 
@@ -402,7 +402,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | **Connection** (RTN) | 23 | 16 | 18 | Missing: RTN16, RTN21 full coverage |
 | **Realtime channels** (RTS) | 5 | 5 | 5 | Full |
 | **Realtime channel** (RTL) | 24 | 15 | 15 | RTL10 partial (RTL10d pending) |
-| **Realtime presence** (RTP) | 15 | 0 | 0 | |
+| **Realtime presence** (RTP) | 15 | 3 | 3 | Phase 1: PresenceMap, LocalPresenceMap, Sync |
 | **Realtime annotations** (RTAN) | 5 | 0 | 0 | |
 | **EventEmitter** (RTE) | 6 | 0 | 0 | |
 | **Backoff/jitter** (RTB) | 1 | 0 | 0 | |

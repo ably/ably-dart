@@ -1,6 +1,7 @@
 import '../channels/channel_details.dart';
 import '../channels/rest_history_params.dart';
 import '../message/message.dart';
+import '../message/presence_message.dart';
 import '../pagination/paginated_result.dart';
 import 'http/http_client.dart';
 import 'paginated_result_impl.dart';
@@ -69,6 +70,52 @@ class ChannelRestApi {
       response: response,
       items: messages,
       fetcher: _fetchHistoryPage,
+    );
+  }
+
+  /// Retrieves presence history for this channel.
+  ///
+  /// Spec: RTP12, RSP4
+  Future<PaginatedResult<PresenceMessage>> presenceHistory([
+    RestHistoryParams? params,
+  ]) async {
+    final path = '/channels/$_encodedName/presence/history';
+    final queryParams = params?.toQueryParams() ?? <String, String>{};
+
+    final response = await _httpClient.request(
+      'GET',
+      path,
+      queryParams: queryParams,
+    );
+
+    final messages = PaginatedResultParser.parsePresenceMessages(response.body);
+
+    return PaginatedResultImpl.fromResponse<PresenceMessage>(
+      response: response,
+      items: messages,
+      fetcher: _fetchPresenceHistoryPage,
+    );
+  }
+
+  Future<PaginatedResult<PresenceMessage>> _fetchPresenceHistoryPage(
+    String url,
+  ) async {
+    final uri = Uri.parse(url);
+
+    final response = await _httpClient.request(
+      'GET',
+      uri.path,
+      queryParams: uri.queryParameters.isNotEmpty
+          ? Map<String, String>.from(uri.queryParameters)
+          : null,
+    );
+
+    final messages = PaginatedResultParser.parsePresenceMessages(response.body);
+
+    return PaginatedResultImpl.fromResponse<PresenceMessage>(
+      response: response,
+      items: messages,
+      fetcher: _fetchPresenceHistoryPage,
     );
   }
 

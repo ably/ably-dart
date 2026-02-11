@@ -18,6 +18,42 @@ enum PresenceAction {
 
 /// Extension methods for PresenceAction.
 extension PresenceActionExtension on PresenceAction {
+  /// Converts to the numeric representation used by the Ably wire protocol.
+  ///
+  /// Values match the Ably protocol: absent=0, present=1, enter=2, leave=3, update=4.
+  int toInt() {
+    switch (this) {
+      case PresenceAction.absent:
+        return 0;
+      case PresenceAction.present:
+        return 1;
+      case PresenceAction.enter:
+        return 2;
+      case PresenceAction.leave:
+        return 3;
+      case PresenceAction.update:
+        return 4;
+    }
+  }
+
+  /// Creates a PresenceAction from the numeric wire protocol value.
+  static PresenceAction fromInt(int value) {
+    switch (value) {
+      case 0:
+        return PresenceAction.absent;
+      case 1:
+        return PresenceAction.present;
+      case 2:
+        return PresenceAction.enter;
+      case 3:
+        return PresenceAction.leave;
+      case 4:
+        return PresenceAction.update;
+      default:
+        throw ArgumentError('Unknown presence action value: $value');
+    }
+  }
+
   /// Converts to the string representation used by Ably.
   String toAblyString() {
     switch (this) {

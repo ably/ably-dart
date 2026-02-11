@@ -20,6 +20,7 @@ import 'connection_state.dart';
 import 'protocol_message.dart';
 import 'publish_result.dart';
 import 'realtime_channel_options.dart';
+import 'realtime_presence.dart';
 import 'timer_manager.dart';
 
 /// Properties of a realtime channel's state.
@@ -81,6 +82,16 @@ class RealtimeChannel {
   /// Whether this channel has ever been attached (for ATTACH_RESUME flag, RTL4j).
   bool _hasBeenAttached = false;
 
+  /// The presence object for this channel (RTL9).
+  late final RealtimePresence _presence = RealtimePresence(
+    channelName: _name,
+    connection: _connection,
+    getClientId: () => _clientOptions.clientId,
+    implicitAttach: attach,
+    getChannelState: () => _state,
+    restHistory: ([params]) => _restApi.presenceHistory(params),
+  );
+
   /// Message subscribers (RTL7, RTL8).
   final List<_Subscription> _subscribers = [];
 
@@ -114,6 +125,11 @@ class RealtimeChannel {
   /// Spec: RTL4m
   List<ChannelMode>? get modes => _modes;
   List<ChannelMode>? _modes;
+
+  /// The presence object for this channel.
+  ///
+  /// Spec: RTL9, RTL9a
+  RealtimePresence get presence => _presence;
 
   /// Error information for the current state (if failed/suspended).
   ///
@@ -581,6 +597,10 @@ class RealtimeChannel {
         _handleError(message);
       case ProtocolAction.message:
         _handleMessage(message);
+      case ProtocolAction.presence:
+        _presence.handlePresenceMessage(message);
+      case ProtocolAction.sync:
+        _presence.handleSyncMessage(message);
       default:
         break;
     }
@@ -607,8 +627,20 @@ class RealtimeChannel {
     final resumed = (message.flags ?? 0) & flagResumed != 0;
     final hasBacklog = (message.flags ?? 0) & flagHasBacklog != 0 ? true : null;
 
-    if (_state == ChannelState.attached) {
+    final wasAlreadyAttached = _state == ChannelState.attached;
+
+    if (wasAlreadyAttached) {
       // Already attached - emit UPDATE event (RTL2g)
+      // Handle presence before emitting update
+      final shouldReenter = _presence.handleAttached(
+        message.flags,
+        wasAlreadyAttached: true,
+      );
+      if (shouldReenter) {
+        _presence.performReentry(
+          emitUpdate: _stateChangeController.add,
+        );
+      }
       _emitUpdate(resumed: resumed, hasBacklog: hasBacklog);
       return;
     }
@@ -632,6 +664,21 @@ class RealtimeChannel {
       resumed: resumed,
       hasBacklog: hasBacklog,
     );
+
+    // Handle presence sync and re-entry
+    final shouldReenter = _presence.handleAttached(
+      message.flags,
+      wasAlreadyAttached: false,
+    );
+
+    // Flush queued presence operations (RTP5b)
+    _presence.flushPendingQueue();
+
+    if (shouldReenter) {
+      _presence.performReentry(
+        emitUpdate: _stateChangeController.add,
+      );
+    }
 
     // Complete pending attach
     if (_attachCompleter != null && !_attachCompleter!.isCompleted) {
@@ -906,6 +953,16 @@ class RealtimeChannel {
         newState == ChannelState.suspended ||
         newState == ChannelState.failed) {
       properties.channelSerial = null;
+    }
+
+    // RTP5a: Clear presence maps on DETACHED or FAILED
+    if (newState == ChannelState.detached || newState == ChannelState.failed) {
+      _presence.handleChannelDetachedOrFailed();
+    }
+
+    // RTP5f: Preserve presence map on SUSPENDED, but fail pending queue
+    if (newState == ChannelState.suspended) {
+      _presence.handleChannelSuspended();
     }
 
     // Update error reason if provided

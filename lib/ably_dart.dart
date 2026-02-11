@@ -43,6 +43,8 @@ export 'src/channels/rest_history_params.dart';
 export 'src/presence/rest_presence.dart';
 export 'src/presence/rest_presence_params.dart';
 export 'src/presence/presence_action.dart';
+export 'src/realtime/presence_map.dart';
+export 'src/realtime/realtime_presence.dart';
 
 // Messages
 export 'src/message/message.dart';

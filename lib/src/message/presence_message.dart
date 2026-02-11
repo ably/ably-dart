@@ -19,12 +19,21 @@ class PresenceMessage {
   });
 
   /// Creates a PresenceMessage from a JSON map.
+  ///
+  /// Accepts action as either an int (wire protocol) or a string (legacy).
   factory PresenceMessage.fromMap(Map<String, dynamic> map) {
+    PresenceAction? action;
+    if (map['action'] != null) {
+      final raw = map['action'];
+      if (raw is int) {
+        action = PresenceActionExtension.fromInt(raw);
+      } else if (raw is String) {
+        action = PresenceActionExtension.fromAblyString(raw);
+      }
+    }
     return PresenceMessage(
       id: map['id'] as String?,
-      action: map['action'] != null
-          ? PresenceActionExtension.fromAblyString(map['action'] as String)
-          : null,
+      action: action,
       clientId: map['clientId'] as String?,
       connectionId: map['connectionId'] as String?,
       data: map['data'],
@@ -77,7 +86,7 @@ class PresenceMessage {
   Map<String, dynamic> toMap() {
     return {
       if (id != null) 'id': id,
-      if (action != null) 'action': action!.toAblyString(),
+      if (action != null) 'action': action!.toInt(),
       if (clientId != null) 'clientId': clientId,
       if (connectionId != null) 'connectionId': connectionId,
       if (data != null) 'data': data,
@@ -86,6 +95,26 @@ class PresenceMessage {
       if (timestamp != null) 'timestamp': timestamp!.millisecondsSinceEpoch,
     };
   }
+
+  /// Creates a copy of this PresenceMessage with the given fields replaced.
+  ///
+  /// Set [clearId] to true to explicitly set id to null (e.g. for
+  /// synthesized LEAVE events per RTP19).
+  PresenceMessage copyWith({
+    PresenceAction? action,
+    DateTime? timestamp,
+    bool clearId = false,
+  }) =>
+      PresenceMessage(
+        id: clearId ? null : id,
+        action: action ?? this.action,
+        clientId: clientId,
+        connectionId: connectionId,
+        data: data,
+        encoding: encoding,
+        extras: extras,
+        timestamp: timestamp ?? this.timestamp,
+      );
 
   @override
   String toString() {
