@@ -75,7 +75,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | RSA14 | Error when token auth selected without token | Yes — `unit/auth/token_renewal_test.dart` | Yes |
 | RSA15 | ClientId validation (RSA15a–RSA15c) | Yes — `unit/auth/client_id_test.dart` (RSA15a, RSA15b, RSA15c REST), `integration/realtime/auth_test.dart` (RSA15c Realtime) | Yes |
 | RSA16 | TokenDetails attribute (RSA16a–RSA16d) | Yes — `unit/auth/token_details_test.dart` | Yes |
-| RSA17 | RevokeTokens (RSA17a–RSA17g) | | |
+| RSA17 | RevokeTokens (RSA17a–RSA17g) | Yes — `unit/auth/revoke_tokens_test.dart` (RSA17b–RSA17g, RSA17c, RSA17d, RSA17e, RSA17f, BAR2, TRS2, TRF2), `integration/rest/revoke_tokens_test.dart` (RSA17b–RSA17g, RSA17c, RSA17d, RSA17e, RSA17f) | Yes |
 
 ### Channels (REST)
 
@@ -347,7 +347,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | BGR1–BGR2, BGF1–BGF2 | BatchPresence result types | Yes — `unit/rest/batch_presence_test.dart` | Yes |
 | PBR1–PBR2 | PublishResult | Yes — `unit/realtime/channels/channel_publish_test.dart` | Yes |
 | UDR1–UDR2 | UpdateDeleteResult | | |
-| TRT1–TRT2, TRS1–TRS2, TRF1–TRF2 | TokenRevocation types | | |
+| TRT1–TRT2, TRS1–TRS2, TRF1–TRF2 | TokenRevocation types | Yes — `unit/auth/revoke_tokens_test.dart`, `integration/rest/revoke_tokens_test.dart` | Yes |
 | MFI1–MFI2 | MessageFilter | | |
 | REX1–REX2 | ReferenceExtras | | |
 
@@ -392,7 +392,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 |------|-------------|----------------|---------------|-------|
 | **Endpoint config** (REC) | 3 | 3 | 3 | Full |
 | **REST client** (RSC) | 18 | 17 | 16 | Missing: RSC15 (fallback) |
-| **REST auth** (RSA) | 15 | 15 | 15 | Full (RSA17 is RevokeTokens — not implemented) |
+| **REST auth** (RSA) | 15 | 15 | 15 | Full |
 | **REST channels** (RSN) | 4 | 4 | 4 | Full |
 | **REST channel** (RSL) | 13 | 7 | 6 | RSL8 via ChannelRestApi |
 | **REST presence** (RSP) | 5 | 4 | 4 | Aligned with UTS |
@@ -409,7 +409,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | **Wrapper SDK** (WP) | 7 | 0 | 0 | |
 | **Push notifications** (RSH) | 8 | 0 | 0 | |
 | **Plugins** (PC/PT/VD) | 3 | 0 | 0 | |
-| **Data types** | 30 | 9 | 9 | BAR2 partial, BGR/BGF via batch_presence |
+| **Data types** | 30 | 10 | 10 | BAR2 partial, BGR/BGF via batch_presence, TRT/TRS/TRF via revoke_tokens |
 | **Option types** | 8 | 5 | 5 | Aligned with UTS |
 | **Push types** | 3 | 0 | 0 | |
 | **Introspection** (CR) | 1 | 0 | 0 | |

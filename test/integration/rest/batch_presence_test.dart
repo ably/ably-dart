@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 import 'package:test/test.dart';
-import 'package:http/http.dart' as http;
 import 'package:ably_dart/ably_dart.dart';
+
+import '../../helpers/test_app_helper.dart';
 
 /// Integration tests for REST batchPresence (RSC24).
 ///
@@ -11,52 +11,29 @@ import 'package:ably_dart/ably_dart.dart';
 /// enters presence members, then a REST client calls batchPresence to
 /// verify the response format and content.
 ///
+/// Uses ably-common test-app-setup.json:
+///   keys[0] — full access (default capability)
+///   keys[2] — per-channel capabilities, "channel6":["*"] used as restricted key
+///
 /// Spec: uts/test/rest/integration/batch_presence.md
 void main() {
+  late TestApp testApp;
   late String fullAccessKey;
   late String restrictedKey;
-  late String appId;
 
-  // Fixed channel name used in the restricted key capability.
-  const allowedChannel = 'batch-allowed';
+  // Channel name matching keys[2] capability from ably-common.
+  const allowedChannel = 'channel6';
 
   setUpAll(() async {
-    // Provision test app with two keys:
-    // keys[0]: full access
-    // keys[1]: access only to the specific "batch-allowed" channel
-    final response = await http.post(
-      Uri.parse('https://sandbox-rest.ably.io/apps'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'keys': [
-          {'capability': '{"*":["*"]}'},
-          {'capability': '{"$allowedChannel":["*"]}'},
-        ],
-      }),
-    );
-
-    expect(response.statusCode, equals(201));
-    final appConfig = jsonDecode(response.body) as Map<String, dynamic>;
-    final keys = appConfig['keys'] as List;
-    fullAccessKey = keys[0]['keyStr'] as String;
-    restrictedKey = keys[1]['keyStr'] as String;
-    appId = appConfig['appId'] as String;
-
-    print('Provisioned test app: $appId');
+    testApp = await TestApp.provision();
+    fullAccessKey = testApp.keys[0].keyStr;
+    restrictedKey = testApp.keys[2].keyStr;
+    print('Provisioned test app: ${testApp.appId}');
   });
 
   tearDownAll(() async {
-    if (appId.isNotEmpty && fullAccessKey.isNotEmpty) {
-      final authBytes = utf8.encode(fullAccessKey);
-      final authHeader = 'Basic ${base64Encode(authBytes)}';
-
-      await http.delete(
-        Uri.parse('https://sandbox-rest.ably.io/apps/$appId'),
-        headers: {'Authorization': authHeader},
-      );
-
-      print('Deleted test app: $appId');
-    }
+    await testApp.delete();
+    print('Deleted test app: ${testApp.appId}');
   });
 
   group(

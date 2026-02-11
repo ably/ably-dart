@@ -2,6 +2,7 @@ import 'auth_options.dart';
 import 'token_details.dart';
 import 'token_params.dart';
 import 'token_request.dart';
+import 'token_revocation.dart';
 
 /// Describes the authentication method used by the client.
 ///
@@ -79,5 +80,19 @@ abstract class Auth {
   Future<TokenDetails> requestToken({
     AuthOptions? authOptions,
     TokenParams? tokenParams,
+  });
+
+  /// Revokes the specified tokens.
+  ///
+  /// Takes a list of [TokenRevocationTargetSpecifier]s and sends them in a
+  /// POST request to `/keys/{keyName}/revokeTokens`.
+  ///
+  /// Requires key-based authentication. If called from a client using token
+  /// authentication, throws an error with code 40162.
+  ///
+  /// Spec: RSA17
+  Future<TokenRevocationResponse> revokeTokens(
+    List<TokenRevocationTargetSpecifier> specifiers, {
+    RevokeTokensOptions? options,
   });
 }

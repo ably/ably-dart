@@ -5,6 +5,7 @@ import '../auth/auth_options.dart';
 import '../auth/token_details.dart';
 import '../auth/token_params.dart';
 import '../auth/token_request.dart';
+import '../auth/token_revocation.dart';
 import '../realtime/connection.dart';
 import 'auth_impl.dart';
 
@@ -91,4 +92,11 @@ class RealtimeAuth implements Auth {
         authOptions: authOptions,
         tokenParams: tokenParams,
       );
+
+  @override
+  Future<TokenRevocationResponse> revokeTokens(
+    List<TokenRevocationTargetSpecifier> specifiers, {
+    RevokeTokensOptions? options,
+  }) =>
+      _authImpl.revokeTokens(specifiers, options: options);
 }

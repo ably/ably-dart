@@ -10,6 +10,7 @@ export 'src/auth/client_options.dart';
 export 'src/auth/token_details.dart';
 export 'src/auth/token_params.dart';
 export 'src/auth/token_request.dart';
+export 'src/auth/token_revocation.dart';
 
 // REST
 export 'src/rest/rest.dart';

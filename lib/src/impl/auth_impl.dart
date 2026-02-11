@@ -11,6 +11,7 @@ import '../auth/client_options.dart';
 import '../auth/token_details.dart';
 import '../auth/token_params.dart';
 import '../auth/token_request.dart';
+import '../auth/token_revocation.dart';
 import '../error/ably_exception.dart';
 import '../error/error_info.dart';
 import '../logging/logger.dart';
@@ -540,5 +541,101 @@ class AuthImpl implements Auth {
     final hmac = Hmac(sha256, key);
     final digest = hmac.convert(bytes);
     return base64.encode(digest.bytes);
+  }
+
+  @override
+  Future<TokenRevocationResponse> revokeTokens(
+    List<TokenRevocationTargetSpecifier> specifiers, {
+    RevokeTokensOptions? options,
+  }) async {
+    // RSA17d: Token auth clients cannot revoke tokens
+    if (_shouldUseTokenAuth()) {
+      throw const AblyException(
+        message: 'Cannot revoke tokens when using token authentication',
+        errorInfo: ErrorInfo(
+          message: 'Cannot revoke tokens when using token authentication',
+          code: 40162,
+          statusCode: 401,
+        ),
+      );
+    }
+
+    final apiKey = _options.key;
+    if (apiKey == null) {
+      throw const AblyException(
+        message: 'API key required to revoke tokens',
+        errorInfo: ErrorInfo(
+          message: 'API key required to revoke tokens',
+          code: 40101,
+          statusCode: 401,
+        ),
+      );
+    }
+
+    // RSA17g: Extract key name for the path
+    final keyName = apiKey.split(':')[0];
+
+    // RSA17b: Map specifiers to type:value strings
+    final targets = specifiers.map((s) => s.toTargetString()).toList();
+
+    // Build request body
+    final body = <String, dynamic>{
+      'targets': targets,
+    };
+
+    // RSA17e: Optional issuedBefore
+    if (options?.issuedBefore != null) {
+      body['issuedBefore'] = options!.issuedBefore;
+    }
+
+    // RSA17f: Optional allowReauthMargin
+    if (options?.allowReauthMargin != null) {
+      body['allowReauthMargin'] = options!.allowReauthMargin;
+    }
+
+    final response = await _httpClient.request(
+      'POST',
+      '/keys/$keyName/revokeTokens',
+      body: body,
+      returnErrorBody: true,
+    );
+
+    final responseBody = response.body;
+
+    // All success (HTTP 2xx): body is a plain array of per-target results
+    if (responseBody is List) {
+      return TokenRevocationResponse.fromList(responseBody);
+    }
+
+    // Mixed/failure (HTTP 400): body is {error: ..., batchResponse: [...]}
+    if (responseBody is Map<String, dynamic> &&
+        responseBody.containsKey('batchResponse')) {
+      return TokenRevocationResponse.fromList(
+        responseBody['batchResponse'] as List,
+      );
+    }
+
+    // Object with successCount/failureCount/results (unit test format)
+    if (responseBody is Map<String, dynamic> &&
+        responseBody.containsKey('results')) {
+      return TokenRevocationResponse.fromMap(responseBody);
+    }
+
+    // Server error without batchResponse — propagate as exception
+    if (responseBody is Map<String, dynamic> &&
+        responseBody.containsKey('error')) {
+      final errorInfo =
+          ErrorInfo.fromMap(responseBody['error'] as Map<String, dynamic>);
+      throw AblyException.fromErrorInfo(errorInfo);
+    }
+
+    throw AblyException(
+      message: 'Unexpected revokeTokens response format',
+      errorInfo: ErrorInfo(
+        message: 'Unexpected response body type: ${responseBody.runtimeType}',
+        statusCode: response.statusCode,
+        code: 50000,
+      ),
+    );
   }
 }

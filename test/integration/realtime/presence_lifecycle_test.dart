@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 import 'package:test/test.dart';
-import 'package:http/http.dart' as http;
 import 'package:ably_dart/ably_dart.dart';
+
+import '../../helpers/test_app_helper.dart';
 
 /// Integration tests for Realtime presence lifecycle.
 ///
@@ -12,42 +12,18 @@ import 'package:ably_dart/ably_dart.dart';
 ///
 /// Spec: uts/test/realtime/integration/presence_lifecycle_test.md
 void main() {
+  late TestApp testApp;
   late String apiKey;
-  late String appId;
 
   setUpAll(() async {
-    // Provision test app in Sandbox
-    final response = await http.post(
-      Uri.parse('https://sandbox-rest.ably.io/apps'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'keys': [
-          {'capability': '{"*":["*"]}'}
-        ],
-      }),
-    );
-
-    expect(response.statusCode, equals(201));
-    final appConfig = jsonDecode(response.body) as Map<String, dynamic>;
-    final keys = appConfig['keys'] as List;
-    apiKey = keys[0]['keyStr'] as String;
-    appId = appConfig['appId'] as String;
-
-    print('Provisioned test app: $appId');
+    testApp = await TestApp.provision();
+    apiKey = testApp.keys[0].keyStr;
+    print('Provisioned test app: ${testApp.appId}');
   });
 
   tearDownAll(() async {
-    if (appId.isNotEmpty && apiKey.isNotEmpty) {
-      final authBytes = utf8.encode(apiKey);
-      final authHeader = 'Basic ${base64Encode(authBytes)}';
-
-      await http.delete(
-        Uri.parse('https://sandbox-rest.ably.io/apps/$appId'),
-        headers: {'Authorization': authHeader},
-      );
-
-      print('Deleted test app: $appId');
-    }
+    await testApp.delete();
+    print('Deleted test app: ${testApp.appId}');
   });
 
   group(
