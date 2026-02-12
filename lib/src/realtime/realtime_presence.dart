@@ -419,7 +419,12 @@ class RealtimePresence {
     if (hasPresence) {
       // Expect SYNC messages — sync will be started when first SYNC arrives
       _syncComplete = false;
-      _syncCompleter ??= Completer<void>();
+      if (_syncCompleter == null) {
+        _syncCompleter = Completer<void>();
+        // Ensure the future's error is handled even if nobody calls
+        // get(waitForSync: true) before the channel detaches/fails.
+        _syncCompleter!.future.ignore();
+      }
     } else {
       // RTP19a: No HAS_PRESENCE — clear existing members
       final existingMembers = members.values();

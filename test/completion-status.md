@@ -106,9 +106,9 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 
 | Spec item | Description | Dart test | UTS spec |
 |-----------|-------------|-----------|----------|
-| PC1–PC5 | Plugin architecture, VCDiff, Objects | | |
+| PC1–PC5 | Plugin architecture, VCDiff, Objects | Partial — PC3 via `unit/realtime/channels/channel_delta_decoding_test.dart`, `integration/realtime/delta_decoding_test.dart` | Partial |
 | PT1–PT2 | PluginType enum | | |
-| VD1–VD2 | VCDiffDecoder | | |
+| VD1–VD2 | VCDiffDecoder | Yes — `lib/src/plugin/vcdiff_decoder.dart` (VD2a interface) | |
 
 ### RestPresence
 
@@ -224,10 +224,10 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | RTL15 | Channel#properties attribute (RTL15a–RTL15b1) | Yes — `unit/realtime/channels/channel_properties_test.dart` | Yes |
 | RTL16 | SetOptions function (RTL16a) | Yes — `unit/realtime/channels/channel_options_test.dart` | Yes |
 | RTL17 | No messages outside ATTACHED state | Yes — `unit/realtime/channels/channel_subscribe_test.dart` | Yes |
-| RTL18 | Vcdiff decoding failure recovery (RTL18a–RTL18c) | | |
-| RTL19 | Base payload storage for vcdiff (RTL19a–RTL19c) | | |
-| RTL20 | Last message ID storage | | |
-| RTL21 | Message ordering in arrays | | |
+| RTL18 | Vcdiff decoding failure recovery (RTL18a–RTL18c) | Yes — `unit/realtime/channels/channel_delta_decoding_test.dart`, `integration/realtime/delta_decoding_test.dart` | Yes |
+| RTL19 | Base payload storage for vcdiff (RTL19a–RTL19c) | Yes — `unit/realtime/channels/channel_delta_decoding_test.dart`, `integration/realtime/delta_decoding_test.dart` | Yes |
+| RTL20 | Last message ID storage | Yes — `unit/realtime/channels/channel_delta_decoding_test.dart`, `integration/realtime/delta_decoding_test.dart` | Yes |
+| RTL21 | Message ordering in arrays | Yes — `unit/realtime/channels/channel_delta_decoding_test.dart` | Yes |
 | RTL22 | Message filtering (RTL22a–RTL22d) | | |
 | RTL23 | Name attribute | | |
 | RTL24 | ErrorReason attribute | | |
@@ -401,14 +401,14 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | **Realtime client** (RTC) | 14 | 11 | 12 | RTC8 added |
 | **Connection** (RTN) | 23 | 16 | 18 | Missing: RTN16, RTN21 full coverage |
 | **Realtime channels** (RTS) | 5 | 5 | 5 | Full |
-| **Realtime channel** (RTL) | 24 | 15 | 15 | RTL10 partial (RTL10d pending) |
+| **Realtime channel** (RTL) | 24 | 19 | 19 | RTL10 partial (RTL10d pending), RTL18–RTL21 added |
 | **Realtime presence** (RTP) | 15 | 15 | 15 | Full |
 | **Realtime annotations** (RTAN) | 5 | 0 | 0 | |
 | **EventEmitter** (RTE) | 6 | 0 | 0 | |
 | **Backoff/jitter** (RTB) | 1 | 0 | 0 | |
 | **Wrapper SDK** (WP) | 7 | 0 | 0 | |
 | **Push notifications** (RSH) | 8 | 0 | 0 | |
-| **Plugins** (PC/PT/VD) | 3 | 0 | 0 | |
+| **Plugins** (PC/PT/VD) | 3 | 2 | 1 | PC3 and VD2 covered |
 | **Data types** | 30 | 10 | 10 | BAR2 partial, BGR/BGF via batch_presence, TRT/TRS/TRF via revoke_tokens |
 | **Option types** | 8 | 5 | 5 | Aligned with UTS |
 | **Push types** | 3 | 0 | 0 | |

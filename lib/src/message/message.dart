@@ -59,14 +59,17 @@ class Message {
     // Process encodings in reverse order (last applied = first decoded)
     for (var i = encodings.length - 1; i >= 0; i--) {
       final enc = encodings[i].trim();
-      result = _decodeSingle(result, enc);
+      result = decodeSingle(result, enc);
     }
 
     return result;
   }
 
-  /// Decodes data with a single encoding.
-  static Object? _decodeSingle(Object? data, String encoding) {
+  /// Decodes data with a single encoding step.
+  ///
+  /// Handles `base64`, `json`, and `utf-8` encodings.
+  /// Returns data unchanged for unknown encodings.
+  static Object? decodeSingle(Object? data, String encoding) {
     switch (encoding) {
       case 'base64':
         if (data is String) {
@@ -100,10 +103,7 @@ class Message {
 
   /// Creates a list of Messages from a JSON array.
   static List<Message> fromEncodedArray(List<dynamic> jsonArray) {
-    return jsonArray
-        .cast<Map<String, dynamic>>()
-        .map(Message.fromMap)
-        .toList();
+    return jsonArray.cast<Map<String, dynamic>>().map(Message.fromMap).toList();
   }
 
   /// Unique message ID assigned by Ably.
@@ -166,8 +166,8 @@ class Message {
         map['data'] = base64.encode(data as Uint8List);
         map['encoding'] = _combineEncodings('base64', encoding);
       } else if (data is Map || data is List) {
-        // JSON-encodable objects
-        map['data'] = data;
+        // JSON-encodable objects — encode to JSON string for wire format
+        map['data'] = json.encode(data);
         map['encoding'] = _combineEncodings('json', encoding);
       } else {
         map['data'] = data;

@@ -62,6 +62,7 @@ class ClientOptions extends AuthOptions {
     int realtimeRequestTimeout = 10000,
     int disconnectedRetryTimeout = 15000,
     int suspendedRetryTimeout = 30000,
+    Map<String, Object>? plugins,
   }) {
     // REC1b1: Endpoint conflicts with deprecated options
     if (endpoint != null) {
@@ -147,6 +148,7 @@ class ClientOptions extends AuthOptions {
       realtimeRequestTimeout: realtimeRequestTimeout,
       disconnectedRetryTimeout: disconnectedRetryTimeout,
       suspendedRetryTimeout: suspendedRetryTimeout,
+      plugins: plugins,
     );
   }
 
@@ -194,6 +196,7 @@ class ClientOptions extends AuthOptions {
     this.realtimeRequestTimeout = 10000,
     this.disconnectedRetryTimeout = 15000,
     this.suspendedRetryTimeout = 30000,
+    this.plugins,
   });
 
   /// Creates ClientOptions from an API key string.
@@ -361,6 +364,15 @@ class ClientOptions extends AuthOptions {
   ///
   /// Defaults to 30000 (30 seconds).
   final int suspendedRetryTimeout;
+
+  /// Plugin map for extensible functionality.
+  ///
+  /// Keys are plugin type identifiers (e.g., `'vcdiff'` for delta decoding).
+  /// Values are plugin objects that implement the appropriate interface
+  /// (e.g., [VCDiffDecoder] for vcdiff plugins).
+  ///
+  /// Spec: TO3o, PC1, PC2, PC3
+  final Map<String, Object>? plugins;
 
   /// Parses the endpoint to determine if it's an explicit hostname (REC1b2).
   ///
@@ -583,6 +595,7 @@ class ClientOptions extends AuthOptions {
     int? realtimeRequestTimeout,
     int? disconnectedRetryTimeout,
     int? suspendedRetryTimeout,
+    Map<String, Object>? plugins,
   }) {
     return ClientOptions._(
       key: key ?? this.key,
@@ -630,6 +643,7 @@ class ClientOptions extends AuthOptions {
           disconnectedRetryTimeout ?? this.disconnectedRetryTimeout,
       suspendedRetryTimeout:
           suspendedRetryTimeout ?? this.suspendedRetryTimeout,
+      plugins: plugins ?? this.plugins,
     );
   }
 

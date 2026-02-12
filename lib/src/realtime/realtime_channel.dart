@@ -1,4 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:meta/meta.dart';
 
 import '../auth/client_options.dart';
 import '../channels/channel_details.dart';
@@ -9,7 +13,9 @@ import '../error/error_info.dart';
 import '../impl/channel_rest_api.dart';
 import '../logging/logger.dart';
 import '../message/message.dart';
+import '../message/message_extras.dart';
 import '../pagination/paginated_result.dart';
+import '../plugin/vcdiff_decoder.dart';
 import 'channel_event.dart';
 import 'channel_mode.dart';
 import 'channel_state.dart';
@@ -81,6 +87,45 @@ class RealtimeChannel {
 
   /// Whether this channel has ever been attached (for ATTACH_RESUME flag, RTL4j).
   bool _hasBeenAttached = false;
+
+  /// Delta decoding state — base payload for vcdiff delta reconstruction.
+  ///
+  /// Stores the decoded payload (after base64 but before json/utf-8) of the
+  /// last successfully decoded message. Can be `String` or `Uint8List`.
+  ///
+  /// Spec: RTL19, RTL19a, RTL19b, RTL19c
+  Object? _basePayload;
+
+  /// The message ID of the last successfully decoded message.
+  ///
+  /// Used to verify delta continuity: the first message's `extras.delta.from`
+  /// must match this value.
+  ///
+  /// Spec: RTL20
+  String? _lastPayloadMessageId;
+
+  /// The channelSerial from the ProtocolMessage containing the last
+  /// successfully decoded message. Used as the channelSerial in the
+  /// ATTACH message during decode failure recovery.
+  ///
+  /// Spec: RTL18c
+  String? _lastPayloadProtocolMessageChannelSerial;
+
+  /// Whether a decode failure recovery is currently in progress.
+  ///
+  /// Prevents multiple concurrent recovery attempts.
+  ///
+  /// Spec: RTL18
+  bool _decodeFailureRecoveryInProgress = false;
+
+  /// Clears the stored last payload message ID, forcing the next delta
+  /// to fail the RTL20 base reference check.
+  ///
+  /// This is only for testing — it simulates a message gap.
+  @visibleForTesting
+  void clearLastPayloadMessageId() {
+    _lastPayloadMessageId = null;
+  }
 
   /// The presence object for this channel (RTL9).
   late final RealtimePresence _presence = RealtimePresence(
@@ -663,6 +708,9 @@ class RealtimeChannel {
       return;
     }
 
+    // RTL18c: Clear decode failure recovery flag on successful attach
+    _decodeFailureRecoveryInProgress = false;
+
     _hasBeenAttached = true;
     _transitionTo(
       ChannelState.attached,
@@ -762,10 +810,10 @@ class RealtimeChannel {
 
   /// Handles incoming MESSAGE protocol message.
   ///
-  /// Delivers individual messages to subscribers, filtering by name
-  /// for name-specific subscriptions. Only delivers when the channel
-  /// is ATTACHED (RTL17). Filters out self-echoed messages when
-  /// echoMessages is false (RTL7f).
+  /// Decodes messages with vcdiff delta support (RTL18-RTL21), delivering
+  /// individual messages to subscribers. Filters by name for name-specific
+  /// subscriptions. Only delivers when the channel is ATTACHED (RTL17).
+  /// Filters out self-echoed messages when echoMessages is false (RTL7f).
   void _handleMessage(ProtocolMessage protocolMessage) {
     // RTL17: Only deliver when ATTACHED
     if (_state != ChannelState.attached) {
@@ -781,15 +829,220 @@ class RealtimeChannel {
     final rawMessages = protocolMessage.messages;
     if (rawMessages == null) return;
 
-    for (final raw in rawMessages) {
-      final message =
-          raw is Message ? raw : Message.fromMap(raw as Map<String, dynamic>);
+    // Populate fields from parent ProtocolMessage (mirrors ably-js
+    // populateFieldsFromParent). Computes message IDs as
+    // `protocolMessageId:index` when the message doesn't have its own ID.
+    final maps = <Map<String, dynamic>>[];
+    for (var i = 0; i < rawMessages.length; i++) {
+      final map = rawMessages[i] is Map<String, dynamic>
+          ? Map<String, dynamic>.from(rawMessages[i] as Map<String, dynamic>)
+          : (rawMessages[i] as Message).toMap();
+      if (map['connectionId'] == null && protocolMessage.connectionId != null) {
+        map['connectionId'] = protocolMessage.connectionId;
+      }
+      if (map['timestamp'] == null && protocolMessage.timestamp != null) {
+        map['timestamp'] = protocolMessage.timestamp;
+      }
+      if (protocolMessage.id != null && map['id'] == null) {
+        map['id'] = '${protocolMessage.id}:$i';
+      }
+      maps.add(map);
+    }
+
+    // RTL20: Check delta continuity — first message's delta.from must match
+    // the last successfully decoded message ID.
+    final firstExtras = maps[0]['extras'] as Map<String, dynamic>?;
+    final firstDelta = firstExtras?['delta'] as Map<String, dynamic>?;
+    if (firstDelta != null && firstDelta['from'] != _lastPayloadMessageId) {
+      _startDecodeFailureRecovery(
+        const ErrorInfo(
+          code: 40018,
+          statusCode: 400,
+          message: 'Delta message decode failure - previous message not '
+              'available',
+        ),
+      );
+      return; // RTL18b: discard
+    }
+
+    // RTL21: Decode messages in ascending index order
+    final messages = <Message>[];
+    for (final map in maps) {
+      final rawData = map['data'];
+      final encoding = map['encoding'] as String?;
+      final extras = map['extras'] as Map<String, dynamic>?;
+      final delta = extras?['delta'] as Map<String, dynamic>?;
+
+      try {
+        final decodedData = _decodeMessageData(
+          rawData,
+          encoding,
+          delta != null,
+        );
+        messages.add(
+          Message(
+            id: map['id'] as String?,
+            name: map['name'] as String?,
+            data: decodedData,
+            clientId: map['clientId'] as String?,
+            connectionId: map['connectionId'] as String?,
+            timestamp: map['timestamp'] as int?,
+            extras: extras != null ? MessageExtras.fromMap(extras) : null,
+          ),
+        );
+      } on AblyException catch (e) {
+        if (e.errorInfo?.code == 40019) {
+          // No vcdiff plugin — channel FAILED (PC3)
+          _transitionTo(ChannelState.failed, error: e.errorInfo);
+          return;
+        }
+        if (e.errorInfo?.code == 40018) {
+          // Decode failure — start recovery (RTL18a, RTL18b)
+          _startDecodeFailureRecovery(e.errorInfo!);
+          return; // Discard remaining messages
+        }
+        rethrow;
+      }
+    }
+
+    // RTL20: Update last message ID (use last in array)
+    if (messages.isNotEmpty) {
+      _lastPayloadMessageId = messages.last.id;
+      _lastPayloadProtocolMessageChannelSerial = protocolMessage.channelSerial;
+    }
+
+    // Deliver to subscribers
+    for (final message in messages) {
       for (final sub in _subscribers) {
         if (sub.name == null || sub.name == message.name) {
           sub.listener(message);
         }
       }
     }
+  }
+
+  /// Decodes message data with vcdiff delta support.
+  ///
+  /// Processes the encoding string right-to-left (outermost encoding first).
+  /// For vcdiff-encoded messages, uses the registered plugin to decode the
+  /// delta against the stored base payload. Tracks the base payload for
+  /// subsequent delta decoding.
+  ///
+  /// Throws [AblyException] with code 40019 if vcdiff encoding is present
+  /// but no plugin is registered, or 40018 if decoding fails.
+  ///
+  /// Spec: RTL19, PC3, PC3a
+  Object? _decodeMessageData(
+    Object? data,
+    String? encoding,
+    bool isDelta,
+  ) {
+    if (encoding == null || encoding.isEmpty) {
+      // No encoding — store raw data as base (RTL19b)
+      _basePayload = data;
+      return data;
+    }
+
+    final encodings = encoding.split('/');
+    var result = data;
+
+    // Track the base payload separately from the decoded result.
+    // Mirrors ably-js: lastPayload starts as the raw wire data and is
+    // only updated by base64 (if outermost) or vcdiff. The json and
+    // utf-8 steps do NOT update lastPayload — the base is stored in
+    // its wire-encoded form (before json/utf-8 decode).
+    var lastPayload = data;
+
+    // Process encodings right-to-left (outermost first)
+    for (var i = encodings.length - 1; i >= 0; i--) {
+      final enc = encodings[i].trim();
+
+      if (enc == 'vcdiff') {
+        // Check plugin exists (PC3)
+        final plugin = _clientOptions.plugins?['vcdiff'];
+        if (plugin == null || plugin is! VCDiffDecoder) {
+          throw const AblyException(
+            errorInfo: ErrorInfo(
+              code: 40019,
+              statusCode: 400,
+              message: 'VCDiff delta decoding is not supported without a '
+                  'vcdiff decoder plugin',
+            ),
+          );
+        }
+
+        // Get base payload (PC3a: UTF-8 encode if String)
+        var base = _basePayload;
+        if (base is String) {
+          base = Uint8List.fromList(utf8.encode(base));
+        }
+        if (base is! Uint8List) {
+          throw const AblyException(
+            errorInfo: ErrorInfo(
+              code: 40018,
+              statusCode: 400,
+              message: 'No base payload available for delta decode',
+            ),
+          );
+        }
+
+        // Ensure delta is bytes
+        final deltaBytes = result is Uint8List
+            ? result
+            : Uint8List.fromList(utf8.encode(result as String));
+        try {
+          result = plugin.decode(deltaBytes, base);
+        } catch (e) {
+          throw AblyException(
+            errorInfo: ErrorInfo(
+              code: 40018,
+              statusCode: 400,
+              message: 'VCDiff decode failed: $e',
+            ),
+          );
+        }
+        // RTL19c: Store vcdiff result as new base payload
+        lastPayload = result;
+      } else if (enc == 'base64') {
+        result = Uint8List.fromList(base64.decode(result as String));
+        // RTL19a: If base64 is the outermost encoding (last in the string,
+        // first processed), store the decoded bytes as base payload.
+        if (i == encodings.length - 1) {
+          lastPayload = result;
+        }
+      } else {
+        // json, utf-8 — decode but do NOT update lastPayload
+        result = Message.decodeSingle(result, enc);
+      }
+    }
+
+    // Store the tracked base payload for subsequent delta decoding
+    _basePayload = lastPayload;
+
+    return result;
+  }
+
+  /// Starts decode failure recovery by reattaching the channel.
+  ///
+  /// Logs the error, transitions to ATTACHING, and sends a new ATTACH
+  /// with the channelSerial from the last successfully decoded message.
+  /// Only one recovery can be in progress at a time.
+  ///
+  /// Spec: RTL18, RTL18a, RTL18b, RTL18c
+  void _startDecodeFailureRecovery(ErrorInfo reason) {
+    if (_decodeFailureRecoveryInProgress) return;
+
+    _logger.error('Delta decode failure, initiating recovery', {
+      'channel': _name,
+      'code': reason.code,
+      'message': reason.message,
+    });
+
+    _decodeFailureRecoveryInProgress = true;
+    // RTL18c: Transition to ATTACHING with the error reason
+    _transitionTo(ChannelState.attaching, error: reason);
+    _sendAttachMessage();
+    _startAttachTimeout();
   }
 
   /// Sends an ATTACH protocol message.
@@ -807,10 +1060,16 @@ class RealtimeChannel {
       flags |= flagAttachResume;
     }
 
+    // RTL18c: During decode failure recovery, use the channelSerial from the
+    // last successfully decoded message so the server resends from that point.
+    final channelSerial = _decodeFailureRecoveryInProgress
+        ? _lastPayloadProtocolMessageChannelSerial
+        : properties.channelSerial;
+
     _connection.sendMessage(ProtocolMessage(
       action: ProtocolAction.attach,
       channel: _name,
-      channelSerial: properties.channelSerial,
+      channelSerial: channelSerial,
       flags: flags != 0 ? flags : null,
       params: _options.params,
     ));

@@ -74,6 +74,9 @@ export 'src/error/error_codes.dart';
 export 'src/crypto/crypto.dart';
 export 'src/crypto/cipher_params.dart';
 
+// Plugins
+export 'src/plugin/vcdiff_decoder.dart';
+
 // Logging
 export 'src/logging/log_level.dart';
 export 'src/logging/log_handler.dart';

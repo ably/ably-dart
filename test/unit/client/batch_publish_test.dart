@@ -230,7 +230,7 @@ void main() {
         final messages = body['messages'] as List;
 
         expect(messages[0]['name'], equals('event'));
-        expect(messages[0]['data'], equals({'key': 'value'}));
+        expect(messages[0]['data'], equals('{"key":"value"}'));
         expect(messages[0]['clientId'], equals('client1'));
       });
 
