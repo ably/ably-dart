@@ -181,6 +181,28 @@ class RealtimeChannel {
   /// Spec: RTL24
   ErrorInfo? get errorReason => _errorReason;
 
+  /// Calls the listener immediately with null if already in the target state,
+  /// otherwise registers a one-time listener for that state.
+  ///
+  /// Spec: RTL25
+  void whenState(
+    ChannelState targetState,
+    void Function(ChannelStateChange?) listener,
+  ) {
+    if (_state == targetState) {
+      // RTL25a: Already in target state - call immediately with null
+      listener(null);
+    } else {
+      // RTL25b: Wait for state transition - use once
+      final subscription =
+          on(ChannelEventExtension.fromState(targetState)).listen(null);
+      subscription.onData((change) {
+        listener(change);
+        subscription.cancel();
+      });
+    }
+  }
+
   /// Listens to channel state changes.
   ///
   /// If [event] is provided, only emits changes matching that event.
