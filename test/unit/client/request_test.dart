@@ -304,7 +304,7 @@ void main() {
         await client.request('GET', '/test');
 
         final request = capturedRequests[0];
-        expect(request.headers['X-Ably-Version'], equals('2'));
+        expect(request.headers['X-Ably-Version'], equals('5'));
       });
     });
 

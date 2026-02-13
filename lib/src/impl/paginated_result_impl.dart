@@ -1,3 +1,4 @@
+import '../message/annotation.dart';
 import '../message/message.dart';
 import '../message/presence_message.dart';
 import '../pagination/http_paginated_response.dart';
@@ -86,7 +87,8 @@ class PaginatedResultImpl<T> implements PaginatedResult<T> {
 }
 
 /// Function type for fetching HTTP paginated results.
-typedef HttpPageFetcher<T> = Future<HttpPaginatedResponse<T>> Function(String url);
+typedef HttpPageFetcher<T> = Future<HttpPaginatedResponse<T>> Function(
+    String url);
 
 /// Type-specific parsers for paginated results.
 class PaginatedResultParser {
@@ -94,10 +96,7 @@ class PaginatedResultParser {
   static List<Message> parseMessages(dynamic body) {
     if (body == null) return [];
     if (body is! List) return [];
-    return body
-        .cast<Map<String, dynamic>>()
-        .map(Message.fromMap)
-        .toList();
+    return body.cast<Map<String, dynamic>>().map(Message.fromMap).toList();
   }
 
   /// Parses a list of presence messages from JSON.
@@ -108,5 +107,12 @@ class PaginatedResultParser {
         .cast<Map<String, dynamic>>()
         .map(PresenceMessage.fromMap)
         .toList();
+  }
+
+  /// Parses a list of annotations from JSON.
+  static List<Annotation> parseAnnotations(dynamic body) {
+    if (body == null) return [];
+    if (body is! List) return [];
+    return body.cast<Map<String, dynamic>>().map(Annotation.fromMap).toList();
   }
 }

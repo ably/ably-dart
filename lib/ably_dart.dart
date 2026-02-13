@@ -31,10 +31,12 @@ export 'src/realtime/channel_event.dart';
 export 'src/realtime/channel_state_change.dart';
 export 'src/realtime/protocol_message.dart';
 export 'src/realtime/publish_result.dart';
+export 'src/realtime/realtime_annotations.dart';
 
 // Channels
 export 'src/channels/channel_details.dart';
 export 'src/channels/channels.dart';
+export 'src/channels/rest_annotations.dart';
 export 'src/channels/rest_channel.dart';
 export 'src/channels/rest_channel_options.dart';
 export 'src/channels/realtime_history_params.dart';
@@ -49,9 +51,16 @@ export 'src/realtime/realtime_presence.dart';
 
 // Messages
 export 'src/message/message.dart';
+export 'src/message/message_action.dart';
+export 'src/message/message_annotations.dart';
+export 'src/message/message_operation.dart';
+export 'src/message/message_version.dart';
 export 'src/message/presence_message.dart';
 export 'src/message/message_extras.dart';
 export 'src/message/delta_extras.dart';
+export 'src/message/annotation.dart';
+export 'src/message/annotation_action.dart';
+export 'src/message/update_delete_result.dart';
 
 // Stats
 export 'src/stats/stats.dart';

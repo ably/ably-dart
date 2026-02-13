@@ -1,7 +1,9 @@
 import '../channels/channel_details.dart';
 import '../channels/rest_history_params.dart';
+import '../message/annotation.dart';
 import '../message/message.dart';
 import '../message/presence_message.dart';
+import '../message/update_delete_result.dart';
 import '../pagination/paginated_result.dart';
 import 'http/http_client.dart';
 import 'paginated_result_impl.dart';
@@ -116,6 +118,131 @@ class ChannelRestApi {
       response: response,
       items: messages,
       fetcher: _fetchPresenceHistoryPage,
+    );
+  }
+
+  /// Retrieves a single message by serial.
+  ///
+  /// Spec: RSL11
+  Future<Message> getMessage(String serial) async {
+    final path =
+        '/channels/$_encodedName/messages/${Uri.encodeComponent(serial)}';
+    final response = await _httpClient.request('GET', path);
+    return Message.fromMap(response.body as Map<String, dynamic>);
+  }
+
+  /// Retrieves all historical versions of a message.
+  ///
+  /// Spec: RSL14
+  Future<PaginatedResult<Message>> getMessageVersions(
+    String serial, [
+    Map<String, String>? params,
+  ]) async {
+    final path =
+        '/channels/$_encodedName/messages/${Uri.encodeComponent(serial)}/versions';
+    final queryParams = params ?? <String, String>{};
+
+    final response = await _httpClient.request(
+      'GET',
+      path,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
+    );
+
+    final messages = PaginatedResultParser.parseMessages(response.body);
+
+    return PaginatedResultImpl.fromResponse<Message>(
+      response: response,
+      items: messages,
+      fetcher: _fetchMessageVersionsPage,
+    );
+  }
+
+  Future<PaginatedResult<Message>> _fetchMessageVersionsPage(
+    String url,
+  ) async {
+    final uri = Uri.parse(url);
+
+    final response = await _httpClient.request(
+      'GET',
+      uri.path,
+      queryParams: uri.queryParameters.isNotEmpty
+          ? Map<String, String>.from(uri.queryParameters)
+          : null,
+    );
+
+    final messages = PaginatedResultParser.parseMessages(response.body);
+
+    return PaginatedResultImpl.fromResponse<Message>(
+      response: response,
+      items: messages,
+      fetcher: _fetchMessageVersionsPage,
+    );
+  }
+
+  /// Sends a PATCH request to update, delete, or append a message.
+  ///
+  /// Spec: RSL15b
+  Future<UpdateDeleteResult> patchMessage(
+    String serial,
+    Map<String, dynamic> body, {
+    Map<String, String>? params,
+  }) async {
+    final path =
+        '/channels/$_encodedName/messages/${Uri.encodeComponent(serial)}';
+    final response = await _httpClient.request(
+      'PATCH',
+      path,
+      queryParams: params,
+      body: body,
+    );
+    return UpdateDeleteResult.fromMap(response.body as Map<String, dynamic>);
+  }
+
+  /// Retrieves annotations for a message.
+  ///
+  /// Spec: RSAN3
+  Future<PaginatedResult<Annotation>> getAnnotations(
+    String messageSerial, [
+    Map<String, String>? params,
+  ]) async {
+    final path =
+        '/channels/$_encodedName/messages/${Uri.encodeComponent(messageSerial)}/annotations';
+    final queryParams = params ?? <String, String>{};
+
+    final response = await _httpClient.request(
+      'GET',
+      path,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
+    );
+
+    final annotations = PaginatedResultParser.parseAnnotations(response.body);
+
+    return PaginatedResultImpl.fromResponse<Annotation>(
+      response: response,
+      items: annotations,
+      fetcher: _fetchAnnotationsPage,
+    );
+  }
+
+  Future<PaginatedResult<Annotation>> _fetchAnnotationsPage(
+    String url,
+  ) async {
+    final uri = Uri.parse(url);
+
+    final response = await _httpClient.request(
+      'GET',
+      uri.path,
+      queryParams: uri.queryParameters.isNotEmpty
+          ? Map<String, String>.from(uri.queryParameters)
+          : null,
+    );
+
+    final annotations = PaginatedResultParser.parseAnnotations(response.body);
+
+    return PaginatedResultImpl.fromResponse<Annotation>(
+      response: response,
+      items: annotations,
+      fetcher: _fetchAnnotationsPage,
     );
   }
 

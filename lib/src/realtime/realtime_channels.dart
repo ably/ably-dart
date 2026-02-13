@@ -6,6 +6,7 @@ import '../error/ably_exception.dart';
 import '../error/error_info.dart';
 import '../impl/channel_rest_api.dart';
 import '../impl/http/http_client.dart';
+import '../impl/rest_annotations_impl.dart';
 import '../logging/logger.dart';
 import 'channel_state.dart';
 import 'connection.dart';
@@ -82,12 +83,21 @@ class RealtimeChannels {
     }
 
     // RTS3a, RTS3b: Create new channel with options
+    final restApi = ChannelRestApi(channelName: name, httpClient: _httpClient);
+    final restAnnotations = RestAnnotationsImpl(
+      channelName: name,
+      httpClient: _httpClient,
+      options: _options,
+      logger: _logger,
+      restApi: restApi,
+    );
     final channel = RealtimeChannel(
       connection: _connection,
       timerManager: _timerManager,
       name: name,
       options: _options,
-      restApi: ChannelRestApi(channelName: name, httpClient: _httpClient),
+      restApi: restApi,
+      restAnnotations: restAnnotations,
       logger: _logger,
       channelOptions: options,
     );

@@ -21,18 +21,48 @@ enum ProtocolAction {
   message, // 15
   sync, // 16
   auth, // 17
+  // 18, 19, 20 unused
+  annotation, // 21 (TR2/TR3w)
 }
 
 extension ProtocolActionExtension on ProtocolAction {
+  /// Wire protocol integer for this action.
+  static const Map<ProtocolAction, int> _toWire = {
+    ProtocolAction.heartbeat: 0,
+    ProtocolAction.ack: 1,
+    ProtocolAction.nack: 2,
+    ProtocolAction.connect: 3,
+    ProtocolAction.connected: 4,
+    ProtocolAction.disconnect: 5,
+    ProtocolAction.disconnected: 6,
+    ProtocolAction.close: 7,
+    ProtocolAction.closed: 8,
+    ProtocolAction.error: 9,
+    ProtocolAction.attach: 10,
+    ProtocolAction.attached: 11,
+    ProtocolAction.detach: 12,
+    ProtocolAction.detached: 13,
+    ProtocolAction.presence: 14,
+    ProtocolAction.message: 15,
+    ProtocolAction.sync: 16,
+    ProtocolAction.auth: 17,
+    ProtocolAction.annotation: 21,
+  };
+
+  static final Map<int, ProtocolAction> _fromWire = {
+    for (final entry in _toWire.entries) entry.value: entry.key,
+  };
+
   /// Converts action to integer for wire protocol.
-  int toInt() => index;
+  int toInt() => _toWire[this]!;
 
   /// Creates action from integer.
   static ProtocolAction fromInt(int value) {
-    if (value < 0 || value >= ProtocolAction.values.length) {
+    final action = _fromWire[value];
+    if (action == null) {
       throw ArgumentError('Invalid protocol action: $value');
     }
-    return ProtocolAction.values[value];
+    return action;
   }
 }
 
@@ -58,6 +88,7 @@ class ProtocolMessage {
     this.timestamp,
     this.messages,
     this.presence,
+    this.annotations,
     this.auth,
     this.params,
     this.count,
@@ -103,6 +134,9 @@ class ProtocolMessage {
   /// Array of PresenceMessage objects (for PRESENCE action).
   final List<dynamic>? presence;
 
+  /// Array of Annotation objects (for ANNOTATION action).
+  final List<dynamic>? annotations;
+
   /// Auth details for AUTH action.
   final dynamic auth;
 
@@ -145,6 +179,7 @@ class ProtocolMessage {
       timestamp: json['timestamp'] as int?,
       messages: json['messages'] as List<dynamic>?,
       presence: json['presence'] as List<dynamic>?,
+      annotations: json['annotations'] as List<dynamic>?,
       auth: json['auth'],
       params: json['params'] != null
           ? Map<String, String>.from(json['params'] as Map)
@@ -175,6 +210,7 @@ class ProtocolMessage {
       if (timestamp != null) 'timestamp': timestamp,
       if (messages != null) 'messages': messages,
       if (presence != null) 'presence': presence,
+      if (annotations != null) 'annotations': annotations,
       if (auth != null) 'auth': auth,
       if (params != null) 'params': params,
       if (count != null) 'count': count,

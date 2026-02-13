@@ -2,7 +2,7 @@
 library;
 
 /// Ably protocol version.
-const String ablyProtocolVersion = '2';
+const String ablyProtocolVersion = '5';
 
 /// SDK version.
 const String sdkVersion = '0.1.0';

@@ -22,6 +22,12 @@ enum ChannelMode {
 
   /// Object publish capability - allows publishing objects.
   objectPublish,
+
+  /// Annotation publish capability - allows publishing annotations.
+  annotationPublish,
+
+  /// Annotation subscribe capability - allows subscribing to annotations.
+  annotationSubscribe,
 }
 
 /// Protocol message flag bit constants per spec TR3.
@@ -53,6 +59,10 @@ extension ChannelModeFlags on ChannelMode {
         return 1 << 24; // TR3y
       case ChannelMode.objectPublish:
         return 1 << 25; // TR3z
+      case ChannelMode.annotationPublish:
+        return 1 << 21; // TR3w - flag 21
+      case ChannelMode.annotationSubscribe:
+        return 1 << 22; // TR3x - flag 22
     }
   }
 }
@@ -88,6 +98,12 @@ List<ChannelMode> decodeModeFlags(int flags) {
   }
   if (flags & ChannelMode.objectPublish.flagBit != 0) {
     modes.add(ChannelMode.objectPublish);
+  }
+  if (flags & ChannelMode.annotationPublish.flagBit != 0) {
+    modes.add(ChannelMode.annotationPublish);
+  }
+  if (flags & ChannelMode.annotationSubscribe.flagBit != 0) {
+    modes.add(ChannelMode.annotationSubscribe);
   }
   return modes;
 }

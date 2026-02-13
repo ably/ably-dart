@@ -97,10 +97,10 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | RSL7 | SetOptions function | Yes — `unit/rest/channel/rest_channel_attributes_test.dart` | Yes |
 | RSL8 | Status function (RSL8a) | Yes — `unit/rest/channel/rest_channel_attributes_test.dart`, `unit/realtime/channels/channel_history_test.dart` (via ChannelRestApi) | Yes |
 | RSL9 | Name attribute | Yes — `unit/rest/channel/rest_channel_attributes_test.dart` | Yes |
-| RSL10 | Annotations attribute | | |
-| RSL11 | GetMessage function (RSL11a–RSL11c) | | |
-| RSL14 | GetMessageVersions (RSL14a–RSL14c) | | |
-| RSL15 | UpdateMessage/DeleteMessage/AppendMessage (RSL15a–RSL15f) | | |
+| RSL10 | Annotations attribute | Yes — `unit/rest/channel/annotations_test.dart` | Yes |
+| RSL11 | GetMessage function (RSL11a–RSL11c) | Yes — `unit/rest/channel/get_message_test.dart`, `integration/rest/mutable_messages_test.dart` | Yes |
+| RSL14 | GetMessageVersions (RSL14a–RSL14c) | Yes — `unit/rest/channel/message_versions_test.dart`, `integration/rest/mutable_messages_test.dart` | Yes |
+| RSL15 | UpdateMessage/DeleteMessage/AppendMessage (RSL15a–RSL15f) | Yes — `unit/rest/channel/update_delete_message_test.dart`, `integration/rest/mutable_messages_test.dart` | Yes |
 
 ### Plugins
 
@@ -130,7 +130,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 
 | Spec item | Description | Dart test | UTS spec |
 |-----------|-------------|-----------|----------|
-| RSAN1–RSAN3 | Annotations publish/delete/get | | |
+| RSAN1–RSAN3 | Annotations publish/delete/get | Yes — `unit/rest/channel/annotations_test.dart`, `integration/rest/mutable_messages_test.dart` | Yes |
 
 ### Forwards Compatibility (REST)
 
@@ -232,11 +232,11 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | RTL23 | Name attribute | Yes — `unit/realtime/channels/channel_attributes_test.dart` | Yes |
 | RTL24 | ErrorReason attribute | Yes — `unit/realtime/channels/channel_attributes_test.dart` | Yes |
 | RTL25 | WhenState function (RTL25a–RTL25b) | Yes — `unit/realtime/channels/channel_when_state_test.dart` | Yes |
-| RTL26 | Annotations attribute | | |
+| RTL26 | Annotations attribute | Yes — `unit/realtime/channels/channel_annotations_test.dart`, `integration/realtime/mutable_messages_test.dart` | Yes |
 | RTL27 | Objects attribute (RTL27a–RTL27b) | | |
-| RTL28 | GetMessage function | | |
-| RTL31 | GetMessageVersions function | | |
-| RTL32 | UpdateMessage/DeleteMessage/AppendMessage (RTL32a–RTL32e) | | |
+| RTL28 | GetMessage function | Yes — `unit/realtime/channels/channel_get_message_test.dart`, `integration/realtime/mutable_messages_test.dart` | Yes |
+| RTL31 | GetMessageVersions function | Yes — `unit/realtime/channels/channel_message_versions_test.dart`, `integration/realtime/mutable_messages_test.dart` | Yes |
+| RTL32 | UpdateMessage/DeleteMessage/AppendMessage (RTL32a–RTL32e) | Yes — `unit/realtime/channels/channel_update_delete_message_test.dart`, `integration/realtime/mutable_messages_test.dart` | Yes |
 
 ### RealtimePresence
 
@@ -265,7 +265,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 
 | Spec item | Description | Dart test | UTS spec |
 |-----------|-------------|-----------|----------|
-| RTAN1–RTAN5 | Annotations publish/delete/get/subscribe/unsubscribe | | |
+| RTAN1–RTAN5 | Annotations publish/delete/get/subscribe/unsubscribe | Yes — `unit/realtime/channels/channel_annotations_test.dart`, `integration/realtime/mutable_messages_test.dart` | Yes |
 
 ### EventEmitter
 
@@ -313,7 +313,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 
 | Spec item | Description | Dart test | UTS spec |
 |-----------|-------------|-----------|----------|
-| TM1–TM8 | Message (TM1–TM8a1) | Partial — `unit/types/message_types_test.dart` (TM1–TM5) | Partial |
+| TM1–TM8 | Message (TM1–TM8a1) | Partial — `unit/types/message_types_test.dart` (TM1–TM5), `unit/rest/types/mutable_message_types_test.dart` (TM2j, TM2r, TM2s, TM2u, TM5, TM8a) | Partial |
 | DE1–DE2 | DeltaExtras | | |
 | TP1–TP5 | PresenceMessage | | |
 | OM1–OM5 | ObjectMessage | | |
@@ -325,7 +325,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | OCN1–OCN3 | ObjectsCounter | | |
 | OME1–OME3 | ObjectsMapEntry | | |
 | OD1–OD5 | ObjectData | | |
-| TAN1–TAN3 | Annotation | | |
+| TAN1–TAN3 | Annotation | Yes — `unit/rest/types/mutable_message_types_test.dart` (TAN2) | Yes |
 | TR1–TR4 | ProtocolMessage | | |
 | TG1–TG7 | PaginatedResult | Yes — `unit/types/paginated_result_test.dart` | Yes |
 | HP1–HP8 | HttpPaginatedResponse | Yes — `unit/client/request_test.dart` (shared via TestClient) | Yes |
@@ -345,8 +345,8 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | BSP1–BSP2 | BatchPublishSpec | | |
 | BPR1–BPR2, BPF1–BPF2 | BatchPublish result types | | |
 | BGR1–BGR2, BGF1–BGF2 | BatchPresence result types | Yes — `unit/rest/batch_presence_test.dart` | Yes |
-| PBR1–PBR2 | PublishResult | Yes — `unit/realtime/channels/channel_publish_test.dart` | Yes |
-| UDR1–UDR2 | UpdateDeleteResult | | |
+| PBR1–PBR2 | PublishResult | Yes — `unit/realtime/channels/channel_publish_test.dart`, `unit/rest/channel/publish_result_test.dart` | Yes |
+| UDR1–UDR2 | UpdateDeleteResult | Yes — `unit/rest/types/mutable_message_types_test.dart` (UDR2a) | Yes |
 | TRT1–TRT2, TRS1–TRS2, TRF1–TRF2 | TokenRevocation types | Yes — `unit/auth/revoke_tokens_test.dart`, `integration/rest/revoke_tokens_test.dart` | Yes |
 | MFI1–MFI2 | MessageFilter | | |
 | REX1–REX2 | ReferenceExtras | | |
@@ -394,16 +394,16 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | **REST client** (RSC) | 18 | 17 | 16 | Missing: RSC15 (fallback) |
 | **REST auth** (RSA) | 15 | 15 | 15 | Full |
 | **REST channels** (RSN) | 4 | 4 | 4 | Full |
-| **REST channel** (RSL) | 13 | 10 | 9 | RSL7–RSL9 added |
+| **REST channel** (RSL) | 13 | 13 | 13 | RSL10–RSL15 added (mutable messages) |
 | **REST presence** (RSP) | 5 | 4 | 4 | Aligned with UTS |
 | **REST encryption** (RSE) | 2 | 0 | 0 | |
-| **REST annotations** (RSAN) | 3 | 0 | 0 | |
+| **REST annotations** (RSAN) | 3 | 3 | 3 | Full |
 | **Realtime client** (RTC) | 14 | 12 | 13 | RTC7, RTC8 added |
 | **Connection** (RTN) | 23 | 17 | 19 | RTN3 added; missing: RTN16, RTN21 full coverage |
 | **Realtime channels** (RTS) | 5 | 5 | 5 | Full |
-| **Realtime channel** (RTL) | 24 | 22 | 22 | RTL23–RTL25 added; RTL10 partial (RTL10d pending) |
+| **Realtime channel** (RTL) | 28 | 26 | 26 | RTL26, RTL28, RTL31, RTL32 added (mutable messages); RTL10 partial (RTL10d pending) |
 | **Realtime presence** (RTP) | 15 | 15 | 15 | Full |
-| **Realtime annotations** (RTAN) | 5 | 0 | 0 | |
+| **Realtime annotations** (RTAN) | 5 | 5 | 5 | Full |
 | **EventEmitter** (RTE) | 6 | 0 | 0 | |
 | **Backoff/jitter** (RTB) | 1 | 0 | 0 | |
 | **Wrapper SDK** (WP) | 7 | 0 | 0 | |

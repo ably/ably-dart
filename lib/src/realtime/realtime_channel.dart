@@ -7,13 +7,17 @@ import 'package:meta/meta.dart';
 import '../auth/client_options.dart';
 import '../channels/channel_details.dart';
 import '../channels/realtime_history_params.dart';
+import '../channels/rest_annotations.dart';
 import '../channels/rest_history_params.dart';
 import '../error/ably_exception.dart';
 import '../error/error_info.dart';
 import '../impl/channel_rest_api.dart';
 import '../logging/logger.dart';
 import '../message/message.dart';
+import '../message/message_action.dart';
 import '../message/message_extras.dart';
+import '../message/message_operation.dart';
+import '../message/update_delete_result.dart';
 import '../pagination/paginated_result.dart';
 import '../plugin/vcdiff_decoder.dart';
 import 'channel_event.dart';
@@ -25,6 +29,7 @@ import 'connection_event.dart';
 import 'connection_state.dart';
 import 'protocol_message.dart';
 import 'publish_result.dart';
+import 'realtime_annotations.dart';
 import 'realtime_channel_options.dart';
 import 'realtime_presence.dart';
 import 'timer_manager.dart';
@@ -60,6 +65,7 @@ class RealtimeChannel {
     required String name,
     required ClientOptions options,
     required ChannelRestApi restApi,
+    required RestAnnotations restAnnotations,
     required Logger logger,
     RealtimeChannelOptions? channelOptions,
   })  : _connection = connection,
@@ -69,7 +75,18 @@ class RealtimeChannel {
         _restApi = restApi,
         _logger = logger,
         _options = channelOptions ?? const RealtimeChannelOptions(),
-        _state = ChannelState.initialized;
+        _state = ChannelState.initialized {
+    _annotations = RealtimeAnnotations(
+      channelName: name,
+      connection: connection,
+      restAnnotations: restAnnotations,
+      implicitAttach: attach,
+      getChannelState: () => _state,
+      getChannelModes: () => _modes,
+      getAttachOnSubscribe: () => _options.attachOnSubscribe,
+      logger: logger,
+    );
+  }
 
   final Connection _connection;
   final TimerManager _timerManager;
@@ -127,6 +144,9 @@ class RealtimeChannel {
     _lastPayloadMessageId = null;
   }
 
+  /// The annotations object for this channel (RTL26).
+  late final RealtimeAnnotations _annotations;
+
   /// The presence object for this channel (RTL9).
   late final RealtimePresence _presence = RealtimePresence(
     channelName: _name,
@@ -176,6 +196,11 @@ class RealtimeChannel {
   ///
   /// Spec: RTL9, RTL9a
   RealtimePresence get presence => _presence;
+
+  /// The annotations object for this channel.
+  ///
+  /// Spec: RTL26
+  RealtimeAnnotations get annotations => _annotations;
 
   /// Error information for the current state (if failed/suspended).
   ///
@@ -398,6 +423,87 @@ class RealtimeChannel {
     }
 
     return _restApi.history(params, extraQueryParams);
+  }
+
+  /// Retrieves a single message by serial via the REST API.
+  ///
+  /// Spec: RTL28 (same as RSL11)
+  Future<Message> getMessage(String serial) {
+    _logger.info('getMessage() called', {
+      'channel': _name,
+      'serial': serial,
+    });
+    _validateSerial(serial);
+    return _restApi.getMessage(serial);
+  }
+
+  /// Retrieves all historical versions of a message via the REST API.
+  ///
+  /// Spec: RTL31 (same as RSL14)
+  Future<PaginatedResult<Message>> getMessageVersions(
+    String serial, {
+    Map<String, String>? params,
+  }) {
+    _logger.info('getMessageVersions() called', {
+      'channel': _name,
+      'serial': serial,
+    });
+    _validateSerial(serial);
+    return _restApi.getMessageVersions(serial, params);
+  }
+
+  /// Updates a previously published message via the realtime connection.
+  ///
+  /// Sends a MESSAGE ProtocolMessage with MESSAGE_UPDATE action.
+  ///
+  /// Spec: RTL32
+  Future<UpdateDeleteResult> updateMessage(
+    Message message, {
+    MessageOperation? operation,
+    Map<String, String>? params,
+  }) {
+    return _mutateMessage(
+      message,
+      MessageAction.messageUpdate,
+      operation: operation,
+      params: params,
+    );
+  }
+
+  /// Deletes a previously published message via the realtime connection.
+  ///
+  /// Sends a MESSAGE ProtocolMessage with MESSAGE_DELETE action.
+  ///
+  /// Spec: RTL32
+  Future<UpdateDeleteResult> deleteMessage(
+    Message message, {
+    MessageOperation? operation,
+    Map<String, String>? params,
+  }) {
+    return _mutateMessage(
+      message,
+      MessageAction.messageDelete,
+      operation: operation,
+      params: params,
+    );
+  }
+
+  /// Appends to a previously published message via the realtime connection.
+  ///
+  /// Sends a MESSAGE ProtocolMessage with MESSAGE_APPEND action.
+  ///
+  /// Spec: RTL32
+  Future<UpdateDeleteResult> appendMessage(
+    Message message, {
+    MessageOperation? operation,
+    Map<String, String>? params,
+  }) {
+    return _mutateMessage(
+      message,
+      MessageAction.messageAppend,
+      operation: operation,
+      params: params,
+    );
   }
 
   /// Retrieves the channel's current status and occupancy via the REST API.
@@ -657,9 +763,10 @@ class RealtimeChannel {
 
   /// Handles an incoming protocol message dispatched from the connection.
   void handleProtocolMessage(ProtocolMessage message) {
-    // RTL15b: Update channelSerial from MESSAGE/PRESENCE actions
+    // RTL15b: Update channelSerial from MESSAGE/PRESENCE/ANNOTATION actions
     if (message.action == ProtocolAction.message ||
-        message.action == ProtocolAction.presence) {
+        message.action == ProtocolAction.presence ||
+        message.action == ProtocolAction.annotation) {
       if (message.channelSerial != null) {
         properties.channelSerial = message.channelSerial;
       }
@@ -678,6 +785,8 @@ class RealtimeChannel {
         _presence.handlePresenceMessage(message);
       case ProtocolAction.sync:
         _presence.handleSyncMessage(message);
+      case ProtocolAction.annotation:
+        _annotations.handleAnnotationMessage(message);
       default:
         break;
     }
@@ -749,6 +858,9 @@ class RealtimeChannel {
       resumed: resumed,
       hasBacklog: hasBacklog,
     );
+
+    // RTAN4e: Check annotation subscribe mode on attach
+    _annotations.checkModeOnAttached();
 
     // Handle presence sync and re-entry
     final shouldReenter = _presence.handleAttached(
@@ -911,6 +1023,13 @@ class RealtimeChannel {
           encoding,
           delta != null,
         );
+        // Parse action from numeric wire value (TM2j)
+        MessageAction? messageAction;
+        final rawAction = map['action'];
+        if (rawAction is int) {
+          messageAction = MessageActionExtension.fromInt(rawAction);
+        }
+
         messages.add(
           Message(
             id: map['id'] as String?,
@@ -920,6 +1039,8 @@ class RealtimeChannel {
             connectionId: map['connectionId'] as String?,
             timestamp: map['timestamp'] as int?,
             extras: extras != null ? MessageExtras.fromMap(extras) : null,
+            action: messageAction,
+            serial: map['serial'] as String?,
           ),
         );
       } on AblyException catch (e) {
@@ -1331,6 +1452,143 @@ class RealtimeChannel {
   /// RTS3c behavior where options are updated but reattachment is not allowed.
   void updateOptionsWithoutReattach(RealtimeChannelOptions options) {
     _options = options;
+  }
+
+  /// Shared implementation for updateMessage, deleteMessage, appendMessage.
+  ///
+  /// RTL32c: Builds a new wire body — does NOT mutate the user's Message.
+  /// RTL32b: Sends a MESSAGE ProtocolMessage with the appropriate action.
+  /// RTL32d: Returns UpdateDeleteResult from the ACK response.
+  Future<UpdateDeleteResult> _mutateMessage(
+    Message message,
+    MessageAction action, {
+    MessageOperation? operation,
+    Map<String, String>? params,
+  }) async {
+    _validateSerial(message.serial);
+
+    _logger.info('${action.name}() called', {
+      'channel': _name,
+      'serial': message.serial,
+    });
+
+    // RTL32c: Build new map, do not mutate the user's message
+    final body = <String, dynamic>{};
+    body['action'] = action.toInt();
+    body['serial'] = message.serial;
+
+    if (message.name != null) body['name'] = message.name;
+    if (message.clientId != null) body['clientId'] = message.clientId;
+    if (message.extras != null) body['extras'] = message.extras!.toMap();
+
+    // RTL32b / RSL15d: Encode data per RSL4
+    if (message.data != null) {
+      _encodeDataInto(body, message.data!, message.encoding);
+    }
+
+    // RTL32b2: Include version only when operation is provided
+    if (operation != null) {
+      body['version'] = operation.toMap();
+    }
+
+    // RTL32c4: Fail if channel is SUSPENDED or FAILED
+    if (_state == ChannelState.suspended || _state == ChannelState.failed) {
+      throw AblyException(
+        errorInfo: ErrorInfo(
+          code: 90001,
+          message: 'Cannot publish when channel is $_state',
+          statusCode: 400,
+        ),
+      );
+    }
+
+    // RTL32b: Send MESSAGE ProtocolMessage
+    final protocolMessage = ProtocolMessage(
+      action: ProtocolAction.message,
+      channel: _name,
+      messages: [body],
+      params: params,
+    );
+
+    final connState = _connection.state;
+
+    final PublishResult result;
+    if (connState == ConnectionState.connected) {
+      result = await _connection.sendPublishMessage(protocolMessage);
+    } else if (connState == ConnectionState.initialized ||
+        connState == ConnectionState.connecting ||
+        connState == ConnectionState.disconnected) {
+      if (_clientOptions.queueMessages) {
+        result = await _connection.queueMessage(protocolMessage);
+      } else {
+        throw AblyException(
+          errorInfo: ErrorInfo(
+            code: 90001,
+            message: 'Cannot publish when connection is $connState and '
+                'queueMessages is false',
+            statusCode: 400,
+          ),
+        );
+      }
+    } else {
+      throw AblyException(
+        errorInfo: ErrorInfo(
+          code: 90001,
+          message: 'Cannot publish when connection is $connState',
+          statusCode: 400,
+        ),
+      );
+    }
+
+    // RTL32d: Parse UpdateDeleteResult from ACK res
+    final serials = result.serials;
+    final versionSerial =
+        (serials.isNotEmpty && serials[0] != null) ? serials[0] : null;
+    return UpdateDeleteResult(versionSerial: versionSerial);
+  }
+
+  /// Encodes data into a wire body map following RSL4 rules.
+  void _encodeDataInto(
+    Map<String, dynamic> body,
+    Object data,
+    String? existingEncoding,
+  ) {
+    if (data is String) {
+      body['data'] = data;
+    } else if (data is Uint8List) {
+      body['data'] = base64.encode(data);
+      body['encoding'] = _combineEncodings('base64', existingEncoding);
+    } else if (data is List || data is Map) {
+      body['data'] = json.encode(data);
+      body['encoding'] = _combineEncodings('json', existingEncoding);
+    } else {
+      body['data'] = json.encode(data);
+      body['encoding'] = _combineEncodings('json', existingEncoding);
+    }
+  }
+
+  String? _combineEncodings(String? newEncoding, String? existingEncoding) {
+    if (newEncoding == null) return existingEncoding;
+    if (existingEncoding == null || existingEncoding.isEmpty) {
+      return newEncoding;
+    }
+    return '$existingEncoding/$newEncoding';
+  }
+
+  /// Validates that a serial is non-null and non-empty.
+  ///
+  /// Spec: RTL32a
+  void _validateSerial(String? serial) {
+    if (serial == null || serial.isEmpty) {
+      throw AblyException(
+        message: 'Message serial is required',
+        errorInfo: const ErrorInfo(
+          message: 'Message serial is required',
+          code: 40003,
+          statusCode: 400,
+        ),
+      );
+    }
   }
 
   /// Disposes resources used by this channel.

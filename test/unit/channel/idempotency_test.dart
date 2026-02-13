@@ -69,8 +69,8 @@ void main() {
         final parts = messageId.split(':');
         expect(parts.length, equals(2));
 
-        // First part is base64-encoded (url-safe)
-        expect(parts[0], matches(RegExp(r'^[A-Za-z0-9_-]+$')));
+        // First part is base64-encoded
+        expect(parts[0], matches(RegExp(r'^[A-Za-z0-9+/=]+$')));
         expect(parts[0].length, greaterThanOrEqualTo(12));
 
         // Second part is a serial number (starting from 0)
@@ -352,8 +352,8 @@ void main() {
         expect(body[0]['id'], equals('client-id-1'));
         expect(body[2]['id'], equals('client-id-2'));
 
-        // Library-generated ID for middle message
-        expect(body[1]['id'], matches(RegExp(r'^[A-Za-z0-9_-]+:[0-9]+$')));
+        // Library-generated ID for middle message (base64:index)
+        expect(body[1]['id'], matches(RegExp(r'^[A-Za-z0-9+/=]+:[0-9]+$')));
       });
     });
   });

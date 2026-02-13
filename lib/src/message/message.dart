@@ -3,7 +3,10 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
+import 'message_action.dart';
+import 'message_annotations.dart';
 import 'message_extras.dart';
+import 'message_version.dart';
 
 /// A message sent to or received from Ably.
 ///
@@ -20,6 +23,10 @@ class Message {
     this.timestamp,
     this.encoding,
     this.extras,
+    this.action,
+    this.serial,
+    this.version,
+    this.annotations,
   });
 
   /// Creates a Message from a JSON map, decoding data based on encoding.
@@ -30,17 +37,55 @@ class Message {
     // Decode data based on encoding
     final decodedData = _decodeData(rawData, encoding);
 
+    // Parse action from numeric wire value (TM2j)
+    MessageAction? action;
+    final rawAction = map['action'];
+    if (rawAction is int) {
+      action = MessageActionExtension.fromInt(rawAction);
+    }
+
+    // Parse serial (TM2r)
+    final serial = map['serial'] as String?;
+    final timestamp = map['timestamp'] as int?;
+
+    // Parse version (TM2s) — if absent, initialize from serial/timestamp
+    MessageVersion? version;
+    final rawVersion = map['version'];
+    if (rawVersion is Map<String, dynamic>) {
+      version = MessageVersion.fromMap(rawVersion);
+    } else if (serial != null || timestamp != null) {
+      // TM2s1: version.serial defaults to message serial
+      // TM2s2: version.timestamp defaults to message timestamp
+      version = MessageVersion(
+        serial: serial,
+        timestamp: timestamp,
+      );
+    }
+
+    // Parse annotations (TM2u) — if absent, initialize to empty
+    MessageAnnotations? annotations;
+    final rawAnnotations = map['annotations'];
+    if (rawAnnotations is Map<String, dynamic>) {
+      annotations = MessageAnnotations.fromMap(rawAnnotations);
+    } else {
+      annotations = const MessageAnnotations();
+    }
+
     return Message(
       id: map['id'] as String?,
       name: map['name'] as String?,
       data: decodedData,
       clientId: map['clientId'] as String?,
       connectionId: map['connectionId'] as String?,
-      timestamp: map['timestamp'] as int?,
+      timestamp: timestamp,
       encoding: null, // Encoding is consumed during decode
       extras: map['extras'] != null
           ? MessageExtras.fromMap(map['extras'] as Map<String, dynamic>)
           : null,
+      action: action,
+      serial: serial,
+      version: version,
+      annotations: annotations,
     );
   }
 
@@ -149,6 +194,26 @@ class Message {
   /// Spec: TM2h
   final MessageExtras? extras;
 
+  /// The action type of the message.
+  ///
+  /// Spec: TM2j
+  final MessageAction? action;
+
+  /// An opaque string that uniquely identifies the message.
+  ///
+  /// Spec: TM2r
+  final String? serial;
+
+  /// Information about the latest version of the message.
+  ///
+  /// Spec: TM2s
+  final MessageVersion? version;
+
+  /// Annotations associated with this message.
+  ///
+  /// Spec: TM2u
+  final MessageAnnotations? annotations;
+
   /// Returns the timestamp as a DateTime, if set.
   DateTime? get timestampAsDateTime => timestamp != null
       ? DateTime.fromMillisecondsSinceEpoch(timestamp!)
@@ -179,6 +244,12 @@ class Message {
     if (timestamp != null) map['timestamp'] = timestamp;
     if (extras != null) map['extras'] = extras!.toMap();
 
+    // Mutable message fields
+    if (action != null) map['action'] = action!.toInt();
+    if (serial != null) map['serial'] = serial;
+    if (version != null) map['version'] = version!.toMap();
+    // annotations is read-only from wire, not sent by client
+
     return map;
   }
 
@@ -204,6 +275,10 @@ class Message {
     int? timestamp,
     String? encoding,
     MessageExtras? extras,
+    MessageAction? action,
+    String? serial,
+    MessageVersion? version,
+    MessageAnnotations? annotations,
   }) {
     return Message(
       id: id ?? this.id,
@@ -214,6 +289,10 @@ class Message {
       timestamp: timestamp ?? this.timestamp,
       encoding: encoding ?? this.encoding,
       extras: extras ?? this.extras,
+      action: action ?? this.action,
+      serial: serial ?? this.serial,
+      version: version ?? this.version,
+      annotations: annotations ?? this.annotations,
     );
   }
 

@@ -5,6 +5,7 @@ import 'package:clock/clock.dart';
 import 'package:http/http.dart' as http;
 
 import '../auth/auth.dart';
+import '../impl/http/constants.dart';
 import '../auth/client_options.dart';
 import '../auth/token_details.dart';
 import '../error/ably_exception.dart';
@@ -598,8 +599,8 @@ class Connection implements WebSocketListener {
       queryParams['echo'] = 'false';
     }
 
-    // Add v parameter (protocol version)
-    queryParams['v'] = '1.2';
+    // Add v parameter (protocol version) (RTN2f, CSV2)
+    queryParams['v'] = ablyProtocolVersion;
 
     // Add resume parameter if resuming (RTN15b)
     if (_shouldResume && _key != null) {
@@ -1426,6 +1427,7 @@ class Connection implements WebSocketListener {
       channel: message.channel,
       messages: message.messages,
       presence: message.presence,
+      annotations: message.annotations,
       msgSerial: serial,
       flags: message.flags,
       params: message.params,
@@ -1510,6 +1512,7 @@ class Connection implements WebSocketListener {
           channel: originalMessage.channel,
           messages: originalMessage.messages,
           presence: originalMessage.presence,
+          annotations: originalMessage.annotations,
           msgSerial: newSerial,
           flags: originalMessage.flags,
           params: originalMessage.params,

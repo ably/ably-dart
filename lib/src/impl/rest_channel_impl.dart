@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import '../auth/client_options.dart';
 import '../channels/channel_details.dart';
+import '../channels/rest_annotations.dart';
 import '../channels/rest_channel.dart';
 import '../channels/rest_channel_options.dart';
 import '../channels/rest_history_params.dart';
@@ -11,10 +12,15 @@ import '../error/ably_exception.dart';
 import '../error/error_info.dart';
 import '../logging/logger.dart';
 import '../message/message.dart';
+import '../message/message_action.dart';
+import '../message/message_operation.dart';
+import '../message/update_delete_result.dart';
 import '../pagination/paginated_result.dart';
 import '../presence/rest_presence.dart';
+import '../realtime/publish_result.dart';
 import 'channel_rest_api.dart';
 import 'http/http_client.dart';
+import 'rest_annotations_impl.dart';
 import 'rest_presence_impl.dart';
 
 /// Implementation of RestChannel.
@@ -37,6 +43,13 @@ class RestChannelImpl implements RestChannel {
       httpClient: httpClient,
       logger: logger,
     );
+    _annotations = RestAnnotationsImpl(
+      channelName: name,
+      httpClient: httpClient,
+      options: options,
+      logger: logger,
+      restApi: _restApi,
+    );
   }
 
   final String _name;
@@ -46,11 +59,8 @@ class RestChannelImpl implements RestChannel {
   RestChannelOptions? _channelOptions;
   late final ChannelRestApi _restApi;
   late final RestPresenceImpl _presence;
+  late final RestAnnotationsImpl _annotations;
   final Random _random;
-
-  // For idempotent publishing
-  int _messageSerial = 0;
-  String? _baseIdempotencyKey;
 
   @override
   String get name => _name;
@@ -59,7 +69,10 @@ class RestChannelImpl implements RestChannel {
   RestPresence get presence => _presence;
 
   @override
-  Future<void> publish({
+  RestAnnotations get annotations => _annotations;
+
+  @override
+  Future<PublishResult> publish({
     Message? message,
     List<Message>? messages,
     String? name,
@@ -112,12 +125,156 @@ class RestChannelImpl implements RestChannel {
 
     // Publish - always send as array (RSL1b/RSL1c)
     final path = '/channels/${Uri.encodeComponent(_name)}/messages';
-    await _httpClient.request(
+    final response = await _httpClient.request(
       'POST',
       path,
       queryParams: params,
       body: encodedMessages,
     );
+
+    // RSL1n: Parse and return PublishResult
+    if (response.body is Map<String, dynamic>) {
+      return PublishResult.fromMap(response.body as Map<String, dynamic>);
+    }
+    return const PublishResult(serials: []);
+  }
+
+  @override
+  Future<Message> getMessage(String serial) async {
+    _validateSerial(serial);
+    _logger.info('getMessage() called', {
+      'channel': _name,
+      'serial': serial,
+    });
+    return _restApi.getMessage(serial);
+  }
+
+  @override
+  Future<PaginatedResult<Message>> getMessageVersions(
+    String serial, {
+    Map<String, String>? params,
+  }) async {
+    _validateSerial(serial);
+    _logger.info('getMessageVersions() called', {
+      'channel': _name,
+      'serial': serial,
+    });
+    return _restApi.getMessageVersions(serial, params);
+  }
+
+  @override
+  Future<UpdateDeleteResult> updateMessage(
+    Message message, {
+    MessageOperation? operation,
+    Map<String, String>? params,
+  }) {
+    return _mutateMessage(
+      message,
+      MessageAction.messageUpdate,
+      operation: operation,
+      params: params,
+    );
+  }
+
+  @override
+  Future<UpdateDeleteResult> deleteMessage(
+    Message message, {
+    MessageOperation? operation,
+    Map<String, String>? params,
+  }) {
+    return _mutateMessage(
+      message,
+      MessageAction.messageDelete,
+      operation: operation,
+      params: params,
+    );
+  }
+
+  @override
+  Future<UpdateDeleteResult> appendMessage(
+    Message message, {
+    MessageOperation? operation,
+    Map<String, String>? params,
+  }) {
+    return _mutateMessage(
+      message,
+      MessageAction.messageAppend,
+      operation: operation,
+      params: params,
+    );
+  }
+
+  /// Shared implementation for updateMessage, deleteMessage, appendMessage.
+  ///
+  /// RSL15c: Builds a new wire body — does NOT mutate the user's Message.
+  Future<UpdateDeleteResult> _mutateMessage(
+    Message message,
+    MessageAction action, {
+    MessageOperation? operation,
+    Map<String, String>? params,
+  }) async {
+    _validateSerial(message.serial);
+
+    _logger.info('${action.name}() called', {
+      'channel': _name,
+      'serial': message.serial,
+    });
+
+    // RSL15c: Build new map, do not mutate the user's message
+    final body = <String, dynamic>{};
+    body['action'] = action.toInt();
+
+    if (message.name != null) body['name'] = message.name;
+    if (message.clientId != null) body['clientId'] = message.clientId;
+    if (message.extras != null) body['extras'] = message.extras!.toMap();
+
+    // RSL15d: Encode data per RSL4
+    if (message.data != null) {
+      _encodeDataInto(body, message.data!, message.encoding);
+    }
+
+    // RSL15b7: Include version only when operation is provided
+    if (operation != null) {
+      body['version'] = operation.toMap();
+    }
+
+    return _restApi.patchMessage(message.serial!, body, params: params);
+  }
+
+  /// Encodes data into a wire body map following RSL4 rules.
+  void _encodeDataInto(
+    Map<String, dynamic> body,
+    Object data,
+    String? existingEncoding,
+  ) {
+    if (data is String) {
+      body['data'] = data;
+    } else if (data is Uint8List) {
+      body['data'] = base64.encode(data);
+      body['encoding'] = _combineEncodings('base64', existingEncoding);
+    } else if (data is List || data is Map) {
+      body['data'] = json.encode(data);
+      body['encoding'] = _combineEncodings('json', existingEncoding);
+    } else {
+      body['data'] = json.encode(data);
+      body['encoding'] = _combineEncodings('json', existingEncoding);
+    }
+  }
+
+  /// Validates that a serial is non-null and non-empty.
+  ///
+  /// Spec: RSL11a, RSL15a
+  void _validateSerial(String? serial) {
+    if (serial == null || serial.isEmpty) {
+      throw AblyException(
+        message: 'Message serial is required',
+        errorInfo: const ErrorInfo(
+          message: 'Message serial is required',
+          code: 40003,
+          statusCode: 400,
+        ),
+      );
+    }
   }
 
   Map<String, dynamic> _encodeMessage(Message msg) {
@@ -130,22 +287,7 @@ class RestChannelImpl implements RestChannel {
 
     // Encode data based on type (RSL4)
     if (msg.data != null) {
-      final data = msg.data;
-      if (data is String) {
-        encoded['data'] = data;
-      } else if (data is Uint8List) {
-        // Binary data needs base64 encoding
-        encoded['data'] = base64.encode(data);
-        encoded['encoding'] = _combineEncodings('base64', msg.encoding);
-      } else if (data is List || data is Map) {
-        // JSON objects/arrays - encode as JSON string (RSL4c)
-        encoded['data'] = json.encode(data);
-        encoded['encoding'] = _combineEncodings('json', msg.encoding);
-      } else {
-        // Other types - convert to JSON string
-        encoded['data'] = json.encode(data);
-        encoded['encoding'] = _combineEncodings('json', msg.encoding);
-      }
+      _encodeDataInto(encoded, msg.data!, msg.encoding);
     }
 
     return encoded;
@@ -165,8 +307,8 @@ class RestChannelImpl implements RestChannel {
 
     for (var i = 0; i < messages.length; i++) {
       if (messages[i]['id'] == null) {
-        messages[i]['id'] = '$baseKey:$_messageSerial';
-        _messageSerial++;
+        // RSL1k1: Use 0-based index within the batch, matching ably-js
+        messages[i]['id'] = '$baseKey:$i';
       }
     }
   }
@@ -174,7 +316,7 @@ class RestChannelImpl implements RestChannel {
   String _generateBaseIdempotencyKey() {
     // Generate a random base64 string (RSL1k1)
     final bytes = List<int>.generate(9, (_) => _random.nextInt(256));
-    return base64Url.encode(bytes);
+    return base64.encode(bytes);
   }
 
   @override

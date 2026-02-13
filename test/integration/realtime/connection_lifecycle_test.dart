@@ -166,7 +166,8 @@ void main() {
 
       expect(client.connection.state, equals(ConnectionState.failed));
       expect(client.connection.errorReason, isNotNull);
-      expect(client.connection.errorReason!.code, equals(40400));
+      // Protocol v5 returns 40101 (unauthorized) for invalid keys
+      expect(client.connection.errorReason!.code, equals(40101));
 
       await client.close();
     });
