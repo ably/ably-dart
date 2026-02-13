@@ -153,6 +153,7 @@ class Connection implements WebSocketListener {
     ConnectionState targetState,
     void Function(ConnectionStateChange?) listener,
   ) {
+    _logger.info('whenState() called', {'targetState': targetState.name});
     if (_state == targetState) {
       // RTN26a: Already in target state - call immediately with null
       listener(null);
@@ -1564,6 +1565,12 @@ class Connection implements WebSocketListener {
           statusCode: 500,
           message: 'Message publish failed (NACK)',
         );
+
+    _logger.warn('Message NACK received', {
+      'serial': startSerial,
+      'count': count,
+      'code': error.code,
+    });
 
     for (var i = 0; i < count; i++) {
       final serial = startSerial + i;

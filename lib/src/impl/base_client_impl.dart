@@ -149,6 +149,7 @@ abstract class BaseClientImpl {
   ///
   /// Spec: RSC16, RTC6a
   Future<DateTime> time() async {
+    logger.info('time() called');
     // RSC16: time() does not require authentication
     final response = await ablyHttpClient.request(
       'GET',
@@ -199,6 +200,7 @@ abstract class BaseClientImpl {
     Map<String, String>? headers,
     Object? body,
   }) async {
+    logger.info('request() called', {'method': method, 'path': path});
     // Ensure path starts with /
     final normalizedPath = path.startsWith('/') ? path : '/$path';
 
@@ -292,6 +294,7 @@ abstract class BaseClientImpl {
     int? limit,
     StatsUnit? unit,
   }) async {
+    logger.info('stats() called');
     final queryParams = <String, String>{};
     if (start != null) {
       queryParams['start'] = start.millisecondsSinceEpoch.toString();

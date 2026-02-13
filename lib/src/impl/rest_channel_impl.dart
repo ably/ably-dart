@@ -35,6 +35,7 @@ class RestChannelImpl implements RestChannel {
     _presence = RestPresenceImpl(
       channelName: name,
       httpClient: httpClient,
+      logger: logger,
     );
   }
 
@@ -177,14 +178,20 @@ class RestChannelImpl implements RestChannel {
   }
 
   @override
-  Future<PaginatedResult<Message>> history([RestHistoryParams? params]) =>
-      _restApi.history(params);
+  Future<PaginatedResult<Message>> history([RestHistoryParams? params]) {
+    _logger.info('history() called', {'channel': _name});
+    return _restApi.history(params);
+  }
 
   @override
-  Future<ChannelDetails> status() => _restApi.status();
+  Future<ChannelDetails> status() {
+    _logger.info('status() called', {'channel': _name});
+    return _restApi.status();
+  }
 
   @override
   Future<void> setOptions(RestChannelOptions options) async {
+    _logger.info('setOptions() called', {'channel': _name});
     _channelOptions = options;
     // Note: Encryption setup would go here if implemented
   }

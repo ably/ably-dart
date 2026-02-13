@@ -1,4 +1,5 @@
 import '../channels/rest_history_params.dart';
+import '../logging/logger.dart';
 import '../message/presence_message.dart';
 import '../pagination/paginated_result.dart';
 import '../presence/rest_presence.dart';
@@ -11,16 +12,20 @@ class RestPresenceImpl implements RestPresence {
   RestPresenceImpl({
     required String channelName,
     required AblyHttpClient httpClient,
+    required Logger logger,
   })  : _channelName = channelName,
-        _httpClient = httpClient;
+        _httpClient = httpClient,
+        _logger = logger;
 
   final String _channelName;
   final AblyHttpClient _httpClient;
+  final Logger _logger;
 
   @override
   Future<PaginatedResult<PresenceMessage>> get([
     RestPresenceParams? params,
   ]) async {
+    _logger.info('presence.get() called', {'channel': _channelName});
     final path = '/channels/${Uri.encodeComponent(_channelName)}/presence';
     final queryParams = params?.toQueryParams() ?? {};
 
@@ -43,7 +48,9 @@ class RestPresenceImpl implements RestPresence {
   Future<PaginatedResult<PresenceMessage>> history([
     RestHistoryParams? params,
   ]) async {
-    final path = '/channels/${Uri.encodeComponent(_channelName)}/presence/history';
+    _logger.info('presence.history() called', {'channel': _channelName});
+    final path =
+        '/channels/${Uri.encodeComponent(_channelName)}/presence/history';
     final queryParams = params?.toQueryParams() ?? {};
 
     final response = await _httpClient.request(
@@ -61,7 +68,8 @@ class RestPresenceImpl implements RestPresence {
     );
   }
 
-  Future<PaginatedResult<PresenceMessage>> _fetchPresencePage(String url) async {
+  Future<PaginatedResult<PresenceMessage>> _fetchPresencePage(
+      String url) async {
     final uri = Uri.parse(url);
 
     final response = await _httpClient.request(

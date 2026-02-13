@@ -237,6 +237,7 @@ class AuthImpl implements Auth {
     AuthOptions? authOptions,
     TokenParams? tokenParams,
   }) async {
+    _logger.info('createTokenRequest() called');
     // RSA9: Create a signed token request
     final effectiveOptions = authOptions ?? _storedAuthOptions ?? _options;
     final key = effectiveOptions.key ?? _options.key;
@@ -324,6 +325,7 @@ class AuthImpl implements Auth {
     AuthOptions? authOptions,
     TokenParams? tokenParams,
   }) async {
+    _logger.info('requestToken() called');
     // RSA8: Request a token without updating stored token
     final effectiveOptions = authOptions ?? _storedAuthOptions ?? _options;
     final effectiveParams = _mergeTokenParams(tokenParams);
@@ -548,6 +550,7 @@ class AuthImpl implements Auth {
     List<TokenRevocationTargetSpecifier> specifiers, {
     RevokeTokensOptions? options,
   }) async {
+    _logger.info('revokeTokens() called', {'targetCount': specifiers.length});
     // RSA17d: Token auth clients cannot revoke tokens
     if (_shouldUseTokenAuth()) {
       throw const AblyException(

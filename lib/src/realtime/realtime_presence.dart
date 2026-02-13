@@ -3,6 +3,7 @@ import 'dart:async';
 import '../channels/rest_history_params.dart';
 import '../error/ably_exception.dart';
 import '../error/error_info.dart';
+import '../logging/logger.dart';
 import '../message/presence_message.dart';
 import '../pagination/paginated_result.dart';
 import '../presence/presence_action.dart';
@@ -29,12 +30,14 @@ class RealtimePresence {
     required Future<PaginatedResult<PresenceMessage>> Function([
       RestHistoryParams? params,
     ]) restHistory,
+    required Logger logger,
   })  : _channelName = channelName,
         _connection = connection,
         _getClientId = getClientId,
         _implicitAttach = implicitAttach,
         _getChannelState = getChannelState,
-        _restHistory = restHistory;
+        _restHistory = restHistory,
+        _logger = logger;
 
   final String _channelName;
   final Connection _connection;
@@ -44,6 +47,7 @@ class RealtimePresence {
   final Future<PaginatedResult<PresenceMessage>> Function([
     RestHistoryParams? params,
   ]) _restHistory;
+  final Logger _logger;
 
   /// The presence map of all members on the channel (RTP2).
   final PresenceMap members = PresenceMap();
@@ -85,6 +89,7 @@ class RealtimePresence {
     List<PresenceAction>? actions,
     bool attachOnSubscribe = true,
   }) {
+    _logger.info('presence.subscribe() called', {'channel': _channelName});
     final effectiveActions = actions ?? (action != null ? [action] : null);
     _subscribers.add(
       _PresenceSubscription(
@@ -116,6 +121,7 @@ class RealtimePresence {
     void Function(PresenceMessage)? listener,
     PresenceAction? action,
   }) {
+    _logger.info('presence.unsubscribe() called', {'channel': _channelName});
     if (listener == null) {
       // RTP7c: Remove all
       _subscribers.clear();
@@ -141,6 +147,7 @@ class RealtimePresence {
   ///
   /// Spec: RTP8, RTP8a, RTP8c, RTP8d, RTP8e, RTP8j
   Future<void> enter([Object? data]) async {
+    _logger.info('presence.enter() called', {'channel': _channelName});
     final clientId = _getClientId();
     // RTP8j: Error for null or wildcard clientId
     if (clientId == null || clientId == '*') {
@@ -165,6 +172,7 @@ class RealtimePresence {
   ///
   /// Spec: RTP9, RTP9a, RTP9d
   Future<void> update([Object? data]) async {
+    _logger.info('presence.update() called', {'channel': _channelName});
     final clientId = _getClientId();
     if (clientId == null || clientId == '*') {
       throw AblyException(
@@ -188,6 +196,7 @@ class RealtimePresence {
   ///
   /// Spec: RTP10, RTP10a, RTP10c
   Future<void> leave([Object? data]) async {
+    _logger.info('presence.leave() called', {'channel': _channelName});
     final clientId = _getClientId();
     if (clientId == null || clientId == '*') {
       throw AblyException(
@@ -213,6 +222,10 @@ class RealtimePresence {
   ///
   /// Spec: RTP14, RTP14a, RTP15e, RTP15f
   Future<void> enterClient(String clientId, [Object? data]) async {
+    _logger.info('presence.enterClient() called', {
+      'channel': _channelName,
+      'clientId': clientId,
+    });
     _validateClientIdForClientOp(clientId);
     await _publishPresence(
       PresenceMessage(
@@ -227,6 +240,10 @@ class RealtimePresence {
   ///
   /// Spec: RTP15, RTP15a
   Future<void> updateClient(String clientId, [Object? data]) async {
+    _logger.info('presence.updateClient() called', {
+      'channel': _channelName,
+      'clientId': clientId,
+    });
     _validateClientIdForClientOp(clientId);
     await _publishPresence(
       PresenceMessage(
@@ -241,6 +258,10 @@ class RealtimePresence {
   ///
   /// Spec: RTP15, RTP15a
   Future<void> leaveClient(String clientId, [Object? data]) async {
+    _logger.info('presence.leaveClient() called', {
+      'channel': _channelName,
+      'clientId': clientId,
+    });
     _validateClientIdForClientOp(clientId);
     await _publishPresence(
       PresenceMessage(
@@ -282,6 +303,7 @@ class RealtimePresence {
     String? clientId,
     String? connectionId,
   }) async {
+    _logger.info('presence.get() called', {'channel': _channelName});
     final channelState = _getChannelState();
 
     // RTP11d: Error on SUSPENDED with default waitForSync
@@ -330,6 +352,7 @@ class RealtimePresence {
   Future<PaginatedResult<PresenceMessage>> history([
     RestHistoryParams? params,
   ]) {
+    _logger.info('presence.history() called', {'channel': _channelName});
     return _restHistory(params);
   }
 

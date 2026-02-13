@@ -33,6 +33,7 @@ class RestChannelsImpl extends Iterable<RestChannel> implements RestChannels {
         channelOptions: options,
       );
       _channels[name] = channel;
+      _logger.debug('Channel created', {'channel': name});
     } else if (options != null) {
       // Update options on existing channel
       channel.setOptions(options);

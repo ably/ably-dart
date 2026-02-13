@@ -135,6 +135,7 @@ class RealtimeChannel {
     implicitAttach: attach,
     getChannelState: () => _state,
     restHistory: ([params]) => _restApi.presenceHistory(params),
+    logger: _logger,
   );
 
   /// Message subscribers (RTL7, RTL8).
@@ -189,6 +190,10 @@ class RealtimeChannel {
     ChannelState targetState,
     void Function(ChannelStateChange?) listener,
   ) {
+    _logger.info('whenState() called', {
+      'channel': _name,
+      'targetState': targetState.name,
+    });
     if (_state == targetState) {
       // RTL25a: Already in target state - call immediately with null
       listener(null);
@@ -256,6 +261,7 @@ class RealtimeChannel {
   ///
   /// Spec: RTL8, RTL8a, RTL8b, RTL8c
   void unsubscribe({void Function(Message)? listener, String? name}) {
+    _logger.info('unsubscribe() called', {'channel': _name});
     if (listener == null && name == null) {
       // RTL8c: Remove all subscriptions
       _subscribers.clear();
@@ -373,6 +379,7 @@ class RealtimeChannel {
   ///
   /// Spec: RTL10, RTL10a, RTL10b, RTL10c
   Future<PaginatedResult<Message>> history([RestHistoryParams? params]) async {
+    _logger.info('history() called', {'channel': _name});
     Map<String, String>? extraQueryParams;
 
     if (params is RealtimeHistoryParams && params.untilAttach) {
@@ -396,7 +403,10 @@ class RealtimeChannel {
   /// Retrieves the channel's current status and occupancy via the REST API.
   ///
   /// Spec: RSL8
-  Future<ChannelDetails> status() => _restApi.status();
+  Future<ChannelDetails> status() {
+    _logger.info('status() called', {'channel': _name});
+    return _restApi.status();
+  }
 
   /// Attaches to this channel.
   ///
@@ -983,6 +993,11 @@ class RealtimeChannel {
         // Check plugin exists (PC3)
         final plugin = _clientOptions.plugins?['vcdiff'];
         if (plugin == null || plugin is! VCDiffDecoder) {
+          _logger.error('Message decode failed', {
+            'channel': _name,
+            'reason': 'VCDiff decoder plugin not available',
+            'code': 40019,
+          });
           throw const AblyException(
             errorInfo: ErrorInfo(
               code: 40019,
@@ -1015,6 +1030,11 @@ class RealtimeChannel {
         try {
           result = plugin.decode(deltaBytes, base);
         } catch (e) {
+          _logger.error('Message decode failed', {
+            'channel': _name,
+            'reason': 'VCDiff decode error',
+            'code': 40018,
+          });
           throw AblyException(
             errorInfo: ErrorInfo(
               code: 40018,
@@ -1054,7 +1074,7 @@ class RealtimeChannel {
   void _startDecodeFailureRecovery(ErrorInfo reason) {
     if (_decodeFailureRecoveryInProgress) return;
 
-    _logger.error('Delta decode failure, initiating recovery', {
+    _logger.warn('Delta decode failure, initiating recovery', {
       'channel': _name,
       'code': reason.code,
       'message': reason.message,
@@ -1115,7 +1135,7 @@ class RealtimeChannel {
       callback: () {
         if (_state != ChannelState.attaching) return;
 
-        _logger.debug('Attach timeout', {'channel': _name});
+        _logger.warn('Attach timeout', {'channel': _name});
         final error = ErrorInfo(
           code: 90007,
           message: 'Channel attach timed out',
@@ -1171,6 +1191,7 @@ class RealtimeChannel {
       callback: () {
         if (_state != ChannelState.detaching) return;
 
+        _logger.warn('Detach timeout', {'channel': _name});
         final error = ErrorInfo(
           code: 90007,
           message: 'Channel detach timed out',
@@ -1283,6 +1304,7 @@ class RealtimeChannel {
   ///
   /// Spec: RTL16, RTL16a
   Future<void> setOptions(RealtimeChannelOptions options) async {
+    _logger.info('setOptions() called', {'channel': _name});
     final needsReattach = options.requiresReattachment &&
         (_state == ChannelState.attached || _state == ChannelState.attaching);
 
