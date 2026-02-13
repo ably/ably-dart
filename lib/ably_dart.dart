@@ -62,6 +62,19 @@ export 'src/message/annotation.dart';
 export 'src/message/annotation_action.dart';
 export 'src/message/update_delete_result.dart';
 
+// Objects (Path Objects API)
+export 'src/objects/batch_context.dart';
+export 'src/objects/events.dart';
+export 'src/objects/instance.dart';
+export 'src/objects/live_counter_path_object.dart';
+export 'src/objects/live_map_path_object.dart';
+export 'src/objects/path_object.dart';
+export 'src/objects/primitive_path_object.dart';
+export 'src/objects/realtime_objects.dart';
+export 'src/objects/subscription.dart';
+export 'src/objects/subscription_options.dart';
+export 'src/objects/value.dart';
+
 // Push
 export 'src/push/push.dart';
 export 'src/push/push_admin.dart';
