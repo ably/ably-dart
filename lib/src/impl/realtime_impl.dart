@@ -1,4 +1,5 @@
 import '../auth/auth.dart';
+import '../push/push.dart';
 import '../realtime/connection.dart';
 import '../realtime/protocol_message.dart';
 import '../realtime/realtime.dart';
@@ -6,6 +7,7 @@ import '../realtime/realtime_channels.dart';
 import '../realtime/timer_manager.dart';
 import '../realtime/websocket_client.dart';
 import 'base_client_impl.dart';
+import 'push_admin_impl.dart';
 import 'realtime_auth.dart';
 
 /// Implementation of the Ably Realtime client.
@@ -34,6 +36,7 @@ class RealtimeImpl extends BaseClientImpl implements Realtime {
   late final Connection _connection;
   late final RealtimeChannels _channels;
   late final RealtimeAuth _realtimeAuth;
+  late final PushImpl _push;
 
   void _initialize() {
     timerManager = _timerManager ?? TimerManager();
@@ -57,6 +60,12 @@ class RealtimeImpl extends BaseClientImpl implements Realtime {
       logger: logger,
     );
 
+    // Initialize push
+    _push = PushImpl(
+      httpClient: ablyHttpClient,
+      logger: logger,
+    );
+
     // Wire up channel message dispatch
     _connection.onChannelMessage = _dispatchChannelMessage;
 
@@ -75,6 +84,9 @@ class RealtimeImpl extends BaseClientImpl implements Realtime {
 
   @override
   Auth get auth => _realtimeAuth;
+
+  @override
+  Push get push => _push;
 
   @override
   Connection get connection => _connection;

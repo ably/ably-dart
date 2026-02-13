@@ -6,6 +6,7 @@ import '../auth/client_options.dart';
 import '../impl/realtime_impl.dart';
 import '../pagination/http_paginated_response.dart';
 import '../pagination/paginated_result.dart';
+import '../push/push.dart';
 import '../stats/stats.dart';
 import 'connection.dart';
 import 'realtime_channels.dart';
@@ -91,6 +92,13 @@ abstract class Realtime {
   ///
   /// Spec: RTC4
   Auth get auth;
+
+  /// The push interface for this client.
+  ///
+  /// Provides access to push notification administration.
+  ///
+  /// Spec: RTC13
+  Push get push;
 
   /// The client options for this client.
   ///

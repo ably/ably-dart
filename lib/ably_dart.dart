@@ -62,6 +62,15 @@ export 'src/message/annotation.dart';
 export 'src/message/annotation_action.dart';
 export 'src/message/update_delete_result.dart';
 
+// Push
+export 'src/push/push.dart';
+export 'src/push/push_admin.dart';
+export 'src/push/push_device_registrations.dart';
+export 'src/push/push_channel_subscriptions.dart';
+export 'src/push/device_details.dart';
+export 'src/push/device_push_details.dart';
+export 'src/push/push_channel_subscription.dart';
+
 // Stats
 export 'src/stats/stats.dart';
 

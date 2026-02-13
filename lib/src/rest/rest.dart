@@ -10,6 +10,7 @@ import '../channels/channels.dart';
 import '../impl/rest_impl.dart';
 import '../pagination/http_paginated_response.dart';
 import '../pagination/paginated_result.dart';
+import '../push/push.dart';
 import '../stats/stats.dart';
 
 /// The Ably REST client.
@@ -64,6 +65,13 @@ abstract class Rest {
   ///
   /// Provides access to REST channels for publishing and history.
   RestChannels get channels;
+
+  /// The push interface for this client.
+  ///
+  /// Provides access to push notification administration.
+  ///
+  /// Spec: RSC21
+  Push get push;
 
   /// Gets the current server time.
   ///

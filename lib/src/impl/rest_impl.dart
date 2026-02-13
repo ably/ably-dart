@@ -6,8 +6,10 @@ import '../batch/batch_result.dart';
 import '../channels/channels.dart';
 import '../error/ably_exception.dart';
 import '../error/error_info.dart';
+import '../push/push.dart';
 import '../rest/rest.dart';
 import 'base_client_impl.dart';
+import 'push_admin_impl.dart';
 import 'rest_channels_impl.dart';
 
 /// Implementation of the Rest client.
@@ -22,12 +24,20 @@ class RestImpl extends BaseClientImpl implements Rest {
       options: options,
       logger: logger,
     );
+    _push = PushImpl(
+      httpClient: ablyHttpClient,
+      logger: logger,
+    );
   }
 
   late final RestChannelsImpl _channels;
+  late final PushImpl _push;
 
   @override
   RestChannels get channels => _channels;
+
+  @override
+  Push get push => _push;
 
   @override
   Future<List<BatchResult>> batchPublish(

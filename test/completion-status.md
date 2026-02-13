@@ -48,8 +48,8 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | RSC17 | ClientId attribute | Yes — `unit/client/rest_client_test.dart` | Yes |
 | RSC18 | TLS configuration | Yes — `unit/client/rest_client_test.dart`, `unit/client/time_test.dart` | Yes |
 | RSC19 | Request function (RSC19a–RSC19f1) | Yes — `unit/client/request_test.dart` (shared via TestClient) | Yes |
-| RSC20 | Deprecated exception reporting (RSC20a–RSC20f) | | |
-| RSC21 | Push object attribute | | |
+| RSC20 | Deprecated exception reporting (RSC20a–RSC20f) | N/A | N/A |
+| RSC21 | Push object attribute | Yes — `unit/rest/push/push_admin_publish_test.dart` (type assertions) | Yes |
 | RSC22 | BatchPublish (RSC22a–RSC22d) | Yes — `unit/client/batch_publish_test.dart` | Yes |
 | RSC23 | Deleted | | |
 | RSC24 | BatchPresence | Yes — `unit/rest/batch_presence_test.dart`, `integration/rest/batch_presence_test.dart` | Yes |
@@ -157,7 +157,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | RTC9 | Request function | Yes — `unit/client/request_test.dart` (shared via TestClient) | Yes |
 | RTC10–RTC11 | Deleted | | |
 | RTC12 | Same constructors as RestClient | | Yes |
-| RTC13 | Push object attribute | | |
+| RTC13 | Push object attribute | Yes — `unit/realtime/realtime_client_test.dart` | Yes |
 | RTC14 | CreateWrapperSDKProxy (RTC14a–RTC14c) | | |
 | RTC15 | Connect function (RTC15a) | Yes — `unit/realtime/realtime_client_test.dart` | Yes |
 | RTC16 | Close function (RTC16a) | Yes — `unit/realtime/realtime_client_test.dart` | Yes |
@@ -297,7 +297,7 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 
 | Spec item | Description | Dart test | UTS spec |
 |-----------|-------------|-----------|----------|
-| RSH1 | Push#admin object (RSH1a–RSH1c5) | | |
+| RSH1 | Push#admin object (RSH1a–RSH1c5) | Yes — `unit/rest/push/push_admin_publish_test.dart` (RSH1, RSH1a), `unit/rest/push/push_device_registrations_test.dart` (RSH1b1–RSH1b5), `unit/rest/push/push_channel_subscriptions_test.dart` (RSH1c1–RSH1c5), `integration/rest/push_admin_test.dart` | Yes |
 | RSH2 | Platform-specific push operations (RSH2a–RSH2e) | | |
 | RSH3 | Activation state machine (RSH3a–RSH3g3) | | |
 | RSH4–RSH5 | Event queueing and sequential handling | | |
@@ -368,9 +368,9 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 
 | Spec item | Description | Dart test | UTS spec |
 |-----------|-------------|-----------|----------|
-| PCS1–PCS5 | PushChannelSubscription | | |
-| PCD1–PCD7 | DeviceDetails | | |
-| PCP1–PCP4 | DevicePushDetails | | |
+| PCS1–PCS5 | PushChannelSubscription | Yes — `unit/rest/push/push_channel_subscriptions_test.dart` | Yes |
+| PCD1–PCD7 | DeviceDetails | Yes — `unit/rest/push/push_device_registrations_test.dart` | Yes |
+| PCP1–PCP4 | DevicePushDetails | Yes — `unit/rest/push/push_device_registrations_test.dart` | Yes |
 
 ### Client Library Introspection
 
@@ -391,14 +391,14 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | Area | Spec groups | With Dart test | With UTS spec | Notes |
 |------|-------------|----------------|---------------|-------|
 | **Endpoint config** (REC) | 3 | 3 | 3 | Full |
-| **REST client** (RSC) | 18 | 17 | 16 | Missing: RSC15 (fallback) |
+| **REST client** (RSC) | 18 | 18 | 17 | RSC21 (push) added |
 | **REST auth** (RSA) | 15 | 15 | 15 | Full |
 | **REST channels** (RSN) | 4 | 4 | 4 | Full |
 | **REST channel** (RSL) | 13 | 13 | 13 | RSL10–RSL15 added (mutable messages) |
 | **REST presence** (RSP) | 5 | 4 | 4 | Aligned with UTS |
 | **REST encryption** (RSE) | 2 | 0 | 0 | |
 | **REST annotations** (RSAN) | 3 | 3 | 3 | Full |
-| **Realtime client** (RTC) | 14 | 12 | 13 | RTC7, RTC8 added |
+| **Realtime client** (RTC) | 14 | 13 | 14 | RTC7, RTC8, RTC13 added |
 | **Connection** (RTN) | 23 | 17 | 19 | RTN3 added; missing: RTN16, RTN21 full coverage |
 | **Realtime channels** (RTS) | 5 | 5 | 5 | Full |
 | **Realtime channel** (RTL) | 28 | 26 | 26 | RTL26, RTL28, RTL31, RTL32 added (mutable messages); RTL10 partial (RTL10d pending) |
@@ -407,11 +407,11 @@ This matrix lists all spec items from the [Ably features spec](../../specificati
 | **EventEmitter** (RTE) | 6 | 0 | 0 | |
 | **Backoff/jitter** (RTB) | 1 | 0 | 0 | |
 | **Wrapper SDK** (WP) | 7 | 0 | 0 | |
-| **Push notifications** (RSH) | 8 | 0 | 0 | |
+| **Push notifications** (RSH) | 8 | 1 | 1 | RSH1 (push admin) — unit + integration |
 | **Plugins** (PC/PT/VD) | 3 | 2 | 1 | PC3 and VD2 covered |
 | **Data types** | 30 | 10 | 10 | BAR2 partial, BGR/BGF via batch_presence, TRT/TRS/TRF via revoke_tokens |
 | **Option types** | 8 | 5 | 5 | Aligned with UTS |
-| **Push types** | 3 | 0 | 0 | |
+| **Push types** | 3 | 3 | 3 | Full — PCS, PCD, PCP |
 | **Introspection** (CR) | 1 | 0 | 0 | |
 | **Defaults** (DF) | 1 | 0 | 0 | |
 | **Compatibility** (RSF/RTF) | 2 | 0 | 0 | |

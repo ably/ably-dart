@@ -3,6 +3,8 @@ import '../message/message.dart';
 import '../message/presence_message.dart';
 import '../pagination/http_paginated_response.dart';
 import '../pagination/paginated_result.dart';
+import '../push/device_details.dart';
+import '../push/push_channel_subscription.dart';
 import 'http/http_client.dart';
 
 /// Link header parser for pagination.
@@ -114,5 +116,34 @@ class PaginatedResultParser {
     if (body == null) return [];
     if (body is! List) return [];
     return body.cast<Map<String, dynamic>>().map(Annotation.fromMap).toList();
+  }
+
+  /// Parses a list of device details from JSON.
+  static List<DeviceDetails> parseDeviceDetails(dynamic body) {
+    if (body == null) return [];
+    if (body is! List) return [];
+    return body
+        .cast<Map<String, dynamic>>()
+        .map(DeviceDetails.fromMap)
+        .toList();
+  }
+
+  /// Parses a list of push channel subscriptions from JSON.
+  static List<PushChannelSubscription> parsePushChannelSubscriptions(
+    dynamic body,
+  ) {
+    if (body == null) return [];
+    if (body is! List) return [];
+    return body
+        .cast<Map<String, dynamic>>()
+        .map(PushChannelSubscription.fromMap)
+        .toList();
+  }
+
+  /// Parses a list of strings from JSON (e.g. channel names).
+  static List<String> parseStringList(dynamic body) {
+    if (body == null) return [];
+    if (body is! List) return [];
+    return body.cast<String>().toList();
   }
 }
