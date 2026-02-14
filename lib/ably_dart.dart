@@ -62,6 +62,13 @@ export 'src/message/annotation.dart';
 export 'src/message/annotation_action.dart';
 export 'src/message/update_delete_result.dart';
 
+// Objects (internal data structures)
+export 'src/realtime/live_counter.dart';
+export 'src/realtime/live_map.dart';
+export 'src/realtime/live_object.dart';
+export 'src/realtime/object_message.dart';
+export 'src/realtime/objects_pool.dart';
+
 // Objects (Path Objects API)
 export 'src/objects/batch_context.dart';
 export 'src/objects/events.dart';

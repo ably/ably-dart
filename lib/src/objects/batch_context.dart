@@ -32,6 +32,11 @@ abstract class LiveMapBatchContext extends BatchContext {
   /// Spec: PO9c2
   void remove(String key);
 
+  /// Queues a `MAP_CLEAR` operation.
+  ///
+  /// Spec: PO9c4
+  void clear();
+
   /// Returns a child [BatchContext] for the entry at [key], or null.
   ///
   /// Spec: PO9c3

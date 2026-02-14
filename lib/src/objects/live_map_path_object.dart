@@ -86,6 +86,14 @@ abstract class LiveMapPathObject {
   /// Spec: PO3k
   Map<String, Object?>? compactJson();
 
+  /// Clears all entries. Returns a Future completing on ACK/NACK.
+  ///
+  /// Requires `OBJECT_PUBLISH` channel mode. Throws if the path does not
+  /// resolve to a `LiveMap`.
+  ///
+  /// Spec: PO3m
+  Future<void> clear();
+
   /// Groups operations into a single channel message.
   ///
   /// Spec: PO3l

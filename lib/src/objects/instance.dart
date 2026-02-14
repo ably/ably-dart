@@ -76,6 +76,11 @@ abstract class LiveMapInstance extends Instance {
   /// Spec: PO6d3
   Future<void> remove(String key);
 
+  /// Clears all entries from this map instance.
+  ///
+  /// Spec: PO6d3
+  Future<void> clear();
+
   @override
   Map<String, Object?>? compact();
 
