@@ -1,0 +1,30 @@
+name: ably_dart
+description: Ably REST SDK for Dart - A pure Dart implementation of the Ably REST API.
+version: 0.1.0
+homepage: https://github.com/ably/ably-dart
+repository: https://github.com/ably/ably-dart
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  http: ^1.1.0
+  meta: ^1.10.0
+  collection: ^1.17.0
+  crypto: ^3.0.0
+  clock: ^1.1.1
+
+dev_dependencies:
+  test: ^1.24.0
+  mockito: ^5.4.0
+  build_runner: ^2.4.0
+  lints: ^3.0.0
+  dart_jsonwebtoken: ^3.3.1
+  vcdiff:
+    git:
+      url: https://github.com/ably/vcdiff-dart.git
+      path: vcdiff
+
+dependency_overrides:
+  vcdiff:
+    path: ../vcdiff-dart/vcdiff
