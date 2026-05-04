@@ -5,7 +5,9 @@
 
 # Ably Pub/Sub Dart SDK
 
-Build any realtime experience using Ably's Pub/Sub Dart SDK. A pure Dart implementation with no platform dependencies, suitable for use as a standalone package or as a dependency of [ably-flutter](https://github.com/ably/ably-flutter).
+Build any realtime experience using Ably's Pub/Sub Dart SDK. A pure Dart implementation with no platform dependencies.
+
+(Note: at this stage, this implementation does not support push messaging, so continue to use [ably-flutter](https://github.com/ably/ably-flutter) if you need that.)
 
 Ably Pub/Sub provides flexible APIs that deliver features such as pub-sub messaging, message history, presence, and push notifications. Utilizing Ably's realtime messaging platform, applications benefit from its highly performant, reliable, and scalable infrastructure.
 
@@ -31,7 +33,6 @@ This is a pure Dart package with no platform-specific dependencies. It runs anyw
 | Platform | Support |
 |----------|---------|
 | Dart     | >=3.0.0 |
-| Flutter  | Via [ably-flutter](https://github.com/ably/ably-flutter) |
 
 ---
 
