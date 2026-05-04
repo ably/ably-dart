@@ -1,0 +1,100 @@
+@Tags(['integration'])
+library;
+
+import 'package:ably_dart/ably_dart.dart';
+import 'package:test/test.dart';
+
+import '../../helpers/poll_until.dart';
+import '../../helpers/test_app_helper.dart';
+import '../../helpers/test_channel_name.dart';
+
+void main() {
+  late TestApp testApp;
+
+  setUpAll(() async {
+    testApp = await TestApp.provision();
+  });
+
+  tearDownAll(() async {
+    await testApp.delete();
+  });
+
+  group('Realtime Channel History Integration Tests', () {
+    // -------------------------------------------------------------------------
+    // RTL10d - History contains messages published by another client
+    // -------------------------------------------------------------------------
+    test('RTL10d - History contains messages published by another client',
+        () async {
+      // Create two Realtime clients
+      final publisher = Realtime(
+        options: ClientOptions(
+          key: testApp.keys[0].keyStr,
+          endpoint: 'sandbox',
+          useBinaryProtocol: false,
+          autoConnect: false,
+        ),
+      );
+      addTearDown(() async => await publisher.close());
+
+      final subscriber = Realtime(
+        options: ClientOptions(
+          key: testApp.keys[0].keyStr,
+          endpoint: 'sandbox',
+          useBinaryProtocol: false,
+          autoConnect: false,
+        ),
+      );
+      addTearDown(() async => await subscriber.close());
+
+      // Connect both clients
+      await publisher.connect();
+      await subscriber.connect();
+
+      await Future.wait([
+        publisher.connection
+            .on(ConnectionEvent.connected)
+            .first
+            .timeout(const Duration(seconds: 10)),
+        subscriber.connection
+            .on(ConnectionEvent.connected)
+            .first
+            .timeout(const Duration(seconds: 10)),
+      ]);
+
+      // Get channels on both clients with the same name
+      final channelName = testChannelName('rtl10d-history');
+      final pubChannel = publisher.channels.get(channelName);
+      final subChannel = subscriber.channels.get(channelName);
+
+      // Attach both channels
+      await pubChannel.attach();
+      await subChannel.attach();
+
+      // Publisher publishes 3 messages
+      await pubChannel.publish(name: 'event1', data: 'data1');
+      await pubChannel.publish(name: 'event2', data: 'data2');
+      await pubChannel.publish(name: 'event3', data: 'data3');
+
+      // Use pollUntil on subscriber's channel.history() until 3 items
+      final historyPage = await pollUntil<PaginatedResult<Message>>(
+        () async {
+          final result = await subChannel.history();
+          if (result.items.length >= 3) return result;
+          return null;
+        },
+        timeout: const Duration(seconds: 15),
+      );
+
+      // Assert: 3 items
+      expect(historyPage.items, hasLength(3));
+
+      // Assert: newest first order (default direction is backwards)
+      expect(historyPage.items[0].name, equals('event3'));
+      expect(historyPage.items[0].data, equals('data3'));
+      expect(historyPage.items[1].name, equals('event2'));
+      expect(historyPage.items[1].data, equals('data2'));
+      expect(historyPage.items[2].name, equals('event1'));
+      expect(historyPage.items[2].data, equals('data1'));
+    });
+  });
+}
