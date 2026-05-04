@@ -1,0 +1,15 @@
+include: package:lints/recommended.yaml
+
+linter:
+  rules:
+    - prefer_single_quotes
+    - prefer_final_locals
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - avoid_print
+    - avoid_redundant_argument_values
+    - require_trailing_commas
+
+analyzer:
+  exclude:
+    - '**/*.g.dart'
