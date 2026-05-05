@@ -173,7 +173,7 @@ void main() {
       'CONNECTED', () {
     test(
         'authCallback failure during RTN22 reauth keeps connection CONNECTED '
-        'with errorReason set', () async {
+        'without setting errorReason', () async {
       var authCallbackCount = 0;
 
       late MockWebSocketClient mockWs;
@@ -226,29 +226,21 @@ void main() {
         ProtocolMessage(action: ProtocolAction.auth),
       );
 
-      // Wait for errorReason to be set (auth failure propagates
-      // asynchronously)
+      // Wait for the auth callback to be called a second time (the failure)
       await _awaitUntil(
-        () => client.connection.errorReason != null,
+        () => authCallbackCount >= 2,
       );
 
       // RSA4c3: Connection remains CONNECTED
       expect(client.connection.state, equals(ConnectionState.connected));
 
-      // No state transitions away from connected occurred
-      final nonConnectedChanges =
-          stateChanges.where((c) => c.current != ConnectionState.connected);
-      expect(nonConnectedChanges, isEmpty);
+      // No state changes at all — the auth failure is silently swallowed
+      expect(stateChanges, isEmpty);
 
-      // RSA4c1: errorReason has code 80019 wrapping the underlying cause
-      expect(client.connection.errorReason, isNotNull);
-      expect(client.connection.errorReason!.code, equals(80019));
-      expect(client.connection.errorReason!.statusCode, equals(401));
-      expect(client.connection.errorReason!.cause, isNotNull);
-      final cause = client.connection.errorReason!.cause;
-      if (cause is ErrorInfo) {
-        expect(cause.code, equals(50000));
-      }
+      // errorReason is NOT set — the connection is healthy, the existing
+      // token is still valid, and there is no state change to associate
+      // the error with (see specification#466)
+      expect(client.connection.errorReason, isNull);
 
       await client.close();
       mockWs.dispose();

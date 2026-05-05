@@ -1496,7 +1496,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
   /// by calling authorize() to get a new token, then send an AUTH message
   /// back to the server with the new token.
   ///
-  /// RSA4c3: If auth fails while CONNECTED, stay CONNECTED but set errorReason.
+  /// RSA4c3: If auth fails while CONNECTED, stay CONNECTED (no errorReason).
   /// RSA4d: If auth fails with 403 while CONNECTED, transition to FAILED.
   ///
   /// Spec: RTN22
@@ -1541,18 +1541,13 @@ class ConnectionImpl implements Connection, WebSocketListener {
         return;
       }
 
-      // RSA4c3: Generic auth error while CONNECTED -> stay CONNECTED,
-      // set errorReason
+      // RSA4c3: Generic auth error while CONNECTED -> stay CONNECTED.
+      // The existing token is still valid, so no errorReason or state
+      // change (see specification#466).
       if (_state == ConnectionState.connected) {
-        final wrappedError = ErrorInfo(
-          code: 80019,
-          statusCode: 401,
-          message:
-              'Authentication failed: ${underlyingError?.message ?? e.toString()}',
-          cause: underlyingError ?? e,
-        );
-        _errorReason = wrappedError;
-        // Don't emit state change - we're staying in CONNECTED
+        _logger.warn('Auth renewal failed while CONNECTED, '
+            'existing token still valid: '
+            '${underlyingError?.message ?? e.toString()}');
         return;
       }
 
