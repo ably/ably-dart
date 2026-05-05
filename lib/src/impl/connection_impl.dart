@@ -944,12 +944,18 @@ class ConnectionImpl implements Connection, WebSocketListener {
     // Reset retry attempt counter on successful connection (RTB1)
     _retryAttempt = 0;
 
-    final previousId = _id;
     final wasAlreadyConnected = _state == ConnectionState.connected;
 
-    // Update connection details (RTN21, RTN24)
-    _id = message.connectionId;
-    _key = message.connectionKey ?? message.connectionDetails?.connectionKey;
+    // RTN24: connectionId is a top-level ProtocolMessage field, NOT inside
+    // connectionDetails, so it is only set on initial connect or resume —
+    // never mutated for an in-progress connection.
+    final previousId = _id;
+    if (!wasAlreadyConnected) {
+      _id = message.connectionId;
+    }
+    _key = message.connectionDetails?.connectionKey ??
+        message.connectionKey ??
+        _key;
     _serial = message.msgSerial ?? -1;
 
     _logger.info('Connection established', {
