@@ -5,14 +5,11 @@ import '../message/presence_message.dart';
 
 /// Response from a batch presence request.
 ///
-/// Contains per-channel results with computed [successCount] and
-/// [failureCount] fields (BAR2).
+/// Contains per-channel results with [successCount] and [failureCount]
+/// fields (BAR2).
 ///
-/// The server returns different formats depending on the outcome:
-/// - All success (HTTP 200): plain array of per-channel results
-/// - Mixed/failure (HTTP 400): `{error: ..., batchResponse: [...]}`
-///
-/// This class normalises both formats into a single interface.
+/// With `X-Ably-Version >= 3`, the server returns a `BatchResult` envelope:
+/// `{successCount, failureCount, results: [{channel, presence/error}, ...]}`
 ///
 /// Spec: RSC24, BAR2
 @immutable
@@ -24,21 +21,20 @@ class BatchPresenceResponse {
     required this.results,
   });
 
-  /// Creates a BatchPresenceResponse from a list of per-channel results.
+  /// Creates a BatchPresenceResponse from a server JSON map.
   ///
-  /// This is the format returned by the server on HTTP 200 (all success).
-  factory BatchPresenceResponse.fromList(List<dynamic> list) {
-    final results = list
+  /// This is the format returned by the server with `X-Ably-Version >= 3`:
+  /// `{successCount, failureCount, results: [...]}`.
+  factory BatchPresenceResponse.fromMap(Map<String, dynamic> map) {
+    final resultsList = (map['results'] as List?) ?? [];
+    final results = resultsList
         .cast<Map<String, dynamic>>()
         .map(BatchPresenceResult.fromMap)
         .toList();
 
-    final successCount = results.where((r) => r.isSuccess).length;
-    final failureCount = results.where((r) => r.isFailure).length;
-
     return BatchPresenceResponse(
-      successCount: successCount,
-      failureCount: failureCount,
+      successCount: map['successCount'] as int? ?? 0,
+      failureCount: map['failureCount'] as int? ?? 0,
       results: results,
     );
   }

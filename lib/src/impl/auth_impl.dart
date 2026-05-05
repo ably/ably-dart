@@ -616,26 +616,14 @@ class AuthImpl implements Auth {
 
     final responseBody = response.body;
 
-    // All success (HTTP 2xx): body is a plain array of per-target results
-    if (responseBody is List) {
-      return TokenRevocationResponse.fromList(responseBody);
-    }
-
-    // Mixed/failure (HTTP 400): body is {error: ..., batchResponse: [...]}
-    if (responseBody is Map<String, dynamic> &&
-        responseBody.containsKey('batchResponse')) {
-      return TokenRevocationResponse.fromList(
-        responseBody['batchResponse'] as List,
-      );
-    }
-
-    // Object with successCount/failureCount/results (unit test format)
+    // With X-Ably-Version >= 3, the server returns a BatchResult envelope:
+    // {successCount, failureCount, results: [...]}
     if (responseBody is Map<String, dynamic> &&
         responseBody.containsKey('results')) {
       return TokenRevocationResponse.fromMap(responseBody);
     }
 
-    // Server error without batchResponse — propagate as exception
+    // Server error — propagate as exception
     if (responseBody is Map<String, dynamic> &&
         responseBody.containsKey('error')) {
       final errorInfo =

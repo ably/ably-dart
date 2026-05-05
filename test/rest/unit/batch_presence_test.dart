@@ -14,10 +14,14 @@ void main() {
         () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
-          request.respondWith(200, [
-            {'channel': 'channel-a', 'presence': []},
-            {'channel': 'channel-b', 'presence': []},
-          ]);
+          request.respondWith(200, {
+            'successCount': 2,
+            'failureCount': 0,
+            'results': [
+              {'channel': 'channel-a', 'presence': []},
+              {'channel': 'channel-b', 'presence': []},
+            ],
+          });
         },
       );
 
@@ -43,9 +47,13 @@ void main() {
         () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
-          request.respondWith(200, [
-            {'channel': 'my-channel', 'presence': []},
-          ]);
+          request.respondWith(200, {
+            'successCount': 1,
+            'failureCount': 0,
+            'results': [
+              {'channel': 'my-channel', 'presence': []},
+            ],
+          });
         },
       );
 
@@ -68,10 +76,14 @@ void main() {
         () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
-          request.respondWith(200, [
-            {'channel': 'foo:bar', 'presence': []},
-            {'channel': 'baz/qux', 'presence': []},
-          ]);
+          request.respondWith(200, {
+            'successCount': 2,
+            'failureCount': 0,
+            'results': [
+              {'channel': 'foo:bar', 'presence': []},
+              {'channel': 'baz/qux', 'presence': []},
+            ],
+          });
         },
       );
 
@@ -92,17 +104,14 @@ void main() {
   });
 
   group('BAR2 - BatchPresenceResponse structure', () {
-    test('BAR2_1 - successCount and failureCount computed from mixed response',
+    test('BAR2_1 - successCount and failureCount from mixed response',
         () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
-          request.respondWith(400, {
-            'error': {
-              'code': 40020,
-              'statusCode': 400,
-              'message': 'Batched response includes errors',
-            },
-            'batchResponse': [
+          request.respondWith(200, {
+            'successCount': 3,
+            'failureCount': 1,
+            'results': [
               {'channel': 'ch-1', 'presence': []},
               {'channel': 'ch-2', 'presence': []},
               {'channel': 'ch-3', 'presence': []},
@@ -137,10 +146,14 @@ void main() {
     test('BAR2_2 - all success', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
-          request.respondWith(200, [
-            {'channel': 'ch-a', 'presence': []},
-            {'channel': 'ch-b', 'presence': []},
-          ]);
+          request.respondWith(200, {
+            'successCount': 2,
+            'failureCount': 0,
+            'results': [
+              {'channel': 'ch-a', 'presence': []},
+              {'channel': 'ch-b', 'presence': []},
+            ],
+          });
         },
       );
 
@@ -161,13 +174,10 @@ void main() {
     test('BAR2_3 - all failure', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
-          request.respondWith(400, {
-            'error': {
-              'code': 40020,
-              'statusCode': 400,
-              'message': 'Batched response includes errors',
-            },
-            'batchResponse': [
+          request.respondWith(200, {
+            'successCount': 0,
+            'failureCount': 2,
+            'results': [
               {
                 'channel': 'ch-a',
                 'error': {
@@ -208,29 +218,33 @@ void main() {
     test('BGR2_1 - success result with members present', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
-          request.respondWith(200, [
-            {
-              'channel': 'my-channel',
-              'presence': [
-                {
-                  'clientId': 'client-1',
-                  'action': 1,
-                  'connectionId': 'conn-abc',
-                  'id': 'conn-abc:0:0',
-                  'timestamp': 1700000000000,
-                  'data': 'hello',
-                },
-                {
-                  'clientId': 'client-2',
-                  'action': 1,
-                  'connectionId': 'conn-def',
-                  'id': 'conn-def:0:0',
-                  'timestamp': 1700000000000,
-                  'data': {'key': 'value'},
-                },
-              ],
-            },
-          ]);
+          request.respondWith(200, {
+            'successCount': 1,
+            'failureCount': 0,
+            'results': [
+              {
+                'channel': 'my-channel',
+                'presence': [
+                  {
+                    'clientId': 'client-1',
+                    'action': 1,
+                    'connectionId': 'conn-abc',
+                    'id': 'conn-abc:0:0',
+                    'timestamp': 1700000000000,
+                    'data': 'hello',
+                  },
+                  {
+                    'clientId': 'client-2',
+                    'action': 1,
+                    'connectionId': 'conn-def',
+                    'id': 'conn-def:0:0',
+                    'timestamp': 1700000000000,
+                    'data': {'key': 'value'},
+                  },
+                ],
+              },
+            ],
+          });
         },
       );
 
@@ -268,9 +282,13 @@ void main() {
     test('BGR2_2 - success result with empty presence (no members)', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
-          request.respondWith(200, [
-            {'channel': 'empty-channel', 'presence': []},
-          ]);
+          request.respondWith(200, {
+            'successCount': 1,
+            'failureCount': 0,
+            'results': [
+              {'channel': 'empty-channel', 'presence': []},
+            ],
+          });
         },
       );
 
@@ -297,13 +315,10 @@ void main() {
     test('BGF2_1 - failure result with error details', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
-          request.respondWith(400, {
-            'error': {
-              'code': 40020,
-              'statusCode': 400,
-              'message': 'Batched response includes errors',
-            },
-            'batchResponse': [
+          request.respondWith(200, {
+            'successCount': 0,
+            'failureCount': 1,
+            'results': [
               {
                 'channel': 'restricted-channel',
                 'error': {
@@ -344,13 +359,10 @@ void main() {
     test('RSC24_Mixed_1 - mixed success and failure results', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
-          request.respondWith(400, {
-            'error': {
-              'code': 40020,
-              'statusCode': 400,
-              'message': 'Batched response includes errors',
-            },
-            'batchResponse': [
+          request.respondWith(200, {
+            'successCount': 1,
+            'failureCount': 1,
+            'results': [
               {
                 'channel': 'allowed-channel',
                 'presence': [
@@ -480,9 +492,13 @@ void main() {
     test('RSC24_Auth_1 - request uses configured authentication', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
-          request.respondWith(200, [
-            {'channel': 'ch', 'presence': []},
-          ]);
+          request.respondWith(200, {
+            'successCount': 1,
+            'failureCount': 0,
+            'results': [
+              {'channel': 'ch', 'presence': []},
+            ],
+          });
         },
       );
 
