@@ -107,10 +107,12 @@ void main() {
         },
         onMessageFromClient: (msg) {
           if (msg.action == ProtocolAction.auth) {
+            // Server responds with CONNECTED after reauth (RTN24) —
+            // same connectionId, connectionDetails may be updated.
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.connected(
-                connectionId: 'connection-id-2',
-                connectionKey: 'connection-key-2',
+                connectionId: 'connection-id-1',
+                connectionKey: 'connection-key-1',
               ),
             );
           }
@@ -165,9 +167,10 @@ void main() {
           stateChanges.where((c) => c.current != c.previous).toList();
       expect(stateTransitions, isEmpty);
 
-      // Connection details were updated (RTN21)
-      expect(client.connection.id, equals('connection-id-2'));
-      expect(client.connection.key, equals('connection-key-2'));
+      // Connection identity unchanged — RTN24 only overrides
+      // connectionDetails, not the top-level connectionId
+      expect(client.connection.id, equals('connection-id-1'));
+      expect(client.connection.key, equals('connection-key-1'));
 
       mockWs.dispose();
     });

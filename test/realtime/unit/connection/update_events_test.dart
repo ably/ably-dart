@@ -57,10 +57,12 @@ void main() {
       expect(updateEvents.length, equals(0));
 
       // Server sends another CONNECTED message (e.g., after reauth)
+      // connectionId stays the same — it's a top-level ProtocolMessage
+      // field, not inside connectionDetails, so RTN24 doesn't change it.
       mockWs.activeConnection!.sendToClient(
         ProtocolMessageHelpers.connected(
-          connectionId: 'connection-id-2',
-          connectionKey: 'connection-key-2',
+          connectionId: 'connection-id-1',
+          connectionKey: 'connection-key-1',
           maxIdleInterval: 20000, // Different value
           connectionStateTtl: 120000,
           clientId: 'client-123',
@@ -85,9 +87,9 @@ void main() {
       expect(updateChange.current, equals(ConnectionState.connected));
       expect(updateChange.reason, isNull); // No error in this case
 
-      // Connection details were updated
-      expect(client.connection.id, equals('connection-id-2'));
-      expect(client.connection.key, equals('connection-key-2'));
+      // connection.id and connection.key are unchanged
+      expect(client.connection.id, equals('connection-id-1'));
+      expect(client.connection.key, equals('connection-key-1'));
 
       await client.close();
       mockWs.dispose();
@@ -129,8 +131,8 @@ void main() {
       // Server sends CONNECTED with error (e.g., token renewed due to expiry)
       mockWs.activeConnection!.sendToClient(
         ProtocolMessageHelpers.connected(
-          connectionId: 'connection-id-2',
-          connectionKey: 'connection-key-2',
+          connectionId: 'connection-id-1',
+          connectionKey: 'connection-key-1',
           maxIdleInterval: 15000,
           connectionStateTtl: 120000,
           error: ErrorInfo(
@@ -193,11 +195,12 @@ void main() {
       expect(client.connection.id, equals('connection-id-1'));
       expect(client.connection.key, equals('connection-key-1'));
 
-      // Server sends new CONNECTED with different details
+      // Server sends new CONNECTED with different connectionDetails (RTN24)
+      // connectionId stays the same — it's not inside connectionDetails.
       mockWs.activeConnection!.sendToClient(
         ProtocolMessageHelpers.connected(
-          connectionId: 'connection-id-2',
-          connectionKey: 'connection-key-2',
+          connectionId: 'connection-id-1',
+          connectionKey: 'connection-key-1',
           maxIdleInterval: 20000, // Changed
           connectionStateTtl: 120000, // Changed
           maxMessageSize: 32768, // Changed
@@ -209,9 +212,9 @@ void main() {
       // Allow stream events to be delivered
       await Future<void>.delayed(Duration.zero);
 
-      // Connection details were updated
-      expect(client.connection.id, equals('connection-id-2'));
-      expect(client.connection.key, equals('connection-key-2'));
+      // connection.id is unchanged (not inside connectionDetails)
+      expect(client.connection.id, equals('connection-id-1'));
+      expect(client.connection.key, equals('connection-key-1'));
 
       // State remains CONNECTED
       expect(client.connection.state, equals(ConnectionState.connected));
@@ -275,12 +278,12 @@ void main() {
       // Record event count after initial connection
       final initialEventCount = allEvents.length;
 
-      // Send multiple CONNECTED messages
+      // Send multiple CONNECTED messages (same connectionId — it never changes)
       for (var i = 1; i <= 3; i++) {
         mockWs.activeConnection!.sendToClient(
           ProtocolMessageHelpers.connected(
-            connectionId: 'connection-id-${i + 1}',
-            connectionKey: 'connection-key-${i + 1}',
+            connectionId: 'connection-id-1',
+            connectionKey: 'connection-key-1',
             maxIdleInterval: 15000,
             connectionStateTtl: 120000,
           ),
