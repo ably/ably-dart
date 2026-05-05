@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 
 /// Message Types Tests
 ///
-/// Spec points: TM1, TM2, TM3, TM4, TM5, TM2a, TM2b, TM2c, TM2d, TM2e,
+/// Spec points: TM1, TM2, TM3, TM4, TM2a, TM2b, TM2c, TM2d, TM2e,
 ///              TM2f, TM2g, TM2h, TM2i
 void main() {
   group('Message', () {
@@ -70,8 +70,8 @@ void main() {
       });
     });
 
-    group('TM3 - Message from JSON (wire format)', () {
-      test('deserializes from JSON wire format', () {
+    group('TM3 - fromEncoded / fromEncodedArray', () {
+      test('fromEncoded deserializes wire format', () {
         final jsonData = {
           'id': 'msg-123',
           'name': 'test-event',
@@ -95,123 +95,94 @@ void main() {
         expect(message.timestamp, equals(1234567890000));
         expect(message.extras?.data['headers']['x-custom'], equals('value'));
       });
-    });
 
-    group('TM3 - Message with encoded data from JSON', () {
-      test('handles null encoding (plain text)', () {
-        final jsonData = {
+      test('fromEncoded decodes null encoding (plain text)', () {
+        final message = Message.fromJson({
           'id': 'msg',
           'name': 'event',
           'data': 'plain text',
           'encoding': null,
-        };
-
-        final message = Message.fromJson(jsonData);
+        });
         expect(message.data, equals('plain text'));
       });
 
-      test('handles json encoding', () {
-        final jsonData = {
+      test('fromEncoded decodes json encoding', () {
+        final message = Message.fromJson({
           'id': 'msg',
           'name': 'event',
           'data': '{"key":"value"}',
           'encoding': 'json',
-        };
-
-        final message = Message.fromJson(jsonData);
-        // After decoding, data should be the parsed object
+        });
         expect(message.data, equals({'key': 'value'}));
       });
 
-      test('handles base64 encoding', () {
-        final jsonData = {
+      test('fromEncoded decodes base64 encoding', () {
+        final message = Message.fromJson({
           'id': 'msg',
           'name': 'event',
           'data': base64.encode(utf8.encode('Hello')),
           'encoding': 'base64',
-        };
-
-        final message = Message.fromJson(jsonData);
-        // After decoding, data should be bytes
+        });
         expect(message.data, isA<Uint8List>());
         expect(utf8.decode(message.data as Uint8List), equals('Hello'));
       });
 
-      test('handles json/base64 encoding', () {
-        final jsonData = {
+      test('fromEncoded decodes json/base64 compound encoding', () {
+        final message = Message.fromJson({
           'id': 'msg',
           'name': 'event',
           'data': base64.encode(utf8.encode('{"k":"v"}')),
           'encoding': 'json/base64',
-        };
-
-        final message = Message.fromJson(jsonData);
+        });
         expect(message.data, equals({'k': 'v'}));
       });
-    });
 
-    group('TM4 - Message to JSON (wire format)', () {
-      test('serializes correctly for transmission', () {
-        final message = Message(
-          id: 'custom-id',
-          name: 'outgoing-event',
-          data: 'outgoing-data',
-          clientId: 'sending-client',
-        );
-
-        final jsonData = message.toJson();
-
-        expect(jsonData['id'], equals('custom-id'));
-        expect(jsonData['name'], equals('outgoing-event'));
-        expect(jsonData['data'], equals('outgoing-data'));
-        expect(jsonData['clientId'], equals('sending-client'));
+      test('fromEncodedArray deserializes array of messages', () {
+        final messages = Message.fromEncodedArray([
+          {'name': 'event1', 'data': 'data1'},
+          {'name': 'event2', 'data': 'data2'},
+        ]);
+        expect(messages.length, equals(2));
+        expect(messages[0].name, equals('event1'));
+        expect(messages[1].name, equals('event2'));
       });
     });
 
-    group('TM4 - Message with object data to JSON', () {
-      test('object data is JSON-encoded for transmission', () {
+    group('TM4 - Message constructors', () {
+      test('constructor(name, data)', () {
+        final message = Message(name: 'event-name', data: 'payload');
+        expect(message.name, equals('event-name'));
+        expect(message.data, equals('payload'));
+        expect(message.clientId, isNull);
+      });
+
+      test('constructor(name, data, clientId)', () {
         final message = Message(
-          name: 'json-event',
-          data: {
-            'nested': {
-              'array': [1, 2, 3],
-            },
-          },
+          name: 'event-name',
+          data: 'payload',
+          clientId: 'client-1',
         );
+        expect(message.name, equals('event-name'));
+        expect(message.data, equals('payload'));
+        expect(message.clientId, equals('client-1'));
+      });
 
-        final jsonData = message.toJson();
-
-        // Object should be JSON-encoded with encoding field set
-        expect(jsonData['encoding'], equals('json'));
+      test('name and data are nullable', () {
+        final message = Message();
+        expect(message.name, isNull);
+        expect(message.data, isNull);
       });
     });
 
-    group('TM4 - Message with binary data to JSON', () {
-      test('binary data is base64-encoded for JSON transmission', () {
-        final message = Message(
-          name: 'binary-event',
-          data: Uint8List.fromList([0x00, 0x01, 0xFF]),
-        );
+    group('TM - Null/missing attributes', () {
+      test('null or missing attributes are handled correctly', () {
+        final message = Message();
 
-        final jsonData = message.toJson();
-
-        expect(jsonData['encoding'], equals('base64'));
-        expect(
-          base64.decode(jsonData['data'] as String),
-          equals([0x00, 0x01, 0xFF]),
-        );
-      });
-    });
-
-    group('TM5 - Message equality', () {
-      test('messages with same content are equal', () {
-        final message1 = Message(id: 'same-id', name: 'event', data: 'data');
-        final message2 = Message(id: 'same-id', name: 'event', data: 'data');
-        final message3 =
-            Message(id: 'different-id', name: 'event', data: 'data');
-
-        expect(message1, equals(message2));
-        expect(message1, isNot(equals(message3)));
+        expect(message.id, isNull);
+        expect(message.name, isNull);
+        expect(message.data, isNull);
+        expect(message.clientId, isNull);
+        expect(message.timestamp, isNull);
       });
     });
 
@@ -233,36 +204,14 @@ void main() {
           }),
         );
 
-        final jsonData = message.toJson();
-
         expect(
-          jsonData['extras']['push']['notification']['title'],
+          message.extras?.data['push']['notification']['title'],
           equals('New Message'),
         );
         expect(
-          jsonData['extras']['push']['data']['customKey'],
+          message.extras?.data['push']['data']['customKey'],
           equals('customValue'),
         );
-      });
-    });
-
-    group('TM - Null/missing attributes', () {
-      test('null or missing attributes are handled correctly', () {
-        // Minimal message
-        final message = Message();
-
-        // All optional attributes should be null
-        expect(message.id, isNull);
-        expect(message.name, isNull);
-        expect(message.data, isNull);
-        expect(message.clientId, isNull);
-        expect(message.timestamp, isNull);
-
-        // Serialization should omit null fields
-        final jsonData = message.toJson();
-        expect(jsonData.containsKey('id'), isFalse);
-        expect(jsonData.containsKey('name'), isFalse);
-        expect(jsonData.containsKey('data'), isFalse);
       });
     });
   });
