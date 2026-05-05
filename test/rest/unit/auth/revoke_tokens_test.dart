@@ -25,13 +25,17 @@ void main() {
             headers: req.headers,
             body: req.bodyAsString,
           ));
-          req.respondWith(200, [
-            {
-              'target': 'clientId:alice',
-              'issuedBefore': 1700000000000,
-              'appliesAt': 1700000001000,
-            }
-          ]);
+          req.respondWith(200, {
+            'successCount': 1,
+            'failureCount': 0,
+            'results': [
+              {
+                'target': 'clientId:alice',
+                'issuedBefore': 1700000000000,
+                'appliesAt': 1700000001000,
+              }
+            ],
+          });
         },
       );
 
@@ -69,13 +73,17 @@ void main() {
             headers: req.headers,
             body: req.bodyAsString,
           ));
-          req.respondWith(200, [
-            {
-              'target': 'clientId:alice',
-              'issuedBefore': 1700000000000,
-              'appliesAt': 1700000001000,
-            }
-          ]);
+          req.respondWith(200, {
+            'successCount': 1,
+            'failureCount': 0,
+            'results': [
+              {
+                'target': 'clientId:alice',
+                'issuedBefore': 1700000000000,
+                'appliesAt': 1700000001000,
+              }
+            ],
+          });
         },
       );
 
@@ -108,23 +116,27 @@ void main() {
             headers: req.headers,
             body: req.bodyAsString,
           ));
-          req.respondWith(200, [
-            {
-              'target': 'clientId:alice',
-              'issuedBefore': 1700000000000,
-              'appliesAt': 1700000001000,
-            },
-            {
-              'target': 'revocationKey:group-1',
-              'issuedBefore': 1700000000000,
-              'appliesAt': 1700000001000,
-            },
-            {
-              'target': 'channel:secret',
-              'issuedBefore': 1700000000000,
-              'appliesAt': 1700000001000,
-            },
-          ]);
+          req.respondWith(200, {
+            'successCount': 3,
+            'failureCount': 0,
+            'results': [
+              {
+                'target': 'clientId:alice',
+                'issuedBefore': 1700000000000,
+                'appliesAt': 1700000001000,
+              },
+              {
+                'target': 'revocationKey:group-1',
+                'issuedBefore': 1700000000000,
+                'appliesAt': 1700000001000,
+              },
+              {
+                'target': 'channel:secret',
+                'issuedBefore': 1700000000000,
+                'appliesAt': 1700000001000,
+              },
+            ],
+          });
         },
       );
 
@@ -166,18 +178,22 @@ void main() {
       final mockHttp = MockHttpClient(
         onConnectionAttempt: (conn) => conn.respondWithSuccess(),
         onRequest: (req) {
-          req.respondWith(200, [
-            {
-              'target': 'clientId:alice',
-              'issuedBefore': 1700000000000,
-              'appliesAt': 1700000001000,
-            },
-            {
-              'target': 'clientId:bob',
-              'issuedBefore': 1700000000000,
-              'appliesAt': 1700000002000,
-            },
-          ]);
+          req.respondWith(200, {
+            'successCount': 2,
+            'failureCount': 0,
+            'results': [
+              {
+                'target': 'clientId:alice',
+                'issuedBefore': 1700000000000,
+                'appliesAt': 1700000001000,
+              },
+              {
+                'target': 'clientId:bob',
+                'issuedBefore': 1700000000000,
+                'appliesAt': 1700000002000,
+              },
+            ],
+          });
         },
       );
 
@@ -206,13 +222,10 @@ void main() {
       final mockHttp = MockHttpClient(
         onConnectionAttempt: (conn) => conn.respondWithSuccess(),
         onRequest: (req) {
-          req.respondWith(400, {
-            'error': {
-              'code': 40020,
-              'statusCode': 400,
-              'message': 'Batched response includes errors',
-            },
-            'batchResponse': [
+          req.respondWith(200, {
+            'successCount': 1,
+            'failureCount': 1,
+            'results': [
               {
                 'target': 'clientId:alice',
                 'issuedBefore': 1700000000000,
@@ -256,13 +269,10 @@ void main() {
       final mockHttp = MockHttpClient(
         onConnectionAttempt: (conn) => conn.respondWithSuccess(),
         onRequest: (req) {
-          req.respondWith(400, {
-            'error': {
-              'code': 40020,
-              'statusCode': 400,
-              'message': 'Batched response includes errors',
-            },
-            'batchResponse': [
+          req.respondWith(200, {
+            'successCount': 0,
+            'failureCount': 2,
+            'results': [
               {
                 'target': 'invalidType:foo',
                 'error': {
@@ -312,13 +322,17 @@ void main() {
       final mockHttp = MockHttpClient(
         onConnectionAttempt: (conn) => conn.respondWithSuccess(),
         onRequest: (req) {
-          req.respondWith(200, [
-            {
-              'target': 'clientId:alice',
-              'issuedBefore': 1700000000000,
-              'appliesAt': 1700000001000,
-            }
-          ]);
+          req.respondWith(200, {
+            'successCount': 1,
+            'failureCount': 0,
+            'results': [
+              {
+                'target': 'clientId:alice',
+                'issuedBefore': 1700000000000,
+                'appliesAt': 1700000001000,
+              }
+            ],
+          });
         },
       );
 
@@ -348,13 +362,10 @@ void main() {
       final mockHttp = MockHttpClient(
         onConnectionAttempt: (conn) => conn.respondWithSuccess(),
         onRequest: (req) {
-          req.respondWith(400, {
-            'error': {
-              'code': 40020,
-              'statusCode': 400,
-              'message': 'Batched response includes errors',
-            },
-            'batchResponse': [
+          req.respondWith(200, {
+            'successCount': 0,
+            'failureCount': 1,
+            'results': [
               {
                 'target': 'invalidType:abc',
                 'error': {
@@ -488,13 +499,17 @@ void main() {
             headers: req.headers,
             body: req.bodyAsString,
           ));
-          req.respondWith(200, [
-            {
-              'target': 'clientId:alice',
-              'issuedBefore': 1699999000000,
-              'appliesAt': 1700000001000,
-            }
-          ]);
+          req.respondWith(200, {
+            'successCount': 1,
+            'failureCount': 0,
+            'results': [
+              {
+                'target': 'clientId:alice',
+                'issuedBefore': 1699999000000,
+                'appliesAt': 1700000001000,
+              }
+            ],
+          });
         },
       );
 
@@ -530,13 +545,17 @@ void main() {
             headers: req.headers,
             body: req.bodyAsString,
           ));
-          req.respondWith(200, [
-            {
-              'target': 'clientId:alice',
-              'issuedBefore': 1700000000000,
-              'appliesAt': 1700000001000,
-            }
-          ]);
+          req.respondWith(200, {
+            'successCount': 1,
+            'failureCount': 0,
+            'results': [
+              {
+                'target': 'clientId:alice',
+                'issuedBefore': 1700000000000,
+                'appliesAt': 1700000001000,
+              }
+            ],
+          });
         },
       );
 
@@ -571,13 +590,17 @@ void main() {
             headers: req.headers,
             body: req.bodyAsString,
           ));
-          req.respondWith(200, [
-            {
-              'target': 'clientId:alice',
-              'issuedBefore': 1700000000000,
-              'appliesAt': 1700000030000,
-            }
-          ]);
+          req.respondWith(200, {
+            'successCount': 1,
+            'failureCount': 0,
+            'results': [
+              {
+                'target': 'clientId:alice',
+                'issuedBefore': 1700000000000,
+                'appliesAt': 1700000030000,
+              }
+            ],
+          });
         },
       );
 
@@ -613,13 +636,17 @@ void main() {
             headers: req.headers,
             body: req.bodyAsString,
           ));
-          req.respondWith(200, [
-            {
-              'target': 'clientId:alice',
-              'issuedBefore': 1700000000000,
-              'appliesAt': 1700000001000,
-            }
-          ]);
+          req.respondWith(200, {
+            'successCount': 1,
+            'failureCount': 0,
+            'results': [
+              {
+                'target': 'clientId:alice',
+                'issuedBefore': 1700000000000,
+                'appliesAt': 1700000001000,
+              }
+            ],
+          });
         },
       );
 
@@ -652,13 +679,17 @@ void main() {
             headers: req.headers,
             body: req.bodyAsString,
           ));
-          req.respondWith(200, [
-            {
-              'target': 'clientId:alice',
-              'issuedBefore': 1699999000000,
-              'appliesAt': 1700000030000,
-            }
-          ]);
+          req.respondWith(200, {
+            'successCount': 1,
+            'failureCount': 0,
+            'results': [
+              {
+                'target': 'clientId:alice',
+                'issuedBefore': 1699999000000,
+                'appliesAt': 1700000030000,
+              }
+            ],
+          });
         },
       );
 
@@ -738,13 +769,17 @@ void main() {
             headers: req.headers,
             body: req.bodyAsString,
           ));
-          req.respondWith(200, [
-            {
-              'target': 'clientId:alice',
-              'issuedBefore': 1700000000000,
-              'appliesAt': 1700000001000,
-            }
-          ]);
+          req.respondWith(200, {
+            'successCount': 1,
+            'failureCount': 0,
+            'results': [
+              {
+                'target': 'clientId:alice',
+                'issuedBefore': 1700000000000,
+                'appliesAt': 1700000001000,
+              }
+            ],
+          });
         },
       );
 

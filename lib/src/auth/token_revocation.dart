@@ -77,29 +77,6 @@ class TokenRevocationResponse {
     );
   }
 
-  /// Creates a response from a plain list of per-target results.
-  ///
-  /// The server returns a plain array on success (HTTP 2xx) or in the
-  /// `batchResponse` field on mixed/failure (HTTP 400). The `successCount`
-  /// and `failureCount` are computed client-side.
-  factory TokenRevocationResponse.fromList(List<dynamic> list) {
-    final results = list
-        .cast<Map<String, dynamic>>()
-        .map(TokenRevocationResult.fromMap)
-        .toList();
-
-    final successCount =
-        results.whereType<TokenRevocationSuccessResult>().length;
-    final failureCount =
-        results.whereType<TokenRevocationFailureResult>().length;
-
-    return TokenRevocationResponse(
-      successCount: successCount,
-      failureCount: failureCount,
-      results: results,
-    );
-  }
-
   /// The number of successful revocations.
   ///
   /// Spec: BAR2a

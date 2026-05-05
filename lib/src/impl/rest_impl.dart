@@ -130,20 +130,14 @@ class RestImpl extends BaseClientImpl implements Rest {
 
     final responseBody = response.body;
 
-    // All success: HTTP 200, body is a plain array of per-channel results
-    if (responseBody is List) {
-      return BatchPresenceResponse.fromList(responseBody);
-    }
-
-    // Mixed/failure: HTTP 400, body is {error: ..., batchResponse: [...]}
+    // With X-Ably-Version >= 3, the server returns a BatchResult envelope:
+    // {successCount, failureCount, results: [...]}
     if (responseBody is Map<String, dynamic> &&
-        responseBody.containsKey('batchResponse')) {
-      return BatchPresenceResponse.fromList(
-        responseBody['batchResponse'] as List,
-      );
+        responseBody.containsKey('results')) {
+      return BatchPresenceResponse.fromMap(responseBody);
     }
 
-    // Server error without batchResponse — propagate as exception
+    // Server error — propagate as exception
     if (responseBody is Map<String, dynamic> &&
         responseBody.containsKey('error')) {
       final errorInfo =
