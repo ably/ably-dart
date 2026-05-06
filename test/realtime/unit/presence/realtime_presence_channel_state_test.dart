@@ -816,6 +816,78 @@ void main() {
 
       mockWs.dispose();
     });
+
+    // UTS: realtime/unit/RTL11/queued-presence-fail-detached-0
+    test('fail on DETACHED (channel detach)', () async {
+      final channelName = testChannelName('RTL11-detached');
+
+      final capturedPresence = <ProtocolMessage>[];
+      late final MockWebSocketClient mockWs;
+      mockWs = MockWebSocketClient(
+        onConnectionAttempt: (conn) {
+          conn.respondWithSuccess(
+            ProtocolMessageHelpers.connected(connectionId: 'conn-1'),
+          );
+        },
+        onMessageFromClient: (msg) {
+          if (msg.action == ProtocolAction.attach) {
+            // Do NOT respond -- leave channel in ATTACHING
+          } else if (msg.action == ProtocolAction.presence) {
+            capturedPresence.add(msg);
+          } else if (msg.action == ProtocolAction.detach) {
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessageHelpers.detached(channel: channelName),
+            );
+          }
+        },
+      );
+
+      final client = Realtime.forTesting(
+        options: _optionsWithClientId('my-client'),
+        webSocketClient: mockWs,
+      );
+
+      final channel = client.channels.get(channelName);
+
+      client.connect();
+      await _awaitConnectionState(
+        client.connection,
+        ConnectionState.connected,
+      );
+
+      // Start attach -- channel goes to ATTACHING
+      unawaited(channel.attach().catchError((_) {}));
+      await _awaitChannelState(channel, ChannelState.attaching);
+
+      // Queue presence while channel is ATTACHING (per RTP16b)
+      Object? enterError;
+      unawaited(
+        channel.presence.enter('queued-enter').catchError((Object e) {
+          enterError = e;
+        }),
+      );
+
+      // Verify nothing sent yet
+      expect(capturedPresence.length, equals(0));
+
+      // Server sends DETACHED for this channel -- channel goes DETACHED
+      mockWs.activeConnection!.sendToClient(ProtocolMessage(
+        action: ProtocolAction.detached,
+        channel: channelName,
+      ));
+
+      // Allow the DETACHED processing to propagate
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      // No presence messages were sent
+      expect(capturedPresence.length, equals(0));
+
+      // The enter completed with an error
+      expect(enterError, isA<AblyException>());
+
+      mockWs.dispose();
+    });
   });
 
   group('RTL11a - ACK/NACK unaffected by channel state changes', () {

@@ -186,6 +186,99 @@ void main() {
   });
 
   group('RTN22a - Forced disconnect on reauth failure', () {
+    // UTS: realtime/unit/RTN22a/forced-disconnect-reauth-failure-0
+    test(
+        'auth fails during server-initiated reauth, server force disconnects',
+        () async {
+      var authCallbackCount = 0;
+
+      late MockWebSocketClient mockWs;
+      mockWs = MockWebSocketClient(
+        onConnectionAttempt: (conn) {
+          conn.respondWithSuccess(
+            ProtocolMessageHelpers.connected(
+              connectionId: 'conn-1',
+              connectionKey: 'key-1',
+            ),
+          );
+        },
+        onMessageFromClient: (msg) {
+          // Do NOT auto-respond to AUTH — simulating reauth failure
+          // (the client sends AUTH but it doesn't succeed in time)
+        },
+      );
+
+      final client = Realtime.forTesting(
+        options: ClientOptions(
+          authCallback: (params) async {
+            authCallbackCount++;
+            if (authCallbackCount == 1) {
+              // Initial auth succeeds
+              return TokenDetails(
+                token: 'initial-token',
+                expires: DateTime.now().millisecondsSinceEpoch + 3600000,
+              );
+            }
+            // Reauth fails
+            throw const AblyException(
+              message: 'Auth provider unavailable',
+              errorInfo: ErrorInfo(
+                code: 40170,
+                statusCode: 401,
+                message: 'Auth provider unavailable',
+              ),
+            );
+          },
+          autoConnect: false,
+        ),
+        webSocketClient: mockWs,
+      );
+
+      client.connect();
+      await _awaitState(client.connection, ConnectionState.connected);
+
+      final stateChanges = <ConnectionStateChange>[];
+      client.connection.on().listen((change) {
+        stateChanges.add(change);
+      });
+
+      // Server sends AUTH requesting reauth (which will fail in authCallback)
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(action: ProtocolAction.auth),
+      );
+
+      // Give time for the async reauth to fail
+      await _awaitCondition(
+        () => authCallbackCount >= 2,
+      );
+
+      // Since reauth failed (RSA4c3), the client stays CONNECTED with
+      // existing token. But the server will eventually force disconnect.
+      // Simulate the server sending a DISCONNECTED with token error
+      // (RTN22a: server force disconnects after reauth timeout).
+      mockWs.activeConnection!.sendToClientAndClose(
+        ProtocolMessageHelpers.disconnected(
+          error: ErrorInfo(
+            message: 'Token expired, reauth timed out',
+            code: 40142,
+            statusCode: 401,
+          ),
+        ),
+      );
+
+      // Wait for DISCONNECTED state
+      await _awaitState(client.connection, ConnectionState.disconnected);
+
+      // Verify the DISCONNECTED transition has the token error
+      final disconnectedChange = stateChanges.firstWhere(
+        (c) => c.current == ConnectionState.disconnected,
+      );
+      expect(disconnectedChange.reason, isNotNull);
+      expect(disconnectedChange.reason!.code, equals(40142));
+
+      mockWs.dispose();
+    });
+
     test(
         'server DISCONNECTED with token error code triggers DISCONNECTED state',
         () async {

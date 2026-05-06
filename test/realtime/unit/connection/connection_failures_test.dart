@@ -766,6 +766,76 @@ void main() {
     });
   });
 
+  group('RTN15e - Connection key updated after successful resume', () {
+    // UTS: realtime/unit/RTN15e/connection-key-updated-0
+    test('connection key is updated from CONNECTED message after resume',
+        () async {
+      final testClock = TestClock();
+      final fakeTimers = FakeTimerManager(testClock);
+
+      await withClock(testClock, () async {
+        var connectionAttemptCount = 0;
+
+        final mockWs = MockWebSocketClient(
+          onConnectionAttempt: (conn) {
+            connectionAttemptCount++;
+
+            if (connectionAttemptCount == 1) {
+              conn.respondWithSuccess(
+                ProtocolMessageHelpers.connected(
+                  connectionId: 'connection-1',
+                  connectionKey: 'key-1',
+                ),
+              );
+            } else {
+              // Resume succeeds with new key (same connectionId = resumed)
+              conn.respondWithSuccess(
+                ProtocolMessageHelpers.connected(
+                  connectionId: 'connection-1',
+                  connectionKey: 'key-2',
+                ),
+              );
+            }
+          },
+        );
+
+        final client = Realtime.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            autoConnect: false,
+            disconnectedRetryTimeout: 1000,
+          ),
+          webSocketClient: mockWs,
+          timerManager: fakeTimers,
+        );
+
+        client.connect();
+        await _awaitState(client.connection, ConnectionState.connected);
+
+        // Verify initial key
+        expect(client.connection.key, equals('key-1'));
+
+        // Disconnect to trigger resume
+        mockWs.activeConnection!.simulateDisconnect();
+        await _awaitState(client.connection, ConnectionState.disconnected);
+
+        // Advance past disconnectedRetryTimeout to trigger retry
+        await _pumpEventQueue();
+        fakeTimers.elapseTime(const Duration(milliseconds: 1100));
+        await _pumpEventQueue();
+
+        // Connection resumed (same ID)
+        expect(client.connection.state, equals(ConnectionState.connected));
+        expect(client.connection.id, equals('connection-1'));
+
+        // RTN15e: Connection key updated to key-2 from the new CONNECTED msg
+        expect(client.connection.key, equals('key-2'));
+
+        mockWs.dispose();
+      });
+    });
+  });
+
   group('RTN15c4 - ERROR with fatal error during resume', () {
     // UTS: realtime/unit/RTN15c4/fatal-error-during-resume-0
     test('transitions to FAILED on fatal error', () async {

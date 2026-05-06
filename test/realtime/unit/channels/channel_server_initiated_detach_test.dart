@@ -551,6 +551,96 @@ void main() {
     });
   });
 
+  group('RTB1 - Channel retry delay when SUSPENDED', () {
+    // UTS: realtime/unit/RTB1/suspended-channel-retry-delay-1
+    test('retry happens after channelRetryTimeout', () async {
+      final testClock = TestClock();
+      final fakeTimers = FakeTimerManager(testClock);
+
+      await withClock(testClock, () async {
+        final channelName = testChannelName('RTB1-retry');
+        var attachCount = 0;
+
+        late final MockWebSocketClient mockWs;
+        mockWs = MockWebSocketClient(
+          onConnectionAttempt: (conn) {
+            conn.respondWithSuccess(ProtocolMessageHelpers.connected());
+          },
+          onMessageFromClient: (msg) {
+            if (msg.action == ProtocolAction.attach) {
+              attachCount++;
+              if (attachCount == 1) {
+                // First attach succeeds
+                mockWs.activeConnection!.sendToClient(
+                  ProtocolMessageHelpers.attached(channel: channelName),
+                );
+              } else if (attachCount == 2) {
+                // Reattach after DETACHED -- don't respond (timeout)
+              } else if (attachCount == 3) {
+                // Retry from SUSPENDED -- succeed
+                mockWs.activeConnection!.sendToClient(
+                  ProtocolMessageHelpers.attached(channel: channelName),
+                );
+              }
+            }
+          },
+        );
+
+        const channelRetryTimeout = 5000;
+
+        final client = Realtime.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            autoConnect: false,
+            realtimeRequestTimeout: 100,
+            channelRetryTimeout: channelRetryTimeout,
+          ),
+          webSocketClient: mockWs,
+          timerManager: fakeTimers,
+        );
+
+        final channel = client.channels.get(channelName);
+
+        client.connect();
+        await _awaitConnectionState(
+            client.connection, ConnectionState.connected);
+
+        await channel.attach();
+        expect(attachCount, equals(1));
+
+        // Server sends DETACHED -> triggers reattach that times out
+        mockWs.activeConnection!.sendToClient(ProtocolMessage(
+          action: ProtocolAction.detached,
+          channel: channelName,
+          error: ErrorInfo(code: 90198, statusCode: 500, message: 'Detached'),
+        ));
+        await _pumpEventQueue();
+        expect(channel.state, equals(ChannelState.attaching));
+
+        // Let reattach timeout -> SUSPENDED
+        fakeTimers.elapseTime(const Duration(milliseconds: 150));
+        await _pumpEventQueue();
+        expect(channel.state, equals(ChannelState.suspended));
+
+        // Advance less than channelRetryTimeout -- should not retry yet
+        fakeTimers.elapseTime(const Duration(milliseconds: 3000));
+        await _pumpEventQueue();
+        expect(channel.state, equals(ChannelState.suspended));
+        expect(attachCount, equals(2)); // No new attach attempt
+
+        // Advance past channelRetryTimeout -- should trigger retry
+        fakeTimers.elapseTime(const Duration(milliseconds: 3000));
+        await _pumpEventQueue();
+        await _awaitChannelState(channel, ChannelState.attached);
+
+        expect(channel.state, equals(ChannelState.attached));
+        expect(attachCount, equals(3));
+
+        mockWs.dispose();
+      });
+    });
+  });
+
   group('RTL13 - DETACHED while DETACHING is normal detach flow', () {
     // UTS: realtime/unit/RTL13a/detaching-not-server-initiated-2
     test('completes detach without triggering reattach', () async {

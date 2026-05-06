@@ -748,6 +748,205 @@ void main() {
       });
     });
 
+    group('RSC22 - Validation and edge cases', () {
+      // UTS: rest/unit/RSC22/empty-channels-rejected-0
+      test('RSC22_Empty1 - batchPublish with empty channels sends to server',
+          () async {
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            // Server rejects empty channels
+            req.respondWith(400, {
+              'error': {
+                'code': 40000,
+                'statusCode': 400,
+                'message': 'No channels specified',
+              },
+            });
+          },
+        );
+
+        final client = Rest.forTesting(
+          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+
+        expect(
+          () => client.batchPublish(
+            BatchPublishSpec(
+              channels: [],
+              messages: [Message(name: 'event')],
+            ),
+          ),
+          throwsA(isA<AblyException>()),
+        );
+      });
+
+      // UTS: rest/unit/RSC22/empty-messages-rejected-0
+      test('RSC22_Empty2 - batchPublish with empty messages sends to server',
+          () async {
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            // Server rejects empty messages
+            req.respondWith(400, {
+              'error': {
+                'code': 40000,
+                'statusCode': 400,
+                'message': 'No messages specified',
+              },
+            });
+          },
+        );
+
+        final client = Rest.forTesting(
+          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+
+        expect(
+          () => client.batchPublish(
+            BatchPublishSpec(
+              channels: ['channel1'],
+              messages: [],
+            ),
+          ),
+          throwsA(isA<AblyException>()),
+        );
+      });
+
+      // UTS: rest/unit/RSC22/multiple-channels-multiple-messages-0
+      test(
+          'RSC22_Multi1 - Multiple channels with multiple messages', () async {
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, [
+              {'channel': 'ch1', 'messageId': 'msg1'},
+              {'channel': 'ch2', 'messageId': 'msg1'},
+              {'channel': 'ch3', 'messageId': 'msg1'},
+            ]);
+          },
+        );
+
+        final client = Rest.forTesting(
+          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+
+        final results = await client.batchPublish(
+          BatchPublishSpec(
+            channels: ['ch1', 'ch2', 'ch3'],
+            messages: [
+              Message(name: 'event1', data: 'data1'),
+              Message(name: 'event2', data: 'data2'),
+            ],
+          ),
+        );
+
+        expect(results.length, equals(3));
+
+        // Verify the request body has all channels and messages
+        final body = json.decode(capturedRequests[0].body!) as Map;
+        expect(body['channels'], equals(['ch1', 'ch2', 'ch3']));
+        expect((body['messages'] as List).length, equals(2));
+      });
+
+      // UTS: rest/unit/RSC22/multiple-messages-per-channel-0
+      test('RSC22_Multi2 - Single channel with multiple messages', () async {
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, [
+              {
+                'channel': 'my-channel',
+                'messageId': 'msg1',
+                'serials': ['s1', 's2', 's3'],
+              },
+            ]);
+          },
+        );
+
+        final client = Rest.forTesting(
+          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+
+        final results = await client.batchPublish(
+          BatchPublishSpec(
+            channels: ['my-channel'],
+            messages: [
+              Message(name: 'event1', data: 'data1'),
+              Message(name: 'event2', data: 'data2'),
+              Message(name: 'event3', data: 'data3'),
+            ],
+          ),
+        );
+
+        expect(results.length, equals(1));
+        expect(results[0].channel, equals('my-channel'));
+
+        // Verify all messages were sent
+        final body = json.decode(capturedRequests[0].body!) as Map;
+        expect((body['messages'] as List).length, equals(3));
+      });
+
+      // UTS: rest/unit/RSC22/request-id-included-0
+      test('RSC22_ReqId - requestId included when addRequestIds is true',
+          () async {
+        final capturedRequests = <CapturedRequest>[];
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, [
+              {'channel': 'channel1', 'messageId': 'msg1'},
+            ]);
+          },
+        );
+
+        final client = Rest.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            addRequestIds: true,
+          ),
+          httpClient: mockHttp,
+        );
+
+        await client.batchPublish(
+          BatchPublishSpec(
+            channels: ['channel1'],
+            messages: [Message(name: 'event')],
+          ),
+        );
+
+        final request = capturedRequests[0];
+        // When addRequestIds is true, request_id should be in query params
+        expect(request.url.queryParameters['request_id'], isNotNull);
+        expect(request.url.queryParameters['request_id'], isNotEmpty);
+      });
+    });
+
     group('RSC22 - Error handling', () {
       // UTS: rest/unit/RSC22/auth-error-propagated-0
       test('RSC22_Error1 - Authentication error throws AblyException',

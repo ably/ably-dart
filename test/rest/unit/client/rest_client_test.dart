@@ -504,5 +504,58 @@ void main() {
             equals('Bearer some-token-string'));
       });
     });
+
+    group('RSC13 - Request timeout', () {
+      // UTS: rest/unit/RSC13/request-timeout-enforced-0
+      test('RSC13 - request timeout enforced', () async {
+        final mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWithTimeout();
+          },
+        );
+
+        final client = Rest.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            httpRequestTimeout: 1000,
+          ),
+          httpClient: mockHttp,
+        );
+
+        try {
+          await client.time();
+          fail('Expected timeout exception');
+        } catch (e) {
+          expect(e, isA<AblyException>());
+        }
+      });
+    });
+
+    group('TO - Endpoint affects host', () {
+      // UTS: rest/unit/TO/endpoint-affects-host-0
+      test('TO - endpoint option affects REST request host', () async {
+        final mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(200, [1234567890000]);
+          },
+        );
+
+        final client = Rest.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            endpoint: 'sandbox',
+          ),
+          httpClient: mockHttp,
+        );
+
+        await client.time();
+
+        expect(mockHttp.capturedRequests, hasLength(1));
+        expect(
+          mockHttp.capturedRequests[0].url.host,
+          equals('sandbox.realtime.ably.net'),
+        );
+      });
+    });
   });
 }

@@ -844,5 +844,93 @@ void main() {
         expect(request.headers['Authorization'], isNotNull);
       });
     });
+
+    group('RSC19c - Response decoding', () {
+      // UTS: rest/unit/RSC19c/response-decoded-by-content-type-3
+      test('RSC19c - response decoded based on content-type header', () async {
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            req.respondWith(200, {'items': [
+              {'name': 'item1'},
+              {'name': 'item2'},
+            ]});
+          },
+        );
+
+        final client = TestClient(
+          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+
+        final response = await client.request('GET', '/test');
+
+        expect(response.statusCode, equals(200));
+        expect(response.items, isNotEmpty);
+      });
+    });
+
+    group('RSC19e - Fallback on server error', () {
+      // UTS: rest/unit/RSC19e/fallback-on-server-error-3
+      test('RSC19e - server error triggers fallback', () async {
+        var requestCount = 0;
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            requestCount++;
+            if (requestCount == 1) {
+              req.respondWith(500, {
+                'error': {
+                  'message': 'Server error',
+                  'code': 50000,
+                  'statusCode': 500,
+                },
+              });
+            } else {
+              req.respondWith(200, {'items': []});
+            }
+          },
+        );
+
+        final client = TestClient(
+          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+
+        final response = await client.request('GET', '/test');
+
+        expect(response.statusCode, equals(200));
+        expect(requestCount, equals(2));
+      });
+
+      // UTS: rest/unit/RSC19e/http-error-no-fallback-2
+      test('RSC19e - HTTP 4xx error does not trigger fallback', () async {
+        var requestCount = 0;
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            requestCount++;
+            req.respondWith(404, {
+              'error': {
+                'message': 'Not found',
+                'code': 40400,
+                'statusCode': 404,
+              },
+            });
+          },
+        );
+
+        final client = TestClient(
+          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+
+        try {
+          await client.request('GET', '/test');
+          fail('Expected AblyException');
+        } on AblyException catch (e) {
+          expect(e.errorInfo?.statusCode, equals(404));
+        }
+
+        expect(requestCount, equals(1));
+      });
+    });
   });
 }

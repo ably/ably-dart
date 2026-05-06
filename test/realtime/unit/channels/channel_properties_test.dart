@@ -289,6 +289,66 @@ void main() {
     });
   });
 
+  group('RTL15b - channelSerial not updated by irrelevant messages', () {
+    // UTS: realtime/unit/RTL15b/serial-not-updated-irrelevant-3
+    test('HEARTBEAT and ACK do not update channelSerial', () async {
+      final channelName = testChannelName('RTL15b-irrelevant');
+
+      late final MockWebSocketClient mockWs;
+      mockWs = MockWebSocketClient(
+        onConnectionAttempt: (conn) {
+          conn.respondWithSuccess(ProtocolMessageHelpers.connected());
+        },
+        onMessageFromClient: (msg) {
+          if (msg.action == ProtocolAction.attach) {
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessageHelpers.attached(
+                channel: channelName,
+                channelSerial: 'serial-001',
+              ),
+            );
+          }
+        },
+      );
+
+      final client = Realtime.forTesting(
+        options: ClientOptions(
+          key: 'appId.keyId:keySecret',
+          autoConnect: false,
+        ),
+        webSocketClient: mockWs,
+      );
+
+      final channel = client.channels.get(channelName);
+
+      client.connect();
+      await _awaitConnectionState(client.connection, ConnectionState.connected);
+
+      await channel.attach();
+      expect(channel.properties.channelSerial, equals('serial-001'));
+
+      // Send HEARTBEAT -- should not update channelSerial
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessageHelpers.heartbeat(),
+      );
+      await _pumpEventQueue();
+      expect(channel.properties.channelSerial, equals('serial-001'));
+
+      // Send ACK -- should not update channelSerial
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.ack,
+          msgSerial: 0,
+          count: 1,
+        ),
+      );
+      await _pumpEventQueue();
+      expect(channel.properties.channelSerial, equals('serial-001'));
+
+      mockWs.dispose();
+    });
+  });
+
   group('RTL15b1 - channelSerial cleared on DETACHED', () {
     // UTS: realtime/unit/RTL15b1/serial-cleared-detached-0
     test('cleared when channel detaches', () async {

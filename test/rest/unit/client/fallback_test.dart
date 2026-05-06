@@ -173,7 +173,614 @@ void main() {
       });
     });
 
+    group('DEVIATIONS - Legacy options not supported', () {
+      // UTS: rest/unit/REC1b1/endpoint-conflicts-environment-0
+      test(
+        'REC1b1 - endpoint conflicts with environment',
+        () {},
+        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
+            'restHost/realtimeHost/environment',
+      );
+
+      // UTS: rest/unit/REC1b1/endpoint-conflicts-resthost-1
+      test(
+        'REC1b1 - endpoint conflicts with restHost',
+        () {},
+        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
+            'restHost/realtimeHost/environment',
+      );
+
+      // UTS: rest/unit/REC1b1/endpoint-conflicts-realtimehost-2
+      test(
+        'REC1b1 - endpoint conflicts with realtimeHost',
+        () {},
+        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
+            'restHost/realtimeHost/environment',
+      );
+
+      // UTS: rest/unit/REC1b1/endpoint-conflicts-fallback-default-3
+      test(
+        'REC1b1 - endpoint conflicts with fallbackHostsUseDefault',
+        () {},
+        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
+            'fallbackHostsUseDefault',
+      );
+
+      // UTS: rest/unit/REC1c1/environment-conflicts-resthost-0
+      test(
+        'REC1c1 - environment conflicts with restHost',
+        () {},
+        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
+            'restHost/realtimeHost/environment',
+      );
+
+      // UTS: rest/unit/REC1c1/environment-conflicts-realtimehost-1
+      test(
+        'REC1c1 - environment conflicts with realtimeHost',
+        () {},
+        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
+            'restHost/realtimeHost/environment',
+      );
+
+      // UTS: rest/unit/REC1c2/environment-sets-primary-domain-0
+      test(
+        'REC1c2 - environment sets primary domain',
+        () {},
+        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
+            'environment option',
+      );
+
+      // UTS: rest/unit/REC1d/resthost-precedence-over-realtimehost-0
+      test(
+        'REC1d - restHost takes precedence over realtimeHost',
+        () {},
+        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
+            'restHost/realtimeHost',
+      );
+
+      // UTS: rest/unit/REC1d1/resthost-sets-primary-domain-0
+      test(
+        'REC1d1 - restHost sets primary domain',
+        () {},
+        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
+            'restHost',
+      );
+
+      // UTS: rest/unit/REC1d2/realtimehost-sets-primary-domain-0
+      test(
+        'REC1d2 - realtimeHost sets primary domain',
+        () {},
+        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
+            'realtimeHost',
+      );
+
+      // UTS: rest/unit/REC2a1/fallback-hosts-conflicts-use-default-0
+      test(
+        'REC2a1 - fallbackHosts conflicts with fallbackHostsUseDefault',
+        () {},
+        skip: 'DEVIATION: Dart SDK does not implement '
+            'fallbackHostsUseDefault',
+      );
+
+      // UTS: rest/unit/REC2b/fallback-hosts-use-default-0
+      test(
+        'REC2b - fallbackHostsUseDefault forces default fallbacks',
+        () {},
+        skip: 'DEVIATION: Dart SDK does not implement '
+            'fallbackHostsUseDefault',
+      );
+
+      // UTS: rest/unit/REC2c6/custom-resthost-no-fallbacks-0
+      test(
+        'REC2c6 - custom restHost has no fallbacks',
+        () {},
+        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
+            'restHost',
+      );
+
+      // UTS: rest/unit/REC2c6/custom-realtimehost-no-fallbacks-1
+      test(
+        'REC2c6 - custom realtimeHost has no fallbacks',
+        () {},
+        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
+            'realtimeHost',
+      );
+    });
+
+    group('REC3 - Connectivity Check Validation', () {
+      // UTS: rest/unit/REC3/connectivity-check-validation-0
+      test(
+        'REC3 - invalid connectivity check URLs are rejected',
+        () {},
+        skip: 'PENDING: Dart SDK does not currently validate '
+            'connectivityCheckUrl at construction time',
+      );
+    });
+
+    group('RSC15m - Fallback with empty hosts', () {
+      // UTS: rest/unit/RSC15m/no-fallback-empty-hosts-0
+      test('RSC15m - empty fallbackHosts means no fallback retry', () async {
+        var requestCount = 0;
+
+        final mockHttp = MockHttpClient(
+          onRequest: (req) {
+            requestCount++;
+            req.respondWith(500, {
+              'error': {
+                'message': 'Server error',
+                'code': 50000,
+                'statusCode': 500,
+              },
+            });
+          },
+        );
+
+        final client = Rest.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            fallbackHosts: [],
+          ),
+          httpClient: mockHttp,
+        );
+
+        try {
+          await client.time();
+          fail('Expected an exception');
+        } on AblyException catch (e) {
+          expect(e.errorInfo?.statusCode, equals(500));
+        }
+
+        // Only 1 request - no fallback attempted
+        expect(requestCount, equals(1));
+        expect(mockHttp.capturedRequests, hasLength(1));
+      });
+    });
+
+    group('RSC15a - Fallback host order', () {
+      // UTS: rest/unit/RSC15a/fallback-random-order-0
+      test('RSC15a - primary tried first, then fallback hosts', () async {
+        var requestCount = 0;
+
+        final mockHttp = MockHttpClient(
+          onRequest: (req) {
+            requestCount++;
+            req.respondWith(500, {
+              'error': {
+                'message': 'Server error',
+                'code': 50000,
+                'statusCode': 500,
+              },
+            });
+          },
+        );
+
+        final client = Rest.forTesting(
+          options: ClientOptions(key: 'appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+
+        try {
+          await client.time();
+          fail('Expected an exception');
+        } on AblyException {
+          // Expected
+        }
+
+        // Primary + up to httpMaxRetryCount fallbacks
+        expect(mockHttp.capturedRequests.length, greaterThan(1));
+
+        // First request goes to primary
+        expect(
+          mockHttp.capturedRequests[0].url.host,
+          equals('main.realtime.ably.net'),
+        );
+
+        // Subsequent requests go to fallback hosts
+        const expectedFallbacks = [
+          'main.a.fallback.ably-realtime.com',
+          'main.b.fallback.ably-realtime.com',
+          'main.c.fallback.ably-realtime.com',
+          'main.d.fallback.ably-realtime.com',
+          'main.e.fallback.ably-realtime.com',
+        ];
+
+        for (var i = 1; i < mockHttp.capturedRequests.length; i++) {
+          expect(
+            expectedFallbacks,
+            contains(mockHttp.capturedRequests[i].url.host),
+          );
+        }
+      });
+    });
+
+    group('RSC15l - Qualifying errors trigger fallback', () {
+      // UTS: rest/unit/RSC15l/qualifying-errors-trigger-fallback-0
+      test('RSC15l - qualifying errors trigger fallback (overview)', () async {
+        var requestCount = 0;
+
+        final mockHttp = MockHttpClient(
+          onRequest: (req) {
+            requestCount++;
+            if (requestCount == 1) {
+              req.respondWith(500, {
+                'error': {
+                  'message': 'Server error',
+                  'code': 50000,
+                  'statusCode': 500,
+                },
+              });
+            } else {
+              req.respondWith(200, [1000]);
+            }
+          },
+        );
+
+        final client = Rest.forTesting(
+          options: ClientOptions(key: 'appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+
+        await client.time();
+
+        expect(requestCount, equals(2));
+        expect(
+          mockHttp.capturedRequests[0].url.host,
+          equals('main.realtime.ably.net'),
+        );
+        expect(
+          mockHttp.capturedRequests[1].url.host,
+          isNot(equals('main.realtime.ably.net')),
+        );
+      });
+
+      // UTS: rest/unit/RSC15l/connection-refused-fallback-0
+      test('RSC15l - connection refused on primary triggers fallback',
+          () async {
+        var connectionCount = 0;
+
+        final mockHttp = MockHttpClient(
+          onConnectionAttempt: (conn) {
+            connectionCount++;
+            if (connectionCount == 1) {
+              conn.respondWithRefused();
+            } else {
+              conn.respondWithSuccess();
+            }
+          },
+          onRequest: (req) {
+            req.respondWith(200, [1000]);
+          },
+        );
+
+        final client = Rest.forTesting(
+          options: ClientOptions(key: 'appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+
+        await client.time();
+
+        expect(connectionCount, equals(2));
+      });
+
+      // UTS: rest/unit/RSC15l/dns-error-fallback-1
+      test('RSC15l - DNS error on primary triggers fallback', () async {
+        var connectionCount = 0;
+
+        final mockHttp = MockHttpClient(
+          onConnectionAttempt: (conn) {
+            connectionCount++;
+            if (connectionCount == 1) {
+              conn.respondWithDnsError();
+            } else {
+              conn.respondWithSuccess();
+            }
+          },
+          onRequest: (req) {
+            req.respondWith(200, [1000]);
+          },
+        );
+
+        final client = Rest.forTesting(
+          options: ClientOptions(key: 'appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+
+        await client.time();
+
+        expect(connectionCount, equals(2));
+      });
+
+      // UTS: rest/unit/RSC15l/connection-timeout-fallback-2
+      test('RSC15l - connection timeout on primary triggers fallback',
+          () async {
+        var connectionCount = 0;
+
+        final mockHttp = MockHttpClient(
+          onConnectionAttempt: (conn) {
+            connectionCount++;
+            if (connectionCount == 1) {
+              conn.respondWithTimeout();
+            } else {
+              conn.respondWithSuccess();
+            }
+          },
+          onRequest: (req) {
+            req.respondWith(200, [1000]);
+          },
+        );
+
+        final client = Rest.forTesting(
+          options: ClientOptions(key: 'appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+
+        await client.time();
+
+        expect(connectionCount, equals(2));
+      });
+
+      // UTS: rest/unit/RSC15l/request-timeout-fallback-3
+      test('RSC15l - request timeout triggers fallback', () async {
+        var requestCount = 0;
+
+        final mockHttp = MockHttpClient(
+          onRequest: (req) {
+            requestCount++;
+            if (requestCount == 1) {
+              req.respondWithTimeout();
+            } else {
+              req.respondWith(200, [1000]);
+            }
+          },
+        );
+
+        final client = Rest.forTesting(
+          options: ClientOptions(key: 'appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+
+        await client.time();
+
+        expect(requestCount, equals(2));
+        expect(
+          mockHttp.capturedRequests[0].url.host,
+          isNot(equals(mockHttp.capturedRequests[1].url.host)),
+        );
+      });
+
+      // UTS: rest/unit/RSC15l/http-5xx-triggers-fallback-4
+      test('RSC15l - HTTP 5xx status codes trigger fallback', () async {
+        for (final statusCode in [500, 501, 502, 503, 504]) {
+          var requestCount = 0;
+
+          final mockHttp = MockHttpClient(
+            onRequest: (req) {
+              requestCount++;
+              if (requestCount == 1) {
+                req.respondWith(statusCode, {
+                  'error': {
+                    'message': 'Server error',
+                    'code': statusCode * 100,
+                    'statusCode': statusCode,
+                  },
+                });
+              } else {
+                req.respondWith(200, [1000]);
+              }
+            },
+          );
+
+          final client = Rest.forTesting(
+            options: ClientOptions(key: 'appId.keyId:keySecret'),
+            httpClient: mockHttp,
+          );
+
+          await client.time();
+
+          expect(
+            requestCount,
+            equals(2),
+            reason: 'HTTP $statusCode should trigger fallback',
+          );
+        }
+      });
+
+      // UTS: rest/unit/RSC15l/http-4xx-no-fallback-5
+      test('RSC15l - HTTP 4xx status codes do NOT trigger fallback', () async {
+        for (final statusCode in [400, 401, 404]) {
+          var requestCount = 0;
+
+          final mockHttp = MockHttpClient(
+            onRequest: (req) {
+              requestCount++;
+              req.respondWith(statusCode, {
+                'error': {
+                  'message': 'Client error',
+                  'code': statusCode * 100,
+                  'statusCode': statusCode,
+                },
+              });
+            },
+          );
+
+          final client = Rest.forTesting(
+            options: ClientOptions(key: 'appId.keyId:keySecret'),
+            httpClient: mockHttp,
+          );
+
+          try {
+            await client.time();
+            fail('Expected an exception for HTTP $statusCode');
+          } on AblyException catch (e) {
+            expect(e.errorInfo?.statusCode, equals(statusCode));
+          }
+
+          // Only 1 request - no fallback
+          expect(
+            requestCount,
+            equals(1),
+            reason: 'HTTP $statusCode should NOT trigger fallback',
+          );
+        }
+      });
+
+      // UTS: rest/unit/RSC15l4/cloudfront-error-triggers-fallback-0
+      test(
+        'RSC15l4 - CloudFront Server header with status >= 400 '
+        'triggers fallback',
+        () {},
+        skip: 'PENDING: Dart SDK does not implement CloudFront error '
+            'detection (RSC15l4)',
+      );
+    });
+
+    group('RSC15j - Host header', () {
+      // UTS: rest/unit/RSC15j/host-header-matches-request-0
+      test('RSC15j - Host header matches request host for fallback requests',
+          () async {
+        var requestCount = 0;
+
+        final mockHttp = MockHttpClient(
+          onRequest: (req) {
+            requestCount++;
+            if (requestCount == 1) {
+              req.respondWith(500, {
+                'error': {
+                  'message': 'fail',
+                  'code': 50000,
+                  'statusCode': 500,
+                },
+              });
+            } else {
+              req.respondWith(200, [1000]);
+            }
+          },
+        );
+
+        final client = Rest.forTesting(
+          options: ClientOptions(key: 'appId.keyId:keySecret'),
+          httpClient: mockHttp,
+        );
+
+        await client.time();
+
+        expect(mockHttp.capturedRequests, hasLength(2));
+
+        final request1 = mockHttp.capturedRequests[0];
+        final request2 = mockHttp.capturedRequests[1];
+
+        // Each request URL host should be different (primary vs fallback)
+        expect(request1.url.host, isNot(equals(request2.url.host)));
+
+        // The URL host should match the actual host the request was sent to.
+        // Dart http library sets the Host header automatically from the URL,
+        // so the URL host IS the host being requested.
+        expect(request1.url.host, equals('main.realtime.ably.net'));
+        expect(request2.url.host, isNot(equals('main.realtime.ably.net')));
+      });
+    });
+
     group('RSC15f - Fallback host caching', () {
+      // UTS: rest/unit/RSC15f/successful-fallback-cached-0
+      test('RSC15f - successful fallback host is cached for subsequent requests',
+          () async {
+        var requestCount = 0;
+
+        final mockHttp = MockHttpClient(
+          onRequest: (req) {
+            requestCount++;
+            if (requestCount == 1) {
+              // Primary fails
+              req.respondWith(500, {
+                'error': {
+                  'message': 'fail',
+                  'code': 50000,
+                  'statusCode': 500,
+                },
+              });
+            } else {
+              // Fallback and subsequent requests succeed
+              req.respondWith(200, [1000]);
+            }
+          },
+        );
+
+        final client = Rest.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            fallbackRetryTimeout: 60000,
+          ),
+          httpClient: mockHttp,
+        );
+
+        // First request: primary fails, fallback succeeds and gets cached
+        await client.time();
+        final fallbackHost = mockHttp.capturedRequests[1].url.host;
+        expect(fallbackHost, isNot(equals('main.realtime.ably.net')));
+
+        // Second request: should go directly to cached fallback
+        await client.time();
+
+        expect(mockHttp.capturedRequests, hasLength(3));
+        expect(mockHttp.capturedRequests[0].url.host,
+            equals('main.realtime.ably.net'));
+        expect(mockHttp.capturedRequests[1].url.host, equals(fallbackHost));
+        // Third request goes to cached fallback, not primary
+        expect(mockHttp.capturedRequests[2].url.host, equals(fallbackHost));
+      });
+
+      // UTS: rest/unit/RSC15f/cached-fallback-expires-1
+      test('RSC15f - cached fallback expires after fallbackRetryTimeout',
+          () async {
+        var requestCount = 0;
+
+        final mockHttp = MockHttpClient(
+          onRequest: (req) {
+            requestCount++;
+            if (requestCount == 1) {
+              // Primary fails
+              req.respondWith(500, {
+                'error': {
+                  'message': 'fail',
+                  'code': 50000,
+                  'statusCode': 500,
+                },
+              });
+            } else {
+              req.respondWith(200, [1000]);
+            }
+          },
+        );
+
+        final client = Rest.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            fallbackRetryTimeout: 100,
+          ),
+          httpClient: mockHttp,
+        );
+
+        // First request: primary fails, fallback succeeds
+        await client.time();
+
+        // Wait for cache to expire
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+
+        // Next request should try primary again
+        await client.time();
+
+        expect(mockHttp.capturedRequests, hasLength(3));
+        // After timeout, primary is tried again
+        expect(
+          mockHttp.capturedRequests[2].url.host,
+          equals('main.realtime.ably.net'),
+        );
+      });
+
+    });
+
+    group('RSC15f - Fallback host caching (legacy)', () {
+      // UTS: rest/unit/RSC15f/expired-not-resurrected-2
       test(
           'RSC15f - expired preferred fallback not resurrected by late '
           'in-flight success', () async {

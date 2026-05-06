@@ -27,6 +27,7 @@ void main() {
   group(
       'RSA4c1, RSA4c2 - authCallback error during CONNECTING transitions to '
       'DISCONNECTED', () {
+    // UTS: realtime/unit/RSA4c2/callback-error-connecting-disconnected-0
     test(
         'authCallback error causes DISCONNECTED with code 80019, then retries '
         'successfully', () async {
@@ -172,6 +173,7 @@ void main() {
   group(
       'RSA4c3 - authCallback error while CONNECTED leaves connection '
       'CONNECTED', () {
+    // UTS: realtime/unit/RSA4c3/callback-error-connected-stays-0
     test(
         'authCallback failure during RTN22 reauth keeps connection CONNECTED '
         'without setting errorReason', () async {
@@ -406,8 +408,81 @@ void main() {
   });
 
   group(
+      'RSA4e - REST authCallback error with code 40170 transitions to '
+      'DISCONNECTED', () {
+    // UTS: realtime/unit/RSA4e/rest-callback-error-40170-0
+    test(
+        'authCallback error with 40170 code causes DISCONNECTED with code '
+        '80019 (token expired is retryable)', () async {
+      var connectionAttempted = false;
+
+      final mockWs = MockWebSocketClient(
+        onConnectionAttempt: (conn) {
+          connectionAttempted = true;
+          conn.respondWithSuccess(
+            ProtocolMessageHelpers.connected(
+              connectionId: 'connection-id',
+              connectionKey: 'connection-key',
+            ),
+          );
+        },
+      );
+
+      final client = Realtime.forTesting(
+        options: ClientOptions(
+          authCallback: (params) async {
+            throw const AblyException(
+              message: 'Token expired',
+              errorInfo: ErrorInfo(
+                code: 40170,
+                statusCode: 401,
+                message: 'Token expired',
+              ),
+            );
+          },
+          autoConnect: false,
+        ),
+        webSocketClient: mockWs,
+      );
+
+      final stateChanges = <ConnectionStateChange>[];
+      client.connection.on().listen((change) {
+        stateChanges.add(change);
+      });
+
+      client.connect();
+
+      // authCallback returns 40170 (token expired) -- connection goes to
+      // DISCONNECTED (not FAILED) because 401 with 40170 is a retryable
+      // auth error per RSA4c2
+      await _awaitState(client.connection, ConnectionState.disconnected);
+
+      // RSA4e/RSA4c2: Connection transitioned to DISCONNECTED
+      expect(client.connection.state, equals(ConnectionState.disconnected));
+
+      // No WebSocket connection was attempted (auth failed before transport)
+      expect(connectionAttempted, isFalse);
+
+      // ErrorInfo has code 80019 wrapping the 40170 error
+      expect(client.connection.errorReason, isNotNull);
+      expect(client.connection.errorReason!.code, equals(80019));
+
+      // Cause is the original 40170 error
+      expect(client.connection.errorReason!.cause, isNotNull);
+      final cause = client.connection.errorReason!.cause;
+      if (cause is ErrorInfo) {
+        expect(cause.code, equals(40170));
+      }
+
+      await client.close();
+      mockWs.dispose();
+    });
+  });
+
+  group(
       'RSA4f - authCallback returns invalid type treated as invalid format '
       'error', () {
+    // UTS: realtime/unit/RSA4f/callback-invalid-type-format-0
     test(
         'non-token return type causes DISCONNECTED with code 80019', () async {
       final mockWs = MockWebSocketClient(
