@@ -329,7 +329,7 @@ void main() {
   group('RTL6i3 - Null fields in msgpack', () {
     // UTS: realtime/unit/RTL6i3/null-fields-msgpack-1
     test('RTL6i3 - null fields in msgpack', () {},
-        skip: 'DEVIATION: Dart SDK does not implement msgpack');
+        skip: 'Not yet implemented: msgpack encoding support');
   });
 
   // ---------------------------------------------------------------------------

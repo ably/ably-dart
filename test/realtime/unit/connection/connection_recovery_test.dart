@@ -648,9 +648,8 @@ void main() {
       await client.close();
       mockWs.dispose();
     },
-        skip: 'ATTACH message does not yet include channelSerial from '
-            'recovery key - requires implementation of RTN16j attach '
-            'resume behavior');
+        skip: 'Not yet implemented: RTN16j channelSerial from recovery key '
+            'in ATTACH messages');
   });
 
   group('RTN16 - Resume behavior on reconnection (existing functionality)',

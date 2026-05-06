@@ -33,13 +33,18 @@ class AblyException implements Exception {
   const AblyException({
     String? message,
     this.errorInfo,
+    this.isRetryable = false,
   }) : _message = message;
 
   /// Creates an AblyException from an ErrorInfo.
-  factory AblyException.fromErrorInfo(ErrorInfo errorInfo) {
+  factory AblyException.fromErrorInfo(
+    ErrorInfo errorInfo, {
+    bool isRetryable = false,
+  }) {
     return AblyException(
       message: errorInfo.message,
       errorInfo: errorInfo,
+      isRetryable: isRetryable,
     );
   }
 
@@ -47,6 +52,12 @@ class AblyException implements Exception {
 
   /// Detailed error information.
   final ErrorInfo? errorInfo;
+
+  /// Whether this error should trigger fallback retry regardless of status code.
+  ///
+  /// RSC15l4: CloudFront errors (Server: CloudFront header with status >= 400)
+  /// are retryable even though they have 4xx status codes.
+  final bool isRetryable;
 
   /// Error message - returns errorInfo.message if not set directly.
   String? get message => _message ?? errorInfo?.message;

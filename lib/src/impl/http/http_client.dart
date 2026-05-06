@@ -179,8 +179,8 @@ class AblyHttpClient {
           );
         }
 
-        // Only retry on certain errors (5xx, network errors)
-        if (!ErrorClassifier.shouldRetryException(e)) {
+        // Only retry on certain errors (5xx, network errors, RSC15l4 CloudFront)
+        if (!e.isRetryable && !ErrorClassifier.shouldRetryException(e)) {
           rethrow;
         }
 
@@ -367,7 +367,18 @@ class AblyHttpClient {
 
     // Check for errors
     if (!ablyResponse.isSuccess && !returnErrorBody) {
-      throw _parseError(ablyResponse, queryParams?['request_id']);
+      // RSC15l4: CloudFront errors are retryable
+      final isCloudFront = normalizedHeaders['server']
+              ?.toLowerCase()
+              .contains('cloudfront') ??
+          false;
+      final forceRetry =
+          isCloudFront && response.statusCode >= 400;
+      throw _parseError(
+        ablyResponse,
+        queryParams?['request_id'],
+        isRetryable: forceRetry,
+      );
     }
 
     // For successful responses, check Content-Type support
@@ -404,7 +415,11 @@ class AblyHttpClient {
     return base64Url.encode(bytes).substring(0, 16);
   }
 
-  AblyException _parseError(AblyHttpResponse response, String? requestId) {
+  AblyException _parseError(
+    AblyHttpResponse response,
+    String? requestId, {
+    bool isRetryable = false,
+  }) {
     ErrorInfo errorInfo;
 
     if (response.body is Map && response.body['error'] != null) {
@@ -424,7 +439,7 @@ class AblyHttpClient {
       );
     }
 
-    return AblyException.fromErrorInfo(errorInfo);
+    return AblyException.fromErrorInfo(errorInfo, isRetryable: isRetryable);
   }
 
   /// Closes the HTTP client.

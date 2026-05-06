@@ -369,7 +369,7 @@ void main() {
     group('RSA4b - Msgpack response', () {
       // UTS: rest/unit/RSA4b/renewal-msgpack-response-4
       test('RSA4b - renewal msgpack response', () {},
-          skip: 'DEVIATION: Dart SDK does not implement msgpack');
+          skip: 'Not yet implemented: msgpack encoding support');
     });
 
     group('RSA4b1 - Preemptive token renewal', () {
