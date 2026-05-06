@@ -17,6 +17,7 @@ void main() {
   group(
       'RSA4a2 - Server token error with non-renewable token transitions to '
       'FAILED', () {
+    // UTS: realtime/unit/RSA4a2/token-error-non-renewable-failed-0
     test('token error 40142 with no renewal mechanism causes FAILED with '
         'code 40171', () async {
       final mockWs = MockWebSocketClient(
@@ -70,6 +71,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RSA4a2/token-error-non-renewable-no-retry-1
     test('token error 40140 with no renewal mechanism causes FAILED with '
         'code 40171', () async {
       final mockWs = MockWebSocketClient(
@@ -124,6 +126,7 @@ void main() {
   group(
       'RSA4a2 - Server token error with non-renewable token does not retry',
       () {
+    // UTS: realtime/unit/RSA4a2/token-error-non-renewable-no-retry-1.1
     test('only one connection attempt is made (no retry)', () async {
       var connectionAttemptCount = 0;
 
@@ -172,6 +175,7 @@ void main() {
       'RSA4a2 - Token errors in range 40140-40149 are treated as token '
       'errors', () {
     for (final tokenErrorCode in [40140, 40142, 40144, 40149]) {
+      // UTS: realtime/unit/RSA4a1/non-renewable-token-logs-warning-0
       test('token error $tokenErrorCode causes FAILED with code 40171',
           () async {
         final mockWs = MockWebSocketClient(

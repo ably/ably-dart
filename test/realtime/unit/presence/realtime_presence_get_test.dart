@@ -12,6 +12,7 @@ import '../../../helpers/test_channel_name.dart';
 /// Spec: uts/test/realtime/unit/presence/realtime_presence_get.md
 void main() {
   group('RTP11a - get returns current members (single-message sync)', () {
+    // UTS: realtime/unit/RTP11a/get-returns-members-single-sync-0
     test('waits for sync before returning', () async {
       final channelName = testChannelName('RTP11a-single');
 
@@ -100,6 +101,7 @@ void main() {
   });
 
   group('RTP11a, RTP11c1 - get waits for multi-message sync', () {
+    // UTS: realtime/unit/RTP11a/get-waits-for-multi-sync-1
     test('waits for all SYNC messages before returning', () async {
       final channelName = testChannelName('RTP11c1-multi');
 
@@ -198,6 +200,7 @@ void main() {
   });
 
   group('RTP11c1 - get with waitForSync=false', () {
+    // UTS: realtime/unit/RTP11c1/get-no-wait-returns-immediately-0
     test('returns immediately with available members', () async {
       final channelName = testChannelName('RTP11c1-nowait');
 
@@ -264,6 +267,7 @@ void main() {
   });
 
   group('RTP11c2 - get filtered by clientId', () {
+    // UTS: realtime/unit/RTP11c2/get-filtered-by-clientid-0
     test('returns only members matching clientId', () async {
       final channelName = testChannelName('RTP11c2');
 
@@ -342,6 +346,7 @@ void main() {
   });
 
   group('RTP11c3 - get filtered by connectionId', () {
+    // UTS: realtime/unit/RTP11c3/get-filtered-by-connectionid-0
     test('returns only members matching connectionId', () async {
       final channelName = testChannelName('RTP11c3');
 
@@ -420,6 +425,7 @@ void main() {
   });
 
   group('RTP11b - get implicitly attaches channel', () {
+    // UTS: realtime/unit/RTP11b/get-implicitly-attaches-0
     test('attaches INITIALIZED channel before returning', () async {
       final channelName = testChannelName('RTP11b');
 
@@ -467,6 +473,7 @@ void main() {
   });
 
   group('RTP11d - get on SUSPENDED channel', () {
+    // UTS: realtime/unit/RTP11d/get-suspended-errors-default-0
     test('errors by default (waitForSync=true)', () async {
       final channelName = testChannelName('RTP11d');
 
@@ -546,6 +553,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTP11d/get-suspended-no-wait-returns-1
     test('waitForSync=false returns available members', () async {
       final channelName = testChannelName('RTP11d-nowait');
 

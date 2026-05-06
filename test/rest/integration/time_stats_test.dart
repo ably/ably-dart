@@ -30,6 +30,7 @@ void main() {
   // RSC16 — server time
   // ---------------------------------------------------------------------------
   group('RSC16 - time()', () {
+    // UTS: rest/integration/RSC16/time-returns-server-time-0
     test('RSC16 - time() returns server time within 5 seconds of local time',
         () async {
       final before = DateTime.now();
@@ -60,6 +61,7 @@ void main() {
   // RSC6 — stats()
   // ---------------------------------------------------------------------------
   group('RSC6 - stats()', () {
+    // UTS: rest/integration/RSC6/stats-returns-result-0
     test('RSC6 - stats() returns PaginatedResult of Stats', () async {
       final result = await client.stats();
 
@@ -68,6 +70,7 @@ void main() {
       // A fresh sandbox app may have zero stats entries — that is fine.
     });
 
+    // UTS: rest/integration/RSC6/stats-with-parameters-1
     test('RSC6 - stats() with limit/direction/unit respects parameters',
         () async {
       final result = await client.stats(

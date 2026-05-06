@@ -44,6 +44,7 @@ void main() {
   // RSP1: channel.presence is not null
   // -----------------------------------------------------------------------
   group('RSP1 - RestPresence is accessible on channel', () {
+    // UTS: rest/integration/RSP1/access-presence-from-channel-0
     test('RSP1 - channel.presence is not null', () {
       final client = makeRestClient();
       final channel = client.channels.get(fixtureChannelName);
@@ -96,6 +97,7 @@ void main() {
   // RSP3a1: presence.get(limit: 2) returns <= 2 items
   // -----------------------------------------------------------------------
   group('RSP3a1 - presence.get() respects limit parameter', () {
+    // UTS: rest/integration/RSP3a1/get-with-limit-0
     test('RSP3a1 - get(limit: 2) returns at most 2 items', () async {
       final client = makeRestClient();
       final channel = client.channels.get(fixtureChannelName);
@@ -131,6 +133,7 @@ void main() {
   // RSP3_Empty: Fresh channel presence.get() returns empty list
   // -----------------------------------------------------------------------
   group('RSP3_Empty - get() on empty channel returns empty result', () {
+    // UTS: rest/integration/RSP3/get-empty-channel-2
     test('RSP3_Empty - empty channel has no presence members', () async {
       final client = makeRestClient();
       final channelName =
@@ -148,6 +151,7 @@ void main() {
   // RSP5_1: client_string data is a String
   // -----------------------------------------------------------------------
   group('RSP5_1 - client_string data is correctly typed as String', () {
+    // UTS: rest/integration/RSP5/decode-string-data-0
     test('RSP5_1 - client_string data is a String with correct value',
         () async {
       final client = makeRestClient();
@@ -301,6 +305,7 @@ void main() {
   // RSP_Error_1: Invalid key causes 401
   // -----------------------------------------------------------------------
   group('RSP_Error_1 - Invalid API key returns auth error', () {
+    // UTS: rest/integration/RSP3/get-presence-members-0
     test('RSP_Error_1 - presence.get() with invalid key throws 401', () async {
       // Use a syntactically valid key format but one that will be rejected.
       final client = Rest(

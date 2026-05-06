@@ -17,6 +17,7 @@ import '../../../helpers/test_channel_name.dart';
 /// Spec: uts/test/realtime/unit/client/realtime_timeouts.md
 void main() {
   group('RTC7 - realtimeRequestTimeout applied to channel attach', () {
+    // UTS: realtime/unit/RTC7/attach-request-timeout-0
     test('custom realtimeRequestTimeout is used for attach timeout', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -69,6 +70,7 @@ void main() {
   });
 
   group('RTC7 - realtimeRequestTimeout applied to channel detach', () {
+    // UTS: realtime/unit/RTC7/detach-request-timeout-1
     test('custom realtimeRequestTimeout is used for detach timeout', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -136,6 +138,7 @@ void main() {
   });
 
   group('RTC7 - disconnectedRetryTimeout controls reconnection delay', () {
+    // UTS: realtime/unit/RTC7/disconnected-retry-timeout-2
     test('custom disconnectedRetryTimeout controls reconnection timing',
         () async {
       final testClock = TestClock();
@@ -221,6 +224,7 @@ void main() {
   });
 
   group('RTC7 - default timeouts applied when not configured', () {
+    // UTS: realtime/unit/RTC7/default-timeouts-applied-3
     test('uses spec-defined default timeout values', () {
       final options = ClientOptions(
         key: 'appId.keyId:keySecret',

@@ -14,6 +14,7 @@ import '../../../helpers/test_channel_name.dart';
 /// Spec: uts/test/realtime/unit/channels/channel_state_events.md
 void main() {
   group('RTL2b - Channel state attribute', () {
+    // UTS: realtime/unit/RTL2b/channel-state-attribute-0
     test('channel has state of type ChannelState', () {
       final client = Realtime(
         options: ClientOptions(
@@ -27,6 +28,7 @@ void main() {
       expect(channel.state, isA<ChannelState>());
     });
 
+    // UTS: realtime/unit/RTL2b/initial-state-initialized-1
     test('initial state is initialized', () {
       final client = Realtime(
         options: ClientOptions(
@@ -42,6 +44,7 @@ void main() {
   });
 
   group('RTL2a - State change events emitted for every state change', () {
+    // UTS: realtime/unit/RTL2a/state-change-events-emitted-0
     test('emits attaching and attached events during attach', () async {
       final channelName = testChannelName('RTL2a');
 
@@ -94,6 +97,7 @@ void main() {
   });
 
   group('RTL2d, TH1, TH2, TH5 - ChannelStateChange object structure', () {
+    // UTS: realtime/unit/RTL2d/state-change-object-structure-0
     test('contains current, previous, and event fields', () async {
       final channelName = testChannelName('RTL2d');
 
@@ -146,6 +150,7 @@ void main() {
   });
 
   group('RTL2d, TH3 - ChannelStateChange includes error reason', () {
+    // UTS: realtime/unit/RTL2d/state-change-error-reason-1
     test('error is included in state change when channel fails', () async {
       final channelName = testChannelName('RTL2d-error');
 
@@ -211,6 +216,7 @@ void main() {
   });
 
   group('RTL2 - Filtered event subscription', () {
+    // UTS: realtime/unit/RTL2/filtered-event-subscription-0
     test('subscribing to specific event only receives that event', () async {
       final channelName = testChannelName('RTL2-filtered');
 
@@ -261,6 +267,7 @@ void main() {
   });
 
   group('RTL2g - UPDATE event for condition changes without state change', () {
+    // UTS: realtime/unit/RTL2g/no-duplicate-state-events-1
     test('emits UPDATE when ATTACHED received while already attached',
         () async {
       final channelName = testChannelName('RTL2g');
@@ -319,6 +326,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL2g/update-event-condition-change-0
     test('does not emit duplicate state events', () async {
       final channelName = testChannelName('RTL2g-nodup');
 
@@ -377,6 +385,7 @@ void main() {
   });
 
   group('RTL2i, TH6 - hasBacklog flag in ChannelStateChange', () {
+    // UTS: realtime/unit/RTL2i/has-backlog-flag-true-0
     test('hasBacklog is true when ATTACHED has HAS_BACKLOG flag', () async {
       final channelName = testChannelName('RTL2i');
       // HAS_BACKLOG flag (TR3b)
@@ -428,6 +437,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL2i/has-backlog-flag-false-1
     test('hasBacklog is false when flag is not present', () async {
       final channelName = testChannelName('RTL2i-false');
 
@@ -476,6 +486,7 @@ void main() {
   });
 
   group('RTL2d - resumed flag in ChannelStateChange', () {
+    // UTS: realtime/unit/RTL2d/resumed-flag-propagated-2
     test('resumed is true when ATTACHED has RESUMED flag', () async {
       final channelName = testChannelName('RTL2d-resumed');
       // RESUMED flag (TR3c)
@@ -529,6 +540,7 @@ void main() {
   });
 
   group('Channel errorReason attribute', () {
+    // UTS: realtime/unit/RTL24/error-reason-populated-0
     test('errorReason is populated when channel enters failed state', () async {
       final channelName = testChannelName('errorReason');
 
@@ -583,6 +595,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL4c/error-reason-cleared-attach-0
     test('errorReason is cleared on successful attach after failure', () async {
       final channelName = testChannelName('errorReason-clear');
       var attachCount = 0;

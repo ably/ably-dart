@@ -10,6 +10,7 @@ import '../../../helpers/mock_http_client.dart';
 /// Spec: uts/test/rest/unit/channel/get_message.md
 void main() {
   group('RSL11b - getMessage sends GET to correct endpoint', () {
+    // UTS: rest/unit/RSL11b/get-correct-endpoint-0
     test('sends GET to /channels/{channelName}/messages/{serial}', () async {
       final channelName = 'test-RSL11b';
       final mockHttp = MockHttpClient(
@@ -46,6 +47,7 @@ void main() {
   });
 
   group('RSL11c - getMessage returns decoded Message', () {
+    // UTS: rest/unit/RSL11c/returns-decoded-message-0
     test('returns Message with all fields populated', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -92,6 +94,7 @@ void main() {
   });
 
   group('RSL11b - getMessage URL-encodes serial in path', () {
+    // UTS: rest/unit/RSL11b/url-encodes-serial-1
     test('special characters in serial are URL-encoded', () async {
       final channelName = 'test-RSL11b-encode';
       const serialWithSpecialChars = 'serial/with:special+chars';
@@ -127,6 +130,7 @@ void main() {
   });
 
   group('RSL11a - getMessage with missing serial throws error', () {
+    // UTS: rest/unit/RSL11a/missing-serial-error-0
     test('empty serial throws AblyException with code 40003', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {

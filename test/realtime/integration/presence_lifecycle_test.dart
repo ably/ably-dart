@@ -43,6 +43,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTP8, RTP9, RTP10 - Enter, update, leave lifecycle
     // -------------------------------------------------------------------------
+    // UTS: realtime/integration/RTP8/enter-update-leave-lifecycle-0
     test('RTP8, RTP9, RTP10 - Enter, update, leave lifecycle', () async {
       final clientA = buildClient(clientId: 'lifecycle-client');
       final clientB = buildClient();
@@ -122,6 +123,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTP4, RTP6, RTP11a - Bulk enterClient observed on different connection
     // -------------------------------------------------------------------------
+    // UTS: realtime/integration/RTP4/bulk-enter-observed-0
     test('RTP4, RTP6, RTP11a - Bulk enterClient observed on different connection',
         () async {
       // Use key auth without clientId for enterClient with multiple clientIds

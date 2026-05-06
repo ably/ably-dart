@@ -28,6 +28,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL26 - channel.annotations returns RealtimeAnnotations', () {
+    // UTS: realtime/unit/RTL26/annotations-attribute-type-0
     test('exposes annotations attribute of correct type', () {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -55,6 +56,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTAN1a, RTAN1c - publish sends ANNOTATION ProtocolMessage', () {
+    // UTS: realtime/unit/RTAN1a/publish-sends-annotation-0
     test('sends ANNOTATION PM with ANNOTATION_CREATE action', () async {
       final channelName = testChannelName('RTAN1-publish');
       final capturedMessages = <ProtocolMessage>[];
@@ -133,6 +135,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTAN1a - publish validates type is required', () {
+    // UTS: realtime/unit/RTAN1a/validates-type-required-1
     test('throws error code 40003 when type is missing', () async {
       final channelName = testChannelName('RTAN1a-validate');
 
@@ -192,6 +195,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTAN1a - publish encodes data per RSL4', () {
+    // UTS: realtime/unit/RTAN1a/encodes-data-json-2
     test('JSON data encoded as string with encoding field', () async {
       final channelName = testChannelName('RTAN1a-encode');
       final capturedMessages = <ProtocolMessage>[];
@@ -277,6 +281,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTAN1b - publish fails in FAILED channel state', () {
+    // UTS: realtime/unit/RTAN1b/publish-channel-state-0
     test('annotation publish rejected when channel is FAILED', () async {
       final channelName = testChannelName('RTAN1b');
 
@@ -346,6 +351,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTAN1d - publish success via ACK', () {
+    // UTS: realtime/unit/RTL6c2/queued-when-disconnected-1
     test('publish resolves on ACK', () async {
       final channelName = testChannelName('RTAN1d-ack');
 
@@ -403,6 +409,7 @@ void main() {
   });
 
   group('RTAN1d - publish failure via NACK', () {
+    // UTS: realtime/unit/RTAN1d/publish-ack-nack-0
     test('publish rejects on NACK with error code', () async {
       final channelName = testChannelName('RTAN1d-nack');
 
@@ -475,6 +482,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTAN2a - delete sends ANNOTATION_DELETE', () {
+    // UTS: realtime/unit/RTAN2a/delete-sends-annotation-0
     test('sends ANNOTATION PM with ANNOTATION_DELETE action', () async {
       final channelName = testChannelName('RTAN2-delete');
       final capturedMessages = <ProtocolMessage>[];
@@ -549,6 +557,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTAN3a - get delegates to REST API', () {
+    // UTS: realtime/unit/RTAN1a/publish-sends-annotation-0.1
     test('sends GET to annotations endpoint via HTTP', () async {
       final channelName = testChannelName('RTAN3a');
 
@@ -628,6 +637,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTAN4a, RTAN4b - subscribe delivers annotations', () {
+    // UTS: realtime/unit/RTAN4a/subscribe-delivers-annotations-0
     test('decoded Annotation objects delivered to listeners', () async {
       final channelName = testChannelName('RTAN4-subscribe');
 
@@ -731,6 +741,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTAN4c - subscribe with type filter', () {
+    // UTS: realtime/unit/RTAN4c/subscribe-type-filter-0
     test('only delivers matching annotation types', () async {
       final channelName = testChannelName('RTAN4c-filter');
 
@@ -829,6 +840,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTAN4d - subscribe implicitly attaches channel', () {
+    // UTS: realtime/unit/RTAN4d/subscribe-implicit-attach-0
     test('subscribe triggers implicit attach from INITIALIZED', () async {
       final channelName = testChannelName('RTAN4d-attach');
 
@@ -884,6 +896,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTAN4e - warns when ANNOTATION_SUBSCRIBE mode not granted', () {
+    // UTS: realtime/unit/RTAN4e/subscribe-warns-no-mode-0
     test('logs warning when attached without ANNOTATION_SUBSCRIBE', () async {
       final channelName = testChannelName('RTAN4e-warn');
 
@@ -951,6 +964,7 @@ void main() {
 
   group('RTAN4e1 - no warning when not attached with attachOnSubscribe false',
       () {
+    // UTS: realtime/unit/RTAN4e1/no-warn-unattached-0
     test('no ANNOTATION_SUBSCRIBE warning when channel is INITIALIZED',
         () async {
       final channelName = testChannelName('RTAN4e1');
@@ -1007,6 +1021,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTAN5a - unsubscribe removes listeners', () {
+    // UTS: realtime/unit/RTAN5a/unsubscribe-type-filter-1
     test('unsubscribed listener does not receive further annotations',
         () async {
       final channelName = testChannelName('RTAN5-unsub');
@@ -1112,6 +1127,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTAN5a - unsubscribe with type removes only typed listener', () {
+    // UTS: realtime/unit/RTAN5a/unsubscribe-removes-listeners-0
     test('unsubscribing typed listener leaves other typed listeners active',
         () async {
       final channelName = testChannelName('RTAN5a-typed');

@@ -51,6 +51,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTL32 - Update message via realtime observed on subscriber
     // -------------------------------------------------------------------------
+    // UTS: realtime/integration/RTL32/update-message-observed-0
     test('RTL32 - Update message via realtime observed on subscriber', () async {
       final clientA = buildClient();
       final clientB = buildClient();
@@ -109,6 +110,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTL32 - Delete message via realtime observed on subscriber
     // -------------------------------------------------------------------------
+    // UTS: realtime/integration/RTL32/delete-message-observed-1
     test('RTL32 - Delete message via realtime observed on subscriber', () async {
       final clientA = buildClient();
       final clientB = buildClient();
@@ -153,6 +155,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTL32 - Append message via realtime observed on subscriber
     // -------------------------------------------------------------------------
+    // UTS: realtime/integration/RTL32/append-message-observed-2
     test('RTL32 - Append message via realtime observed on subscriber', () async {
       final clientA = buildClient();
       final clientB = buildClient();
@@ -200,6 +203,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTL32 - Full mutation lifecycle: create, update, append, delete
     // -------------------------------------------------------------------------
+    // UTS: realtime/integration/RTL32/full-mutation-lifecycle-3
     test('RTL32 - Full mutation lifecycle: create, update, append, delete',
         () async {
       final clientA = buildClient();
@@ -336,6 +340,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTAN1, RTAN2, RTAN4 - Annotation publish and delete via realtime
     // -------------------------------------------------------------------------
+    // UTS: realtime/integration/RTAN1/annotation-publish-delete-0
     test('RTAN1, RTAN2, RTAN4 - Annotation publish and delete via realtime',
         () async {
       final clientA = buildClient();
@@ -425,6 +430,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTAN4c - Annotation subscribe with type filtering
     // -------------------------------------------------------------------------
+    // UTS: realtime/integration/RTAN4c/annotation-type-filtering-0
     test('RTAN4c - Annotation subscribe with type filtering', () async {
       final clientA = buildClient();
       final clientB = buildClient();
@@ -502,6 +508,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTAN4d - Annotation subscribe implicitly attaches channel
     // -------------------------------------------------------------------------
+    // UTS: realtime/integration/RTAN4d/annotation-implicit-attach-0
     test('RTAN4d - Annotation subscribe implicitly attaches channel', () async {
       final client = buildClient();
       addTearDown(() async {

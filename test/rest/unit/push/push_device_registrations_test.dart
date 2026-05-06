@@ -7,6 +7,7 @@ import '../../../helpers/mock_http_client.dart';
 /// Spec: uts/test/rest/unit/push/push_device_registrations.md
 void main() {
   group('RSH1b1 - get', () {
+    // UTS: rest/unit/RSH1b1/get-device-details-0
     test('returns DeviceDetails for known device', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -57,6 +58,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1b1/get-unknown-device-error-1
     test('returns error for unknown device', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -89,6 +91,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1b1/get-url-encodes-deviceid-2
     test('URL-encodes deviceId', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -124,6 +127,7 @@ void main() {
   });
 
   group('RSH1b2 - list', () {
+    // UTS: rest/unit/RSH1b2/list-filtered-by-deviceid-0
     test('returns paginated DeviceDetails filtered by deviceId', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -161,6 +165,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1b2/list-filtered-by-clientid-1
     test('returns paginated DeviceDetails filtered by clientId', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -202,6 +207,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1b2/list-with-limit-param-2
     test('supports limit for pagination', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -233,6 +239,7 @@ void main() {
   });
 
   group('RSH1b3 - save', () {
+    // UTS: rest/unit/RSH1b3/save-put-device-details-0
     test('issues PUT with DeviceDetails', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -297,6 +304,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1b3/save-updates-existing-1
     test('updates existing device', () async {
       var requestCount = 0;
 
@@ -374,6 +382,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1b3/save-error-propagated-2
     test('propagates server error', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -415,6 +424,7 @@ void main() {
   });
 
   group('RSH1b4 - remove', () {
+    // UTS: rest/unit/RSH1b4/remove-delete-device-0
     test('issues DELETE for device', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -442,6 +452,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1b4/remove-nonexistent-succeeds-1
     test('succeeds for nonexistent device', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -462,6 +473,7 @@ void main() {
   });
 
   group('RSH1b5 - removeWhere', () {
+    // UTS: rest/unit/RSH1b5/remove-where-clientid-0
     test('issues DELETE with clientId param', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -489,6 +501,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1b5/remove-where-deviceid-1
     test('issues DELETE with deviceId param', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -515,6 +528,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1b5/remove-where-no-match-succeeds-2
     test('succeeds with no matching devices', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {

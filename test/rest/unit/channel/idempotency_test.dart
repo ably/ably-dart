@@ -18,6 +18,7 @@ void main() {
     });
 
     group('RSL1k1 - idempotentRestPublishing default', () {
+      // UTS: rest/unit/RSL1k1/idempotent-default-true-0
       test('defaults to true', () {
         final client = Rest.forTesting(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -29,6 +30,7 @@ void main() {
     });
 
     group('RSL1k2 - Message ID format when idempotent publishing enabled', () {
+      // UTS: rest/unit/RSL1k2/message-id-format-0
       test('generates ID in <base64>:<serial> format', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSL1k2-format');
@@ -79,6 +81,7 @@ void main() {
     });
 
     group('RSL1k2 - Serial increments for batch publish', () {
+      // UTS: rest/unit/RSL1k2/serial-increments-batch-1
       test('increments serial for each message in batch', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSL1k2-batch');
@@ -136,6 +139,7 @@ void main() {
     });
 
     group('RSL1k3 - Separate publishes get unique base IDs', () {
+      // UTS: rest/unit/RSL1k3/unique-base-ids-0
       test('generates different base IDs for separate calls', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSL1k3-unique');
@@ -179,6 +183,7 @@ void main() {
     });
 
     group('RSL1k3 - No ID generated when idempotent publishing disabled', () {
+      // UTS: rest/unit/RSL1k3/no-id-when-disabled-1
       test('does not add ID when disabled', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSL1k3-disabled');
@@ -218,6 +223,7 @@ void main() {
     });
 
     group('RSL1k - Client-supplied ID preserved', () {
+      // UTS: rest/unit/RSL1k/client-id-preserved-0
       test('does not overwrite client-supplied IDs', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSL1k-preserved');
@@ -259,6 +265,7 @@ void main() {
     });
 
     group('RSL1k2 - Same ID used on retry', () {
+      // UTS: rest/unit/RSL1k2/same-id-on-retry-2
       test('uses same message ID when retrying after failure', () async {
         final capturedRequests = <CapturedRequest>[];
         var requestCount = 0;
@@ -310,6 +317,7 @@ void main() {
     });
 
     group('RSL1k - Mixed client and library IDs in batch', () {
+      // UTS: rest/unit/RSL1k/mixed-ids-in-batch-1
       test('preserves client IDs and generates IDs for others', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSL1k-mixed');

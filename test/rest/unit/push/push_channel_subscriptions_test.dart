@@ -7,6 +7,7 @@ import '../../../helpers/mock_http_client.dart';
 /// Spec: uts/test/rest/unit/push/push_channel_subscriptions.md
 void main() {
   group('RSH1c1 - list', () {
+    // UTS: rest/unit/RSH1c1/list-filtered-by-channel-0
     test('returns paginated PushChannelSubscription filtered by channel',
         () async {
       final mockHttp = MockHttpClient(
@@ -45,6 +46,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1c1/list-filtered-by-device-client-1
     test('filters by deviceId and clientId', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -77,6 +79,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1c1/list-with-limit-param-2
     test('supports limit for pagination', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -103,6 +106,7 @@ void main() {
   });
 
   group('RSH1c2 - listChannels', () {
+    // UTS: rest/unit/RSH1c2/list-channels-paginated-0
     test('returns paginated channel names', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -132,6 +136,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1c2/list-channels-with-limit-1
     test('supports limit and pagination', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -158,6 +163,7 @@ void main() {
   });
 
   group('RSH1c3 - save', () {
+    // UTS: rest/unit/RSH1c3/save-post-subscription-0
     test('issues POST with PushChannelSubscription', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -197,6 +203,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1c3/save-updates-existing-1
     test('updates existing subscription', () async {
       var requestCount = 0;
 
@@ -232,6 +239,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1c3/save-error-propagated-2
     test('propagates server error', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -271,6 +279,7 @@ void main() {
   });
 
   group('RSH1c4 - remove', () {
+    // UTS: rest/unit/RSH1c4/remove-delete-clientid-0
     test('issues DELETE with clientId subscription attributes', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -306,6 +315,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1c4/remove-delete-deviceid-1
     test('issues DELETE with deviceId subscription attributes', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -340,6 +350,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1c4/remove-nonexistent-succeeds-2
     test('succeeds for nonexistent subscription', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -365,6 +376,7 @@ void main() {
   });
 
   group('RSH1c5 - removeWhere', () {
+    // UTS: rest/unit/RSH1c5/remove-where-clientid-0
     test('issues DELETE with clientId param', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -392,6 +404,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1c5/remove-where-deviceid-1
     test('issues DELETE with deviceId param', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -418,6 +431,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1c5/remove-where-no-match-succeeds-2
     test('succeeds with no matching subscriptions', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {

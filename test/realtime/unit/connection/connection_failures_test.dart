@@ -25,6 +25,7 @@ http.Client createMockHttpClient() {
 /// Spec: uts/test/realtime/unit/connection/connection_failures_test.md
 void main() {
   group('RTN15h1 - DISCONNECTED with token error, no renewal', () {
+    // UTS: realtime/unit/RTN15h1/token-error-no-renew-0
     test('transitions to FAILED when token cannot be renewed', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -73,6 +74,7 @@ void main() {
   });
 
   group('RTN15h2 - DISCONNECTED with token error, renewable', () {
+    // UTS: realtime/unit/RTN15h2/token-error-renew-success-0
     test('renews token and resumes connection', () async {
       var connectionAttemptCount = 0;
       var tokenRenewalCount = 0;
@@ -150,6 +152,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN15h2/token-error-renew-fails-1
     test('transitions to DISCONNECTED if renewal fails', () async {
       var authCallbackCount = 0;
 
@@ -216,6 +219,7 @@ void main() {
   });
 
   group('RTN15h3 - DISCONNECTED with non-token error', () {
+    // UTS: realtime/unit/RTN15h3/non-token-error-resume-0
     test('immediately resumes connection', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -296,6 +300,7 @@ void main() {
   });
 
   group('RTN15j - ERROR with empty channel when CONNECTED', () {
+    // UTS: realtime/unit/RTN15j/error-empty-channel-failed-0
     test('transitions to FAILED on connection-level ERROR', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -339,6 +344,7 @@ void main() {
   });
 
   group('RTN15a - Unexpected transport disconnect', () {
+    // UTS: realtime/unit/RTN15a/unexpected-transport-disconnect-0
     test('triggers resume attempt', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -405,6 +411,7 @@ void main() {
   });
 
   group('RTN15b, RTN15c6 - Successful resume', () {
+    // UTS: realtime/unit/RTN15b/successful-resume-0
     test('resumes with same connectionId', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -480,6 +487,7 @@ void main() {
   });
 
   group('RTN15c7 - Failed resume', () {
+    // UTS: realtime/unit/RTN15c7/failed-resume-new-id-0
     test('handles new connectionId indicating failed resume', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -555,6 +563,7 @@ void main() {
   });
 
   group('RTN15g - Connection state cleared after connectionStateTtl', () {
+    // UTS: realtime/unit/RTN15g/state-cleared-after-ttl-0
     test('makes fresh connection after TTL expires', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -669,6 +678,7 @@ void main() {
   });
 
   group('RTN15c5 - ERROR with token error during resume', () {
+    // UTS: realtime/unit/RTN15c5/token-error-during-resume-0
     test('renews token and retries', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -757,6 +767,7 @@ void main() {
   });
 
   group('RTN15c4 - ERROR with fatal error during resume', () {
+    // UTS: realtime/unit/RTN15c4/fatal-error-during-resume-0
     test('transitions to FAILED on fatal error', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);

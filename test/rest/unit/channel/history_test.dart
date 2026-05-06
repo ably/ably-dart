@@ -16,6 +16,7 @@ void main() {
     });
 
     group('RSL2a - History returns PaginatedResult', () {
+      // UTS: rest/unit/RSL2a/returns-paginated-result-0
       test('returns PaginatedResult containing messages', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSL2a');
@@ -75,6 +76,7 @@ void main() {
       ];
 
       for (final testCase in testCases) {
+        // UTS: rest/unit/RSL2b/query-parameters-0
         test('sends ${testCase.parameter}=${testCase.value}', () async {
           final capturedRequests = <CapturedRequest>[];
           final channelName = testChannelName('RSL2b');
@@ -112,6 +114,7 @@ void main() {
     });
 
     group('RSL2b1 - Default direction is backwards', () {
+      // UTS: rest/unit/RSL2b1/default-direction-backwards-0
       test('uses backwards direction by default', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSL2b1');
@@ -148,6 +151,7 @@ void main() {
     });
 
     group('RSL2b2 - Limit parameter', () {
+      // UTS: rest/unit/RSL2b2/limit-parameter-0
       test('sends limit in query string', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSL2b2');
@@ -183,6 +187,7 @@ void main() {
     });
 
     group('RSL2b3 - Default limit is 100', () {
+      // UTS: rest/unit/RSL2b3/default-limit-hundred-0
       test('uses default limit of 100', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSL2b3');
@@ -236,6 +241,7 @@ void main() {
       ];
 
       for (final testCase in testCases) {
+        // UTS: rest/unit/RSL2/request-url-format-0
         test('encodes channel name "${testCase.channelName}"', () async {
           final capturedRequests = <CapturedRequest>[];
 
@@ -268,6 +274,7 @@ void main() {
     });
 
     group('RSL2 - History with time range', () {
+      // UTS: rest/unit/RSL2/history-time-range-1
       test('sends start and end parameters', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSL2-time');

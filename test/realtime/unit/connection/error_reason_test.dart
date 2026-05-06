@@ -14,6 +14,7 @@ import '../../../helpers/protocol_message_helpers.dart';
 /// Spec: uts/test/realtime/unit/connection/error_reason_test.md
 void main() {
   group('RTN25 - errorReason set on connection errors', () {
+    // UTS: realtime/unit/RTN25/error-reason-on-failed-0
     test('errorReason populated on connection failure', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -53,6 +54,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN25/error-reason-disconnected-1
     test('errorReason set on DISCONNECTED state', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -82,6 +84,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN25/error-reason-suspended-2
     test('errorReason on SUSPENDED state after connectionStateTtl', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -126,6 +129,7 @@ void main() {
       });
     });
 
+    // UTS: realtime/unit/RTN25/error-reason-token-error-3
     test('RTN25 - errorReason on non-renewable token errors (RSA4a)', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -160,6 +164,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN25/error-reason-cleared-on-connect-4
     test('errorReason cleared on successful connection', () async {
       var connectionAttemptCount = 0;
 
@@ -214,6 +219,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN25/error-reason-protocol-error-5
     test('errorReason on protocol-level ERROR message', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -253,6 +259,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN25/error-reason-on-failed-0.1
     test('errorReason propagated to ConnectionStateChange events', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -311,6 +318,7 @@ void main() {
   });
 
   group('RTN25 - errorReason across different error types', () {
+    // UTS: realtime/unit/RTN25/error-reason-cleared-on-connect-4.1
     test('errorReason on connection timeout', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -370,6 +378,7 @@ void main() {
       });
     });
 
+    // UTS: realtime/unit/RTN25/error-reason-in-state-change-6
     test('errorReason persists across state transitions', () async {
       var connectionAttemptCount = 0;
 

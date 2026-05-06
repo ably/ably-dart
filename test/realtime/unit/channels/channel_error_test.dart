@@ -16,6 +16,7 @@ import '../../../helpers/test_channel_name.dart';
 /// Spec: uts/test/realtime/unit/channels/channel_error.md
 void main() {
   group('RTL14 - Channel ERROR transitions ATTACHED channel to FAILED', () {
+    // UTS: realtime/unit/RTL14/attached-to-failed-0
     test('transitions to FAILED with error info', () async {
       final channelName = testChannelName('RTL14-attached');
 
@@ -87,6 +88,7 @@ void main() {
   });
 
   group('RTL14 - Channel ERROR transitions ATTACHING channel to FAILED', () {
+    // UTS: realtime/unit/RTL14/attaching-to-failed-1
     test('attach fails with the error', () async {
       final channelName = testChannelName('RTL14-attaching');
 
@@ -149,6 +151,7 @@ void main() {
   });
 
   group('RTL14 - Channel ERROR completes pending detach with error', () {
+    // UTS: realtime/unit/RTL14/pending-detach-error-2
     test('detach fails when ERROR received while DETACHING', () async {
       final channelName = testChannelName('RTL14-detaching');
 
@@ -218,6 +221,7 @@ void main() {
   });
 
   group('RTL14 - Channel ERROR does not affect other channels', () {
+    // UTS: realtime/unit/RTL14/other-channels-unaffected-3
     test('only target channel transitions to FAILED', () async {
       final channelNameA = testChannelName('RTL14-a');
       final channelNameB = testChannelName('RTL14-b');
@@ -281,6 +285,7 @@ void main() {
   });
 
   group('RTL14 - Channel ERROR cancels pending timers', () {
+    // UTS: realtime/unit/RTL14/cancels-pending-timers-4
     test('channel retry timer cancelled by ERROR', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);

@@ -19,6 +19,7 @@ void main() {
       /// Tests that when a request is rejected with error code 40142
       /// (token expired), the library obtains a new token via the auth
       /// callback and retries the request automatically.
+      // UTS: rest/unit/RSA4b/renewal-on-40142-0
       test('obtains new token and retries on 40142 error', () async {
         var callbackCount = 0;
         final tokens = ['first-token', 'second-token'];
@@ -95,6 +96,7 @@ void main() {
 
     group('RSA4b4 - Token renewal on 40140 error', () {
       /// Tests renewal is triggered for error code 40140 (token error).
+      // UTS: rest/unit/RSA4b/renewal-on-40140-1
       test('obtains new token and retries on 40140 error', () async {
         var callbackCount = 0;
         var requestCount = 0;
@@ -142,6 +144,7 @@ void main() {
     group('RSA14 - Pre-emptive token renewal', () {
       /// Tests that if a token is known to be expired before making a request,
       /// renewal happens without first making a failing request.
+      // UTS: rest/unit/RSC10b/non-token-401-no-renewal-0
       test('renews expired token pre-emptively', () async {
         var callbackCount = 0;
         final capturedRequests = <CapturedRequest>[];
@@ -208,6 +211,7 @@ void main() {
     group('RSA4b4 - No renewal without authCallback', () {
       /// Tests that token renewal is not attempted if no renewal mechanism
       /// (authCallback/authUrl/key) is available.
+      // UTS: rest/unit/RSA4a2/no-renewal-without-callback-0
       test('does not retry without renewal mechanism', () async {
         var requestCount = 0;
         final channelName = testChannelName('RSA4b4-no-renewal');
@@ -247,6 +251,7 @@ void main() {
 
     group('RSA4b4 - Renewal with authUrl', () {
       /// Tests that token renewal works via authUrl.
+      // UTS: rest/unit/RSA4b/renewal-via-authurl-2
       test('renews token via authUrl on 40142 error', () async {
         final capturedRequests = <CapturedRequest>[];
         var requestCount = 0;
@@ -321,6 +326,7 @@ void main() {
     group('RSA4b4 - Renewal limit', () {
       /// Tests that token renewal doesn't loop infinitely if server keeps
       /// rejecting tokens.
+      // UTS: rest/unit/RSA4b/renewal-limit-no-loop-3
       test('stops retrying after max attempts', () async {
         var callbackCount = 0;
         var requestCount = 0;

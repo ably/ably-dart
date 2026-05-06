@@ -13,6 +13,7 @@ import '../../../helpers/mock_http_client.dart';
 /// Spec: uts/test/rest/unit/auth/revoke_tokens.md
 void main() {
   group('RSA17g - revokeTokens sends POST to /keys/{keyName}/revokeTokens', () {
+    // UTS: rest/unit/RSA17g/sends-post-correct-path-0
     test('sends POST request to correct path', () async {
       final capturedRequests = <CapturedRequest>[];
 
@@ -61,6 +62,7 @@ void main() {
   });
 
   group('RSA17b - Target specifiers mapped to type:value strings', () {
+    // UTS: rest/unit/RSA17b/single-specifier-targets-0
     test('single specifier sent as targets array', () async {
       final capturedRequests = <CapturedRequest>[];
 
@@ -104,6 +106,7 @@ void main() {
       expect(requestBody['targets'], equals(['clientId:alice']));
     });
 
+    // UTS: rest/unit/RSA17b/multiple-specifier-types-1
     test('multiple specifiers with different types', () async {
       final capturedRequests = <CapturedRequest>[];
 
@@ -174,6 +177,7 @@ void main() {
   });
 
   group('RSA17c, BAR2 - Returns BatchResult', () {
+    // UTS: rest/unit/RSA17c/all-success-result-0
     test('all success result', () async {
       final mockHttp = MockHttpClient(
         onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -218,6 +222,7 @@ void main() {
       expect(result.results.length, equals(2));
     });
 
+    // UTS: rest/unit/RSA17c/mixed-success-failure-1
     test('mixed success and failure result', () async {
       final mockHttp = MockHttpClient(
         onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -265,6 +270,7 @@ void main() {
       expect(result.results.length, equals(2));
     });
 
+    // UTS: rest/unit/RSA17c/all-failure-result-2
     test('all failure result', () async {
       final mockHttp = MockHttpClient(
         onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -317,6 +323,7 @@ void main() {
   });
 
   group('TRS2 - TokenRevocationSuccessResult attributes', () {
+    // UTS: rest/unit/TRS2/success-result-attributes-0
     test('success result contains target, appliesAt, and issuedBefore',
         () async {
       final mockHttp = MockHttpClient(
@@ -358,6 +365,7 @@ void main() {
   });
 
   group('TRF2 - TokenRevocationFailureResult attributes', () {
+    // UTS: rest/unit/TRF2/failure-result-attributes-0
     test('failure result contains target and error', () async {
       final mockHttp = MockHttpClient(
         onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -403,6 +411,7 @@ void main() {
   });
 
   group('RSA17d - Token auth clients cannot revoke tokens', () {
+    // UTS: rest/unit/RSA17d/token-auth-revoke-rejected-0
     test('token auth client fails with 40162', () async {
       final capturedRequests = <CapturedRequest>[];
 
@@ -443,6 +452,7 @@ void main() {
       expect(capturedRequests.length, equals(0));
     });
 
+    // UTS: rest/unit/RSA17d/use-token-auth-revoke-rejected-1
     test('token auth via useTokenAuth flag fails with 40162', () async {
       final capturedRequests = <CapturedRequest>[];
 
@@ -487,6 +497,7 @@ void main() {
   });
 
   group('RSA17e - Optional issuedBefore parameter', () {
+    // UTS: rest/unit/RSA17e/issued-before-included-0
     test('issuedBefore included in request body', () async {
       final capturedRequests = <CapturedRequest>[];
 
@@ -533,6 +544,7 @@ void main() {
       expect(requestBody['issuedBefore'], equals(1699999000000));
     });
 
+    // UTS: rest/unit/RSA17e/issued-before-omitted-1
     test('issuedBefore omitted when not provided', () async {
       final capturedRequests = <CapturedRequest>[];
 
@@ -578,6 +590,7 @@ void main() {
   });
 
   group('RSA17f - Optional allowReauthMargin parameter', () {
+    // UTS: rest/unit/RSA17f/reauth-margin-included-0
     test('allowReauthMargin included when true', () async {
       final capturedRequests = <CapturedRequest>[];
 
@@ -624,6 +637,7 @@ void main() {
       expect(requestBody['allowReauthMargin'], isTrue);
     });
 
+    // UTS: rest/unit/RSA17f/reauth-margin-omitted-1
     test('allowReauthMargin omitted when not provided', () async {
       final capturedRequests = <CapturedRequest>[];
 
@@ -667,6 +681,7 @@ void main() {
       expect(requestBody.containsKey('allowReauthMargin'), isFalse);
     });
 
+    // UTS: rest/unit/RSA17f/both-options-together-2
     test('both issuedBefore and allowReauthMargin together', () async {
       final capturedRequests = <CapturedRequest>[];
 
@@ -720,6 +735,7 @@ void main() {
   });
 
   group('Error handling', () {
+    // UTS: rest/unit/RSA17/server-error-propagated-0
     test('server error is propagated as an exception', () async {
       final mockHttp = MockHttpClient(
         onConnectionAttempt: (conn) => conn.respondWithSuccess(),
@@ -757,6 +773,7 @@ void main() {
   });
 
   group('Request authentication', () {
+    // UTS: rest/unit/RSA17/request-uses-basic-auth-0
     test('request uses Basic authentication', () async {
       final capturedRequests = <CapturedRequest>[];
 

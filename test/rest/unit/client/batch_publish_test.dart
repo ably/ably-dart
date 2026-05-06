@@ -17,6 +17,7 @@ void main() {
     });
 
     group('RSC22c - Request format', () {
+      // UTS: rest/unit/RSC22c/single-spec-post-messages-0
       test('RSC22c1 - Single BatchPublishSpec sends POST to /messages',
           () async {
         final capturedRequests = <CapturedRequest>[];
@@ -57,6 +58,7 @@ void main() {
         expect(request.url.path, equals('/messages'));
       });
 
+      // UTS: rest/unit/RSC22c/array-specs-post-messages-0
       test('RSC22c2 - Array of BatchPublishSpecs sends POST to /messages',
           () async {
         final capturedRequests = <CapturedRequest>[];
@@ -102,6 +104,7 @@ void main() {
         expect(body.length, equals(2));
       });
 
+      // UTS: rest/unit/RSC22c/single-spec-single-result-0
       test('RSC22c3 - Single spec returns single BatchResult', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -131,6 +134,7 @@ void main() {
         expect(results[0].channel, equals('channel1'));
       });
 
+      // UTS: rest/unit/RSC22c/array-specs-array-results-0
       test('RSC22c4 - Array of specs returns array of BatchResults', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -162,6 +166,7 @@ void main() {
         expect(results[1].channel, equals('channel2'));
       });
 
+      // UTS: rest/unit/RSC22c/multiple-channels-multiple-results-0
       test('RSC22c5 - Multiple channels in spec produces multiple results',
           () async {
         mockHttp = MockHttpClient(
@@ -189,6 +194,7 @@ void main() {
         expect(results.length, equals(3));
       });
 
+      // UTS: rest/unit/RSC22c/messages-encoded-per-rsl4-0
       test('RSC22c6 - Messages are encoded according to RSL4', () async {
         final capturedRequests = <CapturedRequest>[];
 
@@ -234,6 +240,7 @@ void main() {
         expect(messages[0]['clientId'], equals('client1'));
       });
 
+      // UTS: rest/unit/RSC22c/uses-configured-auth-0
       test('RSC22c7 - Request uses correct authentication', () async {
         final capturedRequests = <CapturedRequest>[];
 
@@ -270,6 +277,7 @@ void main() {
     });
 
     group('RSC22d - Idempotent publishing', () {
+      // UTS: rest/unit/RSC22d/idempotent-ids-generated-0
       test('RSC22d1 - Idempotent IDs generated when enabled', () async {
         final capturedRequests = <CapturedRequest>[];
 
@@ -315,6 +323,7 @@ void main() {
         expect(messages[0]['id'], isNot(equals(messages[1]['id'])));
       });
 
+      // UTS: rest/unit/RSC22d/explicit-ids-preserved-0
       test('RSC22d3 - Explicit message IDs preserved', () async {
         final capturedRequests = <CapturedRequest>[];
 
@@ -355,6 +364,7 @@ void main() {
         expect(messages[0]['id'], equals('my-custom-id'));
       });
 
+      // UTS: rest/unit/RSC22d/ids-not-generated-disabled-0
       test('RSC22d4 - Idempotent IDs not generated when disabled', () async {
         final capturedRequests = <CapturedRequest>[];
 
@@ -398,6 +408,7 @@ void main() {
     });
 
     group('BSP2 - BatchPublishSpec', () {
+      // UTS: rest/unit/BSP2a/channels-array-strings-0
       test('BSP2a - channels is array of strings', () async {
         final capturedRequests = <CapturedRequest>[];
 
@@ -436,6 +447,7 @@ void main() {
         expect(body['channels'], equals(['ch1', 'ch2']));
       });
 
+      // UTS: rest/unit/BSP2b/messages-array-objects-0
       test('BSP2b - messages is array of Message objects', () async {
         final capturedRequests = <CapturedRequest>[];
 
@@ -478,6 +490,7 @@ void main() {
     });
 
     group('BPR2 - BatchPublishSuccessResult', () {
+      // UTS: rest/unit/BPR2a/success-channel-name-0
       test('BPR2a - channel field contains channel name', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -502,6 +515,7 @@ void main() {
         expect(results[0].channel, equals('my-channel'));
       });
 
+      // UTS: rest/unit/BPR2b/success-message-id-prefix-0
       test('BPR2b - messageId contains the message ID prefix', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -528,6 +542,7 @@ void main() {
             equals('abc123'));
       });
 
+      // UTS: rest/unit/BPR2c/serials-array-0
       test('BPR2c - serials contains array of message serials', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -557,6 +572,7 @@ void main() {
         expect(successResult.serials, equals(['serial1', 'serial2']));
       });
 
+      // UTS: rest/unit/BPR2c/serials-null-conflated-0
       test('BPR2c1 - serials may contain null for conflated messages',
           () async {
         mockHttp = MockHttpClient(
@@ -593,6 +609,7 @@ void main() {
     });
 
     group('BPF2 - BatchPublishFailureResult', () {
+      // UTS: rest/unit/BPF2a/failure-channel-name-0
       test('BPF2a - channel field contains failed channel name', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -621,6 +638,7 @@ void main() {
         expect(results[1].channel, equals('failed-channel'));
       });
 
+      // UTS: rest/unit/BPF2b/failure-error-info-0
       test('BPF2b - error contains ErrorInfo for failure reason', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -658,6 +676,7 @@ void main() {
     });
 
     group('BatchResult - Success/failure detection', () {
+      // UTS: rest/unit/RSC22c/partial-success-mixed-results-0
       test('BatchResult1 - Partial success with mixed results', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -690,6 +709,7 @@ void main() {
         expect(results[2].isSuccess, isTrue);
       });
 
+      // UTS: rest/unit/RSC22c/distinguish-success-failure-0
       test('BatchResult2 - Distinguishing success from failure results',
           () async {
         mockHttp = MockHttpClient(
@@ -729,6 +749,7 @@ void main() {
     });
 
     group('RSC22 - Error handling', () {
+      // UTS: rest/unit/RSC22/auth-error-propagated-0
       test('RSC22_Error1 - Authentication error throws AblyException',
           () async {
         mockHttp = MockHttpClient(
@@ -761,6 +782,7 @@ void main() {
         );
       });
 
+      // UTS: rest/unit/RSC22/server-error-propagated-0
       test('RSC22_Error2 - Invalid argument throws ArgumentError', () async {
         final client = Rest.forTesting(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -775,6 +797,7 @@ void main() {
     });
 
     group('RSC22 - Request headers', () {
+      // UTS: rest/unit/RSC22/standard-headers-included-0
       test('RSC22_Headers1 - Includes standard Ably headers', () async {
         final capturedRequests = <CapturedRequest>[];
 

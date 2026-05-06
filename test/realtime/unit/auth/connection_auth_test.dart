@@ -18,6 +18,7 @@ import '../../../helpers/protocol_message_helpers.dart';
 /// Spec: uts/test/realtime/unit/auth/connection_auth_test.md
 void main() {
   group('RTN2e/RTN27b - Token obtained before WebSocket connection', () {
+    // UTS: realtime/unit/RTN2e/callback-params-include-clientid-2
     test('authCallback invoked before WebSocket connection attempt', () async {
       var callbackInvoked = false;
       var callbackInvokedFirst = false;
@@ -67,6 +68,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN2e/token-before-websocket-0
     test('WebSocket URL contains token from authCallback', () async {
       Uri? capturedUrl;
 
@@ -112,6 +114,7 @@ void main() {
   });
 
   group('RTN2e/RTN27b - authCallback error handling', () {
+    // UTS: realtime/unit/RTN2e/callback-error-prevents-connect-1
     test('authCallback error prevents WebSocket connection attempt', () async {
       var connectionAttempted = false;
 
@@ -164,6 +167,7 @@ void main() {
   });
 
   group('RSA12a - authCallback receives TokenParams', () {
+    // UTS: realtime/unit/RSA4d/callback-403-causes-failed-0
     test('clientId passed to authCallback in TokenParams', () async {
       TokenParams? receivedParams;
 
@@ -206,6 +210,7 @@ void main() {
   });
 
   group('RTN2e - Token caching', () {
+    // UTS: realtime/unit/RTN2e/reuse-valid-token-3
     test('valid token reused for subsequent connections', () async {
       var callbackCount = 0;
       var connectionCount = 0;
@@ -257,6 +262,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RSA4d/callback-403-reauth-causes-failed-1
     test('expired token triggers new authCallback invocation', () async {
       var callbackCount = 0;
 
@@ -307,6 +313,7 @@ void main() {
   });
 
   group('RSA4 - Auth method selection', () {
+    // UTS: realtime/unit/RSA4c2/callback-error-causes-disconnected-0
     test('authCallback takes precedence over key', () async {
       Uri? capturedUrl;
       var callbackInvoked = false;
@@ -354,6 +361,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RSA4c3/callback-error-stays-connected-0
     test('key used for basic auth when no authCallback', () async {
       Uri? capturedUrl;
 

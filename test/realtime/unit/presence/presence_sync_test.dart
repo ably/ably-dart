@@ -9,6 +9,7 @@ import 'package:test/test.dart';
 void main() {
   group('Presence Sync', () {
     group('RTP18a - startSync sets isSyncInProgress', () {
+      // UTS: realtime/unit/RTP18a/startsync-sets-flag-0
       test('isSyncInProgress becomes true after startSync', () {
         final map = PresenceMap();
         expect(map.isSyncInProgress, isFalse);
@@ -20,6 +21,7 @@ void main() {
     });
 
     group('RTP18b - endSync clears isSyncInProgress', () {
+      // UTS: realtime/unit/RTP18b/endsync-clears-flag-0
       test('isSyncInProgress becomes false after endSync', () {
         final map = PresenceMap();
         map.startSync();
@@ -32,6 +34,7 @@ void main() {
     });
 
     group('RTP19 - Stale members get LEAVE events after sync', () {
+      // UTS: realtime/unit/RTP19/stale-members-leave-after-sync-0
       test('members not updated during sync get LEAVE events', () {
         final map = PresenceMap();
         map.put(
@@ -81,6 +84,7 @@ void main() {
     });
 
     group('RTP19 - Synthesized LEAVE has id=null and current timestamp', () {
+      // UTS: realtime/unit/RTP19/synth-leave-null-id-timestamp-1
       test('leave events have null id and recent timestamp', () {
         final map = PresenceMap();
         map.put(
@@ -122,6 +126,7 @@ void main() {
     });
 
     group('RTP19 - Members updated during sync survive', () {
+      // UTS: realtime/unit/RTP19/updated-members-survive-sync-2
       test('members seen during sync are not removed', () {
         final map = PresenceMap();
         map.put(
@@ -193,6 +198,7 @@ void main() {
     });
 
     group('RTP18a - New sync discards previous in-flight sync', () {
+      // UTS: realtime/unit/RTP18a/new-sync-discards-previous-1
       test('starting new sync resets residual tracking', () {
         final map = PresenceMap();
         map.put(
@@ -260,6 +266,7 @@ void main() {
     });
 
     group('RTP18c - Single-message sync', () {
+      // UTS: realtime/unit/RTP18c/single-message-sync-0
       test('sync with immediate start and end', () {
         final map = PresenceMap();
         map.put(
@@ -306,6 +313,7 @@ void main() {
     });
 
     group('RTP19a - ATTACHED without HAS_PRESENCE clears all members', () {
+      // UTS: realtime/unit/RTP19a/no-has-presence-clears-members-0
       test('startSync + endSync with no puts removes all members', () {
         final map = PresenceMap();
         map.put(
@@ -374,6 +382,7 @@ void main() {
     });
 
     group('RTP2h2a - LEAVE during sync stored as ABSENT (in sync context)', () {
+      // UTS: realtime/unit/RTP2h2a/leave-during-sync-absent-cleanup-0
       test('LEAVE during sync becomes ABSENT, cleaned up on endSync', () {
         final map = PresenceMap();
         map.put(
@@ -436,6 +445,7 @@ void main() {
     });
 
     group('RTP19 - Empty map sync produces no leave events', () {
+      // UTS: realtime/unit/RTP19/empty-map-sync-no-leaves-3
       test('sync on empty map then adding members produces no leaves', () {
         final map = PresenceMap();
         map.startSync();
@@ -457,6 +467,7 @@ void main() {
     });
 
     group('RTP18 - endSync without startSync is a no-op', () {
+      // UTS: realtime/unit/RTP18/endsync-without-startsync-noop-0
       test('endSync when no sync is in progress preserves map state', () {
         final map = PresenceMap();
         map.put(
@@ -479,6 +490,7 @@ void main() {
     });
 
     group('RTP19 - Stale SYNC message still removes member from residuals', () {
+      // UTS: realtime/unit/RTP19/stale-sync-removes-from-residuals-4
       test('stale put is rejected but member survives endSync', () {
         final map = PresenceMap();
 
@@ -521,6 +533,7 @@ void main() {
     });
 
     group('RTP19 - PRESENCE echoes followed by SYNC preserves all members', () {
+      // UTS: realtime/unit/RTP19/presence-echoes-then-sync-preserves-5
       test('stale SYNC ids do not cause members to be evicted as residual', () {
         final map = PresenceMap();
 
@@ -568,6 +581,7 @@ void main() {
     });
 
     group('RTP19 - New member added during sync is not stale', () {
+      // UTS: realtime/unit/RTP19/new-member-during-sync-survives-6
       test('new member during sync survives endSync', () {
         final map = PresenceMap();
         // Pre-populate with alice only

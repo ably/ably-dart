@@ -168,6 +168,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN16g2/recovery-key-null-inactive-0
     test('returns null in FAILED state', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -210,6 +211,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN16g2/recovery-key-null-inactive-0.1
     test('returns null in SUSPENDED state', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -359,6 +361,7 @@ void main() {
   });
 
   group('RTN16f - recover option initializes msgSerial from recoveryKey', () {
+    // UTS: realtime/unit/RTN16f/recover-initializes-msgserial-0
     test('msgSerial is initialized from the recoveryKey value', () async {
       final sentMessages = <ProtocolMessage>[];
 
@@ -573,6 +576,7 @@ void main() {
 
   group('RTN16 - Resume behavior on reconnection (existing functionality)',
       () {
+    // UTS: realtime/unit/RTN16k/recover-query-param-0
     test('resume param includes connectionKey on reconnect', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -653,6 +657,7 @@ void main() {
       });
     });
 
+    // UTS: realtime/unit/RTN16g/recovery-key-structure-0
     test('connectionKey is updated after successful resume', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -721,6 +726,7 @@ void main() {
       });
     });
 
+    // UTS: realtime/unit/RTN16f1/malformed-recovery-key-0
     test('failed resume results in new connectionId', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);

@@ -12,6 +12,7 @@ import '../../../helpers/test_channel_name.dart';
 /// Spec: uts/test/realtime/unit/channels/channel_attributes.md
 void main() {
   group('RTL23 - RealtimeChannel name attribute', () {
+    // UTS: realtime/unit/RTL23/name-attribute-0
     test('returns the name used when getting the channel', () {
       final client = Realtime(
         options: ClientOptions(
@@ -30,6 +31,7 @@ void main() {
   });
 
   group('RTL24 - errorReason set on channel error', () {
+    // UTS: realtime/unit/RTL24/error-reason-channel-error-0
     test('errorReason is populated when channel receives ERROR', () async {
       final channelName = testChannelName('RTL24-error');
 
@@ -88,6 +90,7 @@ void main() {
   });
 
   group('RTL24 - errorReason set on attach failure', () {
+    // UTS: realtime/unit/RTL24/error-reason-attach-failure-1
     test('errorReason is populated when attach is rejected', () async {
       final channelName = testChannelName('RTL24-attach-fail');
 
@@ -148,6 +151,7 @@ void main() {
   });
 
   group('RTL4c/RTL24 - errorReason cleared on successful attach', () {
+    // UTS: realtime/unit/RTL4c/error-cleared-on-attach-0
     test('errorReason is null after successful attach following error',
         () async {
       final channelName = testChannelName('RTL24-clear-attach');
@@ -221,6 +225,7 @@ void main() {
   });
 
   group('RTL4c/RTL24 - errorReason cleared on successful attach, preserved through detach', () {
+    // UTS: realtime/unit/RTL4c/error-cleared-preserved-detach-1
     test('errorReason cleared by reattach, stays null through detach', () async {
       final channelName = testChannelName('RTL24-clear-detach');
       var attachCount = 0;

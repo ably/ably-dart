@@ -18,6 +18,7 @@ import '../../../helpers/test_channel_name.dart';
 /// Spec: uts/test/rest/unit/auth/token_renewal.md (RSC10 section)
 void main() {
   group('RSC10 - REST request retried after token renewal', () {
+    // UTS: rest/unit/RSC10b/non-token-401-no-renewal-0.1
     test('channel.status() transparently retried after token renewal',
         () async {
       var callbackCount = 0;
@@ -99,6 +100,7 @@ void main() {
   });
 
   group('RSC10b - Non-token 401 errors are not retried', () {
+    // UTS: rest/unit/RSC10b/non-token-401-no-renewal-0.2
     test('40100 error is not retried', () async {
       var callbackCount = 0;
       var requestCount = 0;

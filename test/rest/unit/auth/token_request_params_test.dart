@@ -12,6 +12,7 @@ import 'package:test/test.dart';
 /// Spec: uts/test/rest/unit/auth/token_request_params.md
 void main() {
   group('RSA5 - TTL handling in createTokenRequest', () {
+    // UTS: rest/unit/RSA5/ttl-null-when-unspecified-0
     test('RSA5 - TTL is null when not specified', () async {
       final client = Rest.fromKey('appId.keyId:keySecret');
 
@@ -21,6 +22,7 @@ void main() {
       expect(tokenRequest.ttl, isNull);
     });
 
+    // UTS: rest/unit/RSA5b/explicit-ttl-preserved-0
     test('RSA5b - explicit TTL is preserved', () async {
       final client = Rest.fromKey('appId.keyId:keySecret');
 
@@ -31,6 +33,7 @@ void main() {
       expect(tokenRequest.ttl, equals(7200000));
     });
 
+    // UTS: rest/unit/RSA5c/ttl-from-default-params-0
     test('RSA5c - TTL from defaultTokenParams is used', () async {
       final client = Rest(
         options: ClientOptions(
@@ -44,6 +47,7 @@ void main() {
       expect(tokenRequest.ttl, equals(1800000));
     });
 
+    // UTS: rest/unit/RSA5d/explicit-ttl-overrides-default-0
     test('RSA5d - explicit TTL overrides defaultTokenParams', () async {
       final client = Rest(
         options: ClientOptions(
@@ -61,6 +65,7 @@ void main() {
   });
 
   group('RSA6 - Capability handling in createTokenRequest', () {
+    // UTS: rest/unit/RSA6/capability-null-when-unspecified-0
     test('RSA6 - capability is null when not specified', () async {
       final client = Rest.fromKey('appId.keyId:keySecret');
 
@@ -70,6 +75,7 @@ void main() {
       expect(tokenRequest.capability, isNull);
     });
 
+    // UTS: rest/unit/RSA6b/explicit-capability-preserved-0
     test('RSA6b - explicit capability is preserved', () async {
       final client = Rest.fromKey('appId.keyId:keySecret');
 
@@ -85,6 +91,7 @@ void main() {
       );
     });
 
+    // UTS: rest/unit/RSA6c/capability-from-default-params-0
     test('RSA6c - capability from defaultTokenParams is used', () async {
       final client = Rest(
         options: ClientOptions(
@@ -100,6 +107,7 @@ void main() {
       expect(tokenRequest.capability, equals('{"*":["subscribe"]}'));
     });
 
+    // UTS: rest/unit/RSA6d/explicit-capability-overrides-default-0
     test('RSA6d - explicit capability overrides defaultTokenParams', () async {
       final client = Rest(
         options: ClientOptions(

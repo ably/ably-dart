@@ -31,6 +31,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTN23a - Transport failure causes disconnect and reconnect
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RTN23a/heartbeat-starvation-reconnect-0
     test('RTN23a - Transport failure causes disconnect and reconnect',
         () async {
       final session = await ProxySession.create(

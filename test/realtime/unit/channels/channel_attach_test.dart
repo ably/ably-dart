@@ -25,6 +25,7 @@ http.Client _createMockHttpClient() {
 /// Spec: uts/test/realtime/unit/channels/channel_attach.md
 void main() {
   group('RTL4a - Attach when already attached is no-op', () {
+    // UTS: realtime/unit/RTL4a/already-attached-noop-0
     test('does not send additional ATTACH message', () async {
       final channelName = testChannelName('RTL4a');
       var attachMessageCount = 0;
@@ -74,6 +75,7 @@ void main() {
   });
 
   group('RTL4h - Attach while attaching waits for completion', () {
+    // UTS: realtime/unit/RTL4h/attach-while-attaching-0
     test('only sends one ATTACH message', () async {
       final channelName = testChannelName('RTL4h');
       var attachMessageCount = 0;
@@ -131,6 +133,7 @@ void main() {
   });
 
   group('RTL4h - Attach while detaching waits then attaches', () {
+    // UTS: realtime/unit/RTL4h/attach-while-detaching-1
     test('sends ATTACH after DETACH completes', () async {
       final channelName = testChannelName('RTL4h-detaching');
       final messagesFromClient = <ProtocolMessage>[];
@@ -199,6 +202,7 @@ void main() {
   });
 
   group('RTL4g - Attach from failed state proceeds with attach', () {
+    // UTS: realtime/unit/RTL4g/attach-from-failed-0
     test('re-attaches and clears errorReason on success', () async {
       final channelName = testChannelName('RTL4g');
       var attachCount = 0;
@@ -265,6 +269,7 @@ void main() {
   });
 
   group('RTL4b - Attach fails when connection is closed', () {
+    // UTS: realtime/unit/RTL4b/fails-connection-closed-0
     test('returns error when connection is closed', () async {
       final channelName = testChannelName('RTL4b-closed');
 
@@ -306,6 +311,7 @@ void main() {
   });
 
   group('RTL4b - Attach fails when connection is suspended', () {
+    // UTS: realtime/unit/RTL4b/fails-connection-suspended-2
     test('returns error when connection is suspended', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -359,6 +365,7 @@ void main() {
   });
 
   group('RTL4b - Attach fails when connection is failed', () {
+    // UTS: realtime/unit/RTL4b/fails-connection-failed-1
     test('returns error when connection is failed', () async {
       final channelName = testChannelName('RTL4b-failed');
 
@@ -400,6 +407,7 @@ void main() {
   });
 
   group('RTL4i - Attach queued when connection is connecting', () {
+    // UTS: realtime/unit/RTL4i/queued-while-connecting-0
     test('channel enters attaching when connection is connecting', () async {
       final channelName = testChannelName('RTL4i');
 
@@ -437,6 +445,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL4i/completes-on-connected-1
     test('attach completes when connection becomes connected', () async {
       final channelName = testChannelName('RTL4i-connected');
       var attachMessageReceived = false;
@@ -496,6 +505,7 @@ void main() {
   });
 
   group('RTL4c - Attach sends ATTACH message and transitions to attaching', () {
+    // UTS: realtime/unit/RTL4c/sends-attach-message-1
     test('sends ATTACH protocol message with correct channel', () async {
       final channelName = testChannelName('RTL4c');
       ProtocolMessage? capturedAttachMessage;
@@ -548,6 +558,7 @@ void main() {
   });
 
   group('RTL4c1 - ATTACH includes channelSerial when available', () {
+    // UTS: realtime/unit/RTL4c1/includes-channel-serial-0
     test('first attach has no channelSerial, reattach includes it', () async {
       final channelName = testChannelName('RTL4c1');
       final capturedAttachMessages = <ProtocolMessage>[];
@@ -609,6 +620,7 @@ void main() {
   });
 
   group('RTL4f - Attach times out and transitions to suspended', () {
+    // UTS: realtime/unit/RTL4f/timeout-to-suspended-0
     test('transitions to suspended when no ATTACHED received', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -667,6 +679,7 @@ void main() {
   });
 
   group('RTL4k - ATTACH includes params from ChannelOptions', () {
+    // UTS: realtime/unit/RTL4k/includes-channel-params-0
     test('channel params are included in ATTACH message', () async {
       final channelName = testChannelName('RTL4k');
       ProtocolMessage? capturedAttachMessage;
@@ -716,6 +729,7 @@ void main() {
   });
 
   group('RTL4l - ATTACH includes modes as flags', () {
+    // UTS: realtime/unit/RTL4l/modes-encoded-as-flags-0
     test('channel modes are encoded in ATTACH flags', () async {
       final channelName = testChannelName('RTL4l');
       ProtocolMessage? capturedAttachMessage;
@@ -773,6 +787,7 @@ void main() {
   });
 
   group('RTL4m - Channel modes populated from ATTACHED response', () {
+    // UTS: realtime/unit/RTL4m/modes-from-attached-0
     test('modes are decoded from ATTACHED flags', () async {
       final channelName = testChannelName('RTL4m');
       // PUBLISH (TR3r) + SUBSCRIBE (TR3s)
@@ -822,6 +837,7 @@ void main() {
   });
 
   group('RTL4j - ATTACH_RESUME flag set for reattach', () {
+    // UTS: realtime/unit/RTL4j/attach-resume-flag-0
     test('first attach has no ATTACH_RESUME, reattach has it', () async {
       final channelName = testChannelName('RTL4j');
       final capturedAttachMessages = <ProtocolMessage>[];
@@ -886,6 +902,7 @@ void main() {
   });
 
   group('RTL4c - Successful attach clears errorReason', () {
+    // UTS: realtime/unit/RTL4c/clears-error-reason-0
     test('errorReason is cleared when ATTACHED received on suspended channel',
         () async {
       final testClock = TestClock();

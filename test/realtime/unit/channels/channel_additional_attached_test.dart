@@ -16,6 +16,7 @@ import '../../../helpers/test_channel_name.dart';
 /// Spec: uts/test/realtime/unit/channels/channel_additional_attached.md
 void main() {
   group('RTL12 - Additional ATTACHED with resumed=false emits UPDATE', () {
+    // UTS: realtime/unit/RTL12/update-emits-with-error-0
     test('emits UPDATE with error reason when ATTACHED has no RESUMED flag',
         () async {
       final channelName = testChannelName('RTL12-update');
@@ -84,6 +85,7 @@ void main() {
 
   group('RTL12 - Additional ATTACHED with resumed=true does NOT emit UPDATE',
       () {
+    // UTS: realtime/unit/RTL12/resumed-no-update-1
     test('no UPDATE event when ATTACHED has RESUMED flag', () async {
       final channelName = testChannelName('RTL12-no-update');
 
@@ -140,6 +142,7 @@ void main() {
   });
 
   group('RTL12 - Additional ATTACHED without error has null reason', () {
+    // UTS: realtime/unit/RTL12/no-error-null-reason-2
     test('UPDATE event reason is null when ATTACHED has no error', () async {
       final channelName = testChannelName('RTL12-no-error');
 

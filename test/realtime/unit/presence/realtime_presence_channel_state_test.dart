@@ -14,6 +14,7 @@ import '../../../helpers/test_channel_name.dart';
 /// Spec: uts/test/realtime/unit/presence/realtime_presence_channel_state.md
 void main() {
   group('RTP1 - HAS_PRESENCE flag triggers sync', () {
+    // UTS: realtime/unit/RTP1/has-presence-triggers-sync-0
     test('SYNC populates presence map', () async {
       final channelName = testChannelName('RTP1');
 
@@ -78,6 +79,7 @@ void main() {
   });
 
   group('RTP1 - No HAS_PRESENCE flag means empty presence', () {
+    // UTS: realtime/unit/RTP1/no-has-presence-empty-1
     test('syncComplete is immediately true with empty map', () async {
       final channelName = testChannelName('RTP1-empty');
 
@@ -125,6 +127,7 @@ void main() {
   });
 
   group('RTP19a - No HAS_PRESENCE clears existing members', () {
+    // UTS: realtime/unit/RTP1/no-has-presence-clears-existing-2
     test('emits LEAVE for each existing member', () async {
       final channelName = testChannelName('RTP19a');
 
@@ -244,6 +247,7 @@ void main() {
   });
 
   group('RTP5a - DETACHED clears both presence maps', () {
+    // UTS: realtime/unit/RTP5a/detached-clears-presence-maps-0
     test('no LEAVE events emitted on clear', () async {
       final channelName = testChannelName('RTP5a-detached');
 
@@ -333,6 +337,7 @@ void main() {
   });
 
   group('RTP5a - FAILED clears both presence maps', () {
+    // UTS: realtime/unit/RTP5a/failed-clears-presence-maps-1
     test('no LEAVE events emitted on channel ERROR', () async {
       final channelName = testChannelName('RTP5a-failed');
 
@@ -412,6 +417,7 @@ void main() {
   });
 
   group('RTP5b - ATTACHED sends queued presence messages', () {
+    // UTS: realtime/unit/RTP5b/attached-sends-queued-presence-0
     test('queued messages sent after attach completes', () async {
       final channelName = testChannelName('RTP5b');
 
@@ -476,6 +482,7 @@ void main() {
   });
 
   group('RTP5f - SUSPENDED maintains presence map', () {
+    // UTS: realtime/unit/RTP5f/suspended-maintains-presence-map-0
     test('members preserved during SUSPENDED', () async {
       final channelName = testChannelName('RTP5f');
 
@@ -556,6 +563,7 @@ void main() {
   });
 
   group('RTP13 - syncComplete attribute', () {
+    // UTS: realtime/unit/RTP13/sync-complete-attribute-0
     test('false during sync, true after sync', () async {
       final channelName = testChannelName('RTP13');
 
@@ -636,6 +644,7 @@ void main() {
   });
 
   group('RTL9, RTL9a - RealtimeChannel#presence attribute', () {
+    // UTS: realtime/unit/RTL9/presence-attribute-0
     test('returns RealtimePresence and same instance each time', () {
       final channelName = testChannelName('RTL9a');
 
@@ -668,6 +677,7 @@ void main() {
   });
 
   group('RTL11 - Queued presence actions fail on state changes', () {
+    // UTS: realtime/unit/RTL11/queued-presence-fail-failed-2
     test('fail on FAILED (channel ERROR)', () async {
       final channelName = testChannelName('RTL11-failed');
 
@@ -736,6 +746,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL11/queued-presence-fail-suspended-1
     test('fail on SUSPENDED (connection suspended)', () async {
       final channelName = testChannelName('RTL11-suspended');
 
@@ -808,6 +819,7 @@ void main() {
   });
 
   group('RTL11a - ACK/NACK unaffected by channel state changes', () {
+    // UTS: realtime/unit/RTL11a/ack-nack-unaffected-by-state-0
     test('ACK resolves presence after channel detached', () async {
       final channelName = testChannelName('RTL11a');
 

@@ -11,6 +11,7 @@ import 'package:test/test.dart';
 void main() {
   group('PresenceMap', () {
     group('RTP2 - Basic put and get', () {
+      // UTS: realtime/unit/RTP2/basic-put-and-get-0
       test('put ENTER message and retrieve by memberKey', () {
         final map = PresenceMap();
         final msg = PresenceMessage(
@@ -33,6 +34,7 @@ void main() {
     });
 
     group('RTP2d2 - ENTER stored as PRESENT', () {
+      // UTS: realtime/unit/RTP2d2/update-stored-as-present-1
       test('ENTER message stored with action PRESENT', () {
         final map = PresenceMap();
         map.put(
@@ -52,6 +54,7 @@ void main() {
         expect(stored.data, equals('entered'));
       });
 
+      // UTS: realtime/unit/RTP2d2/enter-stored-as-present-0
       test('UPDATE message stored with action PRESENT', () {
         final map = PresenceMap();
         // First enter
@@ -82,6 +85,7 @@ void main() {
         expect(stored.data, equals('updated'));
       });
 
+      // UTS: realtime/unit/RTP2d2/present-stored-as-present-2
       test('PRESENT message stored with action PRESENT', () {
         final map = PresenceMap();
         map.put(
@@ -101,6 +105,7 @@ void main() {
     });
 
     group('RTP2d1 - put returns message with original action', () {
+      // UTS: realtime/unit/RTP2d1/put-returns-original-action-0
       test('emitted message preserves original ENTER action', () {
         final map = PresenceMap();
         final emittedEnter = map.put(
@@ -133,6 +138,7 @@ void main() {
     });
 
     group('RTP2h1 - LEAVE outside sync removes member', () {
+      // UTS: realtime/unit/RTP2h1/leave-outside-sync-removes-0
       test('remove returns LEAVE and deletes from map', () {
         final map = PresenceMap();
         map.put(
@@ -164,6 +170,7 @@ void main() {
         expect(map.values(), isEmpty);
       });
 
+      // UTS: realtime/unit/RTP2h1/leave-nonexistent-returns-null-1
       test('LEAVE for non-existent member returns null', () {
         final map = PresenceMap();
         final emitted = map.remove(
@@ -181,6 +188,7 @@ void main() {
     });
 
     group('RTP2h2a - LEAVE during sync stores as ABSENT', () {
+      // UTS: realtime/unit/RTP2h2a/leave-during-sync-stores-absent-0
       test('LEAVE during sync marks member as ABSENT', () {
         final map = PresenceMap();
         map.put(
@@ -216,6 +224,7 @@ void main() {
     });
 
     group('RTP2h2b - ABSENT members deleted on endSync', () {
+      // UTS: realtime/unit/RTP2h2b/absent-deleted-on-endsync-0
       test('endSync removes ABSENT entries', () {
         final map = PresenceMap();
         map.put(
@@ -274,6 +283,7 @@ void main() {
     });
 
     group('RTP2b2 - Newness comparison by id (msgSerial:index)', () {
+      // UTS: realtime/unit/RTP2b2/newness-by-msgserial-index-0
       test('newer msgSerial wins, older msgSerial rejected', () {
         final map = PresenceMap();
         // Add initial message with msgSerial=5
@@ -319,6 +329,7 @@ void main() {
         expect(map.get('conn-1:client-1')!.data, equals('newer'));
       });
 
+      // UTS: realtime/unit/RTP2b2/newness-by-index-same-serial-1
       test('same msgSerial: higher index wins', () {
         final map = PresenceMap();
         map.put(
@@ -363,6 +374,7 @@ void main() {
     });
 
     group('RTP2b1 - Newness comparison by timestamp (synthesized leave)', () {
+      // UTS: realtime/unit/RTP2b1/newness-by-timestamp-0
       test('synthesized leave with newer timestamp removes member', () {
         final map = PresenceMap();
         map.put(
@@ -392,6 +404,7 @@ void main() {
         expect(map.get('conn-1:client-1'), isNull);
       });
 
+      // UTS: realtime/unit/RTP2b1/older-synth-leave-rejected-1
       test('synthesized leave with older timestamp is rejected', () {
         final map = PresenceMap();
         map.put(
@@ -423,6 +436,7 @@ void main() {
     });
 
     group('RTP2b1a - Equal timestamps: incoming is newer', () {
+      // UTS: realtime/unit/RTP2b1a/equal-timestamps-incoming-wins-0
       test('incoming message with equal timestamp wins', () {
         final map = PresenceMap();
         map.put(
@@ -454,6 +468,7 @@ void main() {
     });
 
     group('RTP2c - SYNC messages use same newness comparison', () {
+      // UTS: realtime/unit/RTP2c/sync-uses-same-newness-0
       test('PRESENT messages during sync use newness check', () {
         final map = PresenceMap();
         map.startSync();
@@ -501,6 +516,7 @@ void main() {
     });
 
     group('RTP2 - Multiple members coexist', () {
+      // UTS: realtime/unit/RTP2/multiple-members-coexist-1
       test('different memberKeys stored independently', () {
         final map = PresenceMap();
         map.put(
@@ -540,6 +556,7 @@ void main() {
     });
 
     group('RTP2 - values() excludes ABSENT members', () {
+      // UTS: realtime/unit/RTP2/values-excludes-absent-2
       test('ABSENT members excluded from values()', () {
         final map = PresenceMap();
         map.put(
@@ -584,6 +601,7 @@ void main() {
     });
 
     group('clear() resets all state', () {
+      // UTS: realtime/unit/RTP2/clear-resets-state-3
       test('clears map and sync state', () {
         final map = PresenceMap();
         map.put(

@@ -17,6 +17,7 @@ void main() {
     });
 
     group('RSN1 - Channels collection accessible via RestClient', () {
+      // UTS: rest/unit/RSN1/channels-collection-accessible-0
       test('channels attribute exists and is RestChannels', () {
         expect(client.channels, isNotNull);
         expect(client.channels, isA<RestChannels>());
@@ -24,11 +25,13 @@ void main() {
     });
 
     group('RSN2 - Check if channel exists', () {
+      // UTS: rest/unit/RSN2/check-channel-exists-0.1
       test('exists() returns false for non-existent channel', () {
         final channelName = testChannelName('RSN2');
         expect(client.channels.exists(channelName), isFalse);
       });
 
+      // UTS: rest/unit/RSN2/check-channel-exists-0.2
       test('exists() returns true after channel is created', () {
         final channelName = testChannelName('RSN2');
 
@@ -39,6 +42,7 @@ void main() {
         expect(client.channels.exists(channelName), isTrue);
       });
 
+      // UTS: rest/unit/RSN2/check-channel-exists-0
       test('exists() returns false for other channels', () {
         final channelName = testChannelName('RSN2-a');
         final otherName = testChannelName('RSN2-b');
@@ -51,6 +55,7 @@ void main() {
     });
 
     group('RSN2 - Iterate through existing channels', () {
+      // UTS: rest/unit/RSN2/iterate-channels-1
       test('iterating yields all channels', () {
         final nameA = testChannelName('RSN2-a');
         final nameB = testChannelName('RSN2-b');
@@ -68,12 +73,14 @@ void main() {
         expect(names.length, equals(3));
       });
 
+      // UTS: rest/unit/RSN2/iterate-channels-1.1
       test('iterating empty collection yields nothing', () {
         expect(client.channels.toList(), isEmpty);
       });
     });
 
     group('RSN3a - Get creates new channel if none exists', () {
+      // UTS: rest/unit/RSN3a/get-creates-new-channel-0.1
       test('get() creates new channel', () {
         final channelName = testChannelName('RSN3a');
         final channel = client.channels.get(channelName);
@@ -83,6 +90,7 @@ void main() {
         expect(client.channels.exists(channelName), isTrue);
       });
 
+      // UTS: rest/unit/RSN3a/get-creates-new-channel-0
       test('get() returns existing channel', () {
         final channelName = testChannelName('RSN3a');
         final channel1 = client.channels.get(channelName);
@@ -94,6 +102,7 @@ void main() {
     });
 
     group('RSN3a - Operator subscript creates or returns channel', () {
+      // UTS: rest/unit/RSN3a/subscript-creates-or-returns-2
       test('operator[] creates new channel', () {
         final channelName = testChannelName('RSN3a');
         final channel = client.channels[channelName];
@@ -103,6 +112,7 @@ void main() {
         expect(client.channels.exists(channelName), isTrue);
       });
 
+      // UTS: rest/unit/RSN3a/get-returns-existing-channel-1
       test('operator[] returns same instance as get()', () {
         final channelName = testChannelName('RSN3a');
         final channel1 = client.channels[channelName];
@@ -115,6 +125,7 @@ void main() {
     });
 
     group('RSN4a - Release removes channel', () {
+      // UTS: rest/unit/RSN4a/release-removes-channel-0
       test('release() removes channel from collection', () {
         final channelName = testChannelName('RSN4a');
         client.channels.get(channelName);
@@ -127,6 +138,7 @@ void main() {
     });
 
     group('RSN4b - Release on non-existent channel is no-op', () {
+      // UTS: rest/unit/RSN4b/release-nonexistent-noop-0
       test('release() with unknown name does not throw', () {
         final channelName = testChannelName('RSN4b');
 
@@ -138,6 +150,7 @@ void main() {
     });
 
     group('RSN3a - Get after release creates new channel', () {
+      // UTS: rest/unit/RSN3a/get-after-release-new-instance-3
       test('get() after release() returns new instance', () {
         final channelName = testChannelName('RSN3a-release');
         final channel1 = client.channels.get(channelName);

@@ -27,6 +27,7 @@ void main() {
   });
 
   group('RSA16a - tokenDetails holds current token', () {
+    // UTS: rest/unit/RSA16a/token-from-callback-0
     test('tokenDetails reflects token from authCallback', () async {
       final channelName = testChannelName('RSA16a-callback');
       final client = Rest.forTesting(
@@ -51,6 +52,7 @@ void main() {
       expect(client.auth.tokenDetails!.issued, isNotNull);
     });
 
+    // UTS: rest/unit/RSA16a/token-from-request-token-1
     test('tokenDetails reflects token from requestToken', () async {
       final channelName = testChannelName('RSA16a-request');
       mockHttp = MockHttpClient(
@@ -87,6 +89,7 @@ void main() {
   });
 
   group('RSA16b - tokenDetails with token string only', () {
+    // UTS: rest/unit/RSA16b/token-string-in-options-0
     test('tokenDetails created from token string in ClientOptions', () {
       // Provide only a token string, not full TokenDetails
       final client = Rest.forTesting(
@@ -106,6 +109,7 @@ void main() {
       expect(tokenDetails.capability, isNull);
     });
 
+    // UTS: rest/unit/RSA16b/token-string-from-callback-1
     test('tokenDetails created from token string returned by authCallback',
         () async {
       final channelName = testChannelName('RSA16b-string');
@@ -129,6 +133,7 @@ void main() {
   });
 
   group('RSA16c - tokenDetails updated on token changes', () {
+    // UTS: rest/unit/RSA16c/set-on-instantiation-0
     test('tokenDetails set on instantiation with tokenDetails option', () {
       final initialToken = TokenDetails(
         token: 'initial-token',
@@ -150,6 +155,7 @@ void main() {
       expect(tokenDetails.clientId, equals('initial-client'));
     });
 
+    // UTS: rest/unit/RSA16c/updated-after-authorize-1
     test('tokenDetails updated after explicit authorize()', () async {
       var tokenCount = 0;
 
@@ -185,6 +191,7 @@ void main() {
       expect(firstToken.token, isNot(equals(secondToken.token)));
     });
 
+    // UTS: rest/unit/RSA16c/updated-after-expiry-renewal-2
     test('tokenDetails updated after library-initiated renewal on expiry',
         () async {
       final testClock = TestClock();
@@ -224,6 +231,7 @@ void main() {
       });
     });
 
+    // UTS: rest/unit/RSA16c/updated-after-40142-renewal-3
     test('tokenDetails updated after library-initiated renewal on 40142 error',
         () async {
       var requestCount = 0;
@@ -280,6 +288,7 @@ void main() {
   });
 
   group('RSA16d - tokenDetails is null when appropriate', () {
+    // UTS: rest/unit/RSA16d/null-with-basic-auth-0
     test('tokenDetails is null when using basic auth', () async {
       final channelName = testChannelName('RSA16d-basic');
       // Client with only API key - uses basic auth
@@ -295,6 +304,7 @@ void main() {
       expect(client.auth.tokenDetails, isNull);
     });
 
+    // UTS: rest/unit/RSA16d/null-before-token-obtained-1
     test('tokenDetails is null before any token is obtained', () {
       // Client configured for token auth but no request made yet
       final client = Rest.forTesting(
@@ -314,6 +324,7 @@ void main() {
       expect(tokenDetails, isNull);
     });
 
+    // UTS: rest/unit/RSA16d/null-after-invalidation-2
     test('tokenDetails is null after token invalidation', () async {
       var callbackCount = 0;
       final channelName = testChannelName('RSA16d-invalid');
@@ -376,6 +387,7 @@ void main() {
   });
 
   group('RSA16 - Edge cases', () {
+    // UTS: rest/unit/RSA16a/preserved-across-requests-0
     test('tokenDetails preserved across multiple successful requests',
         () async {
       var callbackCount = 0;
@@ -414,6 +426,7 @@ void main() {
       expect(callbackCount, equals(1));
     });
 
+    // UTS: rest/unit/RSA16a/reflects-capability-1
     test('tokenDetails reflects capability from token', () async {
       final channelName = testChannelName('RSA16-capability');
       final client = Rest.forTesting(

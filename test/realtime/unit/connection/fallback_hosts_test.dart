@@ -14,6 +14,7 @@ import '../../../helpers/protocol_message_helpers.dart';
 /// Spec: uts/test/realtime/unit/connection/fallback_hosts_test.md
 void main() {
   group('RTN17i - Always prefer primary domain first', () {
+    // UTS: realtime/unit/RTN17i/prefer-primary-domain-0
     test('always tries primary domain first, even after previous failures',
         () async {
       final testClock = TestClock();
@@ -107,6 +108,7 @@ void main() {
   });
 
   group('RTN17f - Errors that necessitate fallback host usage', () {
+    // UTS: realtime/unit/RTN17f/fallback-on-error-0
     test('host unreachable triggers fallback', () async {
       final connectionAttempts = <String>[];
       var connectionAttemptCount = 0;
@@ -163,6 +165,7 @@ void main() {
       await client.close();
     });
 
+    // UTS: realtime/unit/RTN17f/fallback-on-error-0.1
     test('connection timeout triggers fallback', () async {
       final connectionAttempts = <String>[];
       var connectionAttemptCount = 0;
@@ -215,6 +218,7 @@ void main() {
   });
 
   group('RTN17f1 - DISCONNECTED with 5xx status triggers fallback', () {
+    // UTS: realtime/unit/RTN17f1/disconnected-5xx-fallback-0
     test('503 error in DISCONNECTED message triggers fallback', () async {
       final connectionAttempts = <String>[];
       var connectionAttemptCount = 0;
@@ -279,6 +283,7 @@ void main() {
   });
 
   group('RTN17j - Connectivity check before fallback', () {
+    // UTS: realtime/unit/RTN17j/connectivity-check-before-fallback-0
     test('performs connectivity check before trying fallback hosts', () async {
       final httpRequests = <String>[];
       final connectionAttempts = <String>[];
@@ -349,6 +354,7 @@ void main() {
   });
 
   group('RTN17g - Empty fallback set results in immediate error', () {
+    // UTS: realtime/unit/RTN17g/empty-fallback-set-error-0
     test('no fallback attempted when fallback set is empty', () async {
       final connectionAttempts = <String>[];
 
@@ -392,6 +398,7 @@ void main() {
   });
 
   group('RTN17h - Fallback domains determined by REC2', () {
+    // UTS: realtime/unit/RTN17h/fallback-domains-from-rec2-0
     test('uses correct fallback hosts based on configuration', () async {
       final connectionAttempts = <String>[];
       var connectionAttemptCount = 0;
@@ -455,6 +462,7 @@ void main() {
   });
 
   group('RTN17j - Fallback hosts tried in random order', () {
+    // UTS: realtime/unit/RTN17j/fallback-random-order-1
     test('fallback hosts are not always tried in same order', () async {
       // This test would run multiple iterations to verify randomness
       // For now, just verify fallback hosts are used
@@ -516,6 +524,7 @@ void main() {
   });
 
   group('RTN17e - HTTP requests use same fallback host as realtime', () {
+    // UTS: realtime/unit/RTN17e/http-uses-same-fallback-0
     test('HTTP requests prefer same host as active realtime connection',
         () async {
       final connectionAttempts = <String>[];

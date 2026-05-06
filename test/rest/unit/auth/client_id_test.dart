@@ -18,6 +18,7 @@ void main() {
 
     group('RSA7a - clientId from ClientOptions', () {
       /// Tests that clientId from ClientOptions is accessible via auth.clientId.
+      // UTS: rest/unit/RSA7a/clientid-from-options-0
       test('accessible via auth.clientId', () {
         final client = Rest(
           options: ClientOptions(
@@ -33,6 +34,7 @@ void main() {
     group('RSA7b - clientId from TokenDetails', () {
       /// Tests that clientId is derived from TokenDetails when token auth
       /// is used.
+      // UTS: rest/unit/RSA7b/clientid-from-token-details-0
       test('derived from TokenDetails when token auth is used', () async {
         final channelName = testChannelName('RSA7b-token');
         mockHttp = MockHttpClient(
@@ -60,6 +62,7 @@ void main() {
 
       /// Tests that clientId is extracted from TokenDetails returned by
       /// authCallback.
+      // UTS: rest/unit/RSA7b/clientid-from-callback-token-1
       test('extracted from authCallback TokenDetails', () async {
         final channelName = testChannelName('RSA7b-callback');
         mockHttp = MockHttpClient(
@@ -92,6 +95,7 @@ void main() {
     group('RSA7c - clientId null when unidentified', () {
       /// Tests that auth.clientId is null when no client identity is
       /// established.
+      // UTS: rest/unit/RSA7c/clientid-null-unidentified-0
       test('null when no client identity is established', () {
         final client = Rest(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
@@ -101,6 +105,7 @@ void main() {
       });
 
       /// Tests that auth.clientId is null when token has no clientId.
+      // UTS: rest/unit/RSA7c/clientid-null-unidentified-token-1
       test('null when token has no clientId', () async {
         final channelName = testChannelName('RSA7c-null');
         mockHttp = MockHttpClient(
@@ -129,6 +134,7 @@ void main() {
 
     group('RSA12a - clientId passed to authCallback in TokenParams', () {
       /// Tests that clientId is passed to authCallback via TokenParams.
+      // UTS: rest/unit/RSA12a/clientid-passed-to-callback-0
       test('passed to authCallback via TokenParams', () async {
         final receivedParams = <TokenParams>[];
         final channelName = testChannelName('RSA12a');
@@ -166,6 +172,7 @@ void main() {
 
     group('RSA12b - clientId sent to authUrl', () {
       /// Tests that clientId is sent as a parameter when using authUrl.
+      // UTS: rest/unit/RSA12b/clientid-sent-to-authurl-0
       test('sent as parameter when using authUrl', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSA12b');
@@ -226,6 +233,7 @@ void main() {
     group('RSA7 - clientId updated after authorize()', () {
       /// Tests that auth.clientId is updated when authorize() returns a new
       /// token with different clientId.
+      // UTS: rest/unit/RSA7/clientid-updated-after-authorize-0
       test('updated when authorize() returns new token', () async {
         var tokenCount = 0;
         final channelName = testChannelName('RSA7-update');
@@ -267,6 +275,7 @@ void main() {
 
     group('RSA12 - Wildcard clientId', () {
       /// Tests handling of wildcard * clientId.
+      // UTS: rest/unit/RSA12/wildcard-clientid-0
       test('wildcard * clientId is preserved', () async {
         final channelName = testChannelName('RSA12-wildcard');
         mockHttp = MockHttpClient(
@@ -297,6 +306,7 @@ void main() {
     group('RSA7, RSA15 - clientId consistency between ClientOptions and token',
         () {
       /// Tests that clientId in ClientOptions matches token clientId.
+      // UTS: rest/unit/RSA15a/token-clientid-must-match-0
       test('matching clientId in ClientOptions and token - success', () async {
         final channelName = testChannelName('RSA7-match');
         mockHttp = MockHttpClient(
@@ -327,6 +337,7 @@ void main() {
 
       /// Tests that mismatch between ClientOptions and token clientId causes
       /// an error.
+      // UTS: rest/unit/RSA7/clientid-mismatch-error-1
       test('mismatched clientId in ClientOptions and token - error', () async {
         final channelName = testChannelName('RSA7-mismatch');
         mockHttp = MockHttpClient(
@@ -362,6 +373,7 @@ void main() {
       });
 
       /// Tests that ClientOptions clientId with null token clientId succeeds.
+      // UTS: rest/unit/RSA15c/incompatible-clientid-error-0
       test('ClientOptions clientId with null token clientId - success',
           () async {
         final channelName = testChannelName('RSA7-null-token');
@@ -392,6 +404,7 @@ void main() {
       });
 
       /// Tests that wildcard token clientId allows any ClientOptions clientId.
+      // UTS: rest/unit/RSA15b/wildcard-token-permits-any-0
       test('ClientOptions clientId with wildcard token - success', () async {
         final channelName = testChannelName('RSA7-wildcard');
         mockHttp = MockHttpClient(
@@ -422,6 +435,7 @@ void main() {
       });
 
       /// Tests that null ClientOptions clientId inherits from token.
+      // UTS: rest/unit/RSA7c/clientid-null-unidentified-token-1.1
       test('null ClientOptions clientId inherits from token - success',
           () async {
         final channelName = testChannelName('RSA7-inherit');

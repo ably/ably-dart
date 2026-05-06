@@ -10,6 +10,7 @@ import '../../helpers/mock_http_client.dart';
 /// Spec: uts/test/rest/unit/batch_presence.md
 void main() {
   group('RSC24 - batchPresence sends GET to /presence', () {
+    // UTS: rest/unit/RSC24/get-presence-channels-param-0
     test('RSC24_1 - sends GET request to /presence with channels query param',
         () async {
       final mockHttp = MockHttpClient(
@@ -43,6 +44,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSC24/single-channel-param-0
     test('RSC24_2 - single channel sends GET with single channel name',
         () async {
       final mockHttp = MockHttpClient(
@@ -72,6 +74,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSC24/special-chars-comma-joined-0
     test('RSC24_3 - channel names with special characters are comma-joined',
         () async {
       final mockHttp = MockHttpClient(
@@ -104,6 +107,7 @@ void main() {
   });
 
   group('BAR2 - BatchPresenceResponse structure', () {
+    // UTS: rest/unit/BAR2/mixed-success-failure-counts-0
     test('BAR2_1 - successCount and failureCount from mixed response',
         () async {
       final mockHttp = MockHttpClient(
@@ -143,6 +147,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/BAR2/all-success-counts-0
     test('BAR2_2 - all success', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -171,6 +176,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/BAR2/all-failure-counts-0
     test('BAR2_3 - all failure', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -215,6 +221,7 @@ void main() {
   });
 
   group('BGR2 - BatchPresenceSuccessResult structure', () {
+    // UTS: rest/unit/BGR2/success-with-members-0
     test('BGR2_1 - success result with members present', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -279,6 +286,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/BGR2/success-empty-presence-0
     test('BGR2_2 - success result with empty presence (no members)', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -312,6 +320,7 @@ void main() {
   });
 
   group('BGF2 - BatchPresenceFailureResult structure', () {
+    // UTS: rest/unit/BGF2/failure-error-details-0
     test('BGF2_1 - failure result with error details', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -356,6 +365,7 @@ void main() {
   });
 
   group('RSC24 - Mixed results', () {
+    // UTS: rest/unit/RSC24/mixed-success-failure-results-0
     test('RSC24_Mixed_1 - mixed success and failure results', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -423,6 +433,7 @@ void main() {
   });
 
   group('RSC24 - Error handling', () {
+    // UTS: rest/unit/RSC24/server-error-propagated-0
     test('RSC24_Error_1 - server error is propagated as an exception',
         () async {
       final mockHttp = MockHttpClient(
@@ -455,6 +466,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSC24/auth-error-propagated-0
     test('RSC24_Error_2 - authentication error is propagated as an exception',
         () async {
       final mockHttp = MockHttpClient(
@@ -489,6 +501,7 @@ void main() {
   });
 
   group('RSC24 - Request authentication', () {
+    // UTS: rest/unit/RSC24/uses-configured-auth-0
     test('RSC24_Auth_1 - request uses configured authentication', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {

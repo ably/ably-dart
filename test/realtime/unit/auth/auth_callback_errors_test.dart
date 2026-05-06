@@ -109,6 +109,7 @@ void main() {
   group(
       'RSA4c1, RSA4c2 - authCallback timeout during CONNECTING transitions to '
       'DISCONNECTED', () {
+    // UTS: realtime/unit/RSA4c2/callback-timeout-connecting-disconnected-1
     test('authCallback timeout causes DISCONNECTED with code 80019', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -250,6 +251,7 @@ void main() {
   group(
       'RSA4d - authCallback returns 403 error during CONNECTING transitions '
       'to FAILED', () {
+    // UTS: realtime/unit/RSA4d/callback-403-connecting-failed-0
     test('403 from authCallback causes FAILED with code 80019, statusCode 403',
         () async {
       var connectionAttempted = false;
@@ -334,6 +336,7 @@ void main() {
   group(
       'RSA4d - authCallback 403 during RTN22 reauth transitions CONNECTED to '
       'FAILED', () {
+    // UTS: realtime/unit/RSA4d/callback-403-reauth-failed-1
     test('403 during server-initiated reauth causes FAILED from CONNECTED',
         () async {
       var authCallbackCount = 0;
@@ -451,6 +454,7 @@ void main() {
   group(
       'RSA4f - authCallback returns token string exceeding 128KiB treated as '
       'invalid format', () {
+    // UTS: realtime/unit/RSA4f/callback-oversized-token-format-1
     test('oversized token string causes DISCONNECTED with code 80019',
         () async {
       // Generate a token string larger than 128KiB (131072 bytes)

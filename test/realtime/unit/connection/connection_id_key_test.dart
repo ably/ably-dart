@@ -10,6 +10,7 @@ import '../../../helpers/protocol_message_helpers.dart';
 /// Spec: uts/test/realtime/unit/connection/connection_id_key_test.md
 void main() {
   group('RTN8a - Connection ID is unset until connected', () {
+    // UTS: realtime/unit/RTN8a/id-unset-until-connected-0
     test('id is null before connecting and set after CONNECTED', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -43,6 +44,7 @@ void main() {
   });
 
   group('RTN9a - Connection key is unset until connected', () {
+    // UTS: realtime/unit/RTN9a/key-unset-until-connected-0
     test('key is null before connecting and set after CONNECTED', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -76,6 +78,7 @@ void main() {
   });
 
   group('RTN8b - Connection ID is unique per connection', () {
+    // UTS: realtime/unit/RTN8b/id-unique-per-connection-0
     test('two clients receive different connection IDs', () async {
       var connectionCount = 0;
 
@@ -122,6 +125,7 @@ void main() {
   });
 
   group('RTN9b - Connection key is unique per connection', () {
+    // UTS: realtime/unit/RTN9b/key-unique-per-connection-0
     test('two clients receive different connection keys', () async {
       var connectionCount = 0;
 
@@ -168,6 +172,7 @@ void main() {
   });
 
   group('RTN8c - Connection ID is null after CLOSED', () {
+    // UTS: realtime/unit/RTN8c/id-null-after-closed-0
     test('id is cleared when connection enters CLOSED state', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -202,6 +207,7 @@ void main() {
   });
 
   group('RTN9c - Connection key is null after CLOSED', () {
+    // UTS: realtime/unit/RTN9c/key-null-after-closed-0
     test('key is cleared when connection enters CLOSED state', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -236,6 +242,7 @@ void main() {
   });
 
   group('RTN8c, RTN9c - ID and key null after FAILED', () {
+    // UTS: realtime/unit/RTN8c/id-key-null-after-failed-1
     test('id and key are cleared on FAILED state', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -268,6 +275,7 @@ void main() {
   });
 
   group('RTN8c, RTN9c - ID and key null after SUSPENDED', () {
+    // UTS: realtime/unit/RTN8c/id-key-null-after-suspended-2
     test('id and key are cleared when connection enters SUSPENDED', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);

@@ -26,6 +26,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RSC10 - Token renewal on HTTP 401
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RSC10/token-renewal-on-401-0
     test('RSC10 - Token renewal on HTTP 401', () async {
       final apiKey = testApp.keys[0].keyStr;
       final channelName =
@@ -98,6 +99,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RSC15m/REC2c2 - HTTP 503 error (no fallback through proxy)
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RSC15m/http-503-no-fallback-0
     test('RSC15m/REC2c2 - HTTP 503 error (no fallback through proxy)',
         () async {
       final apiKey = testApp.keys[0].keyStr;
@@ -181,6 +183,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTL6 - End-to-end publish and history through proxy
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RTL6/publish-history-through-proxy-0
     test('RTL6 - End-to-end publish and history through proxy', () async {
       final apiKey = testApp.keys[0].keyStr;
       final channelName =

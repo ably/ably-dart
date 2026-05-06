@@ -11,6 +11,7 @@ import '../../../helpers/protocol_message_helpers.dart';
 /// Spec: uts/test/realtime/unit/connection/auto_connect_test.md
 void main() {
   group('RTN3 - autoConnect true initiates connection immediately', () {
+    // UTS: realtime/unit/RTN3/auto-connect-true-0
     test('connection is established without calling connect()', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -38,6 +39,7 @@ void main() {
   });
 
   group('RTN3 - autoConnect false does not initiate connection', () {
+    // UTS: realtime/unit/RTN3/auto-connect-false-1
     test('no connection attempt is made on client creation', () async {
       var connectionAttempted = false;
 
@@ -67,6 +69,7 @@ void main() {
   });
 
   group('RTN3 - explicit connect after autoConnect false', () {
+    // UTS: realtime/unit/RTN3/explicit-connect-after-false-2
     test('calling connect() initiates the connection', () async {
       var connectionAttempted = false;
 

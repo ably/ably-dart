@@ -19,6 +19,7 @@ void main() {
     });
 
     group('RSL1a, RSL1b - Publish with name and data', () {
+      // UTS: rest/unit/RSL1a/publish-name-and-data-0
       test('sends a single message', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSL1a');
@@ -61,6 +62,7 @@ void main() {
     });
 
     group('RSL1a, RSL1c - Publish with Message array', () {
+      // UTS: rest/unit/RSL1a/publish-message-array-1
       test('sends all messages in a single request', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSL1c');
@@ -126,6 +128,7 @@ void main() {
       ];
 
       for (final testCase in testCases) {
+        // UTS: rest/unit/RSL1e/null-name-and-data-0
         test('handles ${testCase.description}', () async {
           final capturedRequests = <CapturedRequest>[];
           final channelName = testChannelName('RSL1e');
@@ -171,6 +174,7 @@ void main() {
     });
 
     group('RSL1h - publish(name, data) signature', () {
+      // UTS: rest/unit/RSL1h/publish-signature-0
       test('accepts name and data arguments', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSL1h');
@@ -206,6 +210,7 @@ void main() {
     });
 
     group('RSL1i - Message size limit', () {
+      // UTS: rest/unit/RSL1i/message-size-limit-0
       test('rejects messages exceeding maxMessageSize', () async {
         final channelName = testChannelName('RSL1i-reject');
         final client = Rest.forTesting(
@@ -232,6 +237,7 @@ void main() {
         );
       });
 
+      // UTS: rest/unit/RSL1i/message-size-limit-0.1
       test('accepts messages at or under maxMessageSize', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSL1i-accept');
@@ -269,6 +275,7 @@ void main() {
     });
 
     group('RSL1j - All Message attributes transmitted', () {
+      // UTS: rest/unit/RSL1j/all-attributes-transmitted-0
       test('includes all valid Message attributes', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSL1j');
@@ -318,6 +325,7 @@ void main() {
     });
 
     group('RSL1l - Publish params as querystring', () {
+      // UTS: rest/unit/RSL1l/params-as-querystring-0
       test('sends additional params as querystring', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSL1l');
@@ -365,6 +373,7 @@ void main() {
     });
 
     group('RSL1m - ClientId not set from library clientId', () {
+      // UTS: rest/unit/RSL1m/clientid-not-injected-0
       test('RSL1m1 - message with no clientId, library has clientId', () async {
         final capturedRequests = <CapturedRequest>[];
         var requestCount = 0;
@@ -413,6 +422,7 @@ void main() {
         expect(body[0].containsKey('clientId'), isFalse);
       });
 
+      // UTS: rest/unit/RSL1m/clientid-not-injected-0.1
       test('RSL1m2 - message clientId matches library clientId', () async {
         final capturedRequests = <CapturedRequest>[];
 
@@ -461,6 +471,7 @@ void main() {
         expect(body[0]['clientId'], equals('lib-client'));
       });
 
+      // UTS: rest/unit/RSL1m/clientid-not-injected-0.2
       test('RSL1m3 - unidentified client with message clientId', () async {
         final capturedRequests = <CapturedRequest>[];
 

@@ -16,6 +16,7 @@ void main() {
       mockHttp = MockHttpClient();
     });
 
+    // UTS: rest/unit/RSC5/auth-attribute-accessible-0
     test('RSC5 - auth attribute exists', () {
       final rest = Rest(
         options: ClientOptions(key: 'fake.key:secret'),
@@ -25,6 +26,7 @@ void main() {
       expect(rest.auth, isA<Auth>());
     });
 
+    // UTS: rest/unit/RSC17/client-id-from-options-0
     test('RSC17 - clientId from options is set on auth', () {
       final rest = Rest(
         options: ClientOptions(
@@ -37,6 +39,7 @@ void main() {
     });
 
     group('RSC7e - X-Ably-Version header', () {
+      // UTS: rest/unit/RSC7e/ably-version-header-0
       test('includes X-Ably-Version header in all requests', () async {
         final capturedRequests = <CapturedRequest>[];
 
@@ -70,6 +73,7 @@ void main() {
     });
 
     group('RSC7d - Ably-Agent header', () {
+      // UTS: rest/unit/RSC7d/ably-agent-header-format-0
       test('includes Ably-Agent header with correct format', () async {
         final capturedRequests = <CapturedRequest>[];
 
@@ -107,6 +111,7 @@ void main() {
     });
 
     group('RSC7c - Request ID when addRequestIds enabled', () {
+      // UTS: rest/unit/RSC7c/request-id-included-0
       test('includes request_id query parameter', () async {
         final capturedRequests = <CapturedRequest>[];
 
@@ -142,6 +147,7 @@ void main() {
         expect(requestId, matches(RegExp(r'^[A-Za-z0-9_-]+$')));
       });
 
+      // UTS: rest/unit/RSC7c/request-id-preserved-fallback-1
       test('preserves same request_id on fallback retry', () async {
         final capturedRequests = <CapturedRequest>[];
         var requestCount = 0;
@@ -191,6 +197,7 @@ void main() {
     });
 
     group('RSC8a, RSC8b - Protocol selection', () {
+      // UTS: rest/unit/RSC8a/protocol-selection-0
       test('uses msgpack by default (useBinaryProtocol: true)', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSC8a');
@@ -231,6 +238,7 @@ void main() {
         );
       });
 
+      // UTS: rest/unit/RSC8/error-decoded-from-msgpack-0
       test('uses JSON when useBinaryProtocol is false', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSC8b');
@@ -273,6 +281,7 @@ void main() {
     });
 
     group('RSC8c - Accept and Content-Type headers', () {
+      // UTS: rest/unit/RSC8c/accept-content-type-headers-0
       test('includes both Accept and Content-Type headers', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSC8c');
@@ -309,6 +318,7 @@ void main() {
     });
 
     group('RSC8e - Unsupported Content-Type handling', () {
+      // UTS: rest/unit/RSC8e/unsupported-content-type-0
       test('handles error status with unsupported Content-Type', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -337,6 +347,7 @@ void main() {
         );
       });
 
+      // UTS: rest/unit/RSC8d/mismatched-response-content-type-0
       test('handles success status with unsupported Content-Type', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -367,6 +378,7 @@ void main() {
     });
 
     group('RSC18 - TLS configuration', () {
+      // UTS: rest/unit/RSC18/tls-controls-protocol-scheme-0
       test('uses https by default (tls: true)', () async {
         final capturedRequests = <CapturedRequest>[];
 
@@ -397,6 +409,7 @@ void main() {
         expect(request.url.scheme, equals('https'));
       });
 
+      // UTS: rest/unit/RSC18/tls-controls-protocol-scheme-0.1
       test('uses http when tls is false', () async {
         final capturedRequests = <CapturedRequest>[];
 
@@ -428,6 +441,7 @@ void main() {
         expect(request.url.scheme, equals('http'));
       });
 
+      // UTS: rest/unit/RSC18/basic-auth-over-http-rejected-1
       test('rejects Basic auth over HTTP', () {
         expect(
           () => Rest.forTesting(
@@ -447,6 +461,7 @@ void main() {
         );
       });
 
+      // UTS: rest/unit/RSC17/client-id-matches-auth-1
       test('allows token auth over HTTP', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSC18-http');

@@ -17,6 +17,7 @@ import '../../../helpers/test_channel_name.dart';
 /// Spec: uts/test/realtime/unit/channels/channel_server_initiated_detach.md
 void main() {
   group('RTL13a - Server DETACHED on ATTACHED channel triggers reattach', () {
+    // UTS: realtime/unit/RTL13a/attached-reattach-triggered-0
     test('transitions to ATTACHING with error and reattaches', () async {
       final channelName = testChannelName('RTL13a-attached');
       var attachCount = 0;
@@ -88,6 +89,7 @@ void main() {
   });
 
   group('RTL13a - Server DETACHED on SUSPENDED channel triggers reattach', () {
+    // UTS: realtime/unit/RTL13a/suspended-reattach-triggered-1
     test('reattaches from SUSPENDED state', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -176,6 +178,7 @@ void main() {
   });
 
   group('RTL13b - Failed reattach transitions to SUSPENDED with retry', () {
+    // UTS: realtime/unit/RTL13b/failed-reattach-suspended-retry-0
     test('timeout causes SUSPENDED then auto-retry succeeds', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -277,6 +280,7 @@ void main() {
 
   group('RTL13b - Server DETACHED while ATTACHING transitions to SUSPENDED',
       () {
+    // UTS: realtime/unit/RTL13b/attaching-detached-to-suspended-1
     test('goes directly to SUSPENDED without another reattach', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -363,6 +367,7 @@ void main() {
   });
 
   group('RTL13b - Repeated failures cycle SUSPENDED -> ATTACHING', () {
+    // UTS: realtime/unit/RTL13b/repeated-failure-cycle-2
     test('cycles indefinitely until success', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -467,6 +472,7 @@ void main() {
   });
 
   group('RTL13c - Retry cancelled when connection not CONNECTED', () {
+    // UTS: realtime/unit/RTL13c/retry-cancelled-disconnected-0
     test('no retry after disconnect', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -546,6 +552,7 @@ void main() {
   });
 
   group('RTL13 - DETACHED while DETACHING is normal detach flow', () {
+    // UTS: realtime/unit/RTL13a/detaching-not-server-initiated-2
     test('completes detach without triggering reattach', () async {
       final channelName = testChannelName('RTL13-detaching');
       var attachCount = 0;

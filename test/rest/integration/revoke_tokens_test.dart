@@ -119,6 +119,7 @@ void main() {
   // RSA17d — Token auth client rejected (not key auth)
   // ---------------------------------------------------------------------------
   group('RSA17d - Token auth client cannot revoke tokens', () {
+    // UTS: rest/integration/RSA17d/token-auth-revoke-rejected-0
     test('RSA17d - REST client using JWT token calling revokeTokens throws 40162',
         () async {
       final jwt = JwtHelper.generateToken(

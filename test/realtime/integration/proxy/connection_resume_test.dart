@@ -32,6 +32,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTN15a - Unexpected disconnect triggers resume
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RTN15a/disconnect-triggers-resume-0
     test('RTN15a - Unexpected disconnect triggers resume', () async {
       final session = await ProxySession.create(
         rules: [
@@ -117,6 +118,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTN15b, RTN15c6 - Resume preserves connectionId
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RTN15b/resume-preserves-connid-0
     test('RTN15b, RTN15c6 - Resume preserves connectionId', () async {
       final session = await ProxySession.create(
         rules: [
@@ -185,6 +187,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTN15c7 - Failed resume gets new connectionId
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RTN15c7/failed-resume-new-connid-0
     test('RTN15c7 - Failed resume gets new connectionId', () async {
       final session = await ProxySession.create(
         rules: [
@@ -281,6 +284,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTN15h1 - Non-renewable token with DISCONNECTED 40142 -> FAILED
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RTN15h1/token-error-nonrenewable-failed-0
     test('RTN15h1 - Non-renewable token with DISCONNECTED 40142 -> FAILED',
         () async {
       final session = await ProxySession.create(
@@ -360,6 +364,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTN15h3 - Non-token DISCONNECTED error triggers reconnect
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RTN15h3/non-token-error-reconnects-0
     test('RTN15h3 - Non-token DISCONNECTED error triggers reconnect', () async {
       final session = await ProxySession.create(
         rules: [
@@ -434,6 +439,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTN15j - Fatal ERROR on established connection -> FAILED
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RTN15j/fatal-error-established-conn-0
     test('RTN15j - Fatal ERROR on established connection -> FAILED', () async {
       // No proxy rules - passthrough
       final session = await ProxySession.create();
@@ -496,6 +502,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTN15g, RTN15g2 - connectionStateTtl expiry prevents resume
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RTN15g/ttl-expiry-clears-resume-0
     test('RTN15g, RTN15g2 - connectionStateTtl expiry prevents resume',
         () async {
       final session = await ProxySession.create(
@@ -588,6 +595,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTN19a, RTN19a2 - Unacked messages resent after resume
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RTN19a/unacked-resent-on-resume-0
     test('RTN19a, RTN19a2 - Unacked messages resent after resume', () async {
       final session = await ProxySession.create(
         rules: [

@@ -15,6 +15,7 @@ import '../../../helpers/test_channel_name.dart';
 void main() {
   group('RTN23a - Disconnect after maxIdleInterval + realtimeRequestTimeout',
       () {
+    // UTS: realtime/unit/RTN23a/idle-timeout-reconnect-1
     test('closes WebSocket and reconnects when no server activity detected',
         () async {
       final testClock = TestClock();
@@ -96,6 +97,7 @@ void main() {
       });
     });
 
+    // UTS: realtime/unit/RTN23a/heartbeat-resets-timer-2
     test('HEARTBEAT message resets idle timer', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -170,6 +172,7 @@ void main() {
       });
     });
 
+    // UTS: realtime/unit/RTN23a/any-message-resets-timer-3
     test('any protocol message resets idle timer and client closes on timeout',
         () async {
       final testClock = TestClock();
@@ -273,6 +276,7 @@ void main() {
       });
     });
 
+    // UTS: realtime/unit/RTN23a/timeout-triggers-reconnect-4
     test('heartbeat timeout triggers immediate reconnection', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -350,6 +354,7 @@ void main() {
       });
     });
 
+    // UTS: realtime/unit/RTN23a/reconnect-uses-resume-5
     test('reconnection after heartbeat timeout uses resume', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -426,6 +431,7 @@ void main() {
   });
 
   group('RTN23b - Client can request heartbeats in query params', () {
+    // UTS: realtime/unit/RTN23b/heartbeats-false-query-param-0
     test('client requests heartbeats in connection URL', () async {
       final connectionUrls = <Uri>[];
 
@@ -486,6 +492,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN23b/any-message-resets-timer-3
     test('server respects heartbeats=false', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);

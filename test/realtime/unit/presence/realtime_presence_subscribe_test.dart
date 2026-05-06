@@ -11,6 +11,7 @@ import '../../../helpers/test_channel_name.dart';
 /// Spec: uts/test/realtime/unit/presence/realtime_presence_subscribe.md
 void main() {
   group('RTP6a - Subscribe to all presence events', () {
+    // UTS: realtime/unit/RTP6a/subscribe-all-presence-events-0
     test('receives ENTER, UPDATE, and LEAVE events', () async {
       final channelName = testChannelName('RTP6a');
 
@@ -112,6 +113,7 @@ void main() {
   });
 
   group('RTP6b - Subscribe filtered by action', () {
+    // UTS: realtime/unit/RTP6b/subscribe-filtered-by-action-0
     test('single action filter receives only matching events', () async {
       final channelName = testChannelName('RTP6b');
 
@@ -200,6 +202,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTP6b/subscribe-filtered-multiple-actions-1
     test('multiple action filter receives matching events', () async {
       final channelName = testChannelName('RTP6b-multi');
 
@@ -280,6 +283,7 @@ void main() {
   });
 
   group('RTP6d - Subscribe implicitly attaches channel', () {
+    // UTS: realtime/unit/RTP6d/subscribe-implicitly-attaches-0
     test('channel attaches when subscribe is called', () async {
       final channelName = testChannelName('RTP6d');
       var attachCount = 0;
@@ -332,6 +336,7 @@ void main() {
   });
 
   group('RTP6e - Subscribe with attachOnSubscribe=false does not attach', () {
+    // UTS: realtime/unit/RTP6e/subscribe-no-attach-option-0
     test('channel stays in INITIALIZED', () async {
       final channelName = testChannelName('RTP6e');
       var attachCount = 0;
@@ -385,6 +390,7 @@ void main() {
   });
 
   group('RTP7c - Unsubscribe all listeners', () {
+    // UTS: realtime/unit/RTP7c/unsubscribe-all-listeners-0
     test('no listeners receive events after unsubscribe()', () async {
       final channelName = testChannelName('RTP7c');
 
@@ -471,6 +477,7 @@ void main() {
   });
 
   group('RTP7a - Unsubscribe specific listener', () {
+    // UTS: realtime/unit/RTP7a/unsubscribe-specific-listener-0
     test('only the unsubscribed listener stops receiving', () async {
       final channelName = testChannelName('RTP7a');
 
@@ -541,6 +548,7 @@ void main() {
   });
 
   group('RTP7b - Unsubscribe listener for specific action', () {
+    // UTS: realtime/unit/RTP7b/unsubscribe-for-specific-action-0
     test('unsubscribes only the action-specific subscription', () async {
       final channelName = testChannelName('RTP7b');
 
@@ -620,6 +628,7 @@ void main() {
   });
 
   group('RTP6 - Presence events update the PresenceMap', () {
+    // UTS: realtime/unit/RTP6/presence-events-update-map-0
     test('members are stored as PRESENT after ENTER', () async {
       final channelName = testChannelName('RTP6-map');
 
@@ -685,6 +694,7 @@ void main() {
   });
 
   group('RTP6 - Multiple presence messages in single ProtocolMessage', () {
+    // UTS: realtime/unit/RTP6/multiple-presence-in-single-message-1
     test('all messages delivered to subscribers', () async {
       final channelName = testChannelName('RTP6-batch');
 

@@ -19,6 +19,7 @@ void main() {
     });
 
     group('RSC2 - Default log level is warn', () {
+      // UTS: rest/unit/RSC2/default-log-level-warn-0
       test('only warn and error events emitted at default level', () async {
         final capturedLogs = <({
           LogLevel level,
@@ -52,6 +53,7 @@ void main() {
     });
 
     group('TO3b - Log level can be changed (RSC3)', () {
+      // UTS: rest/unit/TO3b/log-level-changeable-0
       test('verbose level captures info and debug messages', () async {
         final capturedLogs = <({
           LogLevel level,
@@ -91,6 +93,7 @@ void main() {
     });
 
     group('TO3c - Custom log handler (RSC4)', () {
+      // UTS: rest/unit/TO3c/custom-handler-structured-events-0
       test('custom handler receives structured events', () async {
         final capturedLogs = <({
           LogLevel level,
@@ -123,6 +126,7 @@ void main() {
             reason: 'Expected at least one log with non-empty context');
       });
 
+      // UTS: rest/unit/TO3c2/context-contains-expected-keys-0
       test('structured context contains expected keys for HTTP operations',
           () async {
         final capturedLogs = <({
@@ -163,6 +167,7 @@ void main() {
     });
 
     group('RSC2b - LogLevel.none suppresses all output', () {
+      // UTS: rest/unit/RSC2b/log-level-none-suppresses-all-0
       test('no log events with level none', () async {
         final capturedLogs = <({
           LogLevel level,

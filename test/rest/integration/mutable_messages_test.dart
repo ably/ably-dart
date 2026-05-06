@@ -33,6 +33,7 @@ void main() {
   // RSL1n — Publish returns serials
   // ---------------------------------------------------------------------------
   group('RSL1n - Publish returns serials', () {
+    // UTS: rest/integration/RSL11/get-message-by-serial-0
     test('RSL1n - single publish returns non-empty serials list', () async {
       final client = buildClient();
       addTearDown(client.close);
@@ -47,6 +48,7 @@ void main() {
       expect(result.serials.first, isNotEmpty);
     });
 
+    // UTS: rest/integration/RSL1n/publish-returns-serials-0
     test('RSL1n - batch publish (multiple messages) returns serials per message',
         () async {
       final client = buildClient();
@@ -99,6 +101,7 @@ void main() {
   // RSL15 update — update message and poll until action==messageUpdate
   // ---------------------------------------------------------------------------
   group('RSL15 - updateMessage', () {
+    // UTS: rest/integration/RSL15/update-message-0
     test('RSL15 update - publish then update, poll until action==messageUpdate',
         () async {
       final client = buildClient();
@@ -143,6 +146,7 @@ void main() {
   // RSL15 delete — delete message and poll until action==messageDelete
   // ---------------------------------------------------------------------------
   group('RSL15 - deleteMessage', () {
+    // UTS: rest/integration/RSL15/delete-message-1
     test('RSL15 delete - publish then delete, poll until action==messageDelete',
         () async {
       final client = buildClient();
@@ -178,6 +182,7 @@ void main() {
   // RSL14 — getMessageVersions returns history of versions
   // ---------------------------------------------------------------------------
   group('RSL14 - getMessageVersions', () {
+    // UTS: rest/integration/RSL14/get-message-versions-0
     test('RSL14 - publish and update twice, getMessageVersions returns >= 3',
         () async {
       final client = buildClient();
@@ -226,6 +231,7 @@ void main() {
   // RSL15 append — appendMessage with operation, returns versionSerial
   // ---------------------------------------------------------------------------
   group('RSL15 - appendMessage', () {
+    // UTS: rest/integration/RSL15/append-message-2
     test('RSL15 append - publish then append, returns UpdateDeleteResult with versionSerial',
         () async {
       final client = buildClient();
@@ -296,6 +302,7 @@ void main() {
       );
     });
 
+    // UTS: rest/integration/RSAN3/get-annotations-paginated-0
     test('RSAN3 paginated - publish 2 annotations, poll get until >= 2, verify PaginatedResult',
         () async {
       final client = buildClient();

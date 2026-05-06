@@ -23,6 +23,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTL10d - History contains messages published by another client
     // -------------------------------------------------------------------------
+    // UTS: realtime/integration/RTL10d/history-cross-client-0
     test('RTL10d - History contains messages published by another client',
         () async {
       // Create two Realtime clients

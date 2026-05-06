@@ -14,6 +14,7 @@ import '../../../helpers/protocol_message_helpers.dart';
 /// Spec: uts/test/realtime/unit/connection/connection_open_failures_test.md
 void main() {
   group('RTN14a - Invalid API key causes FAILED state', () {
+    // UTS: realtime/unit/RTN14a/invalid-key-failed-0
     test('connects with invalid key and receives ERROR', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -57,6 +58,7 @@ void main() {
   });
 
   group('RTN14b - Token error during connection', () {
+    // UTS: realtime/unit/RSA4a/token-error-no-renewal-0
     test('token error with renewal capability retries', () async {
       var connectionAttemptCount = 0;
       var tokenRenewalCount = 0;
@@ -116,6 +118,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN14b/token-error-with-renewal-0
     test('token error without renewal transitions to FAILED', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -153,6 +156,7 @@ void main() {
   });
 
   group('RTN14c - Connection timeout', () {
+    // UTS: realtime/unit/RTN14c/connection-timeout-0
     test('connection times out if no CONNECTED message', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -214,6 +218,7 @@ void main() {
   });
 
   group('RTN14d - Retry after recoverable failure', () {
+    // UTS: realtime/unit/RTN14d/retry-recoverable-failure-0
     test('automatically retries after disconnectedRetryTimeout', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -270,6 +275,7 @@ void main() {
   });
 
   group('RTN14e - DISCONNECTED to SUSPENDED after connectionStateTtl', () {
+    // UTS: realtime/unit/RTN14e/disconnected-to-suspended-0
     test('transitions to SUSPENDED after prolonged disconnection', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -315,6 +321,7 @@ void main() {
   });
 
   group('RTN14f - SUSPENDED state retries indefinitely', () {
+    // UTS: realtime/unit/RTN14f/suspended-retries-indefinitely-0
     test('continues retry attempts from SUSPENDED', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -394,6 +401,7 @@ void main() {
   });
 
   group('RTN14g - ERROR protocol message with empty channel', () {
+    // UTS: realtime/unit/RTN14g/error-empty-channel-failed-0
     test('transitions to FAILED on connection-level ERROR (5xx)', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -432,6 +440,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN14g/error-empty-channel-failed-0.1
     test('transitions to FAILED for 4xx non-token ERROR (e.g. 40400)',
         () async {
       // This is the real-world case: invalid API key causes the server to
@@ -475,6 +484,7 @@ void main() {
   });
 
   group('RTN14b - Token error during initial connection, renewal fails', () {
+    // UTS: realtime/unit/RTN14b/token-renewal-fails-1
     test('transitions to DISCONNECTED when token renewal fails', () async {
       var callCount = 0;
 

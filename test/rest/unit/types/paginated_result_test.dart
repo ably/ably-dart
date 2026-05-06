@@ -10,6 +10,7 @@ import '../../../helpers/test_channel_name.dart';
 void main() {
   group('PaginatedResult', () {
     group('TG1 - PaginatedResult items attribute', () {
+      // UTS: rest/unit/TG1/paginated-result-items-0
       test('contains items array', () async {
         final channelName = testChannelName('TG1');
         final mockHttp = MockHttpClient(
@@ -40,6 +41,7 @@ void main() {
     });
 
     group('TG2 - hasNext() and isLast() methods', () {
+      // UTS: rest/unit/TG2/has-next-is-last-0
       test('returns true when more pages exist', () async {
         final channelName = testChannelName('TG2-hasNext');
         final mockHttp = MockHttpClient(
@@ -69,6 +71,7 @@ void main() {
         expect(result.isLast(), isFalse);
       });
 
+      // UTS: rest/unit/TG2/has-next-is-last-0.1
       test('returns false when no more pages', () async {
         final channelName = testChannelName('TG2-isLast');
         final mockHttp = MockHttpClient(
@@ -97,6 +100,7 @@ void main() {
     });
 
     group('TG3 - next() method', () {
+      // UTS: rest/unit/TG3/next-fetches-next-page-0
       test('fetches the next page of results', () async {
         var requestCount = 0;
         final channelName = testChannelName('TG3');
@@ -157,6 +161,7 @@ void main() {
     });
 
     group('TG4 - first() method', () {
+      // UTS: rest/unit/TG4/first-returns-first-page-0
       test('returns to the first page', () async {
         var requestCount = 0;
         final channelName = testChannelName('TG4');
@@ -218,6 +223,7 @@ void main() {
     });
 
     group('TG - Empty result', () {
+      // UTS: rest/unit/TG/empty-result-handling-0
       test('handles empty results correctly', () async {
         final channelName = testChannelName('TG-empty');
         final mockHttp = MockHttpClient(
@@ -266,6 +272,7 @@ void main() {
       ];
 
       for (final testCase in testCases) {
+        // UTS: rest/unit/TG/link-header-parsing-1
         test('parses ${testCase.description}', () async {
           final channelName = testChannelName(
               'TG-link-${testCase.description.replaceAll(' ', '-')}');
@@ -295,6 +302,7 @@ void main() {
     });
 
     group('TG - PaginatedResult type parameter', () {
+      // UTS: rest/unit/TG/type-parameter-items-2
       test('items are correctly typed as Message', () async {
         final channelName = testChannelName('TG-type');
         final mockHttp = MockHttpClient(
@@ -321,6 +329,7 @@ void main() {
     });
 
     group('TG - next() on last page', () {
+      // UTS: rest/unit/TG/next-on-last-page-3
       test('returns null when calling next on last page', () async {
         final channelName = testChannelName('TG-lastPage');
         final mockHttp = MockHttpClient(
@@ -355,6 +364,7 @@ void main() {
     });
 
     group('TG - Pagination preserves authentication', () {
+      // UTS: rest/unit/TG/pagination-preserves-auth-4
       test('pagination requests include same auth credentials', () async {
         final capturedRequests = <CapturedRequest>[];
         var requestCount = 0;
@@ -410,6 +420,7 @@ void main() {
     });
 
     group('TG - Pagination with relative URLs', () {
+      // UTS: rest/unit/TG/pagination-relative-urls-5
       test('relative URLs are resolved against base REST host', () async {
         final capturedRequests = <CapturedRequest>[];
         var requestCount = 0;
@@ -466,6 +477,7 @@ void main() {
     });
 
     group('TG - Pagination with absolute URLs', () {
+      // UTS: rest/unit/TG/pagination-presence-results-7
       test('absolute URLs extract path and query, use primary domain', () async {
         final capturedRequests = <CapturedRequest>[];
         var requestCount = 0;
@@ -522,6 +534,7 @@ void main() {
     });
 
     group('TG - Multiple Link relations', () {
+      // UTS: rest/unit/TG/multiple-link-relations-6
       test('parses multiple Link relations correctly', () async {
         final channelName = testChannelName('TG-multiLink');
         final mockHttp = MockHttpClient(
@@ -553,6 +566,7 @@ void main() {
     });
 
     group('TG - Pagination includes request headers', () {
+      // UTS: rest/unit/TG/pagination-includes-headers-8
       test('pagination requests include standard Ably headers', () async {
         final capturedRequests = <CapturedRequest>[];
         var requestCount = 0;
@@ -606,6 +620,7 @@ void main() {
     });
 
     group('TG - Error handling on next()', () {
+      // UTS: rest/unit/TG/error-handling-on-next-9
       test('404 error during pagination raises AblyException', () async {
         final capturedRequests = <CapturedRequest>[];
         var requestCount = 0;
@@ -665,6 +680,7 @@ void main() {
         );
       });
 
+      // UTS: rest/unit/TG/error-handling-on-next-9.1
       test('500 error during pagination raises AblyException', () async {
         final capturedRequests = <CapturedRequest>[];
         var requestCount = 0;

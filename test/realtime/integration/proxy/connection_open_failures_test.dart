@@ -37,6 +37,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTN14a - Fatal error during connection -> FAILED
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RTN14a/fatal-connect-error-0
     test('RTN14a - Fatal error during connection -> FAILED', () async {
       final session = await ProxySession.create(
         rules: [
@@ -93,6 +94,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTN14b - Token error triggers renewal and reconnect
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RTN14b/token-error-renew-reconnect-0
     test('RTN14b - Token error triggers renewal and reconnect', () async {
       final session = await ProxySession.create(
         rules: [
@@ -154,6 +156,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTN14d - Connection refused -> DISCONNECTED -> retry -> CONNECTED
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RTN14d/retry-after-refused-0
     test('RTN14d - Connection refused -> DISCONNECTED -> retry -> CONNECTED',
         () async {
       final session = await ProxySession.create(
@@ -213,6 +216,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTN14g - Connection-level ERROR 50000 -> FAILED
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RTN14g/server-error-causes-failed-0
     test('RTN14g - Connection-level ERROR 50000 -> FAILED', () async {
       final session = await ProxySession.create(
         rules: [
@@ -269,6 +273,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTN14c - Connection timeout (CONNECTED suppressed)
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RTN14c/connection-timeout-0
     test('RTN14c - Connection timeout (CONNECTED suppressed)', () async {
       final session = await ProxySession.create(
         rules: [

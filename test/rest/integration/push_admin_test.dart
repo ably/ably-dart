@@ -51,6 +51,7 @@ void main() {
   // RSH1a — push.admin.publish
   // ---------------------------------------------------------------------------
   group('RSH1a - push.admin.publish', () {
+    // UTS: rest/integration/RSH1a/push-publish-clientid-0
     test('RSH1a - publish to valid clientId recipient does not throw', () async {
       final client = buildClient();
       addTearDown(client.close);
@@ -66,6 +67,7 @@ void main() {
       );
     });
 
+    // UTS: rest/integration/RSH1a/push-publish-invalid-recipient-1
     test('RSH1a invalid - empty recipient throws AblyException', () async {
       final client = buildClient();
       addTearDown(client.close);
@@ -86,6 +88,7 @@ void main() {
   // RSH1b3+RSH1b1 — save device registration and get by deviceId
   // ---------------------------------------------------------------------------
   group('RSH1b3+RSH1b1 - save and get device registration', () {
+    // UTS: rest/integration/RSH1b3/save-and-get-device-0
     test('RSH1b3+RSH1b1 - save device, get by deviceId, verify fields',
         () async {
       final client = buildClient();
@@ -108,6 +111,7 @@ void main() {
       expect(fetched.platform, equals('ios'));
     });
 
+    // UTS: rest/integration/RSH1b3/update-device-registration-1
     test('RSH1b3 update - save device twice with different token, verify via get',
         () async {
       final client = buildClient();
@@ -141,6 +145,7 @@ void main() {
   // RSH1b1 — get non-existent device returns 404
   // ---------------------------------------------------------------------------
   group('RSH1b1 - get non-existent device', () {
+    // UTS: rest/integration/RSH1b1/get-unknown-device-error-0
     test('RSH1b1 not found - get nonexistent deviceId throws with 404',
         () async {
       final client = buildClient();
@@ -160,6 +165,7 @@ void main() {
   // RSH1b2 — list device registrations
   // ---------------------------------------------------------------------------
   group('RSH1b2 - list device registrations', () {
+    // UTS: rest/integration/RSH1b2/list-devices-filtered-0
     test('RSH1b2 list - save device, list by deviceId, verify 1 result',
         () async {
       final client = buildClient();
@@ -183,6 +189,7 @@ void main() {
   // RSH1b4 — remove device registration
   // ---------------------------------------------------------------------------
   group('RSH1b4 - remove device registration', () {
+    // UTS: rest/integration/RSH1b4/remove-device-0
     test('RSH1b4 remove - save device, remove, subsequent get returns 404',
         () async {
       final client = buildClient();
@@ -200,6 +207,7 @@ void main() {
       }
     });
 
+    // UTS: rest/integration/RSH1b4/remove-nonexistent-device-1
     test('RSH1b4 remove nonexistent - does not throw', () async {
       final client = buildClient();
       addTearDown(client.close);
@@ -286,6 +294,7 @@ void main() {
       );
     });
 
+    // UTS: rest/integration/RSH1c3/save-and-list-subscriptions-0
     test('RSH1c3 clientId subscription - save clientId subscription, verify',
         () async {
       final client = buildClient();
@@ -319,6 +328,7 @@ void main() {
   // RSH1c2 — listChannels
   // ---------------------------------------------------------------------------
   group('RSH1c2 - listChannels', () {
+    // UTS: rest/integration/RSH1c2/list-channels-with-subscriptions-0
     test('RSH1c2 listChannels - save clientId subscription, listChannels returns channel',
         () async {
       final client = buildClient();
@@ -354,6 +364,7 @@ void main() {
   // RSH1c4 — remove channel subscription
   // ---------------------------------------------------------------------------
   group('RSH1c4 - remove subscription', () {
+    // UTS: rest/integration/RSH1c4/remove-channel-subscription-0
     test('RSH1c4 remove sub - save sub, remove it, list returns 0', () async {
       final client = buildClient();
       addTearDown(client.close);
@@ -386,6 +397,7 @@ void main() {
       expect(after.items, isEmpty);
     });
 
+    // UTS: rest/integration/RSH1c4/remove-nonexistent-subscription-1
     test('RSH1c4 remove nonexistent sub - does not throw', () async {
       final client = buildClient();
       addTearDown(client.close);

@@ -11,6 +11,7 @@ import '../../../helpers/protocol_message_helpers.dart';
 /// Spec: uts/test/realtime/unit/connection/update_events_test.md
 void main() {
   group('RTN24 - CONNECTED message while already CONNECTED emits UPDATE', () {
+    // UTS: realtime/unit/RTN24/no-duplicate-connected-event-3
     test('emits UPDATE event, not CONNECTED event', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -95,6 +96,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN24/connected-emits-update-0
     test('UPDATE event includes error reason when present', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -162,6 +164,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN24/connection-details-override-2
     test('connectionDetails override stored details', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
