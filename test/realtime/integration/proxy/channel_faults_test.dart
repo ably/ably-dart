@@ -58,10 +58,10 @@ void main() {
           {
             'match': {
               'type': 'ws_frame_to_server',
-              'action': 10, // ATTACH
+              'action': 'ATTACH',
               'channel': channelName,
             },
-            'action': 'suppress',
+            'action': {'type': 'suppress'},
           },
         ],
       );
@@ -136,17 +136,19 @@ void main() {
           {
             'match': {
               'type': 'ws_frame_to_client',
-              'action': 11, // ATTACHED
+              'action': 'ATTACHED',
               'channel': channelName,
             },
-            'action': 'replace',
-            'replacement': {
-              'action': 9, // ERROR
-              'channel': channelName,
-              'error': {
-                'code': 40160,
-                'statusCode': 401,
-                'message': 'Channel denied',
+            'action': {
+              'type': 'replace',
+              'message': {
+                'action': 9, // ERROR
+                'channel': channelName,
+                'error': {
+                  'code': 40160,
+                  'statusCode': 401,
+                  'message': 'Channel denied',
+                },
               },
             },
             'times': 1,
@@ -228,10 +230,10 @@ void main() {
         {
           'match': {
             'type': 'ws_frame_to_server',
-            'action': 12, // DETACH
+            'action': 'DETACH',
             'channel': channelName,
           },
-          'action': 'suppress',
+          'action': {'type': 'suppress'},
         },
       ]);
 

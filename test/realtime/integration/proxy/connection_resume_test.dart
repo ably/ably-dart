@@ -206,7 +206,7 @@ void main() {
           {
             'match': {
               'type': 'ws_frame_to_client',
-              'action': 4, // CONNECTED
+              'action': 'CONNECTED',
             },
             'action': {
               'type': 'replace',
@@ -511,7 +511,7 @@ void main() {
           {
             'match': {
               'type': 'ws_frame_to_client',
-              'action': 4, // CONNECTED
+              'action': 'CONNECTED',
             },
             'action': {
               'type': 'modify',
@@ -603,7 +603,7 @@ void main() {
           {
             'match': {
               'type': 'ws_frame_to_client',
-              'action': 1, // ACK
+              'action': 'ACK',
             },
             'action': {'type': 'drop'},
             'times': 1,
