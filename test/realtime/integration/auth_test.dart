@@ -6,6 +6,7 @@ import 'package:test/test.dart';
 
 import '../../helpers/jwt_helper.dart';
 import '../../helpers/test_app_helper.dart';
+import '../../helpers/wait_for_state.dart';
 
 void main() {
   late TestApp testApp;
@@ -39,13 +40,8 @@ void main() {
       addTearDown(() async => await client.close());
 
       // Connect and await CONNECTED state
-      await client.connect();
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
-
-      expect(client.connection.state, equals(ConnectionState.connected));
+      client.connect();
+      await waitForConnectionState(client.connection, ConnectionState.connected);
 
       // Record the connection ID
       final connectionId = client.connection.id;
@@ -107,12 +103,7 @@ void main() {
       final token = await client.auth.authorize();
 
       // Await CONNECTED state
-      if (client.connection.state != ConnectionState.connected) {
-        await client.connection
-            .on(ConnectionEvent.connected)
-            .first
-            .timeout(const Duration(seconds: 10));
-      }
+      await waitForConnectionState(client.connection, ConnectionState.connected);
 
       // Assert: token non-null
       expect(token, isNotNull);
@@ -144,19 +135,10 @@ void main() {
       addTearDown(() async => await client.close());
 
       // Connect and await CONNECTED
-      await client.connect();
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
+      client.connect();
+      await waitForConnectionState(client.connection, ConnectionState.connected);
 
-      // Assert: connected
-      expect(client.connection.state, equals(ConnectionState.connected));
-
-      // Assert: connection.id non-null
       expect(client.connection.id, isNotNull);
-
-      // Assert: errorReason null
       expect(client.connection.errorReason, isNull);
     });
 
@@ -185,14 +167,8 @@ void main() {
       addTearDown(() async => await client.close());
 
       // Connect and await CONNECTED
-      await client.connect();
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
-
-      // Assert: connected
-      expect(client.connection.state, equals(ConnectionState.connected));
+      client.connect();
+      await waitForConnectionState(client.connection, ConnectionState.connected);
 
       // Assert: auth.clientId matches
       expect(client.auth.clientId, equals(testClientId));

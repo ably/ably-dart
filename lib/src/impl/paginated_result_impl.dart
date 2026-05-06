@@ -72,17 +72,31 @@ class PaginatedResultImpl<T> implements PaginatedResult<T> {
   }
 
   /// Creates a PaginatedResult from an HTTP response.
+  ///
+  /// [requestPath] is the path of the original request, used to resolve
+  /// relative Link header URLs (the server returns `./messages?...` etc).
   static PaginatedResultImpl<T> fromResponse<T>({
     required AblyHttpResponse response,
     required List<T> items,
     required PageFetcher<T>? fetcher,
+    String? requestPath,
   }) {
     final links = LinkParser.parse(response.linkHeader);
 
+    String? resolveLink(String? link) {
+      if (link == null) return null;
+      if (link.startsWith('/') || link.startsWith('http')) return link;
+      if (requestPath != null) {
+        final baseUri = Uri.parse(requestPath);
+        return baseUri.resolve(link).toString();
+      }
+      return link;
+    }
+
     return PaginatedResultImpl<T>(
       items: items,
-      nextLink: links['next'],
-      firstLink: links['first'] ?? links['current'],
+      nextLink: resolveLink(links['next']),
+      firstLink: resolveLink(links['first'] ?? links['current']),
       fetcher: fetcher,
     );
   }

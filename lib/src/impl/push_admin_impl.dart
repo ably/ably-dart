@@ -133,6 +133,7 @@ class PushDeviceRegistrationsImpl implements PushDeviceRegistrations {
       response: response,
       items: items,
       fetcher: _fetchDeviceDetailsPage,
+      requestPath: '/push/deviceRegistrations',
     );
   }
 
@@ -140,9 +141,10 @@ class PushDeviceRegistrationsImpl implements PushDeviceRegistrations {
     String url,
   ) async {
     final uri = Uri.parse(url);
+    final path = uri.path;
     final response = await _httpClient.request(
       'GET',
-      uri.path,
+      path,
       queryParams: uri.queryParameters.isNotEmpty
           ? Map<String, String>.from(uri.queryParameters)
           : null,
@@ -152,6 +154,7 @@ class PushDeviceRegistrationsImpl implements PushDeviceRegistrations {
       response: response,
       items: items,
       fetcher: _fetchDeviceDetailsPage,
+      requestPath: path,
     );
   }
 
@@ -224,6 +227,7 @@ class PushChannelSubscriptionsImpl implements PushChannelSubscriptions {
       response: response,
       items: items,
       fetcher: _fetchSubscriptionsPage,
+      requestPath: '/push/channelSubscriptions',
     );
   }
 
@@ -231,9 +235,10 @@ class PushChannelSubscriptionsImpl implements PushChannelSubscriptions {
     String url,
   ) async {
     final uri = Uri.parse(url);
+    final path = uri.path;
     final response = await _httpClient.request(
       'GET',
-      uri.path,
+      path,
       queryParams: uri.queryParameters.isNotEmpty
           ? Map<String, String>.from(uri.queryParameters)
           : null,
@@ -244,6 +249,7 @@ class PushChannelSubscriptionsImpl implements PushChannelSubscriptions {
       response: response,
       items: items,
       fetcher: _fetchSubscriptionsPage,
+      requestPath: path,
     );
   }
 
@@ -265,14 +271,16 @@ class PushChannelSubscriptionsImpl implements PushChannelSubscriptions {
       response: response,
       items: items,
       fetcher: _fetchChannelsPage,
+      requestPath: '/push/channels',
     );
   }
 
   Future<PaginatedResult<String>> _fetchChannelsPage(String url) async {
     final uri = Uri.parse(url);
+    final path = uri.path;
     final response = await _httpClient.request(
       'GET',
-      uri.path,
+      path,
       queryParams: uri.queryParameters.isNotEmpty
           ? Map<String, String>.from(uri.queryParameters)
           : null,
@@ -282,6 +290,7 @@ class PushChannelSubscriptionsImpl implements PushChannelSubscriptions {
       response: response,
       items: items,
       fetcher: _fetchChannelsPage,
+      requestPath: path,
     );
   }
 

@@ -8,6 +8,7 @@ import 'package:ably_dart/ably_dart.dart';
 
 import '../../helpers/test_app_helper.dart';
 import '../../helpers/poll_until.dart';
+import '../../helpers/wait_for_state.dart';
 
 void main() {
   late TestApp testApp;
@@ -39,12 +40,8 @@ void main() {
 
   /// Connects a client and waits until CONNECTED.
   Future<void> connectAndWait(Realtime client) async {
-    await client.connect();
-    await pollUntil(() async {
-      return client.connection.state == ConnectionState.connected
-          ? true
-          : null;
-    });
+    client.connect();
+    await waitForConnectionState(client.connection, ConnectionState.connected);
   }
 
   group('Realtime Mutable Messages Integration Tests', () {
@@ -354,8 +351,16 @@ void main() {
       await connectAndWait(clientB);
 
       final channelName = uniqueChannel('rtan1-rtan2');
-      final channelA = clientA.channels.get(channelName);
-      final channelB = clientB.channels.get(channelName);
+      const annotationModes = RealtimeChannelOptions(
+        modes: [
+          ChannelMode.publish,
+          ChannelMode.subscribe,
+          ChannelMode.annotationPublish,
+          ChannelMode.annotationSubscribe,
+        ],
+      );
+      final channelA = clientA.channels.get(channelName, annotationModes);
+      final channelB = clientB.channels.get(channelName, annotationModes);
 
       await channelA.attach();
       await channelB.attach();
@@ -443,8 +448,16 @@ void main() {
       await connectAndWait(clientB);
 
       final channelName = uniqueChannel('rtan4c-filter');
-      final channelA = clientA.channels.get(channelName);
-      final channelB = clientB.channels.get(channelName);
+      const annotationModes = RealtimeChannelOptions(
+        modes: [
+          ChannelMode.publish,
+          ChannelMode.subscribe,
+          ChannelMode.annotationPublish,
+          ChannelMode.annotationSubscribe,
+        ],
+      );
+      final channelA = clientA.channels.get(channelName, annotationModes);
+      final channelB = clientB.channels.get(channelName, annotationModes);
 
       await channelA.attach();
       await channelB.attach();

@@ -8,6 +8,7 @@ import 'package:ably_dart/ably_dart.dart';
 
 import '../../helpers/test_app_helper.dart';
 import '../../helpers/poll_until.dart';
+import '../../helpers/wait_for_state.dart';
 
 void main() {
   late TestApp testApp;
@@ -54,17 +55,13 @@ void main() {
 
       final channelName = uniqueChannel('presence-lifecycle');
 
-      // Connect both clients
-      await clientA.connect();
-      await clientB.connect();
-
-      // Wait until both are connected
-      await pollUntil(() async {
-        return clientA.connection.state == ConnectionState.connected &&
-                clientB.connection.state == ConnectionState.connected
-            ? true
-            : null;
-      });
+      // Connect both clients (fire-and-forget, then await state)
+      clientA.connect();
+      clientB.connect();
+      await Future.wait([
+        waitForConnectionState(clientA.connection, ConnectionState.connected),
+        waitForConnectionState(clientB.connection, ConnectionState.connected),
+      ]);
 
       final channelA = clientA.channels.get(channelName);
       final channelB = clientB.channels.get(channelName);
@@ -137,16 +134,13 @@ void main() {
       final channelName = uniqueChannel('presence-bulk');
       const memberCount = 20;
 
-      // Connect both clients
-      await clientA.connect();
-      await clientB.connect();
-
-      await pollUntil(() async {
-        return clientA.connection.state == ConnectionState.connected &&
-                clientB.connection.state == ConnectionState.connected
-            ? true
-            : null;
-      });
+      // Connect both clients (fire-and-forget, then await state)
+      clientA.connect();
+      clientB.connect();
+      await Future.wait([
+        waitForConnectionState(clientA.connection, ConnectionState.connected),
+        waitForConnectionState(clientB.connection, ConnectionState.connected),
+      ]);
 
       final channelA = clientA.channels.get(channelName);
       final channelB = clientB.channels.get(channelName);

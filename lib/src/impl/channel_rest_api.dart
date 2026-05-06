@@ -52,15 +52,17 @@ class ChannelRestApi {
       response: response,
       items: messages,
       fetcher: _fetchHistoryPage,
+      requestPath: path,
     );
   }
 
   Future<PaginatedResult<Message>> _fetchHistoryPage(String url) async {
     final uri = Uri.parse(url);
+    final path = uri.path;
 
     final response = await _httpClient.request(
       'GET',
-      uri.path,
+      path,
       queryParams: uri.queryParameters.isNotEmpty
           ? Map<String, String>.from(uri.queryParameters)
           : null,
@@ -72,6 +74,7 @@ class ChannelRestApi {
       response: response,
       items: messages,
       fetcher: _fetchHistoryPage,
+      requestPath: path,
     );
   }
 
@@ -96,6 +99,7 @@ class ChannelRestApi {
       response: response,
       items: messages,
       fetcher: _fetchPresenceHistoryPage,
+      requestPath: path,
     );
   }
 
@@ -103,10 +107,11 @@ class ChannelRestApi {
     String url,
   ) async {
     final uri = Uri.parse(url);
+    final path = uri.path;
 
     final response = await _httpClient.request(
       'GET',
-      uri.path,
+      path,
       queryParams: uri.queryParameters.isNotEmpty
           ? Map<String, String>.from(uri.queryParameters)
           : null,
@@ -118,6 +123,7 @@ class ChannelRestApi {
       response: response,
       items: messages,
       fetcher: _fetchPresenceHistoryPage,
+      requestPath: path,
     );
   }
 
@@ -154,6 +160,7 @@ class ChannelRestApi {
       response: response,
       items: messages,
       fetcher: _fetchMessageVersionsPage,
+      requestPath: path,
     );
   }
 
@@ -161,10 +168,11 @@ class ChannelRestApi {
     String url,
   ) async {
     final uri = Uri.parse(url);
+    final path = uri.path;
 
     final response = await _httpClient.request(
       'GET',
-      uri.path,
+      path,
       queryParams: uri.queryParameters.isNotEmpty
           ? Map<String, String>.from(uri.queryParameters)
           : null,
@@ -176,6 +184,7 @@ class ChannelRestApi {
       response: response,
       items: messages,
       fetcher: _fetchMessageVersionsPage,
+      requestPath: path,
     );
   }
 
@@ -221,6 +230,7 @@ class ChannelRestApi {
       response: response,
       items: annotations,
       fetcher: _fetchAnnotationsPage,
+      requestPath: path,
     );
   }
 
@@ -228,10 +238,11 @@ class ChannelRestApi {
     String url,
   ) async {
     final uri = Uri.parse(url);
+    final path = uri.path;
 
     final response = await _httpClient.request(
       'GET',
-      uri.path,
+      path,
       queryParams: uri.queryParameters.isNotEmpty
           ? Map<String, String>.from(uri.queryParameters)
           : null,
@@ -243,6 +254,7 @@ class ChannelRestApi {
       response: response,
       items: annotations,
       fetcher: _fetchAnnotationsPage,
+      requestPath: path,
     );
   }
 

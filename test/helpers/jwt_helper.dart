@@ -14,12 +14,15 @@ class JwtHelper {
   /// [capability] is the JSON-encoded capability (default: full access).
   /// [clientId] is an optional clientId to bind to the token.
   /// [expiresAt] overrides the expiry time (used for expired token tests).
+  /// [issuedAt] overrides the issued-at time (use with [expiresAt] to create
+  /// tokens with a positive TTL that are already expired).
   static String generateToken({
     required String apiKey,
     int ttl = 3600000,
     String capability = '{"*":["*"]}',
     String? clientId,
     DateTime? expiresAt,
+    DateTime? issuedAt,
   }) {
     final parts = apiKey.split(':');
     if (parts.length != 2) {
@@ -28,7 +31,7 @@ class JwtHelper {
     final keyName = parts[0];
     final keySecret = parts[1];
 
-    final now = DateTime.now();
+    final now = issuedAt ?? DateTime.now();
     final iat = now.millisecondsSinceEpoch ~/ 1000;
     final exp = expiresAt != null
         ? expiresAt.millisecondsSinceEpoch ~/ 1000

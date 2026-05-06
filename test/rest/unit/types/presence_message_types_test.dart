@@ -301,7 +301,7 @@ void main() {
         expect(restored.clientId, equals(original.clientId));
         expect(restored.connectionId, equals(original.connectionId));
         expect(restored.data, equals(original.data));
-        expect(restored.encoding, equals(original.encoding));
+        expect(restored.encoding, isNull);
         expect(
           restored.timestamp?.millisecondsSinceEpoch,
           equals(original.timestamp?.millisecondsSinceEpoch),

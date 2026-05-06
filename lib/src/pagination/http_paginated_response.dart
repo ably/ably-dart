@@ -62,15 +62,20 @@ class HttpPaginatedResponseImpl<T> implements HttpPaginatedResponse<T> {
     String? nextUrl;
 
     if (linkHeader != null) {
-      // Parse Link: </path?cursor=xyz>; rel="next", </path>; rel="first"
+      // Parse Link: <./messages?cursor=xyz>; rel="next"
       final links = linkHeader.split(',');
       for (final link in links) {
         final match =
             RegExp(r'<([^>]+)>;\s*rel="(\w+)"').firstMatch(link.trim());
         if (match != null) {
-          final url = match.group(1);
+          var url = match.group(1);
           final rel = match.group(2);
-          if (rel == 'next') {
+          if (url != null && rel == 'next') {
+            if (!url.startsWith('/') &&
+                !url.startsWith('http') &&
+                firstUrl != null) {
+              url = Uri.parse(firstUrl).resolve(url).toString();
+            }
             nextUrl = url;
           }
         }
