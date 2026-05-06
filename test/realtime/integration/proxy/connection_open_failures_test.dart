@@ -45,7 +45,7 @@ void main() {
           {
             'match': {
               'type': 'ws_frame_to_client',
-              'action': 4, // CONNECTED
+              'action': 'CONNECTED',
             },
             'action': {
               'type': 'replace',
@@ -102,7 +102,7 @@ void main() {
           {
             'match': {
               'type': 'ws_frame_to_client',
-              'action': 4, // CONNECTED
+              'action': 'CONNECTED',
             },
             'action': {
               'type': 'replace',
@@ -224,7 +224,7 @@ void main() {
           {
             'match': {
               'type': 'ws_frame_to_client',
-              'action': 4, // CONNECTED
+              'action': 'CONNECTED',
             },
             'action': {
               'type': 'replace',
@@ -281,7 +281,7 @@ void main() {
           {
             'match': {
               'type': 'ws_frame_to_client',
-              'action': 4, // CONNECTED
+              'action': 'CONNECTED',
             },
             'action': {'type': 'drop'},
           },

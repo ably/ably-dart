@@ -42,13 +42,15 @@ void main() {
               'type': 'http_request',
               'pathContains': '/channels/',
             },
-            'action': 'http_respond',
-            'statusCode': 401,
-            'body': {
-              'error': {
-                'code': 40142,
-                'statusCode': 401,
-                'message': 'Token expired',
+            'action': {
+              'type': 'http_respond',
+              'status': 401,
+              'body': {
+                'error': {
+                  'code': 40142,
+                  'statusCode': 401,
+                  'message': 'Token expired',
+                },
               },
             },
             'times': 1,
@@ -114,13 +116,15 @@ void main() {
               'type': 'http_request',
               'pathContains': '/channels/',
             },
-            'action': 'http_respond',
-            'statusCode': 503,
-            'body': {
-              'error': {
-                'code': 50300,
-                'statusCode': 503,
-                'message': 'Service unavailable',
+            'action': {
+              'type': 'http_respond',
+              'status': 503,
+              'body': {
+                'error': {
+                  'code': 50300,
+                  'statusCode': 503,
+                  'message': 'Service unavailable',
+                },
               },
             },
             'times': 1,

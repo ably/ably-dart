@@ -1,5 +1,13 @@
+paths: ["test/rest/unit", "test/realtime/unit"]
+
 tags:
   integration:
-    skip: "Run with: dart test -t integration"
   proxy:
-    skip: "Run with: dart test -t proxy"
+
+presets:
+  proxy:
+    paths: ["test/rest/integration/proxy", "test/realtime/integration/proxy"]
+  integration:
+    paths: ["test/rest/integration", "test/realtime/integration"]
+  all:
+    paths: ["test"]

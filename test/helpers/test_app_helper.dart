@@ -74,8 +74,8 @@ class TestApp {
     // When running `dart test` from the ably-dart directory, the working
     // directory is the ably-dart root.
     final candidates = [
-      'submodules/test-resources/test-app-setup.json',
-      '../submodules/test-resources/test-app-setup.json',
+      'submodules/ably-common/test-resources/test-app-setup.json',
+      '../submodules/ably-common/test-resources/test-app-setup.json',
     ];
 
     for (final path in candidates) {

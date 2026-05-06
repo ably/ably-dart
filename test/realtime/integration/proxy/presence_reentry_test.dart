@@ -184,26 +184,30 @@ void main() {
             'match': {
               'type': 'ws_connect',
             },
-            'action': 'close',
-            'delayMs': 3000,
+            'action': {
+              'type': 'close',
+              'delayMs': 3000,
+            },
             'times': 1,
             'skip': 1, // Skip the first connection, close the second
           },
           {
             'match': {
               'type': 'ws_frame_to_client',
-              'action': 11, // ATTACHED
+              'action': 'ATTACHED',
               'channel': channelName,
             },
-            'action': 'replace',
-            'replacement': {
-              'action': 11, // ATTACHED
-              'channel': channelName,
-              'flags': 0,
-              'error': {
-                'code': 91001,
-                'statusCode': 500,
-                'message': 'Channel reattached without resume',
+            'action': {
+              'type': 'replace',
+              'message': {
+                'action': 11, // ATTACHED
+                'channel': channelName,
+                'flags': 0,
+                'error': {
+                  'code': 91001,
+                  'statusCode': 500,
+                  'message': 'Channel reattached without resume',
+                },
               },
             },
             'times': 1,
