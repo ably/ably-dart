@@ -24,7 +24,7 @@ void main() {
   Rest buildRevocableKeyClient() => Rest(
         options: ClientOptions(
           key: testApp.keys[4].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );
@@ -53,7 +53,7 @@ void main() {
       final realtimeClient = Realtime(
         options: ClientOptions(
           token: token.token,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
           // Disable auto-reconnect after token revocation
           disconnectedRetryTimeout: 60000,
@@ -129,7 +129,7 @@ void main() {
       final tokenClient = Rest(
         options: ClientOptions(
           token: jwt,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );

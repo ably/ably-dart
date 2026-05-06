@@ -22,7 +22,7 @@ void main() {
   Rest makeClient() => Rest(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );

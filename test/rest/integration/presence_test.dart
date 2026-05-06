@@ -22,7 +22,7 @@ void main() {
   Rest makeRestClient([int keyIndex = 0]) => Rest(
         options: ClientOptions(
           key: testApp.keys[keyIndex].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );
@@ -31,7 +31,7 @@ void main() {
   Realtime makeRealtimeClientWithClientId(String clientId) => Realtime(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
           clientId: clientId,
         ),
@@ -311,7 +311,7 @@ void main() {
       final client = Rest(
         options: ClientOptions(
           key: 'invalid.key:secret',
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );

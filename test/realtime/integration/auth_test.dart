@@ -31,7 +31,7 @@ void main() {
           authCallback: (params) async {
             return JwtHelper.generateToken(apiKey: apiKey);
           },
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
           autoConnect: false,
         ),
@@ -93,7 +93,7 @@ void main() {
           authCallback: (params) async {
             return JwtHelper.generateToken(apiKey: apiKey);
           },
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
           autoConnect: false,
         ),
@@ -136,7 +136,7 @@ void main() {
           authCallback: (params) async {
             return JwtHelper.generateToken(apiKey: apiKey);
           },
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
           autoConnect: false,
         ),
@@ -177,7 +177,7 @@ void main() {
             );
           },
           clientId: testClientId,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
           autoConnect: false,
         ),

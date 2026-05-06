@@ -22,7 +22,7 @@ void main() {
   Rest buildAdminClient() => Rest(
         options: ClientOptions(
           key: testApp.keys[1].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );
@@ -68,7 +68,7 @@ void main() {
       final deviceClient = Rest(
         options: ClientOptions(
           key: testApp.keys[1].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );
@@ -135,7 +135,7 @@ void main() {
       final deviceClient = Rest(
         options: ClientOptions(
           key: testApp.keys[1].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );

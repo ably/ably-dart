@@ -31,7 +31,7 @@ void main() {
       final client = Rest(
         options: ClientOptions(
           key: testApp.keys[2].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );
@@ -64,7 +64,7 @@ void main() {
       client = Rest(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );
@@ -124,7 +124,7 @@ void main() {
       final client = Rest(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
           idempotentRestPublishing: false,
         ),
@@ -171,7 +171,7 @@ void main() {
       final client = Rest(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );
@@ -207,7 +207,7 @@ void main() {
       final keyClient = Rest(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );
@@ -221,7 +221,7 @@ void main() {
       final tokenClient = Rest(
         options: ClientOptions(
           token: tokenDetails.token,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );
