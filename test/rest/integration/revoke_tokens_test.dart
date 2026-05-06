@@ -8,6 +8,7 @@ import 'package:ably_dart/ably_dart.dart';
 
 import '../../helpers/jwt_helper.dart';
 import '../../helpers/test_app_helper.dart';
+import '../../helpers/wait_for_state.dart';
 
 void main() {
   late TestApp testApp;
@@ -55,6 +56,7 @@ void main() {
           token: token.token,
           endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
+          autoConnect: false,
           // Disable auto-reconnect after token revocation
           disconnectedRetryTimeout: 60000,
         ),
@@ -62,10 +64,11 @@ void main() {
       addTearDown(realtimeClient.close);
 
       // Wait for the Realtime connection to be established
-      await realtimeClient.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 15));
+      realtimeClient.connect();
+      await waitForConnectionState(
+        realtimeClient.connection,
+        ConnectionState.connected,
+      );
 
       // Set up listener for disconnected/failed state change before revoking
       final disconnectedCompleter = Completer<ConnectionStateChange>();
@@ -104,13 +107,15 @@ void main() {
       final stateChange = await disconnectedCompleter.future
           .timeout(const Duration(seconds: 30));
 
-      // RSA17g: The connection should be disconnected/failed with code 40141
+      // RSA17g: The connection should be disconnected/failed with a token
+      // revocation code (40141 in v2, 40171 in v5)
       expect(stateChange.reason, isNotNull);
       expect(
         stateChange.reason!.code,
-        equals(40141),
+        anyOf(equals(40141), equals(40171)),
         reason:
-            'Expected error code 40141 (token revoked), got ${stateChange.reason?.code}',
+            'Expected error code 40141 or 40171 (token revoked), '
+            'got ${stateChange.reason?.code}',
       );
     });
   });

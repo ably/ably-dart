@@ -35,7 +35,7 @@ class Message {
     final encoding = map['encoding'] as String?;
 
     // Decode data based on encoding
-    final decodedData = _decodeData(rawData, encoding);
+    final decodedData = decodeData(rawData, encoding);
 
     // Parse action from numeric wire value (TM2j)
     MessageAction? action;
@@ -91,7 +91,7 @@ class Message {
 
   /// Decodes data based on encoding string.
   /// Encoding can be a single encoding or compound (e.g., 'json/base64').
-  static Object? _decodeData(Object? data, String? encoding) {
+  static Object? decodeData(Object? data, String? encoding) {
     if (data == null || encoding == null || encoding.isEmpty) {
       return data;
     }

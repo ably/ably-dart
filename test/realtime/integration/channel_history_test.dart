@@ -7,6 +7,7 @@ import 'package:test/test.dart';
 import '../../helpers/poll_until.dart';
 import '../../helpers/test_app_helper.dart';
 import '../../helpers/test_channel_name.dart';
+import '../../helpers/wait_for_state.dart';
 
 void main() {
   late TestApp testApp;
@@ -48,18 +49,14 @@ void main() {
       addTearDown(() async => await subscriber.close());
 
       // Connect both clients
-      await publisher.connect();
-      await subscriber.connect();
-
+      publisher.connect();
+      subscriber.connect();
       await Future.wait([
-        publisher.connection
-            .on(ConnectionEvent.connected)
-            .first
-            .timeout(const Duration(seconds: 10)),
-        subscriber.connection
-            .on(ConnectionEvent.connected)
-            .first
-            .timeout(const Duration(seconds: 10)),
+        waitForConnectionState(publisher.connection, ConnectionState.connected),
+        waitForConnectionState(
+          subscriber.connection,
+          ConnectionState.connected,
+        ),
       ]);
 
       // Get channels on both clients with the same name

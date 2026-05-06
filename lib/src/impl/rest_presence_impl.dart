@@ -41,6 +41,7 @@ class RestPresenceImpl implements RestPresence {
       response: response,
       items: messages,
       fetcher: (url) => _fetchPresencePage(url),
+      requestPath: path,
     );
   }
 
@@ -65,16 +66,18 @@ class RestPresenceImpl implements RestPresence {
       response: response,
       items: messages,
       fetcher: (url) => _fetchPresenceHistoryPage(url),
+      requestPath: path,
     );
   }
 
   Future<PaginatedResult<PresenceMessage>> _fetchPresencePage(
       String url) async {
     final uri = Uri.parse(url);
+    final path = uri.path;
 
     final response = await _httpClient.request(
       'GET',
-      uri.path,
+      path,
       queryParams: uri.queryParameters.isNotEmpty
           ? Map<String, String>.from(uri.queryParameters)
           : null,
@@ -86,6 +89,7 @@ class RestPresenceImpl implements RestPresence {
       response: response,
       items: messages,
       fetcher: (nextUrl) => _fetchPresencePage(nextUrl),
+      requestPath: path,
     );
   }
 
@@ -93,10 +97,11 @@ class RestPresenceImpl implements RestPresence {
     String url,
   ) async {
     final uri = Uri.parse(url);
+    final path = uri.path;
 
     final response = await _httpClient.request(
       'GET',
-      uri.path,
+      path,
       queryParams: uri.queryParameters.isNotEmpty
           ? Map<String, String>.from(uri.queryParameters)
           : null,
@@ -108,6 +113,7 @@ class RestPresenceImpl implements RestPresence {
       response: response,
       items: messages,
       fetcher: (nextUrl) => _fetchPresenceHistoryPage(nextUrl),
+      requestPath: path,
     );
   }
 }

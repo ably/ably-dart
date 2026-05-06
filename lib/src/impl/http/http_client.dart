@@ -235,7 +235,8 @@ class AblyHttpClient {
     final port = _options.effectivePort;
     final hostWithPort =
         port == (_options.tls ? 443 : 80) ? host : '$host:$port';
-    var uri = Uri.parse('$scheme://$hostWithPort$path');
+    final normalizedPath = path.startsWith('/') ? path : '/$path';
+    var uri = Uri.parse('$scheme://$hostWithPort$normalizedPath');
 
     if (queryParams != null && queryParams.isNotEmpty) {
       uri = uri.replace(queryParameters: queryParams);

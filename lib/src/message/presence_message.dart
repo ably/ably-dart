@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../presence/presence_action.dart';
+import 'message.dart';
 import 'message_extras.dart';
 
 /// A presence message indicating a presence state change.
@@ -31,13 +32,16 @@ class PresenceMessage {
         action = PresenceActionExtension.fromAblyString(raw);
       }
     }
+    final encoding = map['encoding'] as String?;
+    final rawData = map['data'];
+    final decodeResult = _decodePresenceData(rawData, encoding);
     return PresenceMessage(
       id: map['id'] as String?,
       action: action,
       clientId: map['clientId'] as String?,
       connectionId: map['connectionId'] as String?,
-      data: map['data'],
-      encoding: map['encoding'] as String?,
+      data: decodeResult.data,
+      encoding: decodeResult.remainingEncoding,
       extras: map['extras'] != null
           ? MessageExtras.fromMap(map['extras'] as Map<String, dynamic>)
           : null,
@@ -96,6 +100,24 @@ class PresenceMessage {
     };
   }
 
+  static _DecodeResult _decodePresenceData(Object? data, String? encoding) {
+    if (data == null || encoding == null || encoding.isEmpty) {
+      return _DecodeResult(data, encoding);
+    }
+    final encodings = encoding.split('/');
+    Object? result = data;
+    for (var i = encodings.length - 1; i >= 0; i--) {
+      final enc = encodings[i].trim();
+      if (enc == 'json' || enc == 'base64' || enc == 'utf-8') {
+        result = Message.decodeSingle(result, enc);
+      } else {
+        final remaining = encodings.sublist(0, i + 1).join('/');
+        return _DecodeResult(result, remaining);
+      }
+    }
+    return _DecodeResult(result, null);
+  }
+
   /// Creates a copy of this PresenceMessage with the given fields replaced.
   ///
   /// Set [clearId] to true to explicitly set id to null (e.g. for
@@ -133,4 +155,10 @@ class PresenceMessage {
 
   @override
   int get hashCode => Object.hash(id, action, clientId, connectionId);
+}
+
+class _DecodeResult {
+  _DecodeResult(this.data, this.remainingEncoding);
+  final Object? data;
+  final String? remainingEncoding;
 }

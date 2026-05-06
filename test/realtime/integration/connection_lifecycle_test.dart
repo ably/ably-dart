@@ -5,6 +5,7 @@ import 'package:ably_dart/ably_dart.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/test_app_helper.dart';
+import '../../helpers/wait_for_state.dart';
 
 void main() {
   late TestApp testApp;
@@ -37,16 +38,8 @@ void main() {
       expect(client.connection.state, equals(ConnectionState.initialized));
 
       // Connect
-      await client.connect();
-
-      // Await CONNECTED with 10s timeout
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
-
-      // Assert: state == connected
-      expect(client.connection.state, equals(ConnectionState.connected));
+      client.connect();
+      await waitForConnectionState(client.connection, ConnectionState.connected);
 
       // Assert: connection.id is non-empty string
       expect(client.connection.id, isNotNull);
@@ -76,26 +69,12 @@ void main() {
       addTearDown(() async => await client.close());
 
       // Connect and await CONNECTED
-      await client.connect();
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
-      expect(client.connection.state, equals(ConnectionState.connected));
+      client.connect();
+      await waitForConnectionState(client.connection, ConnectionState.connected);
 
       // Close the connection
-      await client.close();
-
-      // Await CLOSED state (5s timeout)
-      if (client.connection.state != ConnectionState.closed) {
-        await client.connection
-            .on(ConnectionEvent.closed)
-            .first
-            .timeout(const Duration(seconds: 5));
-      }
-
-      // Assert: state == closed
-      expect(client.connection.state, equals(ConnectionState.closed));
+      client.close();
+      await waitForConnectionState(client.connection, ConnectionState.closed);
 
       // Assert: errorReason null
       expect(client.connection.errorReason, isNull);
@@ -117,33 +96,19 @@ void main() {
       addTearDown(() async => await client.close());
 
       // First connection
-      await client.connect();
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
-      expect(client.connection.state, equals(ConnectionState.connected));
+      client.connect();
+      await waitForConnectionState(client.connection, ConnectionState.connected);
 
       final firstConnectionId = client.connection.id;
       expect(firstConnectionId, isNotNull);
 
       // Close the connection
-      await client.close();
-      if (client.connection.state != ConnectionState.closed) {
-        await client.connection
-            .on(ConnectionEvent.closed)
-            .first
-            .timeout(const Duration(seconds: 5));
-      }
-      expect(client.connection.state, equals(ConnectionState.closed));
+      client.close();
+      await waitForConnectionState(client.connection, ConnectionState.closed);
 
       // Reconnect
-      await client.connect();
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
-      expect(client.connection.state, equals(ConnectionState.connected));
+      client.connect();
+      await waitForConnectionState(client.connection, ConnectionState.connected);
 
       final secondConnectionId = client.connection.id;
       expect(secondConnectionId, isNotNull);

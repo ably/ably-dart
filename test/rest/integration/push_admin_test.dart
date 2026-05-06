@@ -17,11 +17,9 @@ void main() {
     await testApp.delete();
   });
 
-  // Helper: build a key-authenticated REST client using key[1] which has
-  // push-admin capability on pushenabled:admin:* channels.
   Rest buildClient() => Rest(
         options: ClientOptions(
-          key: testApp.keys[1].keyStr,
+          key: testApp.keys[0].keyStr,
           endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),

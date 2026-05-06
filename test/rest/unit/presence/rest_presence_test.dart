@@ -129,7 +129,7 @@ void main() {
         expect(msg2.id, equals('presence-msg-2'));
         expect(msg2.action, equals(PresenceAction.enter));
         expect(msg2.clientId, equals('client2'));
-        expect(msg2.encoding, equals('json'));
+        expect(msg2.encoding, isNull);
       });
 
       // UTS: rest/unit/RSP3/get-channel-not-found-4
@@ -1010,10 +1010,8 @@ void main() {
 
         final result = await channel.presence.get();
 
-        // Note: The actual decoding behavior depends on implementation
-        // This test verifies the data is passed through with the encoding field
-        expect(result.items[0].encoding, equals('base64'));
-        expect(result.items[0].data, equals(base64Data));
+        expect(result.items[0].encoding, isNull);
+        expect(result.items[0].data, equals(originalBytes));
       });
     });
 
@@ -1116,9 +1114,8 @@ void main() {
         final result = await channel.presence.history();
 
         expect(result.items.length, equals(2));
-        // First message has JSON encoding
-        expect(result.items[0].encoding, equals('json'));
-        // Second message has no encoding
+        expect(result.items[0].encoding, isNull);
+        expect(result.items[0].data, equals({'status': 'online'}));
         expect(result.items[1].data, equals('plain text'));
       });
 

@@ -325,15 +325,17 @@ abstract class BaseClientImpl {
       response: response,
       items: items,
       fetcher: (url) => _fetchStatsPage(url),
+      requestPath: '/stats',
     );
   }
 
   Future<PaginatedResult<Stats>> _fetchStatsPage(String url) async {
     final uri = Uri.parse(url);
+    final path = uri.path;
 
     final response = await ablyHttpClient.request(
       'GET',
-      uri.path,
+      path,
       queryParams: uri.queryParameters.isNotEmpty
           ? Map<String, String>.from(uri.queryParameters)
           : null,
@@ -346,6 +348,7 @@ abstract class BaseClientImpl {
       response: response,
       items: items,
       fetcher: (nextUrl) => _fetchStatsPage(nextUrl),
+      requestPath: path,
     );
   }
 
