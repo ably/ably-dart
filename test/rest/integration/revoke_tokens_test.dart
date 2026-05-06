@@ -117,6 +117,11 @@ void main() {
             'Expected error code 40141 or 40171 (token revoked), '
             'got ${stateChange.reason?.code}',
       );
+
+      // Close before test exits to prevent async SocketException from
+      // the internal reconnection attempt leaking into the test zone.
+      await subscription.cancel();
+      await realtimeClient.close();
     });
   });
 

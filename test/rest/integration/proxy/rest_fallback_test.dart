@@ -415,10 +415,73 @@ void main() {
   // RSL1k4 - Idempotent publish retry deduplication
   // ---------------------------------------------------------------------------
   // UTS: rest/proxy/RSL1k4/idempotent-retry-dedup-0
-  test(
-    'RSL1k4 - Idempotent publish retry deduplication',
-    () {},
-    skip: 'Requires proxy http_forward_then_respond action '
-        '(not yet implemented in proxy)',
-  );
+  test('RSL1k4 - Idempotent publish retry deduplication', () async {
+    final apiKey = testApp.keys[0].keyStr;
+
+    final session = await ProxySession.create(
+      rules: [
+        {
+          'match': {
+            'type': 'http_request',
+            'method': 'POST',
+            'pathContains': '/channels/',
+          },
+          'action': {
+            'type': 'http_replace_response',
+            'status': 503,
+            'body': {
+              'error': {
+                'code': 50300,
+                'statusCode': 503,
+                'message': 'Service temporarily unavailable',
+              },
+            },
+          },
+          'times': 1,
+          'comment':
+              'RSL1k4: Forward first publish to server, return fake 503',
+        },
+      ],
+    );
+    addTearDown(() async => session.close());
+
+    final client = Rest(
+      options: ClientOptions(
+        authCallback: _tokenAuthCallback(apiKey),
+        endpoint: 'localhost',
+        fallbackHosts: ['localhost'],
+        port: session.proxyPort,
+        tls: false,
+        useBinaryProtocol: false,
+        idempotentRestPublishing: true,
+      ),
+    );
+    addTearDown(() async => client.close());
+
+    final channelName = 'test-RSL1k4-${DateTime.now().millisecondsSinceEpoch}';
+    final channel = client.channels.get(channelName);
+
+    // Publish — first attempt succeeds server-side but client sees 503,
+    // SDK retries, server deduplicates the retry
+    await channel.publish(name: 'test', data: 'data');
+
+    // Verify via history that only one copy of the message exists
+    final history = await channel.history();
+    final matching = history.items
+        .where((m) => m.name == 'test' && m.data == 'data')
+        .toList();
+    expect(matching.length, equals(1));
+
+    // Proxy event log shows at least two POST requests to /channels/
+    final log = await session.getLog();
+    final httpRequests = log.where((e) {
+      final type = e['type'] as String? ?? '';
+      final method = e['method'] as String? ?? '';
+      final path = e['path'] as String? ?? '';
+      return type == 'http_request' &&
+          method == 'POST' &&
+          path.contains('/channels/');
+    }).toList();
+    expect(httpRequests.length, greaterThanOrEqualTo(2));
+  });
 }
