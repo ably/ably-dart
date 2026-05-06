@@ -78,13 +78,16 @@ void main() {
       );
       addTearDown(client.close);
 
-      await client.connect();
-
-      // Should transition to FAILED
-      await client.connection
+      // Register listener before connect — connect() may complete with
+      // FAILED before returning, so a post-connect listener misses it.
+      final failedFuture = client.connection
           .on(ConnectionEvent.failed)
           .first
           .timeout(const Duration(seconds: 10));
+
+      unawaited(client.connect());
+
+      await failedFuture;
 
       expect(client.connection.state, equals(ConnectionState.failed));
       expect(client.connection.errorReason, isNotNull);
@@ -164,7 +167,7 @@ void main() {
           // Refuse first ws_connect
           {
             'match': {'type': 'ws_connect'},
-            'action': {'type': 'refuse'},
+            'action': {'type': 'refuse_connection'},
             'times': 1,
           },
         ],
@@ -257,13 +260,14 @@ void main() {
       );
       addTearDown(client.close);
 
-      await client.connect();
-
-      // Should transition to FAILED
-      await client.connection
+      final failedFuture = client.connection
           .on(ConnectionEvent.failed)
           .first
           .timeout(const Duration(seconds: 10));
+
+      unawaited(client.connect());
+
+      await failedFuture;
 
       expect(client.connection.state, equals(ConnectionState.failed));
       expect(client.connection.errorReason, isNotNull);
@@ -283,7 +287,7 @@ void main() {
               'type': 'ws_frame_to_client',
               'action': 'CONNECTED',
             },
-            'action': {'type': 'drop'},
+            'action': {'type': 'suppress'},
           },
         ],
       );
@@ -304,13 +308,14 @@ void main() {
       );
       addTearDown(client.close);
 
-      await client.connect();
-
-      // Should transition to DISCONNECTED due to timeout
-      await client.connection
+      final disconnectedFuture = client.connection
           .on(ConnectionEvent.disconnected)
           .first
           .timeout(const Duration(seconds: 10));
+
+      unawaited(client.connect());
+
+      await disconnectedFuture;
 
       expect(client.connection.state, equals(ConnectionState.disconnected));
       expect(client.connection.errorReason, isNotNull,

@@ -37,13 +37,11 @@ void main() {
       final session = await ProxySession.create(
         rules: [
           {
-            'match': {'type': 'ws_connect'},
-            'action': {
-              'type': 'delay_after_ws_connect',
-              'delayMs': 1000,
-              'then': {'type': 'close'},
-            },
+            'match': {'type': 'delay_after_ws_connect', 'delayMs': 1000},
+            'action': {'type': 'close'},
             'times': 1,
+            'comment':
+                'RTN15a: Close WebSocket after 1s to trigger unexpected disconnect',
           },
         ],
       );
@@ -66,13 +64,8 @@ void main() {
 
       client.connection.on().listen(stateChanges.add);
 
+      // connect() internally awaits CONNECTED
       await client.connect();
-
-      // Wait for initial CONNECTED
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
 
       // Wait for DISCONNECTED (proxy closes after 1s)
       await client.connection
@@ -123,13 +116,10 @@ void main() {
       final session = await ProxySession.create(
         rules: [
           {
-            'match': {'type': 'ws_connect'},
-            'action': {
-              'type': 'delay_after_ws_connect',
-              'delayMs': 1000,
-              'then': {'type': 'close'},
-            },
+            'match': {'type': 'delay_after_ws_connect', 'delayMs': 1000},
+            'action': {'type': 'close'},
             'times': 1,
+            'comment': 'RTN15b: Close WebSocket after 1s to trigger disconnect',
           },
         ],
       );
@@ -150,10 +140,6 @@ void main() {
       addTearDown(client.close);
 
       await client.connect();
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
 
       final originalId = client.connection.id;
       final originalKey = client.connection.key;
@@ -193,44 +179,47 @@ void main() {
         rules: [
           // Rule 1: Close after 1s on first connection
           {
-            'match': {'type': 'ws_connect'},
-            'action': {
-              'type': 'delay_after_ws_connect',
-              'delayMs': 1000,
-              'then': {'type': 'close'},
-            },
+            'match': {'type': 'delay_after_ws_connect', 'delayMs': 1000},
+            'action': {'type': 'close'},
             'times': 1,
+            'comment':
+                'RTN15c7: Close WebSocket after 1s to trigger disconnect',
           },
-          // Rule 2: On second connection, replace CONNECTED with new id/key
-          // and error 80008 to indicate resume failed
+          // Rule 2: Replace 2nd CONNECTED with new id/key and error 80008
           {
             'match': {
               'type': 'ws_frame_to_client',
               'action': 'CONNECTED',
+              'count': 2,
             },
             'action': {
               'type': 'replace',
               'message': {
                 'action': 4, // CONNECTED
                 'connectionId': 'proxy-injected-new-id',
+                'connectionKey': 'proxy-injected-new-key',
                 'connectionDetails': {
                   'connectionKey': 'proxy-injected-new-key',
+                  'clientId': null,
+                  'maxMessageSize': 65536,
+                  'maxInboundRate': 250,
+                  'maxOutboundRate': 100,
+                  'maxFrameSize': 524288,
+                  'serverId': 'proxy-server',
                   'connectionStateTtl': 120000,
                   'maxIdleInterval': 15000,
-                  'maxFrameSize': 524288,
-                  'maxInboundRate': 250,
-                  'maxMessageSize': 65536,
-                  'serverId': 'proxy-server',
-                  'clientId': null,
                 },
                 'error': {
-                  'message': 'Connection resume failed',
                   'code': 80008,
-                  'statusCode': 401,
+                  'statusCode': 400,
+                  'message': 'Unable to recover connection',
                 },
               },
             },
             'times': 1,
+            'comment':
+                'RTN15c7: Replace 2nd CONNECTED with failed resume '
+                '(different connectionId + error 80008)',
           },
         ],
       );
@@ -251,10 +240,6 @@ void main() {
       addTearDown(client.close);
 
       await client.connect();
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
 
       final originalId = client.connection.id;
       expect(originalId, isNotNull);
@@ -290,23 +275,21 @@ void main() {
       final session = await ProxySession.create(
         rules: [
           {
-            'match': {'type': 'ws_connect'},
+            'match': {'type': 'delay_after_ws_connect', 'delayMs': 1000},
             'action': {
-              'type': 'delay_after_ws_connect',
-              'delayMs': 1000,
-              'then': {
-                'type': 'inject_to_client_and_close',
-                'message': {
-                  'action': 6, // DISCONNECTED
-                  'error': {
-                    'message': 'Token expired',
-                    'code': 40142,
-                    'statusCode': 401,
-                  },
+              'type': 'inject_to_client_and_close',
+              'message': {
+                'action': 6, // DISCONNECTED
+                'error': {
+                  'code': 40142,
+                  'statusCode': 401,
+                  'message': 'Token expired',
                 },
               },
             },
             'times': 1,
+            'comment':
+                'RTN15h1: Inject DISCONNECTED with token error (40142) after 1s',
           },
         ],
       );
@@ -317,11 +300,12 @@ void main() {
       final restClient = Rest(
         options: ClientOptions(
           key: apiKey,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );
       final tokenDetails = await restClient.auth.requestToken();
+      await restClient.close();
       final tokenString = tokenDetails.token!;
 
       final client = Realtime(
@@ -337,12 +321,6 @@ void main() {
       addTearDown(client.close);
 
       await client.connect();
-
-      // Wait for CONNECTED first
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
 
       // After 1s the proxy injects DISCONNECTED with 40142, which should
       // cause FAILED since the token is non-renewable
@@ -369,23 +347,22 @@ void main() {
       final session = await ProxySession.create(
         rules: [
           {
-            'match': {'type': 'ws_connect'},
+            'match': {'type': 'delay_after_ws_connect', 'delayMs': 1000},
             'action': {
-              'type': 'delay_after_ws_connect',
-              'delayMs': 1000,
-              'then': {
-                'type': 'inject_to_client_and_close',
-                'message': {
-                  'action': 6, // DISCONNECTED
-                  'error': {
-                    'message': 'Internal error',
-                    'code': 80003,
-                    'statusCode': 500,
-                  },
+              'type': 'inject_to_client_and_close',
+              'message': {
+                'action': 6, // DISCONNECTED
+                'error': {
+                  'code': 80003,
+                  'statusCode': 500,
+                  'message': 'Service temporarily unavailable',
                 },
               },
             },
             'times': 1,
+            'comment':
+                'RTN15h3: Inject DISCONNECTED with non-token error (80003) '
+                'after 1s, once only',
           },
         ],
       );
@@ -409,12 +386,6 @@ void main() {
       client.connection.on().listen(stateChanges.add);
 
       await client.connect();
-
-      // Wait for initial CONNECTED
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
 
       // Wait for DISCONNECTED (proxy injects after 1s)
       await client.connection
@@ -460,16 +431,19 @@ void main() {
       addTearDown(client.close);
 
       await client.connect();
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
 
       // Attach two channels
       final ch1 = client.channels.get('rtn15j-channel1');
       final ch2 = client.channels.get('rtn15j-channel2');
       await ch1.attach();
       await ch2.attach();
+
+      // Register listener BEFORE injection — the SDK processes the ERROR
+      // synchronously and may emit FAILED before triggerAction returns.
+      final failedFuture = client.connection
+          .on(ConnectionEvent.failed)
+          .first
+          .timeout(const Duration(seconds: 10));
 
       // Inject fatal ERROR via triggerAction
       await session.triggerAction({
@@ -484,11 +458,7 @@ void main() {
         },
       });
 
-      // Wait for FAILED
-      await client.connection
-          .on(ConnectionEvent.failed)
-          .first
-          .timeout(const Duration(seconds: 10));
+      await failedFuture;
 
       expect(client.connection.state, equals(ConnectionState.failed));
       expect(client.connection.errorReason, isNotNull);
@@ -507,35 +477,54 @@ void main() {
         () async {
       final session = await ProxySession.create(
         rules: [
-          // Rule 1: Replace first CONNECTED with connectionStateTtl=2000
+          // Rule 1: Replace 1st CONNECTED with short connectionStateTtl (2s)
           {
             'match': {
               'type': 'ws_frame_to_client',
               'action': 'CONNECTED',
+              'count': 1,
             },
             'action': {
-              'type': 'modify',
-              'set': {
-                'connectionDetails.connectionStateTtl': 2000,
+              'type': 'replace',
+              'message': {
+                'action': 4,
+                'connectionId': 'proxy-ttl-test-id',
+                'connectionKey': 'proxy-ttl-test-key',
+                'connectionDetails': {
+                  'connectionKey': 'proxy-ttl-test-key',
+                  'clientId': null,
+                  'maxMessageSize': 65536,
+                  'maxInboundRate': 250,
+                  'maxOutboundRate': 100,
+                  'maxFrameSize': 524288,
+                  'serverId': 'test-server',
+                  'connectionStateTtl': 2000,
+                  'maxIdleInterval': 15000,
+                },
               },
             },
             'times': 1,
+            'comment':
+                'RTN15g: Replace 1st CONNECTED with short '
+                'connectionStateTtl (2s)',
           },
-          // Rule 2: Close after 1s on first established connection
+          // Rule 2: Close WebSocket after 1s to trigger disconnect
           {
-            'match': {'type': 'ws_connect'},
-            'action': {
-              'type': 'delay_after_ws_connect',
-              'delayMs': 1000,
-              'then': {'type': 'close'},
-            },
+            'match': {'type': 'delay_after_ws_connect', 'delayMs': 1000},
+            'action': {'type': 'close'},
             'times': 1,
+            'comment':
+                'RTN15g: Close WebSocket after 1s to trigger disconnect',
           },
-          // Rule 3: Refuse second ws_connect to force retry delay
+          // Rule 3: Refuse 2nd connection so SDK stays in disconnected
+          // until TTL expires
           {
-            'match': {'type': 'ws_connect'},
-            'action': {'type': 'refuse'},
+            'match': {'type': 'ws_connect', 'count': 2},
+            'action': {'type': 'refuse_connection'},
             'times': 1,
+            'comment':
+                'RTN15g: Refuse 2nd connection so SDK stays in '
+                'disconnected until TTL expires',
           },
         ],
       );
@@ -560,15 +549,15 @@ void main() {
       client.connection.on().listen(stateChanges.add);
 
       await client.connect();
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
 
+      // Record the connection ID from the replaced CONNECTED
       final originalId = client.connection.id;
-      expect(originalId, isNotNull);
+      expect(originalId, equals('proxy-ttl-test-id'));
 
-      // Wait for SUSPENDED (after TTL expiry ~3s: 1s connect + 2s TTL)
+      // T=1: proxy closes WebSocket -> SDK enters DISCONNECTED, retries
+      // T=1: 2nd ws_connect is refused -> SDK stays in DISCONNECTED
+      // T=3: connectionStateTtl (2s) expires -> SDK enters SUSPENDED
+      // T=4: suspendedRetryTimeout (1s) fires -> SDK connects fresh
       await client.connection
           .on(ConnectionEvent.suspended)
           .first
@@ -604,9 +593,12 @@ void main() {
             'match': {
               'type': 'ws_frame_to_client',
               'action': 'ACK',
+              'count': 1,
             },
-            'action': {'type': 'drop'},
+            'action': {'type': 'suppress'},
             'times': 1,
+            'comment':
+                'RTN19a: Suppress the first ACK so the MESSAGE remains unacked',
           },
         ],
       );
@@ -628,10 +620,6 @@ void main() {
       addTearDown(client.close);
 
       await client.connect();
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
 
       final channel = client.channels.get(channelName);
       await channel.attach();
@@ -642,38 +630,45 @@ void main() {
       // Poll proxy log until we see the MESSAGE sent and ACK suppressed
       await pollUntil(() async {
         final log = await session.getLog();
-        final hasMessage = log.any((e) =>
-            e['type'] == 'ws_frame_to_server' && e['action'] == 15,); // MESSAGE
-        final hasDroppedAck = log.any((e) =>
-            e['type'] == 'ws_frame_to_client' &&
-            e['action'] == 1 && // ACK
-            e['dropped'] == true,);
+        final hasMessage = log.any((e) {
+          if (e['type'] != 'ws_frame') return false;
+          if (e['direction'] != 'client_to_server') return false;
+          final msg = e['message'] as Map<String, dynamic>? ?? {};
+          return msg['action'] == 15; // MESSAGE
+        });
+        final hasDroppedAck = log.any((e) {
+          if (e['type'] != 'ws_frame') return false;
+          if (e['direction'] != 'server_to_client') return false;
+          final msg = e['message'] as Map<String, dynamic>? ?? {};
+          return msg['action'] == 1 && e['ruleMatched'] != null; // ACK suppressed
+        });
         if (hasMessage && hasDroppedAck) return true;
         return null;
       },);
+
+      // Set up reconnect listener before triggering close
+      final reconnectedFuture = client.connection
+          .on(ConnectionEvent.connected)
+          .first
+          .timeout(const Duration(seconds: 15));
 
       // Force disconnect via triggerAction
       await session.triggerAction({'type': 'close'});
 
       // Wait for reconnect
-      await client.connection
-          .on(ConnectionEvent.disconnected)
-          .first
-          .timeout(const Duration(seconds: 5));
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 15));
+      await reconnectedFuture;
 
       // Now the publish should complete after the message is resent
       await publishFuture.timeout(const Duration(seconds: 10));
 
       // Verify proxy log has >= 2 MESSAGE frames
       final log = await session.getLog();
-      final messageFrames = log
-          .where((e) =>
-              e['type'] == 'ws_frame_to_server' && e['action'] == 15,) // MESSAGE
-          .toList();
+      final messageFrames = log.where((e) {
+        if (e['type'] != 'ws_frame') return false;
+        if (e['direction'] != 'client_to_server') return false;
+        final msg = e['message'] as Map<String, dynamic>? ?? {};
+        return msg['action'] == 15; // MESSAGE
+      }).toList();
       expect(messageFrames.length, greaterThanOrEqualTo(2),
           reason: 'Message should be resent after resume',);
     });

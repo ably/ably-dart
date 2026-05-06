@@ -60,21 +60,11 @@ void main() {
 
         // Connect and await CONNECTED
         await client.connect();
-        await client.connection
-            .on(ConnectionEvent.connected)
-            .first
-            .timeout(const Duration(seconds: 10));
 
         final channel = client.channels.get(channelName);
 
         // Attach and enter presence
         await channel.attach();
-        await pollUntil(
-          () async {
-            if (channel.state == ChannelState.attached) return true;
-            return null;
-          },
-        );
         await channel.presence.enter('hello');
 
         // Allow presence to settle
@@ -83,15 +73,15 @@ void main() {
         // Record baseline PRESENCE frame count from proxy log
         final baselineLog = await session.getLog();
         final baselinePresenceCount = baselineLog.where((event) {
-          final type = event['type'] as String? ?? '';
-          if (type != 'ws_frame_to_server') return false;
+          if (event['type'] != 'ws_frame') return false;
+          if (event['direction'] != 'client_to_server') return false;
           final message = event['message'] as Map<String, dynamic>? ?? {};
           return message['action'] == 14; // PRESENCE
         }).length;
 
         // Inject ATTACHED (action 11) with flags=0 (non-resumed), error 91001
         await session.triggerAction({
-          'action': 'inject_to_client',
+          'type': 'inject_to_client',
           'message': {
             'action': 11, // ATTACHED
             'channel': channelName,
@@ -109,8 +99,8 @@ void main() {
           () async {
             final log = await session.getLog();
             final presenceFrames = log.where((event) {
-              final type = event['type'] as String? ?? '';
-              if (type != 'ws_frame_to_server') return false;
+              if (event['type'] != 'ws_frame') return false;
+              if (event['direction'] != 'client_to_server') return false;
               final message =
                   event['message'] as Map<String, dynamic>? ?? {};
               return message['action'] == 14; // PRESENCE
@@ -125,8 +115,8 @@ void main() {
         // Get the re-enter PRESENCE frame
         final finalLog = await session.getLog();
         final presenceFrames = finalLog.where((event) {
-          final type = event['type'] as String? ?? '';
-          if (type != 'ws_frame_to_server') return false;
+          if (event['type'] != 'ws_frame') return false;
+          if (event['direction'] != 'client_to_server') return false;
           final message = event['message'] as Map<String, dynamic>? ?? {};
           return message['action'] == 14; // PRESENCE
         }).toList();
@@ -182,20 +172,19 @@ void main() {
         rules: [
           {
             'match': {
-              'type': 'ws_connect',
-            },
-            'action': {
-              'type': 'close',
+              'type': 'delay_after_ws_connect',
               'delayMs': 3000,
             },
+            'action': {'type': 'close'},
             'times': 1,
-            'skip': 1, // Skip the first connection, close the second
+            'comment': 'RTP17i: Close WebSocket after 3s to trigger reconnect',
           },
           {
             'match': {
               'type': 'ws_frame_to_client',
               'action': 'ATTACHED',
               'channel': channelName,
+              'count': 2,
             },
             'action': {
               'type': 'replace',
@@ -206,12 +195,14 @@ void main() {
                 'error': {
                   'code': 91001,
                   'statusCode': 500,
-                  'message': 'Channel reattached without resume',
+                  'message': 'Continuity lost',
                 },
               },
             },
             'times': 1,
-            'skip': 1, // Skip 1st ATTACHED, replace 2nd
+            'comment':
+                'RTP17i: Replace 2nd ATTACHED with non-resumed to '
+                'trigger re-entry',
           },
         ],
       );
@@ -235,43 +226,26 @@ void main() {
       );
       addTearDown(() async => await client.close());
 
-      // Connect and await CONNECTED
+      // Connect
       await client.connect();
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
 
       final channel = client.channels.get(channelName);
 
       // Attach and enter presence
       await channel.attach();
-      await pollUntil(
-        () async {
-          if (channel.state == ChannelState.attached) return true;
-          return null;
-        },
-      );
       await channel.presence.enter('hello');
 
       // Allow presence to settle
       await Future<void>.delayed(const Duration(seconds: 1));
 
-      // Wait for DISCONNECTED (triggered by close after 3s)
-      await pollUntil(
-        () async {
-          if (client.connection.state == ConnectionState.disconnected) {
-            return true;
-          }
-          return null;
-        },
-      );
-
-      // Wait for reconnection
-      await client.connection
+      // Set up reconnect listener before proxy close fires
+      final reconnectedFuture = client.connection
           .on(ConnectionEvent.connected)
           .first
           .timeout(const Duration(seconds: 30));
+
+      // Wait for reconnection (proxy closes WS after 3s from initial connect)
+      await reconnectedFuture;
 
       // Wait for channel to become ATTACHED
       await pollUntil(
@@ -306,8 +280,8 @@ void main() {
       if (secondConnectIndex >= 0) {
         for (var i = secondConnectIndex; i < log.length; i++) {
           final event = log[i];
-          final type = event['type'] as String? ?? '';
-          if (type == 'ws_frame_to_server') {
+          if (event['type'] == 'ws_frame' &&
+              event['direction'] == 'client_to_server') {
             final message =
                 event['message'] as Map<String, dynamic>? ?? {};
             if (message['action'] == 14) {
