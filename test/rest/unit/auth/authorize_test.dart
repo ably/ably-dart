@@ -59,7 +59,7 @@ void main() {
         final tokenDetails = await client.auth.authorize();
 
         expect(tokenDetails, isA<TokenDetails>());
-        expect(tokenDetails.token, equals('obtained-token'));
+        expect(tokenDetails!.token, equals('obtained-token'));
 
         // Verify token is now used for requests
         await client.channels.get(channelName).status();
@@ -196,7 +196,7 @@ void main() {
         expect(client.auth.tokenDetails, isNotNull);
         expect(client.auth.tokenDetails!.token, equals('new-token'));
         expect(client.auth.tokenDetails!.clientId, equals('token-client'));
-        expect(client.auth.tokenDetails!.token, equals(result.token));
+        expect(client.auth.tokenDetails!.token, equals(result!.token));
       });
     });
 
@@ -322,8 +322,8 @@ void main() {
         final result1 = await client.auth.authorize();
         final result2 = await client.auth.authorize();
 
-        expect(result1.token, equals('token-1'));
-        expect(result2.token, equals('token-2'));
+        expect(result1!.token, equals('token-1'));
+        expect(result2!.token, equals('token-2'));
       });
     });
 

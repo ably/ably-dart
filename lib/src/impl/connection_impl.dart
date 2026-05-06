@@ -1522,6 +1522,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
   Future<void> _performReauth() async {
     try {
       final tokenDetails = await _auth.authorize();
+      if (tokenDetails == null) return;
       // Send AUTH message with new token
       final authMessage = ProtocolMessage(
         action: ProtocolAction.auth,

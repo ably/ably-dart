@@ -113,6 +113,12 @@ class AuthImpl implements Auth {
   TokenDetails? get tokenDetails => _currentToken;
 
   bool _shouldUseTokenAuth() {
+    // RSA16d: If authorize() switched to basic auth, respect that
+    if (_storedAuthOptions?.useTokenAuth == false &&
+        _storedAuthOptions?.key != null) {
+      return false;
+    }
+
     // RSA4: Use token auth if:
     // - useTokenAuth is explicitly true
     // - authCallback is set
@@ -139,7 +145,7 @@ class AuthImpl implements Auth {
   }
 
   String _getBasicAuthHeader() {
-    final key = _options.key;
+    final key = _storedAuthOptions?.key ?? _options.key;
     if (key == null) {
       throw const AblyException(
         message: 'API key required for Basic authentication',
@@ -175,11 +181,22 @@ class AuthImpl implements Auth {
   }
 
   @override
-  Future<TokenDetails> authorize({
+  Future<TokenDetails?> authorize({
     AuthOptions? authOptions,
     TokenParams? tokenParams,
   }) async {
     _logger.info('authorize() called');
+
+    // RSA16d: Switch to basic auth if explicitly requested
+    if (authOptions != null &&
+        authOptions.useTokenAuth == false &&
+        authOptions.key != null) {
+      _storedAuthOptions = authOptions;
+      _currentToken = null;
+      _logger.info('Switched to basic auth');
+      return null;
+    }
+
     // RSA10: Authorize and store token
     // If authOptions provided, replace stored options
     if (authOptions != null) {
@@ -196,7 +213,6 @@ class AuthImpl implements Auth {
 
     // RSA16d: Clear current token before attempting renewal
     // If renewal fails, we don't want to keep using an invalid token
-    final previousToken = _currentToken;
     _currentToken = null;
 
     try {
@@ -228,8 +244,12 @@ class AuthImpl implements Auth {
       return _currentToken!;
     }
     _logger.warn('Token expired, renewing');
-    // Otherwise get a new token
-    return authorize();
+    // Otherwise get a new token — getValidToken must always return a token,
+    // so if authorize() returns null (basic auth switch), fall back to
+    // requestToken() which always produces one.
+    final token = await authorize();
+    if (token != null) return token;
+    return requestToken();
   }
 
   @override

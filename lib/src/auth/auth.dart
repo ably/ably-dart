@@ -48,7 +48,7 @@ abstract class Auth {
   /// If [tokenParams] is provided, it specifies the token parameters.
   ///
   /// Spec: RSA10
-  Future<TokenDetails> authorize({
+  Future<TokenDetails?> authorize({
     AuthOptions? authOptions,
     TokenParams? tokenParams,
   });

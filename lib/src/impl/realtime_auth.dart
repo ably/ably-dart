@@ -42,7 +42,7 @@ class RealtimeAuth implements Auth {
   TokenDetails? get tokenDetails => _authImpl.tokenDetails;
 
   @override
-  Future<TokenDetails> authorize({
+  Future<TokenDetails?> authorize({
     AuthOptions? authOptions,
     TokenParams? tokenParams,
   }) async {
@@ -59,7 +59,9 @@ class RealtimeAuth implements Auth {
         authOptions: authOptions,
         tokenParams: tokenParams,
       );
-      await _connection.reauthorize(tokenDetails);
+      if (tokenDetails != null) {
+        await _connection.reauthorize(tokenDetails);
+      }
       return tokenDetails;
     } finally {
       // Always complete the guard successfully — it's just a serialization

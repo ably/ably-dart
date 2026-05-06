@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:ably_dart/ably_dart.dart';
@@ -314,8 +315,69 @@ void main() {
 
     group('RSL4 - Encoding fixtures and protocol', () {
       // UTS: rest/unit/RSL4/encoding-fixtures-ably-common-0
-      test('RSL4 - encoding fixtures from ably-common', () {},
-          skip: 'Not yet implemented: ably-common test fixture loading');
+      test('RSL4 - encoding fixtures from ably-common', () async {
+        final fixtureFile = _loadFixtureFile('messages-encoding.json');
+        final fixtures = jsonDecode(fixtureFile.readAsStringSync())
+            as Map<String, dynamic>;
+        final messages = fixtures['messages'] as List;
+
+        for (final fixture in messages) {
+          final fixtureData = fixture['data'];
+          final fixtureEncoding = fixture['encoding'] as String?;
+          final expectedType = fixture['expectedType'] as String;
+
+          // Derive the input data to publish from the fixture's wire format
+          final dynamic inputData;
+          if (expectedType == 'binary') {
+            inputData = base64Decode(fixtureData as String);
+          } else if (expectedType == 'jsonObject' ||
+              expectedType == 'jsonArray') {
+            inputData = jsonDecode(fixtureData as String);
+          } else {
+            inputData = fixtureData;
+          }
+
+          final capturedRequests = <CapturedRequest>[];
+          final channelName = testChannelName('RSL4-fixture-$expectedType');
+
+          mockHttp = MockHttpClient(
+            onRequest: (req) {
+              capturedRequests.add(CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ));
+              req.respondWith(201, {'serials': ['s1']});
+            },
+          );
+
+          final client = Rest.forTesting(
+            options: ClientOptions(
+              key: 'appId.keyId:keySecret',
+              useBinaryProtocol: false,
+            ),
+            httpClient: mockHttp,
+          );
+          final channel = client.channels.get(channelName);
+
+          await channel.publish(name: 'fixture', data: inputData);
+
+          final body = jsonDecode(capturedRequests[0].body!) as List;
+          final wireMsg = body[0] as Map<String, dynamic>;
+
+          expect(wireMsg['data'], equals(fixtureData),
+              reason: 'Wire data mismatch for $expectedType');
+          if (fixtureEncoding != null) {
+            expect(wireMsg['encoding'], equals(fixtureEncoding),
+                reason: 'Wire encoding mismatch for $expectedType');
+          } else {
+            expect(wireMsg.containsKey('encoding'), isFalse,
+                reason:
+                    'Should not have encoding field for $expectedType');
+          }
+        }
+      });
 
       // UTS: rest/unit/RSL4/null-data-no-encoding-1
       test('null data should have no encoding header', () async {
@@ -678,4 +740,20 @@ void main() {
       });
     });
   });
+}
+
+File _loadFixtureFile(String filename) {
+  final candidates = [
+    'submodules/ably-common/test-resources/$filename',
+    '../submodules/ably-common/test-resources/$filename',
+  ];
+  for (final path in candidates) {
+    final file = File(path);
+    if (file.existsSync()) return file;
+  }
+  throw Exception(
+    'Could not find $filename. '
+    'Ensure the ably-common submodule is initialised: '
+    'git submodule update --init',
+  );
 }

@@ -629,8 +629,9 @@ void main() {
       client.connect();
       await _awaitState(client.connection, ConnectionState.connected);
 
-      // Attach channel-a
-      chA.attach();
+      // Attach channel-a — ignore the returned Future since we won't
+      // send an ATTACHED response; we just need the outgoing message.
+      unawaited(chA.attach().catchError((_) {}));
       await _pumpEventQueue();
 
       // Find the ATTACH message for channel-a
@@ -648,8 +649,7 @@ void main() {
       await client.close();
       mockWs.dispose();
     },
-        skip: 'Not yet implemented: RTN16j channelSerial from recovery key '
-            'in ATTACH messages');
+);
   });
 
   group('RTN16 - Resume behavior on reconnection (existing functionality)',

@@ -78,7 +78,7 @@ void main() {
       expect(capturedAuthMessages[0].auth, isNotNull);
 
       // authorize() resolved with the new token
-      expect(tokenDetails.token, equals('token-2'));
+      expect(tokenDetails!.token, equals('token-2'));
 
       // No state transitions occurred — connection stayed CONNECTED throughout
       // (UPDATE events are expected but are not state transitions)
@@ -401,7 +401,7 @@ void main() {
       final tokenDetails = await authorizeFuture;
 
       expect(authorizeCompleted, isTrue);
-      expect(tokenDetails.token, equals('token-2'));
+      expect(tokenDetails!.token, equals('token-2'));
 
       mockWs.dispose();
     });
@@ -457,7 +457,7 @@ void main() {
       final tokenDetails = await client.auth.authorize();
 
       // authorize() completed successfully
-      expect(tokenDetails.token, equals('token-2'));
+      expect(tokenDetails!.token, equals('token-2'));
 
       // Connection is now CONNECTED
       expect(client.connection.state, equals(ConnectionState.connected));
@@ -584,7 +584,7 @@ void main() {
       final tokenDetails = await client.auth.authorize();
 
       // authorize() completed successfully
-      expect(tokenDetails.token, equals('token-1'));
+      expect(tokenDetails!.token, equals('token-1'));
 
       // Connection is now CONNECTED
       expect(client.connection.state, equals(ConnectionState.connected));
@@ -662,7 +662,7 @@ void main() {
       final tokenDetails = await client.auth.authorize();
 
       // authorize() completed successfully
-      expect(tokenDetails.token, equals('token-2'));
+      expect(tokenDetails!.token, equals('token-2'));
 
       // Connection recovered to CONNECTED
       expect(client.connection.state, equals(ConnectionState.connected));
@@ -722,7 +722,7 @@ void main() {
       final tokenDetails = await client.auth.authorize();
 
       // authorize() completed successfully
-      expect(tokenDetails.token, equals('token-2'));
+      expect(tokenDetails!.token, equals('token-2'));
 
       // Connection is now CONNECTED again
       expect(client.connection.state, equals(ConnectionState.connected));
