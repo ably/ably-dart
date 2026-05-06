@@ -28,8 +28,8 @@ class TestApp {
   /// The provisioned keys.
   final List<TestAppKey> keys;
 
-  /// The sandbox REST host.
-  static const String sandboxRestHost = 'sandbox-rest.ably.io';
+  /// The sandbox REST host (nonprod environment per REC1b3).
+  static const String sandboxRestHost = 'sandbox.realtime.ably-nonprod.net';
 
   /// Provisions a new sandbox app using the ably-common test-app-setup.json.
   static Future<TestApp> provision() async {

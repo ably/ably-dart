@@ -63,11 +63,10 @@ void main() {
         options: ClientOptions(
           authCallback: (params) async {
             authCallbackCount++;
-            // Use a REST client pointing at sandbox to request a real token
             final innerRest = Rest(
               options: ClientOptions(
                 key: apiKey,
-                endpoint: 'sandbox',
+                endpoint: 'nonprod:sandbox',
                 useBinaryProtocol: false,
               ),
             );
@@ -139,7 +138,7 @@ void main() {
             final innerRest = Rest(
               options: ClientOptions(
                 key: apiKey,
-                endpoint: 'sandbox',
+                endpoint: 'nonprod:sandbox',
                 useBinaryProtocol: false,
               ),
             );
@@ -212,23 +211,12 @@ void main() {
       );
       addTearDown(() async => await realtimeClient.close());
 
-      // Connect and await CONNECTED
       await realtimeClient.connect();
-      await realtimeClient.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
 
       final realtimeChannel = realtimeClient.channels.get(channelName);
 
       // Attach and publish
       await realtimeChannel.attach();
-      await pollUntil(
-        () async {
-          if (realtimeChannel.state == ChannelState.attached) return true;
-          return null;
-        },
-      );
       await realtimeChannel.publish(name: 'test-msg', data: 'hello world');
 
       // Allow message to propagate

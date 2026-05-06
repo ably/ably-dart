@@ -53,10 +53,6 @@ void main() {
 
         // Connect and await CONNECTED
         await client.connect();
-        await client.connection
-            .on(ConnectionEvent.connected)
-            .first
-            .timeout(const Duration(seconds: 10));
         expect(client.connection.state, equals(ConnectionState.connected));
 
         // Record connection ID and initial callback count
@@ -71,7 +67,7 @@ void main() {
 
         // Inject AUTH message (action 17) from server to client
         await session.triggerAction({
-          'action': 'inject_to_client',
+          'type': 'inject_to_client',
           'message': {
             'action': 17, // AUTH
           },
@@ -126,8 +122,8 @@ void main() {
         // Check proxy log for AUTH frame (action 17) from client to server
         final log = await session.getLog();
         final authFramesFromClient = log.where((event) {
-          final type = event['type'] as String? ?? '';
-          if (type != 'ws_frame_to_server') return false;
+          if (event['type'] != 'ws_frame') return false;
+          if (event['direction'] != 'client_to_server') return false;
           final message = event['message'] as Map<String, dynamic>? ?? {};
           return message['action'] == 17;
         }).toList();

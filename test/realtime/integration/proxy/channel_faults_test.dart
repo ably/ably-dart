@@ -75,10 +75,6 @@ void main() {
 
       // Connect and await CONNECTED
       await client.connect();
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
 
       final channel = client.channels.get(channelName);
 
@@ -146,8 +142,8 @@ void main() {
                 'channel': channelName,
                 'error': {
                   'code': 40160,
-                  'statusCode': 401,
-                  'message': 'Channel denied',
+                  'statusCode': 403,
+                  'message': 'Not permitted',
                 },
               },
             },
@@ -162,10 +158,6 @@ void main() {
 
       // Connect and await CONNECTED
       await client.connect();
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
 
       final channel = client.channels.get(channelName);
 
@@ -208,21 +200,11 @@ void main() {
 
       // Connect and await CONNECTED
       await client.connect();
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
 
       final channel = client.channels.get(channelName);
 
       // Attach successfully
       await channel.attach();
-      await pollUntil(
-        () async {
-          if (channel.state == ChannelState.attached) return true;
-          return null;
-        },
-      );
       expect(channel.state, equals(ChannelState.attached));
 
       // Phase 2: Suppress DETACH (action 12) for this channel
@@ -289,21 +271,11 @@ void main() {
 
       // Connect and await CONNECTED
       await client.connect();
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
 
       final channel = client.channels.get(channelName);
 
       // Attach successfully
       await channel.attach();
-      await pollUntil(
-        () async {
-          if (channel.state == ChannelState.attached) return true;
-          return null;
-        },
-      );
 
       // Record state changes
       final stateChanges = <ChannelStateChange>[];
@@ -312,7 +284,7 @@ void main() {
 
       // Inject unsolicited DETACHED (action 13) with error
       await session.triggerAction({
-        'action': 'inject_to_client',
+        'type': 'inject_to_client',
         'message': {
           'action': 13, // DETACHED
           'channel': channelName,
@@ -371,32 +343,22 @@ void main() {
 
       // Connect and await CONNECTED
       await client.connect();
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
 
       final channel = client.channels.get(channelName);
 
       // Attach successfully
       await channel.attach();
-      await pollUntil(
-        () async {
-          if (channel.state == ChannelState.attached) return true;
-          return null;
-        },
-      );
 
       // Inject channel ERROR (action 9) with code 40160
       await session.triggerAction({
-        'action': 'inject_to_client',
+        'type': 'inject_to_client',
         'message': {
           'action': 9, // ERROR
           'channel': channelName,
           'error': {
             'code': 40160,
-            'statusCode': 401,
-            'message': 'Channel denied',
+            'statusCode': 403,
+            'message': 'Not permitted',
           },
         },
       });
@@ -437,21 +399,11 @@ void main() {
 
       // Connect and await CONNECTED
       await client.connect();
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
 
       final channel = client.channels.get(channelName);
 
       // Attach successfully
       await channel.attach();
-      await pollUntil(
-        () async {
-          if (channel.state == ChannelState.attached) return true;
-          return null;
-        },
-      );
 
       // Listen for update events
       final updateEvents = <ChannelStateChange>[];
@@ -461,7 +413,7 @@ void main() {
 
       // Inject ATTACHED (action 11) with flags=0 (no resumed), error 91001
       await session.triggerAction({
-        'action': 'inject_to_client',
+        'type': 'inject_to_client',
         'message': {
           'action': 11, // ATTACHED
           'channel': channelName,
@@ -511,10 +463,6 @@ void main() {
 
       // Connect and await CONNECTED
       await client.connect();
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
 
       final channel1 = client.channels.get(channelName1);
       final channel2 = client.channels.get(channelName2);
@@ -542,26 +490,19 @@ void main() {
         await sub2.cancel();
       });
 
-      // Trigger disconnect by closing the WebSocket
-      await session.triggerAction({
-        'action': 'close',
-      });
-
-      // Await DISCONNECTED
-      await pollUntil(
-        () async {
-          if (client.connection.state == ConnectionState.disconnected) {
-            return true;
-          }
-          return null;
-        },
-      );
-
-      // Await reconnection to CONNECTED
-      await client.connection
+      // Set up reconnection listener BEFORE triggering disconnect
+      final reconnectedFuture = client.connection
           .on(ConnectionEvent.connected)
           .first
           .timeout(const Duration(seconds: 30));
+
+      // Trigger disconnect by closing the WebSocket
+      await session.triggerAction({
+        'type': 'close',
+      });
+
+      // Await reconnection to CONNECTED
+      await reconnectedFuture;
 
       // Await both channels re-attached
       await pollUntil(

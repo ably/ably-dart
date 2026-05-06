@@ -36,14 +36,9 @@ void main() {
         () async {
       final session = await ProxySession.create(
         rules: [
-          // Close WebSocket 2s after ws_connect (times: 1)
           {
-            'match': {'type': 'ws_connect'},
-            'action': {
-              'type': 'delay_after_ws_connect',
-              'delayMs': 2000,
-              'then': {'type': 'close'},
-            },
+            'match': {'type': 'delay_after_ws_connect', 'delayMs': 2000},
+            'action': {'type': 'close'},
             'times': 1,
           },
         ],
@@ -67,13 +62,9 @@ void main() {
 
       client.connection.on().listen(stateChanges.add);
 
+      // connect() internally awaits CONNECTED, so it returns in
+      // connected state — no need for a separate event listener.
       await client.connect();
-
-      // Wait for initial CONNECTED
-      await client.connection
-          .on(ConnectionEvent.connected)
-          .first
-          .timeout(const Duration(seconds: 10));
 
       final originalId = client.connection.id;
       expect(originalId, isNotNull);

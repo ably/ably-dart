@@ -12,7 +12,7 @@ Future<Object> Function(TokenParams params) _tokenAuthCallback(String apiKey) {
     final innerRest = Rest(
       options: ClientOptions(
         key: apiKey,
-        endpoint: 'sandbox',
+        endpoint: 'nonprod:sandbox',
         useBinaryProtocol: false,
       ),
     );
