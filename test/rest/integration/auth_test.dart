@@ -28,7 +28,7 @@ void main() {
       final client = Rest(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );
@@ -53,7 +53,7 @@ void main() {
       final client = Rest(
         options: ClientOptions(
           token: jwt,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );
@@ -70,7 +70,7 @@ void main() {
       final keyClient = Rest(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );
@@ -83,7 +83,7 @@ void main() {
       final tokenClient = Rest(
         options: ClientOptions(
           token: tokenDetails.token,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );
@@ -100,7 +100,7 @@ void main() {
       final keyClient = Rest(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );
@@ -111,7 +111,7 @@ void main() {
           authCallback: (params) async {
             return keyClient.auth.createTokenRequest();
           },
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );
@@ -131,7 +131,7 @@ void main() {
           authCallback: (params) async {
             return JwtHelper.generateToken(apiKey: apiKey);
           },
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );
@@ -152,7 +152,7 @@ void main() {
       final client = Rest(
         options: ClientOptions(
           key: '${testApp.appId}.invalidKey:invalidSecret',
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );
@@ -202,7 +202,7 @@ void main() {
             // Second call: return a valid JWT
             return JwtHelper.generateToken(apiKey: apiKey);
           },
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );
@@ -239,7 +239,7 @@ void main() {
       final client = Rest(
         options: ClientOptions(
           token: restrictedJwt,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );

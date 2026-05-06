@@ -22,7 +22,7 @@ void main() {
   Rest makeRestClient([int keyIndex = 0]) => Rest(
         options: ClientOptions(
           key: testApp.keys[keyIndex].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );
@@ -31,7 +31,7 @@ void main() {
   Realtime makeRealtimeClientForEnterClient([int keyIndex = 0]) => Realtime(
         options: ClientOptions(
           key: testApp.keys[keyIndex].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
         ),
       );

@@ -24,7 +24,7 @@ void main() {
   Realtime buildClient({bool autoConnect = false}) => Realtime(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
           autoConnect: autoConnect,
         ),

@@ -25,7 +25,7 @@ void main() {
       Realtime(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
           autoConnect: autoConnect,
           clientId: clientId,

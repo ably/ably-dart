@@ -287,7 +287,7 @@ void main() {
       final client = Realtime(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
           autoConnect: false,
           plugins: {'vcdiff': decoder},
@@ -373,7 +373,7 @@ void main() {
       final client = Realtime(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
           autoConnect: false,
           plugins: {'vcdiff': decoder},
@@ -449,7 +449,7 @@ void main() {
       final client = Realtime(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
           autoConnect: false,
           plugins: {'vcdiff': decoder},
@@ -515,7 +515,7 @@ void main() {
       final client = Realtime(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
           autoConnect: false,
           plugins: {'vcdiff': decoder},
@@ -624,7 +624,7 @@ void main() {
       final client = Realtime(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
           autoConnect: false,
           plugins: {'vcdiff': failingDecoder},
@@ -710,7 +710,7 @@ void main() {
       final subscriber = Realtime(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
           autoConnect: false,
           // No plugins -- deliberately omitting vcdiff decoder
@@ -722,7 +722,7 @@ void main() {
       final publisher = Realtime(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
-          endpoint: 'sandbox',
+          endpoint: 'nonprod:sandbox',
           useBinaryProtocol: false,
           autoConnect: false,
         ),
