@@ -9,6 +9,7 @@ import 'package:test/test.dart';
 void main() {
   group('LocalPresenceMap', () {
     group('RTP17h - Keyed by clientId, not memberKey', () {
+      // UTS: realtime/unit/RTP17h/keyed-by-clientid-0
       test('same clientId with different connectionId overwrites', () {
         final map = LocalPresenceMap();
         map.put(
@@ -41,6 +42,7 @@ void main() {
     });
 
     group('RTP17b - ENTER adds to map', () {
+      // UTS: realtime/unit/RTP17b/enter-adds-to-map-0
       test('ENTER event stores member', () {
         final map = LocalPresenceMap();
         map.put(
@@ -62,6 +64,7 @@ void main() {
     });
 
     group('RTP17b - UPDATE with no prior entry adds to map', () {
+      // UTS: realtime/unit/RTP17b/update-adds-to-map-1
       test('UPDATE on unknown clientId behaves like ENTER', () {
         final map = LocalPresenceMap();
         map.put(
@@ -83,6 +86,7 @@ void main() {
     });
 
     group('RTP17b - ENTER after ENTER overwrites', () {
+      // UTS: realtime/unit/RTP17b/enter-overwrites-enter-2
       test('second ENTER for same clientId overwrites first', () {
         final map = LocalPresenceMap();
         map.put(
@@ -113,6 +117,7 @@ void main() {
     });
 
     group('RTP17b - UPDATE after ENTER overwrites', () {
+      // UTS: realtime/unit/RTP17b/update-overwrites-enter-3
       test('UPDATE overwrites prior ENTER for same clientId', () {
         final map = LocalPresenceMap();
         map.put(
@@ -143,6 +148,7 @@ void main() {
     });
 
     group('RTP17b - PRESENT adds to map', () {
+      // UTS: realtime/unit/RTP17b/present-adds-to-map-4
       test('PRESENT event stores member', () {
         final map = LocalPresenceMap();
         map.put(
@@ -163,6 +169,7 @@ void main() {
     });
 
     group('RTP17b - Non-synthesized LEAVE removes from map', () {
+      // UTS: realtime/unit/RTP17b/non-synthesized-leave-removes-5
       test('non-synthesized LEAVE removes member', () {
         final map = LocalPresenceMap();
         map.put(
@@ -194,6 +201,7 @@ void main() {
     });
 
     group('RTP17b - Synthesized LEAVE is ignored', () {
+      // UTS: realtime/unit/RTP17b/synthesized-leave-ignored-6
       test('synthesized LEAVE does not remove member', () {
         final map = LocalPresenceMap();
         map.put(
@@ -226,6 +234,7 @@ void main() {
     });
 
     group('RTP17 - Multiple clientIds coexist', () {
+      // UTS: realtime/unit/RTP17/multiple-clientids-coexist-0
       test('different clientIds stored independently', () {
         final map = LocalPresenceMap();
         map.put(
@@ -268,6 +277,7 @@ void main() {
         expect(map.get('carol')!.data, equals('carol-data'));
       });
 
+      // UTS: realtime/unit/RTP17/remove-one-of-multiple-1
       test('remove one of multiple members', () {
         final map = LocalPresenceMap();
         map.put(
@@ -306,6 +316,7 @@ void main() {
     });
 
     group('clear() resets all state', () {
+      // UTS: realtime/unit/RTP17/clear-resets-state-2
       test('clears all members', () {
         final map = LocalPresenceMap();
         map.put(
@@ -337,6 +348,7 @@ void main() {
     });
 
     group('RTP17 - Get returns null for unknown clientId', () {
+      // UTS: realtime/unit/RTP17/get-null-unknown-clientid-3
       test('get for nonexistent clientId returns null', () {
         final map = LocalPresenceMap();
         expect(map.get('nonexistent'), isNull);
@@ -344,6 +356,7 @@ void main() {
     });
 
     group('RTP17 - Remove for unknown clientId is a no-op', () {
+      // UTS: realtime/unit/RTP17/remove-unknown-noop-4
       test('remove for unknown clientId does not affect existing members', () {
         final map = LocalPresenceMap();
         map.put(

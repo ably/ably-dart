@@ -14,6 +14,7 @@ import '../../../helpers/test_channel_name.dart';
 void main() {
   group('RTL25a - whenState calls listener immediately if already in state',
       () {
+    // UTS: realtime/unit/RTL25a/resolves-immediately-current-0
     test('invokes callback immediately with null when already in target state',
         () async {
       final channelName = testChannelName('RTL25a-immediate');
@@ -70,6 +71,7 @@ void main() {
   });
 
   group('RTL25b - whenState waits for state if not already in it', () {
+    // UTS: realtime/unit/RTL25b/waits-for-state-change-0
     test('waits for state transition when not currently in target state',
         () async {
       final channelName = testChannelName('RTL25b-deferred');
@@ -139,6 +141,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL25b/fires-once-only-1
     test('whenState only fires once', () async {
       final channelName = testChannelName('RTL25b-once');
 
@@ -206,6 +209,7 @@ void main() {
   });
 
   group('RTL25a - whenState for past state does not fire', () {
+    // UTS: realtime/unit/RTL25a/past-state-does-not-resolve-1
     test('callback not invoked for a state that was previously visited',
         () async {
       final channelName = testChannelName('RTL25a-past');

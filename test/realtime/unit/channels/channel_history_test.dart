@@ -16,6 +16,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL10a - RealtimeChannel#history returns PaginatedResult', () {
+    // UTS: realtime/unit/RTL10a/supports-rest-params-0
     test('returns messages from REST API', () async {
       final channelName = testChannelName('RTL10a');
       final capturedRequests = <CapturedRequest>[];
@@ -83,6 +84,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: rest/unit/RSL2b/query-parameters-0.1
     test('passes query parameters through', () async {
       final channelName = testChannelName('RTL10a-params');
       final capturedRequests = <CapturedRequest>[];
@@ -142,6 +144,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL10b - untilAttach adds fromSerial query parameter', () {
+    // UTS: realtime/unit/RTL10b/adds-from-serial-0
     test('adds fromSerial when channel is attached', () async {
       final channelName = testChannelName('RTL10b');
       final capturedRequests = <CapturedRequest>[];
@@ -210,6 +213,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL10b/errors-when-not-attached-1
     test('throws when channel has no attachSerial', () async {
       final channelName = testChannelName('RTL10b-err');
 
@@ -249,6 +253,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL10b/adds-from-serial-0.1
     test('untilAttach false does not add fromSerial', () async {
       final channelName = testChannelName('RTL10b-false');
       final capturedRequests = <CapturedRequest>[];
@@ -302,6 +307,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL10c - Returns PaginatedResult with items', () {
+    // UTS: rest/unit/RSL2a/returns-paginated-result-0.1
     test('empty history returns empty PaginatedResult', () async {
       final channelName = testChannelName('RTL10c');
 
@@ -345,6 +351,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RSL8 - RealtimeChannel#status returns ChannelDetails', () {
+    // UTS: rest/unit/RSL2/request-url-format-0.1
     test('makes GET request to channel status endpoint', () async {
       final channelName = testChannelName('RSL8');
       final capturedRequests = <CapturedRequest>[];

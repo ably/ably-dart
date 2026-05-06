@@ -9,6 +9,7 @@ import 'package:ably_dart/ably_dart.dart';
 /// Spec: uts/test/rest/unit/types/mutable_message_types.md
 void main() {
   group('TM5 - MessageAction enum values', () {
+    // UTS: rest/unit/TM5/message-action-enum-values-0
     test('has correct numeric wire values', () {
       expect(MessageAction.messageCreate.toInt(), equals(0));
       expect(MessageAction.messageUpdate.toInt(), equals(1));
@@ -18,6 +19,7 @@ void main() {
       expect(MessageAction.messageAppend.toInt(), equals(5));
     });
 
+    // UTS: rest/unit/TM5/message-action-enum-values-0.1
     test('round-trips from int', () {
       expect(MessageActionExtension.fromInt(0),
           equals(MessageAction.messageCreate));
@@ -34,6 +36,7 @@ void main() {
   });
 
   group('TM2j, TM2r - Message action and serial fields', () {
+    // UTS: rest/unit/TM2j/action-and-serial-fields-0
     test('supports action and serial with correct wire serialization', () {
       final msg = Message(
         name: 'test',
@@ -54,6 +57,7 @@ void main() {
   });
 
   group('TM2s - Message.version populated from wire', () {
+    // UTS: rest/unit/TM2s/version-populated-from-wire-0
     test('parses version object with all fields', () {
       final msg = Message.fromJson({
         'serial': 'msg-serial-1',
@@ -80,6 +84,7 @@ void main() {
   });
 
   group('TM2s1, TM2s2 - Message.version defaults when not on wire', () {
+    // UTS: rest/unit/TM2s1/version-defaults-from-message-0
     test('initializes version from serial and timestamp', () {
       final msg = Message.fromJson({
         'serial': 'msg-serial-1',
@@ -99,6 +104,7 @@ void main() {
   });
 
   group('TM2u, TM8a - Message.annotations defaults to empty', () {
+    // UTS: rest/unit/TM2u/annotations-defaults-empty-0
     test('initializes empty annotations when not on wire', () {
       final msg = Message.fromJson({
         'serial': 'msg-serial-1',
@@ -113,6 +119,7 @@ void main() {
   });
 
   group('MOP2a-c - MessageOperation fields', () {
+    // UTS: rest/unit/MOP2a/message-operation-fields-0
     test('constructs with all fields and serializes correctly', () {
       final op = MessageOperation(
         clientId: 'user-1',
@@ -131,6 +138,7 @@ void main() {
       expect((json['metadata'] as Map)['reason'], equals('typo'));
     });
 
+    // UTS: rest/unit/MOP2a/message-operation-fields-0.1
     test('omits null fields from serialization', () {
       const emptyOp = MessageOperation();
 
@@ -146,6 +154,7 @@ void main() {
   });
 
   group('UDR2a - UpdateDeleteResult fields', () {
+    // UTS: rest/unit/UDR2a/update-delete-result-fields-0
     test('parses versionSerial from response map', () {
       final result1 = UpdateDeleteResult.fromMap(
         {'versionSerial': 'version-serial-abc'},
@@ -164,6 +173,7 @@ void main() {
   });
 
   group('TAN2 - Annotation type and action encoding', () {
+    // UTS: rest/unit/TAN2/annotation-attributes-and-action-0
     test('fromMap decodes all fields correctly', () {
       final ann = Annotation.fromMap({
         'id': 'ann-id-1',
@@ -193,6 +203,7 @@ void main() {
       expect(ann.type, equals('com.example.reaction'));
     });
 
+    // UTS: rest/unit/TAN2/annotation-attributes-and-action-0.1
     test('AnnotationAction has correct numeric values', () {
       expect(AnnotationAction.annotationCreate.toInt(), equals(0));
       expect(AnnotationAction.annotationDelete.toInt(), equals(1));

@@ -22,6 +22,7 @@ import '../../../helpers/protocol_message_helpers.dart';
 /// Spec: uts/test/realtime/unit/connection/server_initiated_reauth_test.md
 void main() {
   group('RTN22 - Server sends AUTH, client re-authenticates', () {
+    // UTS: realtime/unit/RTN22/stays-connected-during-reauth-1
     test('receives AUTH from server, obtains new token, sends AUTH back',
         () async {
       var authCallbackCount = 0;
@@ -113,6 +114,7 @@ void main() {
   group(
       'RTN22 - Connection remains CONNECTED during server-initiated reauth',
       () {
+    // UTS: realtime/unit/RTN22/server-auth-triggers-reauth-0
     test('connection state does not change during server-initiated reauth',
         () async {
       var authCallbackCount = 0;

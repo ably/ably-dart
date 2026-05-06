@@ -12,6 +12,7 @@ import '../../../helpers/test_channel_name.dart';
 /// Spec: uts/test/realtime/unit/presence/realtime_presence_history.md
 void main() {
   group('RTP12a - history supports same params as RestPresence#history', () {
+    // UTS: realtime/unit/RTP12a/history-supports-rest-params-0
     test('passes start, end, direction, limit to REST endpoint', () async {
       final channelName = testChannelName('RTP12a');
 
@@ -90,6 +91,7 @@ void main() {
   });
 
   group('RTP12c - history returns PaginatedResult', () {
+    // UTS: realtime/unit/RTP12c/history-returns-paginated-result-0
     test('returns PaginatedResult with presence messages', () async {
       final channelName = testChannelName('RTP12c');
 

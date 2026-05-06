@@ -11,52 +11,62 @@ import 'package:test/test.dart';
 void main() {
   group('Message', () {
     group('TM2a-TM2i - Message attributes', () {
+      // UTS: rest/unit/TM2a/message-attributes-0
       test('TM2a - id attribute', () {
         final message = Message(id: 'unique-id');
         expect(message.id, equals('unique-id'));
       });
 
+      // UTS: rest/unit/TM2a/message-attributes-0.1
       test('TM2b - name attribute', () {
         final message = Message(name: 'event-name');
         expect(message.name, equals('event-name'));
       });
 
+      // UTS: rest/unit/TM2a/message-attributes-0.2
       test('TM2c - data attribute (string)', () {
         final message = Message(data: 'string-data');
         expect(message.data, equals('string-data'));
       });
 
+      // UTS: rest/unit/TM2a/message-attributes-0.3
       test('TM2c - data attribute (map)', () {
         final message = Message(data: {'key': 'value'});
         expect(message.data, equals({'key': 'value'}));
       });
 
+      // UTS: rest/unit/TM2a/message-attributes-0.4
       test('TM2c - data attribute (binary)', () {
         final bytes = Uint8List.fromList([0x01, 0x02]);
         final message = Message(data: bytes);
         expect(message.data, equals(bytes));
       });
 
+      // UTS: rest/unit/TM2a/message-attributes-0.5
       test('TM2d - clientId attribute', () {
         final message = Message(clientId: 'message-client');
         expect(message.clientId, equals('message-client'));
       });
 
+      // UTS: rest/unit/TM2a/message-attributes-0.6
       test('TM2e - connectionId attribute', () {
         final message = Message(connectionId: 'conn-id');
         expect(message.connectionId, equals('conn-id'));
       });
 
+      // UTS: rest/unit/TM2a/message-attributes-0.7
       test('TM2f - timestamp attribute', () {
         final message = Message(timestamp: 1234567890000);
         expect(message.timestamp, equals(1234567890000));
       });
 
+      // UTS: rest/unit/TM2a/message-attributes-0.8
       test('TM2g - encoding attribute', () {
         final message = Message(encoding: 'json/base64');
         expect(message.encoding, equals('json/base64'));
       });
 
+      // UTS: rest/unit/TM2a/message-attributes-0.9
       test('TM2h - extras attribute', () {
         final message = Message(
           extras: MessageExtras(data: {
@@ -71,6 +81,7 @@ void main() {
     });
 
     group('TM3 - fromEncoded / fromEncodedArray', () {
+      // UTS: rest/unit/TM3/from-encoded-deserialization-0
       test('fromEncoded deserializes wire format', () {
         final jsonData = {
           'id': 'msg-123',
@@ -96,6 +107,7 @@ void main() {
         expect(message.extras?.data['headers']['x-custom'], equals('value'));
       });
 
+      // UTS: rest/unit/TM3/from-encoded-decodes-encoding-1
       test('fromEncoded decodes null encoding (plain text)', () {
         final message = Message.fromJson({
           'id': 'msg',
@@ -106,6 +118,7 @@ void main() {
         expect(message.data, equals('plain text'));
       });
 
+      // UTS: rest/unit/TM3/from-encoded-decodes-encoding-1.1
       test('fromEncoded decodes json encoding', () {
         final message = Message.fromJson({
           'id': 'msg',
@@ -116,6 +129,7 @@ void main() {
         expect(message.data, equals({'key': 'value'}));
       });
 
+      // UTS: rest/unit/TM3/from-encoded-decodes-encoding-1.2
       test('fromEncoded decodes base64 encoding', () {
         final message = Message.fromJson({
           'id': 'msg',
@@ -127,6 +141,7 @@ void main() {
         expect(utf8.decode(message.data as Uint8List), equals('Hello'));
       });
 
+      // UTS: rest/unit/TM3/from-encoded-decodes-encoding-1.3
       test('fromEncoded decodes json/base64 compound encoding', () {
         final message = Message.fromJson({
           'id': 'msg',
@@ -137,6 +152,7 @@ void main() {
         expect(message.data, equals({'k': 'v'}));
       });
 
+      // UTS: rest/unit/TM3/from-encoded-deserialization-0.1
       test('fromEncodedArray deserializes array of messages', () {
         final messages = Message.fromEncodedArray([
           {'name': 'event1', 'data': 'data1'},
@@ -149,6 +165,7 @@ void main() {
     });
 
     group('TM4 - Message constructors', () {
+      // UTS: rest/unit/TM4/message-constructors-0
       test('constructor(name, data)', () {
         final message = Message(name: 'event-name', data: 'payload');
         expect(message.name, equals('event-name'));
@@ -156,6 +173,7 @@ void main() {
         expect(message.clientId, isNull);
       });
 
+      // UTS: rest/unit/TM4/message-constructors-0.1
       test('constructor(name, data, clientId)', () {
         final message = Message(
           name: 'event-name',
@@ -167,6 +185,7 @@ void main() {
         expect(message.clientId, equals('client-1'));
       });
 
+      // UTS: rest/unit/TM4/message-constructors-0.2
       test('name and data are nullable', () {
         final message = Message();
         expect(message.name, isNull);
@@ -175,6 +194,7 @@ void main() {
     });
 
     group('TM - Null/missing attributes', () {
+      // UTS: rest/unit/TM/null-missing-attributes-0
       test('null or missing attributes are handled correctly', () {
         final message = Message();
 
@@ -187,6 +207,7 @@ void main() {
     });
 
     group('TM - Message with extras', () {
+      // UTS: rest/unit/TM/message-with-extras-1
       test('push notification extras are handled correctly', () {
         final message = Message(
           name: 'push-event',

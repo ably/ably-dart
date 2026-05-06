@@ -16,6 +16,7 @@ import '../../../helpers/test_channel_name.dart';
 /// Spec: uts/test/realtime/unit/channels/channel_properties.md
 void main() {
   group('RTL15a - attachSerial updated from ATTACHED message', () {
+    // UTS: realtime/unit/RTL15a/attach-serial-from-attached-0
     test('initially unset, set on attach, updated on reattach', () async {
       final channelName = testChannelName('RTL15a');
       var attachCount = 0;
@@ -72,6 +73,7 @@ void main() {
   });
 
   group('RTL15a - attachSerial updated on server-initiated reattach', () {
+    // UTS: realtime/unit/RTL15a/attach-serial-server-reattach-1
     test('updated when unsolicited ATTACHED received', () async {
       final channelName = testChannelName('RTL15a-update');
 
@@ -124,6 +126,7 @@ void main() {
   });
 
   group('RTL15b - channelSerial updated from ATTACHED message', () {
+    // UTS: realtime/unit/RTL15b/channel-serial-from-attached-0
     test('set from ATTACHED response channelSerial', () async {
       final channelName = testChannelName('RTL15b-attached');
 
@@ -168,6 +171,7 @@ void main() {
   });
 
   group('RTL15b - channelSerial updated from MESSAGE and PRESENCE', () {
+    // UTS: realtime/unit/RTL15b/channel-serial-from-messages-1
     test('updated by MESSAGE and PRESENCE protocol messages', () async {
       final channelName = testChannelName('RTL15b-messages');
 
@@ -231,6 +235,7 @@ void main() {
   });
 
   group('RTL15b - channelSerial not updated when field not populated', () {
+    // UTS: realtime/unit/RTL15b/serial-not-updated-empty-2
     test('MESSAGE without channelSerial does not change it', () async {
       final channelName = testChannelName('RTL15b-noupdate');
 
@@ -285,6 +290,7 @@ void main() {
   });
 
   group('RTL15b1 - channelSerial cleared on DETACHED', () {
+    // UTS: realtime/unit/RTL15b1/serial-cleared-detached-0
     test('cleared when channel detaches', () async {
       final channelName = testChannelName('RTL15b1-detached');
 
@@ -335,6 +341,7 @@ void main() {
   });
 
   group('RTL15b1 - channelSerial cleared on SUSPENDED', () {
+    // UTS: realtime/unit/RTL15b1/serial-cleared-suspended-1
     test('cleared when channel enters SUSPENDED via attach timeout', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -405,6 +412,7 @@ void main() {
   });
 
   group('RTL15b1 - channelSerial cleared on FAILED', () {
+    // UTS: realtime/unit/RTL15b1/serial-cleared-failed-2
     test('cleared when channel enters FAILED via ERROR', () async {
       final channelName = testChannelName('RTL15b1-failed');
 

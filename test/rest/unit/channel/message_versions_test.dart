@@ -10,6 +10,7 @@ import '../../../helpers/mock_http_client.dart';
 /// Spec: uts/test/rest/unit/channel/message_versions.md
 void main() {
   group('RSL14b - getMessageVersions sends GET to correct endpoint', () {
+    // UTS: rest/unit/RSL14b/get-correct-endpoint-0
     test('sends GET to /channels/{channelName}/messages/{serial}/versions',
         () async {
       final channelName = 'test-RSL14b';
@@ -57,6 +58,7 @@ void main() {
   });
 
   group('RSL14c - getMessageVersions returns PaginatedResult of Messages', () {
+    // UTS: rest/unit/RSL14c/returns-paginated-result-0
     test('parses response into paginated result with decoded messages',
         () async {
       final mockHttp = MockHttpClient(
@@ -113,6 +115,7 @@ void main() {
   });
 
   group('RSL14a - getMessageVersions passes params as querystring', () {
+    // UTS: rest/unit/RSL14a/params-as-querystring-0
     test('optional params sent as query parameters', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {

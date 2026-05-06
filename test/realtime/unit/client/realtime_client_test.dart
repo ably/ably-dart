@@ -7,6 +7,7 @@ import '../../../helpers/test_channel_name.dart';
 
 void main() {
   group('Realtime Client - UTS Tests', () {
+    // UTS: realtime/unit/RTC2/connection-attribute-0
     test('RTC2 - connection attribute exists', () {
       final realtime = Realtime(
         options: ClientOptions(
@@ -19,6 +20,7 @@ void main() {
       expect(realtime.connection, isA<Connection>());
     });
 
+    // UTS: realtime/unit/RTC3/channels-attribute-0
     test('RTC3 - channels attribute exists and can get channels', () {
       final realtime = Realtime(
         options: ClientOptions(
@@ -47,6 +49,7 @@ void main() {
       expect(realtime.channels.exists('nonexistent'), isFalse);
     });
 
+    // UTS: realtime/unit/RTC4/auth-attribute-0
     test('RTC4 - auth attribute exists', () {
       final realtime = Realtime(
         options: ClientOptions(
@@ -59,6 +62,7 @@ void main() {
       expect(realtime.auth, isA<Auth>());
     });
 
+    // UTS: realtime/unit/RTC17/client-id-attribute-0
     test('RTC17 - clientId attribute returns auth clientId', () {
       // Test with no clientId
       final realtime1 = Realtime(
@@ -80,6 +84,7 @@ void main() {
       expect(realtime2.clientId, equals('test-client-id'));
     });
 
+    // UTS: realtime/unit/RTC1a/echo-messages-option-0
     test('RTC1a - echoMessages option in query parameters', () {
       // Test default value (true)
       final realtime1 = Realtime(
@@ -111,6 +116,7 @@ void main() {
       expect(realtime3.options.echoMessages, isFalse);
     });
 
+    // UTS: realtime/unit/RTC15/connect-method-0
     test('Connection initial state is initialized', () {
       final realtime = Realtime(
         options: ClientOptions(
@@ -121,6 +127,7 @@ void main() {
       expect(realtime.connection.state, equals(ConnectionState.initialized));
     });
 
+    // UTS: realtime/unit/RTC17/client-id-attribute-0.1
     test('Channel initial state is initialized', () {
       final realtime = Realtime(
         options: ClientOptions(
@@ -133,6 +140,7 @@ void main() {
       expect(channel.state, equals(ChannelState.initialized));
     });
 
+    // UTS: realtime/unit/RTC2/connection-attribute-0.1
     test('Connection state changes can be observed', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -177,6 +185,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTC17/client-id-attribute-0.2
     test('Channel state changes can be observed', () async {
       final channelName = testChannelName('RTC-state');
 
@@ -235,6 +244,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTC2/connection-attribute-0.2
     test('Connection on(event) filters by event type', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -281,6 +291,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTC17/client-id-attribute-0.3
     test('Channel on(event) filters by event type', () async {
       final channelName = testChannelName('RTC-filter');
 
@@ -339,6 +350,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTC17/client-id-attribute-0.4
     test('Channel release detaches and removes channel', () async {
       final channelName = testChannelName('RTC-release');
 
@@ -393,6 +405,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTC16/close-method-0
     test('Realtime.close closes connection', () async {
       final realtime = Realtime(
         options: ClientOptions(
@@ -409,6 +422,7 @@ void main() {
       expect(realtime.connection.state, equals(ConnectionState.closed));
     });
 
+    // UTS: realtime/unit/RTC1b/auto-connect-option-0
     test('Constructor with options parameter', () {
       final options = ClientOptions(
         key: 'fake.key:secret',
@@ -424,6 +438,7 @@ void main() {
       expect(realtime.options.echoMessages, isFalse);
     });
 
+    // UTS: realtime/unit/RTC12/constructor-string-detection-0
     test('Constructor with key parameter overrides options', () {
       final options = ClientOptions(
         key: 'old.key:secret',
@@ -438,6 +453,7 @@ void main() {
       expect(realtime.options.key, equals('new.key:secret'));
     });
 
+    // UTS: realtime/unit/RTC1c/recover-option-0
     test('Constructor throws when neither options nor key provided', () {
       expect(
         () => Realtime(),

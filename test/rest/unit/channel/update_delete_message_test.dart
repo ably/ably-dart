@@ -13,6 +13,7 @@ import '../../../helpers/mock_http_client.dart';
 /// Spec: uts/test/rest/unit/channel/update_delete_message.md
 void main() {
   group('RSL15b, RSL15b1 - updateMessage sends PATCH with MESSAGE_UPDATE', () {
+    // UTS: rest/unit/RSL15b/update-sends-patch-update-0
     test('sends PATCH with action 1 to correct endpoint', () async {
       final channelName = 'test-RSL15-update';
       final mockHttp = MockHttpClient(
@@ -51,6 +52,7 @@ void main() {
   });
 
   group('RSL15b, RSL15b1 - deleteMessage sends PATCH with MESSAGE_DELETE', () {
+    // UTS: rest/unit/RSL15b/delete-sends-patch-delete-1
     test('sends PATCH with action 2 to correct endpoint', () async {
       final channelName = 'test-RSL15-delete';
       final mockHttp = MockHttpClient(
@@ -86,6 +88,7 @@ void main() {
   });
 
   group('RSL15b, RSL15b1 - appendMessage sends PATCH with MESSAGE_APPEND', () {
+    // UTS: rest/unit/RSL15b/append-sends-patch-append-2
     test('sends PATCH with action 5 to correct endpoint', () async {
       final channelName = 'test-RSL15-append';
       final mockHttp = MockHttpClient(
@@ -122,6 +125,7 @@ void main() {
   });
 
   group('RSL15b7 - version set to MessageOperation when provided', () {
+    // UTS: rest/unit/RSL15b7/version-set-with-operation-0
     test('includes version field with operation data', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -155,6 +159,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSL15b7/version-absent-no-operation-1
     test('omits version field when no operation provided', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -181,6 +186,7 @@ void main() {
   });
 
   group('RSL15c - does not mutate user-supplied Message', () {
+    // UTS: rest/unit/RSL15c/no-mutate-user-message-0
     test('original message is unchanged after updateMessage', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -212,6 +218,7 @@ void main() {
   });
 
   group('RSL15e - returns UpdateDeleteResult on success', () {
+    // UTS: rest/unit/RSL15e/returns-update-delete-result-0
     test('parses versionSerial from response', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -235,6 +242,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSL15e/null-version-serial-1
     test('null versionSerial preserved', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -260,6 +268,7 @@ void main() {
   });
 
   group('RSL15f - params sent as querystring', () {
+    // UTS: rest/unit/RSL15f/params-sent-as-querystring-0
     test('optional params are sent as query parameters', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -287,6 +296,7 @@ void main() {
   });
 
   group('RSL15a - serial required, throws error if missing', () {
+    // UTS: rest/unit/RSL15a/serial-required-throws-error-0
     test('updateMessage without serial throws error code 40003', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -330,6 +340,7 @@ void main() {
   });
 
   group('RSL15d - request body encoded per RSL4', () {
+    // UTS: rest/unit/RSL15d/body-encoded-per-rsl4-0
     test('JSON data encoded as string with encoding field', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -358,6 +369,7 @@ void main() {
   });
 
   group('RSL15b - serial URL-encoded in path', () {
+    // UTS: rest/unit/RSL15b/serial-url-encoded-path-3
     test('special characters in serial are URL-encoded', () async {
       final channelName = 'test-RSL15b-encode';
       const serialWithSpecialChars = 'serial/special:chars';

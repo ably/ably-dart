@@ -18,6 +18,7 @@ void main() {
     });
 
     group('RSP1 - Presence accessible via RestChannel', () {
+      // UTS: rest/unit/RSP3b/get-returns-presence-messages-0
       test('RSP1_1 - Presence accessible via RestChannel#presence', () async {
         final channelName = testChannelName('RSP1-1');
         final client = Rest.forTesting(
@@ -29,6 +30,7 @@ void main() {
         expect(channel.presence, isA<RestPresence>());
       });
 
+      // UTS: rest/unit/RSP1b/same-instance-returned-0
       test('RSP1_2 - Same presence object returned for same channel', () async {
         final channelName = testChannelName('RSP1-2');
         final client = Rest.forTesting(
@@ -45,6 +47,7 @@ void main() {
     });
 
     group('RSP3 - Presence get()', () {
+      // UTS: rest/unit/RSP3/get-request-id-enabled-6
       test('RSP3_1 - Get sends GET request to presence endpoint', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSP3-1');
@@ -76,6 +79,7 @@ void main() {
             equals('/channels/${Uri.encodeComponent(channelName)}/presence'));
       });
 
+      // UTS: rest/unit/RSP3/get-standard-headers-5
       test('RSP3_2 - Get returns PresenceMessage objects with correct fields',
           () async {
         final channelName = testChannelName('RSP3-2');
@@ -128,6 +132,7 @@ void main() {
         expect(msg2.encoding, equals('json'));
       });
 
+      // UTS: rest/unit/RSP3/get-channel-not-found-4
       test('RSP3_3 - Get with no members returns empty list', () async {
         final channelName = testChannelName('RSP3-3');
         mockHttp = MockHttpClient(
@@ -150,6 +155,7 @@ void main() {
     });
 
     group('RSP3a - Presence get() parameters', () {
+      // UTS: rest/unit/RSP3a1/get-limit-parameter-0
       test('RSP3a1_1 - Get with limit parameter', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSP3a1-1');
@@ -181,6 +187,7 @@ void main() {
         expect(request.url.queryParameters['limit'], equals('50'));
       });
 
+      // UTS: rest/unit/RSP3a1/get-limit-default-100-1
       test('RSP3a1_2 - Get limit defaults to 100', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSP3a1-2');
@@ -213,6 +220,7 @@ void main() {
         }
       });
 
+      // UTS: rest/unit/RSP3a2/get-clientid-filter-0
       test('RSP3a2_1 - Get with clientId filter', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSP3a2-1');
@@ -249,6 +257,7 @@ void main() {
         );
       });
 
+      // UTS: rest/unit/RSP3a3/get-connectionid-filter-0
       test('RSP3a3_1 - Get with connectionId filter', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSP3a3-1');
@@ -282,6 +291,7 @@ void main() {
         expect(request.url.queryParameters['connectionId'], equals('conn-abc'));
       });
 
+      // UTS: rest/unit/RSP3/get-multiple-filters-0
       test('RSP3_Combined - Get with multiple filters', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSP3-combined');
@@ -327,6 +337,7 @@ void main() {
     });
 
     group('RSP4 - Presence history()', () {
+      // UTS: rest/unit/RSP4/history-pagination-1
       test('RSP4_1 - History sends GET to presence history endpoint', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSP4-1');
@@ -361,6 +372,7 @@ void main() {
         );
       });
 
+      // UTS: rest/unit/RSP4a/history-returns-paginated-1
       test('RSP4a_1 - History returns PaginatedResult of PresenceMessage',
           () async {
         final channelName = testChannelName('RSP4a-1');
@@ -397,6 +409,7 @@ void main() {
         expect(result.items[1].action, equals(PresenceAction.leave));
       });
 
+      // UTS: rest/unit/RSP4b1/history-start-parameter-0
       test('RSP4b1_1 - History with start parameter', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSP4b1-1');
@@ -426,6 +439,7 @@ void main() {
         expect(request.url.queryParameters['start'], equals('1609459200000'));
       });
 
+      // UTS: rest/unit/RSP4b1/history-end-parameter-1
       test('RSP4b1_2 - History with end parameter', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSP4b1-2');
@@ -455,6 +469,7 @@ void main() {
         expect(request.url.queryParameters['end'], equals('1609459300000'));
       });
 
+      // UTS: rest/unit/RSP4b2/history-direction-backwards-default-0
       test('RSP4b2_1 - History with direction backwards (default)', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSP4b2-1');
@@ -490,6 +505,7 @@ void main() {
         }
       });
 
+      // UTS: rest/unit/RSP4b2/history-direction-forwards-1
       test('RSP4b2_2 - History with direction forwards', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSP4b2-2');
@@ -521,6 +537,7 @@ void main() {
         expect(request.url.queryParameters['direction'], equals('forwards'));
       });
 
+      // UTS: rest/unit/RSP4b3/history-limit-parameter-0
       test('RSP4b3_1 - History with limit parameter', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSP4b3-1');
@@ -550,6 +567,7 @@ void main() {
         expect(request.url.queryParameters['limit'], equals('50'));
       });
 
+      // UTS: rest/unit/RSP4/history-all-parameters-0
       test('RSP4_Combined - History with all parameters', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSP4-combined');
@@ -591,6 +609,7 @@ void main() {
     });
 
     group('RSP5 - Data decoding', () {
+      // UTS: rest/unit/RSP5/decode-string-data-0
       test('RSP5_1 - String data decoded as string', () async {
         final channelName = testChannelName('RSP5-1');
         mockHttp = MockHttpClient(
@@ -618,6 +637,7 @@ void main() {
         expect(result.items[0].data, isA<String>());
       });
 
+      // UTS: rest/unit/RSP5/decode-json-data-1
       test('RSP5_2 - JSON encoded data decoded to object', () async {
         final channelName = testChannelName('RSP5-2');
         mockHttp = MockHttpClient(
@@ -648,6 +668,7 @@ void main() {
         expect(data['count'], equals(42));
       });
 
+      // UTS: rest/unit/RSP5/decode-base64-binary-2
       test('RSP5_3 - Base64 encoded data decoded to binary', () async {
         final channelName = testChannelName('RSP5-3');
         final originalBytes = [1, 2, 3, 4, 5];
@@ -683,6 +704,7 @@ void main() {
     });
 
     group('RSP_Pagination - Presence pagination', () {
+      // UTS: rest/unit/RSP3/get-pagination-link-header-1
       test('RSP_Pagination_1 - Get returns paginated result with Link header',
           () async {
         final channelName = testChannelName('RSP-page1');
@@ -715,6 +737,7 @@ void main() {
         expect(result.isLast(), isFalse);
       });
 
+      // UTS: rest/unit/RSP3/get-pagination-next-page-2
       test('RSP_Pagination_2 - Get next page fetches from Link URL', () async {
         var requestCount = 0;
         final channelName = testChannelName('RSP-page2');
@@ -762,6 +785,7 @@ void main() {
     });
 
     group('RSP_Error - Presence error handling', () {
+      // UTS: rest/unit/RSP3/get-server-error-3
       test('RSP_Error_1 - Get with server error throws AblyException',
           () async {
         final channelName = testChannelName('RSP-err1');
@@ -790,6 +814,7 @@ void main() {
         );
       });
 
+      // UTS: rest/unit/RSP4/history-auth-error-2
       test('RSP_Error_2 - History with invalid auth throws AblyException',
           () async {
         final channelName = testChannelName('RSP-err2');
@@ -832,6 +857,7 @@ void main() {
     });
 
     group('RSP_Headers - Request headers', () {
+      // UTS: rest/unit/RSP3a/get-request-endpoint-0
       test('RSP_Headers_1 - Get includes standard headers', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSP-headers');
@@ -864,6 +890,7 @@ void main() {
     });
 
     group('RSP_Action - Presence actions', () {
+      // UTS: rest/unit/RSP5/presence-action-mapping-8
       test('RSP_Action_1 - All presence actions correctly mapped', () async {
         final channelName = testChannelName('RSP-action');
         mockHttp = MockHttpClient(
@@ -915,6 +942,7 @@ void main() {
       ];
 
       for (final testCase in testCases) {
+        // UTS: rest/unit/RSP1a/presence-channel-attribute-0
         test('encodes channel name "${testCase.channelName}" correctly',
             () async {
           final capturedRequests = <CapturedRequest>[];

@@ -447,6 +447,7 @@ void main() {
   });
 
   group('RTN20 - Network change does not affect terminal states', () {
+    // UTS: realtime/unit/RTN20a/network-loss-connected-disconnects-0
     test('CLOSED state is not affected by network changes', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -482,6 +483,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN20a/network-loss-connecting-disconnects-1
     test('FAILED state is not affected by network changes', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {

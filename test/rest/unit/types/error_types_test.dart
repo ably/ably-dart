@@ -7,16 +7,19 @@ import 'package:test/test.dart';
 void main() {
   group('ErrorInfo', () {
     group('TI1-TI5 - ErrorInfo attributes', () {
+      // UTS: rest/unit/TI1/errorinfo-attributes-0
       test('TI1 - code attribute', () {
         final error = ErrorInfo(code: 40000);
         expect(error.code, equals(40000));
       });
 
+      // UTS: rest/unit/TI1/errorinfo-attributes-0.1
       test('TI2 - statusCode attribute', () {
         final error = ErrorInfo(code: 40100, statusCode: 401);
         expect(error.statusCode, equals(401));
       });
 
+      // UTS: rest/unit/TI1/errorinfo-attributes-0.2
       test('TI3 - message attribute', () {
         final error = ErrorInfo(
           code: 40000,
@@ -26,6 +29,7 @@ void main() {
         expect(error.message, equals('Bad request: invalid parameter'));
       });
 
+      // UTS: rest/unit/TI1/errorinfo-attributes-0.3
       test('TI4 - href attribute (optional)', () {
         final error = ErrorInfo(
           code: 40000,
@@ -34,6 +38,7 @@ void main() {
         expect(error.href, equals('https://help.ably.io/error/40000'));
       });
 
+      // UTS: rest/unit/TI1/errorinfo-attributes-0.4
       test('TI5 - cause attribute (optional)', () {
         final originalError = Exception('Network failure');
         final error = ErrorInfo(
@@ -47,6 +52,7 @@ void main() {
     });
 
     group('TI - ErrorInfo from JSON response', () {
+      // UTS: rest/unit/TI/errorinfo-from-json-0
       test('parses error from JSON response', () {
         final jsonResponse = {
           'code': 40100,
@@ -65,6 +71,7 @@ void main() {
     });
 
     group('TI - ErrorInfo with nested error', () {
+      // UTS: rest/unit/TI/errorinfo-nested-cause-1
       test('parses error response with nested error structure', () {
         final jsonResponse = {
           'code': 50000,
@@ -103,6 +110,7 @@ void main() {
       ];
 
       for (final testCase in testCases) {
+        // UTS: rest/unit/TI/common-error-codes-3
         test('handles error code ${testCase.code}', () {
           final error = ErrorInfo(
             code: testCase.code,
@@ -117,6 +125,7 @@ void main() {
     });
 
     group('TI - Error string representation', () {
+      // UTS: rest/unit/TI/error-string-representation-4
       test('has useful string representation', () {
         final error = ErrorInfo(
           code: 40100,
@@ -132,6 +141,7 @@ void main() {
     });
 
     group('TI - Error equality', () {
+      // UTS: rest/unit/TI/error-equality-5
       test('errors with same content are equal', () {
         final error1 = ErrorInfo(
           code: 40000,
@@ -156,6 +166,7 @@ void main() {
   });
 
   group('AblyException', () {
+    // UTS: rest/unit/TI/ably-exception-wraps-errorinfo-2
     test('wraps ErrorInfo', () {
       final errorInfo = ErrorInfo(
         code: 40000,

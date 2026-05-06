@@ -9,6 +9,7 @@ import '../../../helpers/protocol_message_helpers.dart';
 /// exactly like the HTTP mock pattern.
 void main() {
   group('WebSocket Mock Injection', () {
+    // UTS: realtime/unit/RTC17/client-id-attribute-0.5
     test('can inject MockWebSocketClient into Realtime client', () async {
       // Create mock
       final mockWs = MockWebSocketClient(
@@ -47,6 +48,7 @@ void main() {
       await client.close();
     });
 
+    // UTS: realtime/unit/RTN2e/token-before-websocket-0.1
     test('can use awaitable pattern', () async {
       // Create mock without handler
       final mockWs = MockWebSocketClient();
@@ -84,6 +86,7 @@ void main() {
       await client.close();
     });
 
+    // UTS: realtime/unit/RTN2e/token-before-websocket-0.2
     test('can simulate connection failure', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -114,6 +117,7 @@ void main() {
       await client.close();
     });
 
+    // UTS: realtime/unit/RTN15h2/token-error-renew-success-0.1
     test('can simulate error response', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {

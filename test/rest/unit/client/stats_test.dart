@@ -18,6 +18,7 @@ void main() {
     });
 
     group('RSC6a - stats() returns PaginatedResult with Stats objects', () {
+      // UTS: rest/unit/RSC6a/returns-paginated-stats-0
       test('returns PaginatedResult containing Stats items', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -64,6 +65,7 @@ void main() {
 
     group('RSC6a - stats() sends authenticated request with standard headers',
         () {
+      // UTS: rest/unit/RSC6a/authenticated-with-headers-1
       test('includes Authorization and standard Ably headers', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -92,6 +94,7 @@ void main() {
     });
 
     group('RSC6b1 - start and end parameters', () {
+      // UTS: rest/unit/RSC6b1/start-param-millis-0
       test('sends start as milliseconds since epoch', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -116,6 +119,7 @@ void main() {
         );
       });
 
+      // UTS: rest/unit/RSC6b1/end-param-millis-1
       test('sends end as milliseconds since epoch', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -140,6 +144,7 @@ void main() {
         );
       });
 
+      // UTS: rest/unit/RSC6b1/start-and-end-params-2
       test('sends both start and end together', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -171,6 +176,7 @@ void main() {
     });
 
     group('RSC6b2 - direction parameter', () {
+      // UTS: rest/unit/RSC6b2/direction-param-forwards-0
       test('sends direction=forwards when specified', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -190,6 +196,7 @@ void main() {
         expect(request.url.queryParameters['direction'], equals('forwards'));
       });
 
+      // UTS: rest/unit/RSC6b2/direction-param-forwards-0.1
       test('sends direction=backwards when specified', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -209,6 +216,7 @@ void main() {
         expect(request.url.queryParameters['direction'], equals('backwards'));
       });
 
+      // UTS: rest/unit/RSC6b2/direction-defaults-backwards-1
       test('omits direction when not specified (server default: backwards)',
           () async {
         mockHttp = MockHttpClient(
@@ -232,6 +240,7 @@ void main() {
     });
 
     group('RSC6b3 - limit parameter', () {
+      // UTS: rest/unit/RSC6b3/limit-param-value-0
       test('sends limit when specified', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -251,6 +260,7 @@ void main() {
         expect(request.url.queryParameters['limit'], equals('10'));
       });
 
+      // UTS: rest/unit/RSC6b3/limit-defaults-to-100-1
       test('omits limit when not specified (server default: 100)', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -274,6 +284,7 @@ void main() {
 
     group('RSC6b4 - unit parameter', () {
       for (final unit in StatsUnit.values) {
+        // UTS: rest/unit/RSC6b4/unit-param-values-0
         test('sends unit=${unit.name}', () async {
           mockHttp = MockHttpClient(
             onRequest: (req) {
@@ -294,6 +305,7 @@ void main() {
         });
       }
 
+      // UTS: rest/unit/RSC6b4/unit-defaults-to-minute-1
       test('omits unit when not specified (server default: minute)', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -316,6 +328,7 @@ void main() {
     });
 
     group('RSC6b - all parameters combined', () {
+      // UTS: rest/unit/RSC6b/all-params-combined-0
       test('sends all parameters together', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -356,6 +369,7 @@ void main() {
     });
 
     group('RSC6a - no parameters sends clean request', () {
+      // UTS: rest/unit/RSC6a/no-params-clean-request-2
       test('sends GET /stats with no query parameters', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -380,6 +394,7 @@ void main() {
     });
 
     group('RSC6a - pagination with Link headers', () {
+      // UTS: rest/unit/RSC6a/pagination-link-headers-3
       test('supports pagination navigation via next()', () async {
         var requestCount = 0;
 
@@ -428,6 +443,7 @@ void main() {
     });
 
     group('RSC6a - empty results', () {
+      // UTS: rest/unit/RSC6a/empty-results-handled-4
       test('handles empty result set correctly', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -450,6 +466,7 @@ void main() {
     });
 
     group('RSC6a - error handling', () {
+      // UTS: rest/unit/RSC6a/error-propagated-5
       test('propagates errors from stats endpoint', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {

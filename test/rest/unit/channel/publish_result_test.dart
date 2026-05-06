@@ -10,6 +10,7 @@ import '../../../helpers/mock_http_client.dart';
 /// Spec: uts/test/rest/unit/channel/publish_result.md
 void main() {
   group('RSL1n - publish() returns PublishResult with serials', () {
+    // UTS: rest/unit/RSL1n/publish-result-single-message-0
     test('single message returns single serial', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -35,6 +36,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSL1n/publish-result-batch-serials-1
     test('batch publish returns serials matching each message', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -66,6 +68,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSL1n/publish-result-null-serial-2
     test('null serial preserved for conflated message', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {

@@ -12,6 +12,7 @@ import '../../../helpers/mock_http_client.dart';
 /// Spec: uts/test/rest/unit/channel/annotations.md
 void main() {
   group('RSL10 - channel.annotations returns RestAnnotations', () {
+    // UTS: rest/unit/RSL10/annotations-attribute-type-0
     test('exposes annotations attribute', () {
       final client = Rest.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
@@ -24,6 +25,7 @@ void main() {
 
   group('RSAN1c6, RSAN1c1, RSAN1c2 - publish sends POST with ANNOTATION_CREATE',
       () {
+    // UTS: rest/unit/RSAN1c6/publish-post-annotation-create-0
     test('sends POST to correct endpoint with correct body', () async {
       final channelName = 'test-RSAN1-publish';
       final mockHttp = MockHttpClient(
@@ -67,6 +69,7 @@ void main() {
   });
 
   group('RSAN1a3 - publish validates type is required', () {
+    // UTS: rest/unit/RSAN1a3/publish-type-required-0
     test('throws error code 40003 when type is missing', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -97,6 +100,7 @@ void main() {
   });
 
   group('RSAN1c3 - annotation data encoded per RSL4', () {
+    // UTS: rest/unit/RSAN1c3/annotation-data-encoded-0
     test('JSON data encoded as string with encoding field', () async {
       final channelName = 'test-RSAN1c3';
       final mockHttp = MockHttpClient(
@@ -140,6 +144,7 @@ void main() {
   });
 
   group('RSAN1c4 - idempotent ID generated when enabled', () {
+    // UTS: rest/unit/RSAN1c4/idempotent-id-generated-0
     test('auto-generates ID with format base64:0', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -175,6 +180,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSAN1c4/idempotent-id-not-generated-1
     test('does not generate ID when disabled', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -206,6 +212,7 @@ void main() {
   });
 
   group('RSAN2a - delete sends POST with ANNOTATION_DELETE', () {
+    // UTS: rest/unit/RSAN1c6/publish-post-annotation-create-0.1
     test('sends POST with action 1 to correct endpoint', () async {
       final channelName = 'test-RSAN2-delete';
       final mockHttp = MockHttpClient(
@@ -247,6 +254,7 @@ void main() {
   });
 
   group('RSAN3b - get sends GET to correct endpoint', () {
+    // UTS: rest/unit/RSAN1c6/publish-post-annotation-create-0.2
     test('sends GET to annotations endpoint', () async {
       final channelName = 'test-RSAN3-get';
       final mockHttp = MockHttpClient(
@@ -286,6 +294,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSAN1c6/publish-post-annotation-create-0.3
     test('passes params as querystring', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -312,6 +321,7 @@ void main() {
   });
 
   group('RSAN3c - get returns PaginatedResult of Annotations', () {
+    // UTS: rest/unit/RSL10/annotations-attribute-type-0.1
     test('parses response with all annotation fields', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {

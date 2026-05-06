@@ -43,6 +43,7 @@ void main() {
     });
 
     group('RTS1 - Channels collection accessible via RealtimeClient', () {
+      // UTS: realtime/unit/RTS1/channels-collection-accessible-0
       test('channels attribute exists and is RealtimeChannels', () {
         expect(client.channels, isNotNull);
         expect(client.channels, isA<RealtimeChannels>());
@@ -50,11 +51,13 @@ void main() {
     });
 
     group('RTS2 - Check if channel exists', () {
+      // UTS: realtime/unit/RTS2/channel-exists-check-0.1
       test('exists() returns false for non-existent channel', () {
         final channelName = testChannelName('RTS2');
         expect(client.channels.exists(channelName), isFalse);
       });
 
+      // UTS: realtime/unit/RTS2/channel-exists-check-0.2
       test('exists() returns true after channel is created', () {
         final channelName = testChannelName('RTS2');
 
@@ -68,6 +71,7 @@ void main() {
         expect(client.channels.exists(channelName), isTrue);
       });
 
+      // UTS: realtime/unit/RTS2/channel-exists-check-0
       test('exists() returns false for other channels', () {
         final channelNameA = testChannelName('RTS2-a');
         final channelNameB = testChannelName('RTS2-b');
@@ -80,6 +84,7 @@ void main() {
     });
 
     group('RTS2 - Iterate through existing channels', () {
+      // UTS: realtime/unit/RTS2/iterate-channels-1
       test('names returns all channel names', () {
         final channelNameA = testChannelName('RTS2-a');
         final channelNameB = testChannelName('RTS2-b');
@@ -97,12 +102,14 @@ void main() {
         expect(names.length, equals(3));
       });
 
+      // UTS: realtime/unit/RTS2/iterate-channels-1.1
       test('names is empty when no channels exist', () {
         expect(client.channels.names, isEmpty);
       });
     });
 
     group('RTS3a - Get creates new channel if none exists', () {
+      // UTS: realtime/unit/RTS3a/get-after-release-new-3
       test('get() creates new channel', () {
         final channelName = testChannelName('RTS3a');
         final channel = client.channels.get(channelName);
@@ -112,6 +119,7 @@ void main() {
         expect(client.channels.exists(channelName), isTrue);
       });
 
+      // UTS: realtime/unit/RTS3a/get-creates-new-channel-0
       test('get() returns existing channel', () {
         final channelName = testChannelName('RTS3a');
         final channel1 = client.channels.get(channelName);
@@ -124,6 +132,7 @@ void main() {
     });
 
     group('RTS3a - Operator subscript creates or returns channel', () {
+      // UTS: realtime/unit/RTS3a/subscript-operator-channel-2
       test('operator[] creates new channel', () {
         final channelName = testChannelName('RTS3a');
         final channel = client.channels[channelName];
@@ -133,6 +142,7 @@ void main() {
         expect(client.channels.exists(channelName), isTrue);
       });
 
+      // UTS: realtime/unit/RTS3a/get-returns-existing-channel-1
       test('operator[] returns same instance as get()', () {
         final channelName = testChannelName('RTS3a');
         final channel1 = client.channels[channelName];
@@ -145,6 +155,7 @@ void main() {
     });
 
     group('RTS4a - Release detaches and removes channel', () {
+      // UTS: realtime/unit/RTS4a/release-removes-channel-0
       test('release() removes channel from collection', () async {
         final channelName = testChannelName('RTS4a');
         client.channels.get(channelName);
@@ -155,6 +166,7 @@ void main() {
         expect(client.channels.exists(channelName), isFalse);
       });
 
+      // UTS: realtime/unit/RTS4a/release-nonexistent-noop-1
       test('release() on non-existent channel is no-op', () async {
         final channelName = testChannelName('RTS4a-nonexistent');
         // Should complete without throwing
@@ -163,6 +175,7 @@ void main() {
         expect(client.channels.exists(channelName), isFalse);
       });
 
+      // UTS: realtime/unit/RTS4a/release-detaches-attached-2
       test('release() calls detach on attached channel', () async {
         final channelName = testChannelName('RTS4a');
         final channel = client.channels.get(channelName);
@@ -177,6 +190,7 @@ void main() {
         expect(client.channels.exists(channelName), isFalse);
       });
 
+      // UTS: realtime/unit/RTS4a/release-removes-channel-0.1
       test('get() after release() creates new channel instance', () async {
         final channelName = testChannelName('RTS4a');
         final channel1 = client.channels.get(channelName);
@@ -193,6 +207,7 @@ void main() {
     });
 
     group('Edge cases', () {
+      // UTS: realtime/unit/RTS1/channels-collection-accessible-0.1
       test('multiple channels are independent', () {
         final channelNameA = testChannelName('edge-a');
         final channelNameB = testChannelName('edge-b');
@@ -205,6 +220,7 @@ void main() {
         expect(channelB.name, equals(channelNameB));
       });
 
+      // UTS: realtime/unit/RTS1/channels-collection-accessible-0.2
       test('channel names are case-sensitive', () {
         final lowerName = testChannelName('case');
         final upperName = lowerName.toUpperCase();
@@ -218,6 +234,7 @@ void main() {
         expect(client.channels.names.length, equals(2));
       });
 
+      // UTS: realtime/unit/RTS1/channels-collection-accessible-0.3
       test('channel names can contain special characters', () {
         final channelName = '${testChannelName('special')}:with/chars.here';
         final channel = client.channels.get(channelName);

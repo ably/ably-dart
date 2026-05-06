@@ -10,6 +10,7 @@ import '../../../helpers/test_channel_name.dart';
 void main() {
   group('Auth Callback', () {
     group('RSA8d - authCallback invocation', () {
+      // UTS: rest/unit/RSA8d/callback-receives-token-params-3
       test('invokes callback with TokenParams and returns token', () async {
         final callbackInvocations = <TokenParams>[];
         final capturedRequests = <CapturedRequest>[];
@@ -66,6 +67,7 @@ void main() {
     });
 
     group('RSA8d - authCallback returns different token types', () {
+      // UTS: rest/unit/RSA8d/callback-invoked-for-auth-0
       test('accepts TokenDetails return type', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSA8d-details');
@@ -105,6 +107,7 @@ void main() {
         );
       });
 
+      // UTS: rest/unit/RSA8d/callback-returns-jwt-1
       test('accepts String (token) return type', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSA8d-string');
@@ -141,6 +144,7 @@ void main() {
         );
       });
 
+      // UTS: rest/unit/RSA8d/callback-returns-token-request-2
       test('accepts TokenRequest return type', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSA8d-request');
@@ -201,6 +205,7 @@ void main() {
     });
 
     group('RSA8c - authUrl queries URL for token', () {
+      // UTS: rest/unit/RSA8c/authurl-invoked-for-auth-0
       test('queries authUrl to obtain a token', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSA8c');
@@ -255,6 +260,7 @@ void main() {
     });
 
     group('RSA8c1a - authUrl with GET method', () {
+      // UTS: rest/unit/RSA8c/authurl-returns-jwt-4
       test('sends TokenParams and authParams as query string', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSA8c1a');
@@ -305,6 +311,7 @@ void main() {
     });
 
     group('RSA8c1b - authUrl with POST method', () {
+      // UTS: rest/unit/RSA8c/authurl-post-method-1
       test('sends TokenParams and authParams as form-encoded body', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSA8c1b');
@@ -360,6 +367,7 @@ void main() {
     });
 
     group('RSA8c1c - authUrl preserves existing query params', () {
+      // UTS: rest/unit/RSA8c/authurl-query-params-3
       test('merges existing and new query params', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSA8c1c');
@@ -410,6 +418,7 @@ void main() {
     });
 
     group('RSA8c2 - TokenParams take precedence over authParams', () {
+      // UTS: rest/unit/RSA8d/callback-error-propagated-4
       test('uses TokenParams values when names conflict', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSA8c2');

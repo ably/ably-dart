@@ -25,6 +25,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('TM2a - Message id populated from ProtocolMessage id and index', () {
+    // UTS: realtime/unit/TM2a/id-from-protocol-message-0
     test('computes id as protocolMessageId:index for each message', () async {
       final channelName = testChannelName('TM2a-id');
 
@@ -96,6 +97,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('TM2a - Message with existing id is not overwritten', () {
+    // UTS: realtime/unit/TM2a/existing-id-not-overwritten-1
     test('retains original id when message already has one', () async {
       final channelName = testChannelName('TM2a-existing');
 
@@ -158,6 +160,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('TM2a - No id when ProtocolMessage has no id', () {
+    // UTS: realtime/unit/TM2a/no-id-without-protocol-id-2
     test('message id remains null when ProtocolMessage has no id', () async {
       final channelName = testChannelName('TM2a-no-proto-id');
 
@@ -220,6 +223,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('TM2c - Message connectionId populated from ProtocolMessage', () {
+    // UTS: realtime/unit/TM2c/connectionid-from-protocol-0
     test('inherits connectionId from ProtocolMessage when absent', () async {
       final channelName = testChannelName('TM2c-connId');
 
@@ -283,6 +287,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('TM2c - Message with existing connectionId is not overwritten', () {
+    // UTS: realtime/unit/TM2c/existing-connectionid-kept-1
     test('retains original connectionId when message already has one',
         () async {
       final channelName = testChannelName('TM2c-existing');
@@ -351,6 +356,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('TM2f - Message timestamp populated from ProtocolMessage', () {
+    // UTS: realtime/unit/TM2f/timestamp-from-protocol-0
     test('inherits timestamp from ProtocolMessage when absent', () async {
       final channelName = testChannelName('TM2f-timestamp');
 
@@ -414,6 +420,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('TM2f - Message with existing timestamp is not overwritten', () {
+    // UTS: realtime/unit/TM2f/existing-timestamp-kept-1
     test('retains original timestamp when message already has one', () async {
       final channelName = testChannelName('TM2f-existing');
 

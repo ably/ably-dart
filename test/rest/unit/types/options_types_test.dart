@@ -7,6 +7,7 @@ import 'package:test/test.dart';
 void main() {
   group('ClientOptions', () {
     group('TO3 - ClientOptions attributes with defaults', () {
+      // UTS: rest/unit/TO3/client-options-attributes-0
       test('has correct default values', () {
         final options = ClientOptions.fromKey('appId.keyId:keySecret');
 
@@ -21,6 +22,7 @@ void main() {
         expect(options.maxMessageSize, equals(65536));
       });
 
+      // UTS: rest/unit/TO3/client-options-attributes-0.1
       test('accepts custom values', () {
         final options = ClientOptions(
           key: 'appId.keyId:keySecret',
@@ -45,6 +47,7 @@ void main() {
     });
 
     group('TO3 - ClientOptions with custom hosts', () {
+      // UTS: rest/unit/TO3/client-options-custom-hosts-1
       test('accepts custom host configuration', () {
         final options = ClientOptions(
           key: 'appId.keyId:keySecret',
@@ -61,6 +64,7 @@ void main() {
     });
 
     group('TO3 - ClientOptions with auth URL', () {
+      // UTS: rest/unit/TO3/client-options-auth-url-2
       test('accepts auth URL configuration', () {
         final options = ClientOptions(
           authUrl: 'https://auth.example.com/token',
@@ -77,6 +81,7 @@ void main() {
     });
 
     group('TO3 - ClientOptions with defaultTokenParams', () {
+      // UTS: rest/unit/TO3/client-options-default-token-params-3
       test('accepts default token parameters', () {
         final options = ClientOptions(
           key: 'appId.keyId:keySecret',
@@ -97,6 +102,7 @@ void main() {
     });
 
     group('TO - Conflicting options validation', () {
+      // UTS: rest/unit/TO/conflicting-options-validation-1
       test('throws when no auth options provided', () {
         expect(
           () => Rest(options: ClientOptions()),
@@ -108,6 +114,7 @@ void main() {
 
   group('AuthOptions', () {
     group('AO2 - AuthOptions attributes', () {
+      // UTS: rest/unit/AO2/auth-options-attributes-0
       test('has all required attributes', () {
         final authOptions = AuthOptions(
           authUrl: 'https://auth.example.com/token',
@@ -129,6 +136,7 @@ void main() {
     });
 
     group('AO - AuthOptions with authCallback', () {
+      // UTS: rest/unit/AO/auth-options-with-callback-0
       test('can hold and invoke authCallback function', () async {
         var callbackCalled = false;
 

@@ -7,6 +7,7 @@ import '../../../helpers/mock_http_client.dart';
 /// Spec: uts/test/rest/unit/push/push_admin_publish.md
 void main() {
   group('RSH1 - client.push.admin exposes PushAdmin object', () {
+    // UTS: rest/unit/RSH1/push-admin-accessible-0
     test('push.admin provides correct type hierarchy', () {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -35,6 +36,7 @@ void main() {
   });
 
   group('RSH1a - publish sends POST to /push/publish', () {
+    // UTS: rest/unit/RSH1a/publish-post-push-publish-0
     test('sends POST with APNS recipient and notification data', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -68,6 +70,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1a/publish-clientid-recipient-1
     test('sends POST with clientId recipient', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -95,6 +98,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1a/publish-deviceid-recipient-2
     test('sends POST with deviceId recipient', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -122,6 +126,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1a/rejects-empty-recipient-3
     test('rejects empty recipient', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -151,6 +156,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1a/rejects-empty-data-4
     test('rejects empty data', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -178,6 +184,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1a/server-error-propagated-6
     test('propagates server error', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {

@@ -16,6 +16,7 @@ import '../../../helpers/protocol_message_helpers.dart';
 /// Spec: specification/uts/realtime/unit/connection/backoff_jitter_test.md
 void main() {
   group('RTB1a - Backoff coefficient follows min((n+2)/3, 2)', () {
+    // UTS: realtime/unit/RTB1a/backoff-coefficient-sequence-0
     test('produces correct coefficient sequence for successive retries', () {
       // RTB1a: The backoff coefficient for the nth retry (1-indexed) is
       // min((n+2)/3, 2), producing the sequence [1, 4/3, 5/3, 2, 2, ...]
@@ -44,6 +45,7 @@ void main() {
   });
 
   group('RTB1b - Jitter coefficient is between 0.8 and 1.0', () {
+    // UTS: realtime/unit/RTB1b/jitter-coefficient-range-0
     test('all values are within [0.8, 1.0] with approximate uniformity', () {
       // RTB1b: The jitter coefficient is a random number between 0.8 and 1.0,
       // approximately uniformly distributed.
@@ -212,6 +214,7 @@ void main() {
       });
     });
 
+    // UTS: realtime/unit/RTB1/disconnected-retry-delay-0
     test('retry delays increase monotonically up to the cap', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);

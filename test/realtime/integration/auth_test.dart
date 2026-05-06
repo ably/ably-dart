@@ -22,6 +22,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTC8a - In-band reauthorization on CONNECTED client
     // -------------------------------------------------------------------------
+    // UTS: realtime/integration/RTC8a/in-band-reauth-connected-0
     test('RTC8a - In-band reauthorization on CONNECTED client', () async {
       final apiKey = testApp.keys[0].keyStr;
 
@@ -83,6 +84,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTC8c - authorize() from INITIALIZED initiates connection
     // -------------------------------------------------------------------------
+    // UTS: realtime/integration/RTC8c/authorize-initiates-connection-0
     test('RTC8c - authorize() from INITIALIZED initiates connection', () async {
       final apiKey = testApp.keys[0].keyStr;
 
@@ -125,6 +127,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RSA8 - Token auth via authCallback on realtime
     // -------------------------------------------------------------------------
+    // UTS: realtime/integration/RSA8/token-auth-connect-0
     test('RSA8 - Token auth via authCallback on realtime', () async {
       final apiKey = testApp.keys[0].keyStr;
 
@@ -160,6 +163,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RSA7 - matching clientId succeeds
     // -------------------------------------------------------------------------
+    // UTS: realtime/integration/RSA7/matching-clientid-succeeds-0
     test('RSA7 - matching clientId succeeds', () async {
       final apiKey = testApp.keys[0].keyStr;
       final testClientId = 'test-client-${DateTime.now().millisecondsSinceEpoch}';

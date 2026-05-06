@@ -74,6 +74,7 @@ void main() {
       await client.close();
     });
 
+    // UTS: rest/integration/RSL1n/publish-result-serials-0
     test('RSL1n - single message publish returns non-empty serials list',
         () async {
       final channelName = testChannelName('rsl1n-single');
@@ -89,6 +90,7 @@ void main() {
       );
     });
 
+    // UTS: rest/integration/RSL1d/publish-failure-error-0
     test('RSL1n - batch publish returns serials for each message', () async {
       final channelName = testChannelName('rsl1n-batch');
       final messages = [

@@ -48,6 +48,7 @@ void main() {
         final inputPreview = testCase.input.length > 20
             ? '${testCase.input.substring(0, 20)}...'
             : testCase.input;
+        // UTS: rest/unit/RSC17/client-id-from-options-0.1
         test('$inputPreview is detected as ${testCase.expected}', () {
           if (testCase.expected == 'API key') {
             final options = ClientOptions.fromKey(testCase.input);
@@ -59,6 +60,7 @@ void main() {
         });
       }
 
+      // UTS: rest/unit/TI/error-string-representation-4.1
       test('empty string throws error', () {
         expect(
           () => ClientOptions.fromKey(''),
@@ -68,6 +70,7 @@ void main() {
     });
 
     group('RSC1b - Invalid Arguments Error', () {
+      // UTS: rest/unit/RSC1b/no-auth-method-error-0.1
       test('throws error 40106 when no auth configured', () {
         expect(
           () => Rest.forTesting(
@@ -84,6 +87,7 @@ void main() {
         );
       });
 
+      // UTS: rest/unit/RSC1b/no-auth-method-error-0.2
       test('throws error when useTokenAuth: true but no token means', () {
         expect(
           () => Rest.forTesting(
@@ -100,6 +104,7 @@ void main() {
         );
       });
 
+      // UTS: rest/unit/RSC1b/no-auth-method-error-0.3
       test('throws error when only clientId provided', () {
         expect(
           () => Rest.forTesting(
@@ -118,6 +123,7 @@ void main() {
     });
 
     group('RSC1 - ClientOptions Constructor', () {
+      // UTS: rest/unit/RSC17/client-id-from-options-0.2
       test('accepts full ClientOptions and preserves values', () {
         final options = ClientOptions(
           key: 'appId.keyId:keySecret',
@@ -143,6 +149,7 @@ void main() {
         expect(client.options.logLevel, equals(LogLevel.verbose));
       });
 
+      // UTS: rest/unit/TO3/client-options-default-token-params-3.1
       test('applies default values for unspecified options', () {
         final options = ClientOptions.fromKey('appId.keyId:keySecret');
 
@@ -155,12 +162,14 @@ void main() {
     });
 
     group('ClientOptions.fromKey convenience constructor', () {
+      // UTS: rest/integration/RSA4/basic-auth-key-0.1
       test('creates options from API key string', () {
         final options = ClientOptions.fromKey('appId.keyId:keySecret');
 
         expect(options.key, equals('appId.keyId:keySecret'));
       });
 
+      // UTS: rest/unit/TO3/client-options-default-token-params-3.2
       test('validates key format', () {
         expect(
           () => ClientOptions.fromKey('invalid'),
@@ -175,6 +184,7 @@ void main() {
     });
 
     group('Rest.fromKey convenience constructor', () {
+      // UTS: rest/integration/RSA4/basic-auth-key-0.2
       test('creates Rest client from API key string', () {
         mockHttp = MockHttpClient(
           onRequest: (req) {

@@ -52,6 +52,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH7a1/subscribe-device-no-token-fails-0
     test('RSH7a1 - fails if no deviceIdentityToken', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -81,6 +82,7 @@ void main() {
   });
 
   group('RSH7b - subscribeClient', () {
+    // UTS: rest/unit/RSH7b2/subscribe-client-post-0
     test('RSH7b2 - sends POST with clientId and channel name', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -114,6 +116,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH7b1/subscribe-client-no-clientid-fails-0
     test('RSH7b1 - fails if no clientId', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -189,6 +192,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH7c1/unsubscribe-device-no-token-fails-0
     test('RSH7c1 - fails if no deviceIdentityToken', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -218,6 +222,7 @@ void main() {
   });
 
   group('RSH7d - unsubscribeClient', () {
+    // UTS: rest/unit/RSH7d2/unsubscribe-client-delete-0
     test('RSH7d2 - sends DELETE with clientId and channel name', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -256,6 +261,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH7d1/unsubscribe-client-no-clientid-fails-0
     test('RSH7d1 - fails if no clientId', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -285,6 +291,7 @@ void main() {
   });
 
   group('RSH7e - listSubscriptions', () {
+    // UTS: rest/unit/RSH7e/list-subscriptions-with-filters-0
     test('sends GET with channel, deviceId, clientId, and concatFilters',
         () async {
       final mockHttp = MockHttpClient(
@@ -352,6 +359,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH7e/list-subscriptions-omits-clientid-1
     test('omits clientId when LocalDevice has no clientId', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {

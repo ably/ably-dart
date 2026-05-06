@@ -278,6 +278,7 @@ void main() {
     // -------------------------------------------------------------------------
     // Test 1: PC3 - Delta plugin decodes messages end-to-end
     // -------------------------------------------------------------------------
+    // UTS: realtime/integration/PC3/delta-decode-end-to-end-0
     test('PC3 - Delta plugin decodes messages end-to-end', () async {
       final decoder = CountingVCDiffDecoder(SimpleVCDiffDecoder());
       final channelName =
@@ -362,6 +363,7 @@ void main() {
     // -------------------------------------------------------------------------
     // Test 2: RTL19b - Dissimilar payloads without delta
     // -------------------------------------------------------------------------
+    // UTS: realtime/integration/RTL19b/dissimilar-payloads-no-delta-0
     test('RTL19b - Dissimilar payloads without delta', () async {
       final decoder = CountingVCDiffDecoder(SimpleVCDiffDecoder());
       final channelName =
@@ -438,6 +440,7 @@ void main() {
     // -------------------------------------------------------------------------
     // Test 3: PC3 - No deltas without delta channel param
     // -------------------------------------------------------------------------
+    // UTS: realtime/integration/PC3/no-deltas-without-param-1
     test('PC3 - No deltas without delta channel param', () async {
       final decoder = CountingVCDiffDecoder(SimpleVCDiffDecoder());
       final channelName =
@@ -612,6 +615,7 @@ void main() {
     // -------------------------------------------------------------------------
     // Test 5: RTL18, RTL18c - Recovery after decode failure
     // -------------------------------------------------------------------------
+    // UTS: realtime/integration/RTL18/recovery-decode-failure-1
     test('RTL18, RTL18c - Recovery after decode failure', () async {
       final failingDecoder = FailingVCDiffDecoder();
       final channelName =
@@ -697,6 +701,7 @@ void main() {
     // -------------------------------------------------------------------------
     // Test 6: PC3 - No plugin causes FAILED state
     // -------------------------------------------------------------------------
+    // UTS: realtime/integration/PC3/no-plugin-causes-failed-2
     test('PC3 - No plugin causes FAILED state', () async {
       final channelName =
           'delta-noplugin-${DateTime.now().millisecondsSinceEpoch}';

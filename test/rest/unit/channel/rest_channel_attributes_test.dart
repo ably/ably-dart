@@ -10,6 +10,7 @@ import '../../../helpers/mock_http_client.dart';
 /// Spec: uts/test/rest/unit/channel/rest_channel_attributes.md
 void main() {
   group('RSL9 - RestChannel name attribute', () {
+    // UTS: rest/unit/RSL9/channel-name-attribute-0
     test('returns the name used when getting the channel', () {
       final client = Rest.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
@@ -25,6 +26,7 @@ void main() {
   });
 
   group('RSL7 - RestChannel setOptions', () {
+    // UTS: rest/unit/RSL7/setoptions-updates-options-0
     test('setOptions completes without error', () async {
       final client = Rest.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
@@ -37,6 +39,7 @@ void main() {
   });
 
   group('RSL8 - RestChannel status', () {
+    // UTS: rest/unit/RSL8/status-get-correct-endpoint-0
     test('sends GET request to /channels/<channelId>', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -77,6 +80,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSL8/status-special-chars-encoded-1
     test('URL-encodes special characters in channel name', () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
@@ -121,6 +125,7 @@ void main() {
   });
 
   group('RSL8a - status returns ChannelDetails', () {
+    // UTS: rest/unit/RSL8a/status-returns-channel-details-0
     test('parses response into ChannelDetails with correct attributes',
         () async {
       final mockHttp = MockHttpClient(
@@ -172,6 +177,7 @@ void main() {
 
   group('CHD2, CHS2, CHO2, CHM2 - status() parses all ChannelMetrics fields',
       () {
+    // UTS: rest/unit/CHM2/parses-all-metrics-fields-0
     test('parses all metric fields including objectPublishers/objectSubscribers',
         () async {
       final mockHttp = MockHttpClient(
@@ -238,6 +244,7 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/CHM2/zero-and-missing-metrics-1
     test('missing objectPublishers/objectSubscribers default to null',
         () async {
       final mockHttp = MockHttpClient(

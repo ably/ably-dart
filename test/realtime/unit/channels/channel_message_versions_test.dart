@@ -19,6 +19,7 @@ void main() {
   group(
       'RTL31 - RealtimeChannel#getMessageVersions sends GET to correct endpoint',
       () {
+    // UTS: rest/unit/RSL14b/get-correct-endpoint-0.1
     test('sends GET to /channels/{channelName}/messages/{serial}/versions',
         () async {
       final channelName = testChannelName('RTL31');
@@ -95,6 +96,7 @@ void main() {
 
   group('RTL31 - RealtimeChannel#getMessageVersions returns PaginatedResult',
       () {
+    // UTS: realtime/unit/RTL31/identical-to-rest-0
     test('parses response into paginated result with decoded messages',
         () async {
       final channelName = testChannelName('RTL31-decode');
@@ -179,6 +181,7 @@ void main() {
   });
 
   group('RTL31 - RealtimeChannel#getMessageVersions passes params', () {
+    // UTS: rest/unit/RSL14a/params-as-querystring-0.1
     test('optional params sent as query parameters', () async {
       final channelName = testChannelName('RTL31-params');
 
@@ -235,6 +238,7 @@ void main() {
   });
 
   group('RTL31 - getMessageVersions serial validation', () {
+    // UTS: realtime/unit/RTL31/identical-to-rest-0.1
     test('empty serial throws AblyException with code 40003', () async {
       final channelName = testChannelName('RTL31-validate');
 

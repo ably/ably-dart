@@ -20,6 +20,7 @@ void main() {
 
     group('RSL4 - Encoding messages for transmission', () {
       group('RSL4a - String data', () {
+        // UTS: rest/unit/RSL4a/string-data-no-encoding-0
         test('transmits string data without encoding', () async {
           final capturedRequests = <CapturedRequest>[];
           final channelName = testChannelName('RSL4a');
@@ -58,6 +59,7 @@ void main() {
       });
 
       group('RSL4c - JSON-encodable objects', () {
+        // UTS: rest/unit/RSL4c/binary-base64-json-protocol-0
         test('encodes map data as JSON with encoding field', () async {
           final capturedRequests = <CapturedRequest>[];
           final channelName = testChannelName('RSL4c-map');
@@ -100,6 +102,7 @@ void main() {
           expect(dataJson['number'], equals(42));
         });
 
+        // UTS: rest/unit/RSL4c/binary-direct-msgpack-protocol-1
         test('encodes list data as JSON', () async {
           final capturedRequests = <CapturedRequest>[];
           final channelName = testChannelName('RSL4c-list');
@@ -137,6 +140,7 @@ void main() {
       });
 
       group('RSL4d - Binary data', () {
+        // UTS: rest/unit/RSL4d/array-json-encoding-0
         test('encodes binary data as base64 for JSON protocol', () async {
           final capturedRequests = <CapturedRequest>[];
           final channelName = testChannelName('RSL4d');
@@ -180,6 +184,7 @@ void main() {
 
     group('RSL6 - Decoding messages from server', () {
       group('RSL6a - Plain data (no encoding)', () {
+        // UTS: rest/unit/RSL6a/decode-chained-encodings-2
         test('returns data unchanged when no encoding', () async {
           final channelName = testChannelName('RSL6a');
           mockHttp = MockHttpClient(
@@ -204,6 +209,7 @@ void main() {
       });
 
       group('RSL6b - JSON encoding', () {
+        // UTS: rest/unit/RSL6b/unrecognized-encoding-preserved-0
         test('decodes JSON-encoded data to objects', () async {
           final channelName = testChannelName('RSL6b');
           mockHttp = MockHttpClient(
@@ -236,6 +242,7 @@ void main() {
       });
 
       group('RSL6c - Base64 encoding', () {
+        // UTS: rest/unit/RSL6a/decode-base64-to-binary-0
         test('decodes base64-encoded data to binary', () async {
           final channelName = testChannelName('RSL6c');
           final originalBytes = [0x00, 0x01, 0xFF, 0xFE];
@@ -271,6 +278,7 @@ void main() {
       });
 
       group('RSL6 - Compound encoding', () {
+        // UTS: rest/unit/RSL6/decode-utf8-base64-data-2
         test('decodes json/base64 encoded data', () async {
           final channelName = testChannelName('RSL6-compound');
           final jsonData = '{"nested":"object"}';
@@ -305,6 +313,7 @@ void main() {
     });
 
     group('Encoding edge cases', () {
+      // UTS: rest/unit/RSL4/empty-string-no-encoding-4
       test('handles empty string data', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSL-empty-str');
@@ -341,6 +350,7 @@ void main() {
         expect(body[0].containsKey('encoding'), isFalse);
       });
 
+      // UTS: rest/unit/RSL4/empty-array-json-encoding-5
       test('handles empty binary data', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSL-empty-bin');
@@ -377,6 +387,7 @@ void main() {
         expect(body[0]['data'], equals('')); // Empty base64
       });
 
+      // UTS: rest/unit/RSL4b/json-object-encoding-0
       test('handles deeply nested JSON objects', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSL-nested');

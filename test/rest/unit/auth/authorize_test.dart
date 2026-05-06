@@ -20,6 +20,7 @@ void main() {
 
     group('RSA10a - authorize() with default tokenParams', () {
       /// Tests that authorize() obtains a token using configured defaults.
+      // UTS: rest/unit/RSA10a/authorize-default-params-0
       test('obtains token using configured defaults', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSA10a');
@@ -71,6 +72,7 @@ void main() {
 
     group('RSA10b - authorize() with explicit tokenParams', () {
       /// Tests that provided tokenParams override defaults.
+      // UTS: rest/unit/RSA10b/authorize-explicit-params-0
       test('provided tokenParams override defaults', () async {
         final callbackParams = <TokenParams>[];
         final channelName = testChannelName('RSA10b');
@@ -110,6 +112,7 @@ void main() {
 
     group('RSA10e - authorize() saves tokenParams for reuse', () {
       /// Tests that tokenParams provided to authorize() are saved and reused.
+      // UTS: rest/unit/RSA10e/authorize-saves-params-0
       test('saves and reuses tokenParams on subsequent requests', () async {
         final testClock = TestClock();
         final channelName = testChannelName('RSA10e');
@@ -164,6 +167,7 @@ void main() {
 
     group('RSA10g - authorize() updates Auth.tokenDetails', () {
       /// Tests that after authorize(), auth.tokenDetails reflects the new token.
+      // UTS: rest/unit/RSA10g/authorize-updates-token-details-0
       test('updates auth.tokenDetails after authorize', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -198,6 +202,7 @@ void main() {
 
     group('RSA10h - authorize() with authOptions replaces defaults', () {
       /// Tests that authOptions in authorize() replaces stored auth options.
+      // UTS: rest/unit/RSA10h/authorize-replaces-auth-options-0
       test('authOptions replaces stored auth options', () async {
         var originalCallbackCalled = false;
         var newCallbackCalled = false;
@@ -242,6 +247,7 @@ void main() {
     group('RSA10i - authorize() preserves key from constructor', () {
       /// Tests that the API key from ClientOptions is preserved even when
       /// authOptions are provided.
+      // UTS: rest/unit/RSA10i/authorize-preserves-key-0
       test('preserves key from constructor', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSA10i');
@@ -289,6 +295,7 @@ void main() {
     group('RSA10j - authorize() when already authorized', () {
       /// Tests that calling authorize() when a valid token exists obtains
       /// a new token.
+      // UTS: rest/unit/RSA10j/authorize-replaces-existing-token-0
       test('obtains new token when already authorized', () async {
         var tokenCount = 0;
         final channelName = testChannelName('RSA10j');
@@ -323,6 +330,7 @@ void main() {
     group('RSA10k - authorize() with queryTime option', () {
       /// Tests that queryTime: true causes time to be queried from server
       /// before requesting token.
+      // UTS: rest/unit/RSA10k/authorize-query-time-0
       test('queries time from server when queryTime is true', () async {
         final capturedRequests = <CapturedRequest>[];
 
@@ -369,6 +377,7 @@ void main() {
     group('RSA10l - authorize() error handling', () {
       /// Tests that errors during authorization are properly propagated to
       /// the caller.
+      // UTS: rest/unit/RSA10l/authorize-error-propagated-0
       test('propagates errors during authorization', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {

@@ -16,6 +16,7 @@ import '../../../helpers/test_channel_name.dart';
 /// Spec: uts/test/realtime/unit/channels/channel_detach.md
 void main() {
   group('RTL5a - Detach when initialized is no-op', () {
+    // UTS: realtime/unit/RTL5a/detach-initialized-noop-0
     test('returns immediately from initialized state', () async {
       final channelName = testChannelName('RTL5a');
 
@@ -55,6 +56,7 @@ void main() {
   });
 
   group('RTL5a - Detach when already detached is no-op', () {
+    // UTS: realtime/unit/RTL5a/detach-already-detached-noop-1
     test('does not send additional DETACH message', () async {
       final channelName = testChannelName('RTL5a-detached');
       var detachMessageCount = 0;
@@ -110,6 +112,7 @@ void main() {
   });
 
   group('RTL5i - Detach while detaching waits for completion', () {
+    // UTS: realtime/unit/RTL5i/detach-while-detaching-0
     test('only sends one DETACH message', () async {
       final channelName = testChannelName('RTL5i');
       var detachMessageCount = 0;
@@ -174,6 +177,7 @@ void main() {
   });
 
   group('RTL5i - Detach while attaching waits then detaches', () {
+    // UTS: realtime/unit/RTL5i/detach-while-attaching-1
     test('sends DETACH after ATTACH completes', () async {
       final channelName = testChannelName('RTL5i-attaching');
       final messagesFromClient = <ProtocolMessage>[];
@@ -237,6 +241,7 @@ void main() {
   });
 
   group('RTL5b - Detach from failed state results in error', () {
+    // UTS: realtime/unit/RTL5b/detach-failed-errors-0
     test('returns error when channel is in failed state', () async {
       final channelName = testChannelName('RTL5b');
 
@@ -295,6 +300,7 @@ void main() {
   });
 
   group('RTL5j - Detach from suspended transitions to detached', () {
+    // UTS: realtime/unit/RTL5j/detach-suspended-to-detached-0
     test('transitions directly without sending DETACH message', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -365,6 +371,7 @@ void main() {
 
   group('RTL5l - Detach when connection not connected transitions immediately',
       () {
+    // UTS: realtime/unit/RTL5l/detach-not-connected-immediate-0
     test('transitions to detached without sending DETACH', () async {
       final channelName = testChannelName('RTL5l');
       var detachMessageCount = 0;
@@ -411,6 +418,7 @@ void main() {
   });
 
   group('RTL5d - Normal detach flow', () {
+    // UTS: realtime/unit/RTL5d/normal-detach-flow-0
     test('sends DETACH and transitions through detaching to detached',
         () async {
       final channelName = testChannelName('RTL5d');
@@ -473,6 +481,7 @@ void main() {
   });
 
   group('RTL5f - Detach timeout returns to previous state', () {
+    // UTS: realtime/unit/RTL5f/timeout-returns-previous-state-0
     test('returns to attached state on timeout', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -541,6 +550,7 @@ void main() {
   });
 
   group('RTL5k - ATTACHED received while detaching sends new DETACH', () {
+    // UTS: realtime/unit/RTL5k/attached-while-detaching-0
     test('sends another DETACH when ATTACHED received during detach', () async {
       final channelName = testChannelName('RTL5k');
       var detachMessageCount = 0;
@@ -600,6 +610,7 @@ void main() {
   });
 
   group('RTL5k - ATTACHED received while detached sends DETACH', () {
+    // UTS: realtime/unit/RTL5k/attached-while-detached-1
     test('sends DETACH when unexpected ATTACHED received', () async {
       final channelName = testChannelName('RTL5k-detached');
       var detachMessageCount = 0;
@@ -663,6 +674,7 @@ void main() {
   });
 
   group('RTL5 - Detach emits state change events', () {
+    // UTS: realtime/unit/RTL5/detach-state-change-events-0
     test('emits detaching and detached events', () async {
       final channelName = testChannelName('RTL5-events');
 
@@ -724,6 +736,7 @@ void main() {
   });
 
   group('RTL5 - Detach clears errorReason', () {
+    // UTS: realtime/unit/RTL5/detach-state-change-events-0.1
     test('errorReason is cleared after successful detach', () async {
       final channelName = testChannelName('RTL5-error');
       var attachCount = 0;
@@ -797,6 +810,7 @@ void main() {
   });
 
   group('RTL5l - Detach ATTACHED channel when connection disconnected', () {
+    // UTS: realtime/unit/RTL5l/detach-attached-when-disconnected-1
     test('transitions directly to DETACHED without sending DETACH', () async {
       final channelName = testChannelName('RTL5l');
       final messagesSent = <ProtocolMessage>[];

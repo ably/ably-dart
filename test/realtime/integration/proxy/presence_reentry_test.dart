@@ -168,6 +168,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTP17i - Presence re-enter after real disconnect
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RTP17i/reenter-after-disconnect-1
     test('RTP17i - Presence re-enter after real disconnect', () async {
       final apiKey = testApp.keys[0].keyStr;
       const clientId = 'client-a';

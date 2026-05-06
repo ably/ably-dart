@@ -21,6 +21,7 @@ void main() {
       ];
 
       for (final testCase in testCases) {
+        // UTS: rest/unit/RSA1/token-auth-takes-precedence-0
         test('${testCase.input} is ${testCase.expected}', () {
           if (testCase.expected == 'Valid') {
             expect(
@@ -38,6 +39,7 @@ void main() {
     });
 
     group('RSA2, RSA11 - Basic auth when using API key', () {
+      // UTS: rest/unit/RSA2/basic-auth-header-format-0
       test('uses Basic authentication header', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSA2');
@@ -80,6 +82,7 @@ void main() {
     });
 
     group('RSA3 - Token auth when token provided', () {
+      // UTS: rest/unit/RSA3/token-auth-explicit-token-0
       test('uses Bearer token authentication header', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSA3');
@@ -115,6 +118,7 @@ void main() {
         );
       });
 
+      // UTS: rest/unit/RSA3/token-auth-token-details-1
       test('extracts token from TokenDetails', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSA3-details');
@@ -157,6 +161,7 @@ void main() {
     });
 
     group('RSA4 - Auth method selection priority', () {
+      // UTS: rest/unit/RSA4/authurl-triggers-token-3
       test('RSA4a - authCallback takes precedence', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSA4a');
@@ -197,6 +202,7 @@ void main() {
         );
       });
 
+      // UTS: rest/unit/RSA4/auth-callback-triggers-token-2
       test('RSA4b - key + clientId triggers token auth', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSA4b');
@@ -251,6 +257,7 @@ void main() {
         );
       });
 
+      // UTS: rest/unit/RSC18/token-auth-over-non-tls-0
       test('RSA4c - key only uses Basic auth', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSA4c');
@@ -283,6 +290,7 @@ void main() {
         expect(request.headers['Authorization'], startsWith('Basic '));
       });
 
+      // UTS: rest/unit/RSA4/basic-auth-key-only-0
       test('authCallback takes precedence over key', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSA4-callback');
@@ -321,6 +329,7 @@ void main() {
         );
       });
 
+      // UTS: rest/unit/RSA4/use-token-auth-forced-1
       test('explicit token takes precedence over key', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSA4-token');
@@ -361,6 +370,7 @@ void main() {
     });
 
     group('RSA4 - No auth credentials error', () {
+      // UTS: rest/unit/RSC1b/no-auth-method-error-0
       test('throws error when no authentication method is configured', () {
         expect(
           () => Rest(options: ClientOptions()),

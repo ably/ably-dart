@@ -23,6 +23,7 @@ void main() {
   // RSA4 — Basic auth with API key
   // ---------------------------------------------------------------------------
   group('RSA4 - Basic auth', () {
+    // UTS: rest/integration/RSA4/basic-auth-key-0
     test('RSA4 - basic auth with API key succeeds', () async {
       final client = Rest(
         options: ClientOptions(
@@ -43,6 +44,7 @@ void main() {
   // RSA8 — JWT token auth
   // ---------------------------------------------------------------------------
   group('RSA8 - JWT token auth', () {
+    // UTS: rest/integration/RSA8/token-auth-jwt-0
     test('RSA8 JWT - pre-generated JWT succeeds', () async {
       final jwt = JwtHelper.generateToken(
         apiKey: testApp.keys[0].keyStr,
@@ -62,6 +64,7 @@ void main() {
       expect(response.statusCode, inInclusiveRange(200, 299));
     });
 
+    // UTS: rest/integration/RSA8/token-auth-native-1
     test('RSA8 native token - requestToken then use token string', () async {
       // Obtain a native Ably token using a key-authenticated client.
       final keyClient = Rest(
@@ -92,6 +95,7 @@ void main() {
       expect(response.statusCode, inInclusiveRange(200, 299));
     });
 
+    // UTS: rest/integration/RSA8/auth-callback-jwt-3
     test('RSA8 authCallback returning TokenRequest succeeds', () async {
       final keyClient = Rest(
         options: ClientOptions(
@@ -118,6 +122,7 @@ void main() {
       expect(response.statusCode, inInclusiveRange(200, 299));
     });
 
+    // UTS: rest/integration/RSA8/auth-callback-token-request-2
     test('RSA8 authCallback returning JWT string succeeds', () async {
       final apiKey = testApp.keys[0].keyStr;
 
@@ -142,6 +147,7 @@ void main() {
   // RSA4 — Invalid credentials
   // ---------------------------------------------------------------------------
   group('RSA4 - Invalid credentials', () {
+    // UTS: rest/integration/RSA4/invalid-credentials-rejected-1
     test('RSA4 - invalid API key returns 401 / error code 40400', () async {
       final client = Rest(
         options: ClientOptions(

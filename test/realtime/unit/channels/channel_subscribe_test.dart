@@ -21,6 +21,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL7a - Subscribe with no name receives all messages', () {
+    // UTS: realtime/unit/RTL7a/multiple-messages-per-protocol-1
     test('delivers all messages regardless of name', () async {
       final channelName = testChannelName('RTL7a');
 
@@ -89,6 +90,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL7a/subscribe-all-messages-0
     test('receives multiple messages from a single ProtocolMessage', () async {
       final channelName = testChannelName('RTL7a-multi');
 
@@ -153,6 +155,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL7b - Subscribe with name only receives matching messages', () {
+    // UTS: realtime/unit/RTL7b/name-filtered-subscribe-0
     test('filters messages by name', () async {
       final channelName = testChannelName('RTL7b');
 
@@ -216,6 +219,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL7b/multiple-name-subscriptions-1
     test('multiple name-specific subscriptions are independent', () async {
       final channelName = testChannelName('RTL7b-multi');
 
@@ -292,6 +296,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL7g - Subscribe triggers implicit attach', () {
+    // UTS: realtime/unit/RTL7g/implicit-attach-initialized-0
     test('from INITIALIZED state', () async {
       final channelName = testChannelName('RTL7g');
       var attachMessageCount = 0;
@@ -352,6 +357,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL7g/implicit-attach-detached-1
     test('from DETACHED state', () async {
       final channelName = testChannelName('RTL7g-detached');
       var attachMessageCount = 0;
@@ -407,6 +413,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL7g/listener-registered-attach-fails-2
     test('listener registered even if implicit attach fails', () async {
       final channelName = testChannelName('RTL7g-fail');
       var attachCount = 0;
@@ -480,6 +487,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL7g/no-attach-when-attached-3
     test('does not attach when already attached', () async {
       final channelName = testChannelName('RTL7g-already');
       var attachMessageCount = 0;
@@ -527,6 +535,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL7g/no-attach-when-attaching-4
     test('does not attach when already attaching', () async {
       final channelName = testChannelName('RTL7g-attaching');
       var attachMessageCount = 0;
@@ -580,6 +589,7 @@ void main() {
 
   group('RTL7h - Subscribe does not attach when attachOnSubscribe is false',
       () {
+    // UTS: realtime/unit/RTL7h/no-attach-on-subscribe-0
     test('channel remains INITIALIZED', () async {
       final channelName = testChannelName('RTL7h');
       var attachMessageCount = 0;
@@ -635,6 +645,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL17 - Messages not delivered when channel is not ATTACHED', () {
+    // UTS: realtime/unit/RTL17/no-delivery-when-not-attached-0
     test('messages suppressed while ATTACHING', () async {
       final channelName = testChannelName('RTL17');
 
@@ -693,6 +704,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL7f - Messages not echoed when echoMessages is false', () {
+    // UTS: realtime/unit/RTL7f/no-echo-messages-0
     test('filters messages from own connection', () async {
       final channelName = testChannelName('RTL7f');
       const connectionId = 'conn-self-123';
@@ -768,6 +780,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL8a - Unsubscribe specific listener', () {
+    // UTS: realtime/unit/RTL8a/unsubscribe-noop-not-subscribed-1
     test('stops delivering to unsubscribed listener', () async {
       final channelName = testChannelName('RTL8a');
 
@@ -844,6 +857,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL8a/unsubscribe-specific-listener-0
     test('unsubscribing non-subscribed listener is no-op', () async {
       final channelName = testChannelName('RTL8a-noop');
 
@@ -910,6 +924,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL8b - Unsubscribe listener from specific name', () {
+    // UTS: realtime/unit/RTL8b/unsubscribe-named-listener-0
     test('removes only the name-specific subscription', () async {
       final channelName = testChannelName('RTL8b');
 
@@ -991,6 +1006,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL8c - Unsubscribe with no arguments removes all listeners', () {
+    // UTS: realtime/unit/RTL8c/unsubscribe-all-listeners-0
     test('no listeners receive messages after unsubscribe()', () async {
       final channelName = testChannelName('RTL8c');
 
@@ -1073,6 +1089,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL22a - Subscribe with MessageFilter matching name', () {
+    // UTS: realtime/unit/RTL22a/filter-matching-name-0
     test('delivers only messages whose name matches the filter', () async {
       final channelName = testChannelName('RTL22a-name');
 
@@ -1160,6 +1177,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL22a - Subscribe with MessageFilter matching refTimeserial', () {
+    // UTS: realtime/unit/RTL22a/filter-matching-ref-timeserial-1
     test('delivers only messages whose extras.ref.timeserial matches',
         () async {
       final channelName = testChannelName('RTL22a-ref-timeserial');
@@ -1282,6 +1300,7 @@ void main() {
   group(
       'RTL22b - Subscribe with MessageFilter isRef false delivers only '
       'messages without extras.ref', () {
+    // UTS: realtime/unit/RTL22b/filter-isref-false-0
     test('filters out messages with extras.ref', () async {
       final channelName = testChannelName('RTL22b-isref-false');
 
@@ -1402,6 +1421,7 @@ void main() {
   group(
       'RTL22c - Subscribe with MessageFilter matching multiple criteria '
       '(name + refType)', () {
+    // UTS: realtime/unit/RTL22c/filter-multiple-criteria-0
     test('delivers only messages matching ALL criteria', () async {
       final channelName = testChannelName('RTL22c-multi');
 
@@ -1540,6 +1560,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL22a, MFI2e - Subscribe with MessageFilter matching clientId', () {
+    // UTS: realtime/unit/RTL22a/filter-matching-clientid-2
     test('delivers only messages whose clientId matches the filter', () async {
       final channelName = testChannelName('RTL22a-clientid');
 

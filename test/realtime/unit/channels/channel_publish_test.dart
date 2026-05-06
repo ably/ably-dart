@@ -22,6 +22,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL6i1 - Publish single message by name and data', () {
+    // UTS: realtime/unit/RTL6i1/publish-name-and-data-0
     test('sends a MESSAGE ProtocolMessage with one message entry', () async {
       final channelName = testChannelName('RTL6i1');
       final capturedMessages = <ProtocolMessage>[];
@@ -85,6 +86,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL6i1/publish-message-object-1
     test('publishes a Message object directly', () async {
       final channelName = testChannelName('RTL6i1-obj');
       final capturedMessages = <ProtocolMessage>[];
@@ -154,6 +156,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL6i2 - Publish array of Message objects', () {
+    // UTS: realtime/unit/RTL6i2/publish-message-array-0
     test('sends all messages in a single ProtocolMessage', () async {
       final channelName = testChannelName('RTL6i2');
       final capturedMessages = <ProtocolMessage>[];
@@ -229,6 +232,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL6i3 - Null fields omitted from JSON wire encoding', () {
+    // UTS: realtime/unit/RTL6i3/null-fields-json-0
     test('name-only publish omits data key from wire JSON', () async {
       final channelName = testChannelName('RTL6i3-json');
       final capturedFrames = <Map<String, dynamic>>[];
@@ -323,6 +327,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL6c1 - Publish immediately when CONNECTED', () {
+    // UTS: realtime/unit/RTL6c1/publish-when-attached-0
     test('sends immediately when channel is ATTACHED', () async {
       final channelName = testChannelName('RTL6c1-attached');
       final capturedMessages = <ProtocolMessage>[];
@@ -387,6 +392,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL6c1/publish-when-attaching-1
     test('sends immediately when channel is ATTACHING', () async {
       final channelName = testChannelName('RTL6c1-attaching');
       final capturedMessages = <ProtocolMessage>[];
@@ -449,6 +455,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL6c1/publish-when-initialized-2
     test('sends immediately when channel is INITIALIZED', () async {
       final channelName = testChannelName('RTL6c1-init');
       final capturedMessages = <ProtocolMessage>[];
@@ -512,6 +519,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL6c2 - Publish queued when connection not CONNECTED', () {
+    // UTS: realtime/unit/RTL6c2/queued-when-connecting-0
     test('queues and sends after CONNECTING → CONNECTED', () async {
       final channelName = testChannelName('RTL6c2-connecting');
       final capturedMessages = <ProtocolMessage>[];
@@ -584,6 +592,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL6c2/queued-when-initialized-2
     test('queues when connection is INITIALIZED', () async {
       final channelName = testChannelName('RTL6c2-init');
       final capturedMessages = <ProtocolMessage>[];
@@ -648,6 +657,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL6c2/queued-messages-order-4
     test('multiple queued messages sent in order', () async {
       final channelName = testChannelName('RTL6c2-order');
       final capturedMessages = <ProtocolMessage>[];
@@ -723,6 +733,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL6c2/fails-no-queue-messages-3
     test('fails when queueMessages is false and not CONNECTED', () async {
       final channelName = testChannelName('RTL6c2-noqueue');
 
@@ -769,6 +780,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL6c4 - Publish fails when connection is CLOSED', () {
+    // UTS: realtime/unit/RTL6c4/fails-conn-closed-1
     test('throws error after close()', () async {
       final channelName = testChannelName('RTL6c4-closed');
 
@@ -813,6 +825,7 @@ void main() {
   });
 
   group('RTL6c4 - Publish fails when connection is FAILED', () {
+    // UTS: realtime/unit/RTL6c4/fails-conn-failed-2
     test('throws error when connection failed', () async {
       final channelName = testChannelName('RTL6c4-failed');
 
@@ -859,6 +872,7 @@ void main() {
   });
 
   group('RTL6c4 - Publish fails when connection is SUSPENDED', () {
+    // UTS: realtime/unit/RTL6c4/fails-conn-suspended-0
     test('throws error when connection suspended', () async {
       final channelName = testChannelName('RTL6c4-suspended');
 
@@ -918,6 +932,7 @@ void main() {
   });
 
   group('RTL6c4 - Publish fails when channel is FAILED', () {
+    // UTS: realtime/unit/RTL6c4/fails-channel-failed-4
     test('throws error when channel is FAILED', () async {
       final channelName = testChannelName('RTL6c4-ch-failed');
       final capturedMessages = <ProtocolMessage>[];
@@ -986,6 +1001,7 @@ void main() {
   });
 
   group('RTL6c4 - Publish fails when channel is SUSPENDED', () {
+    // UTS: realtime/unit/RTL6c4/fails-channel-suspended-3
     test('throws error when channel is SUSPENDED', () async {
       final channelName = testChannelName('RTL6c4-ch-suspended');
       final capturedMessages = <ProtocolMessage>[];
@@ -1061,6 +1077,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL6c5 - Publish does not trigger implicit attach', () {
+    // UTS: realtime/unit/RTL6c5/no-implicit-attach-0
     test('channel remains INITIALIZED after publish', () async {
       final channelName = testChannelName('RTL6c5');
       var attachMessageCount = 0;
@@ -1131,6 +1148,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL6j - Publish returns PublishResult', () {
+    // UTS: realtime/unit/RTL6j/publish-result-serials-0
     test('returns PublishResult with serials from ACK', () async {
       final channelName = testChannelName('RTL6j');
       final capturedMessages = <ProtocolMessage>[];
@@ -1194,6 +1212,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL6j/batch-publish-serials-1
     test('returns PublishResult with multiple serials for batch', () async {
       final channelName = testChannelName('RTL6j-batch');
       final capturedMessages = <ProtocolMessage>[];
@@ -1262,6 +1281,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL6j/incrementing-msg-serial-2
     test('sequential publishes get incrementing msgSerial', () async {
       final channelName = testChannelName('RTL6j-serial');
       final capturedMessages = <ProtocolMessage>[];
@@ -1329,6 +1349,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTL6j/nack-results-error-3
     test('NACK results in error', () async {
       final channelName = testChannelName('RTL6j-nack');
 
@@ -1397,6 +1418,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTN7e - Pending publishes fail when connection enters CLOSED', () {
+    // UTS: realtime/unit/RTN7e/pending-fail-closed-1
     test('pending publish fails when client.close() is called', () async {
       final channelName = testChannelName('RTN7e-closed');
 
@@ -1455,6 +1477,7 @@ void main() {
   });
 
   group('RTN7e - Pending publishes fail when connection enters FAILED', () {
+    // UTS: realtime/unit/RTN7e/pending-fail-failed-2
     test('pending publish fails when server sends fatal ERROR', () async {
       final channelName = testChannelName('RTN7e-failed');
 
@@ -1519,6 +1542,7 @@ void main() {
   });
 
   group('RTN7e - Pending publishes fail when connection enters SUSPENDED', () {
+    // UTS: realtime/unit/RTN7e/pending-fail-suspended-0
     test('pending publish fails when connection becomes SUSPENDED', () async {
       final channelName = testChannelName('RTN7e-suspended');
 
@@ -1614,6 +1638,7 @@ void main() {
   });
 
   group('RTN7e - Multiple pending publishes all fail on state change', () {
+    // UTS: realtime/unit/RTN7e/multiple-pending-fail-3
     test('all pending publishes fail when connection closes', () async {
       final channelName = testChannelName('RTN7e-multi');
 
@@ -1681,6 +1706,7 @@ void main() {
   group(
       'RTN7d - Pending publishes fail on DISCONNECTED when queueMessages=false',
       () {
+    // UTS: realtime/unit/RTN7d/fail-disconnected-no-queue-0
     test('pending publish fails immediately on DISCONNECTED', () async {
       final channelName = testChannelName('RTN7d');
 
@@ -1745,6 +1771,7 @@ void main() {
   group(
       'RTN7d - Pending publishes survive DISCONNECTED when queueMessages=true',
       () {
+    // UTS: realtime/unit/RTN7d/survive-disconnected-queue-1
     test('pending publish succeeds after reconnect', () async {
       final channelName = testChannelName('RTN7d-default');
 
@@ -1835,6 +1862,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTN19a - Pending messages resent on new transport', () {
+    // UTS: realtime/unit/RTN19a/resent-on-new-transport-0
     test('message is resent on second transport after disconnect', () async {
       final channelName = testChannelName('RTN19a');
       final capturedMessages = <({ProtocolMessage msg, int connection})>[];
@@ -1950,6 +1978,7 @@ void main() {
 
   group('RTN19a2 - Resent messages keep same msgSerial on successful resume',
       () {
+    // UTS: realtime/unit/RTN19a2/same-serial-on-resume-0
     test('msgSerial is preserved when connectionId stays the same', () async {
       final channelName = testChannelName('RTN19a2-resume');
       final capturedMessages = <({ProtocolMessage msg, int connection})>[];
@@ -2057,6 +2086,7 @@ void main() {
   });
 
   group('RTN19a2 - Resent messages get new msgSerial on failed resume', () {
+    // UTS: realtime/unit/RTN19a2/new-serial-failed-resume-1
     test('msgSerial resets to 0 when connectionId changes', () async {
       final channelName = testChannelName('RTN19a2-failed');
       final capturedMessages = <({ProtocolMessage msg, int connection})>[];
@@ -2179,6 +2209,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTN19b - Pending ATTACH resent on new transport', () {
+    // UTS: realtime/unit/RTN19b/attach-resent-on-reconnect-0
     test('ATTACH is resent after disconnect and reconnect', () async {
       final channelName = testChannelName('RTN19b-attach');
       final capturedAttachMessages =
@@ -2274,6 +2305,7 @@ void main() {
   });
 
   group('RTN19b - Pending DETACH resent on new transport', () {
+    // UTS: realtime/unit/RTN19b/detach-resent-on-reconnect-1
     test('DETACH is resent after disconnect and reconnect', () async {
       final channelName = testChannelName('RTN19b-detach');
       final capturedDetachMessages =
@@ -2374,6 +2406,7 @@ void main() {
 
   group('RTN7e - Error passed to publish callback represents state change reason',
       () {
+    // UTS: realtime/unit/RTN7e/error-represents-reason-4
     test('publish callback error matches the connection failure reason',
         () async {
       final channelName = testChannelName('RTN7e');

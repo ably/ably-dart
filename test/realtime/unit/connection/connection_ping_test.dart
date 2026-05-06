@@ -33,6 +33,7 @@ MockWebSocketClient _createEchoingMock({
 /// Spec: uts/test/realtime/unit/connection/connection_ping_test.md
 void main() {
   group('RTN13a - Ping sends HEARTBEAT and returns round-trip duration', () {
+    // UTS: realtime/unit/RTN13a/ping-heartbeat-roundtrip-0
     test('ping resolves with duration on HEARTBEAT response', () async {
       final mockWs = _createEchoingMock(
         onConnectionAttempt: (conn) {
@@ -71,6 +72,7 @@ void main() {
   });
 
   group('RTN13e - HEARTBEAT includes random id for disambiguation', () {
+    // UTS: realtime/unit/RTN13e/heartbeat-random-id-0
     test('only matching id resolves the ping', () async {
       String? capturedHeartbeatId;
 
@@ -119,6 +121,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN13e/no-id-heartbeat-ignored-1
     test('HEARTBEAT with no id is ignored as ping response', () async {
       late MockWebSocketClient mockWs;
       mockWs = MockWebSocketClient(
@@ -162,6 +165,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN13e/concurrent-pings-unique-ids-2
     test('multiple concurrent pings each get their own response', () async {
       final mockWs = _createEchoingMock(
         onConnectionAttempt: (conn) {
@@ -209,6 +213,7 @@ void main() {
   });
 
   group('RTN13c - Ping times out if no HEARTBEAT response', () {
+    // UTS: realtime/unit/RTN13c/ping-timeout-0
     test('fails with timeout error after realtimeRequestTimeout', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -265,6 +270,7 @@ void main() {
   });
 
   group('RTN13b - Ping errors in invalid states', () {
+    // UTS: realtime/unit/RTN13b/ping-error-initialized-0
     test('errors in INITIALIZED state', () async {
       final client = Realtime.forTesting(
         options: ClientOptions(
@@ -279,6 +285,7 @@ void main() {
       expect(error, isA<ErrorInfo>());
     });
 
+    // UTS: realtime/unit/RTN13b/ping-error-suspended-1
     test('errors in SUSPENDED state', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -315,6 +322,7 @@ void main() {
       });
     });
 
+    // UTS: realtime/unit/RTN13b/ping-error-closed-2
     test('errors in CLOSED state', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -347,6 +355,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN13b/ping-error-failed-3
     test('errors in FAILED state', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -379,6 +388,7 @@ void main() {
   });
 
   group('RTN13d - Ping deferred from CONNECTING until CONNECTED', () {
+    // UTS: realtime/unit/RTN13d/ping-deferred-connecting-0
     test('ping called while CONNECTING resolves after CONNECTED', () async {
       late MockWebSocketClient mockWs;
       mockWs = MockWebSocketClient(
@@ -435,6 +445,7 @@ void main() {
   });
 
   group('RTN13d - Ping deferred from DISCONNECTED until CONNECTED', () {
+    // UTS: realtime/unit/RTN13d/ping-deferred-disconnected-1
     test('ping called while DISCONNECTED resolves after reconnect', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -510,6 +521,7 @@ void main() {
   });
 
   group('RTN13b - Deferred ping errors on state transition', () {
+    // UTS: realtime/unit/RTN13b/deferred-ping-error-failed-4
     test('deferred ping errors if connection transitions to FAILED', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -548,6 +560,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN13b/deferred-ping-error-suspended-5
     test('deferred ping errors if connection transitions to SUSPENDED',
         () async {
       final testClock = TestClock();
@@ -591,6 +604,7 @@ void main() {
   group(
       'RTN13c - Deferred ping times out after realtimeRequestTimeout '
       'from CONNECTED', () {
+    // UTS: realtime/unit/RTN13c/deferred-ping-timeout-1
     test('deferred ping still subject to realtimeRequestTimeout', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);

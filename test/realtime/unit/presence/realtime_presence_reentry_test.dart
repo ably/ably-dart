@@ -12,6 +12,7 @@ import '../../../helpers/test_channel_name.dart';
 /// Spec: uts/test/realtime/unit/presence/realtime_presence_reentry.md
 void main() {
   group('RTP17i - Automatic re-entry on ATTACHED (non-RESUMED)', () {
+    // UTS: realtime/unit/RTP17i/auto-reentry-on-attached-0
     test('re-enters after disconnect and reconnect', () async {
       final channelName = testChannelName('RTP17i');
 
@@ -93,6 +94,7 @@ void main() {
   });
 
   group('RTP17g - Re-entry preserves clientId and data', () {
+    // UTS: realtime/unit/RTP17g/reentry-publishes-enter-with-data-0
     test('re-enters multiple members with original data', () async {
       final channelName = testChannelName('RTP17g');
 
@@ -193,6 +195,7 @@ void main() {
   });
 
   group('RTP17g1 - Re-entry omits id when connectionId changed', () {
+    // UTS: realtime/unit/RTP17g1/reentry-omits-id-new-connid-0
     test('id is null on re-entered message with new connectionId', () async {
       final channelName = testChannelName('RTP17g1');
 
@@ -275,6 +278,7 @@ void main() {
   });
 
   group('RTP17i - No re-entry when ATTACHED with RESUMED flag', () {
+    // UTS: realtime/unit/RTP17i/no-reentry-with-resumed-flag-1
     test('RESUMED flag suppresses automatic re-entry', () async {
       final channelName = testChannelName('RTP17i-resumed');
 
@@ -341,6 +345,7 @@ void main() {
   });
 
   group('RTP17e - Failed re-entry emits UPDATE with error', () {
+    // UTS: realtime/unit/RTP17e/failed-reentry-emits-update-error-0
     test('NACK on re-entry emits channel UPDATE with error 91004', () async {
       final channelName = testChannelName('RTP17e');
 
@@ -439,6 +444,7 @@ void main() {
 
   group('RTP17a - Server publishes member regardless of subscribe capability',
       () {
+    // UTS: realtime/unit/RTP17a/server-publishes-without-subscribe-0
     test('member present in public map via get', () async {
       final channelName = testChannelName('RTP17a');
 

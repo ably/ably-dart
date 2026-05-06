@@ -17,6 +17,7 @@ import '../../../helpers/test_channel_name.dart';
 /// Spec: uts/test/realtime/unit/channels/channel_get_message.md
 void main() {
   group('RTL28 - RealtimeChannel#getMessage sends GET to correct endpoint', () {
+    // UTS: realtime/unit/RTL28/identical-to-rest-0
     test('sends GET to /channels/{channelName}/messages/{serial}', () async {
       final channelName = testChannelName('RTL28');
 
@@ -81,6 +82,7 @@ void main() {
   });
 
   group('RTL28 - RealtimeChannel#getMessage returns decoded Message', () {
+    // UTS: rest/unit/RSL11c/returns-decoded-message-0.1
     test('returns Message with all fields populated', () async {
       final channelName = testChannelName('RTL28-decode');
 
@@ -150,6 +152,7 @@ void main() {
   });
 
   group('RTL28 - getMessage serial validation', () {
+    // UTS: rest/unit/RSL11a/missing-serial-error-0.1
     test('empty serial throws AblyException with code 40003', () async {
       final channelName = testChannelName('RTL28-validate');
 

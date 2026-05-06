@@ -12,6 +12,7 @@ import '../../../helpers/test_channel_name.dart';
 /// Spec: uts/test/realtime/unit/presence/realtime_presence_enter.md
 void main() {
   group('RTP8a, RTP8c - enter sends PRESENCE with ENTER action', () {
+    // UTS: realtime/unit/RTP8a/enter-sends-presence-enter-0
     test('sends ENTER without clientId in PresenceMessage', () async {
       final channelName = testChannelName('RTP8a');
 
@@ -70,6 +71,7 @@ void main() {
   });
 
   group('RTP8e - enter with data', () {
+    // UTS: realtime/unit/RTP8e/enter-with-data-0
     test('data is included in the presence message', () async {
       final channelName = testChannelName('RTP8e');
 
@@ -121,6 +123,7 @@ void main() {
   });
 
   group('RTP8d - enter implicitly attaches channel', () {
+    // UTS: realtime/unit/RTP8d/enter-implicitly-attaches-0
     test('INITIALIZED channel becomes ATTACHED', () async {
       final channelName = testChannelName('RTP8d');
 
@@ -169,6 +172,7 @@ void main() {
   });
 
   group('RTP8g - enter on FAILED channel errors', () {
+    // UTS: realtime/unit/RTP8g/enter-detached-failed-errors-0
     test('errors immediately on FAILED channel', () async {
       final channelName = testChannelName('RTP8g');
 
@@ -220,6 +224,7 @@ void main() {
   });
 
   group('RTP8j - enter with null clientId errors', () {
+    // UTS: realtime/unit/RTP8j/enter-wildcard-clientid-errors-1
     test('errors immediately for anonymous client', () async {
       final channelName = testChannelName('RTP8j');
 
@@ -266,6 +271,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTP8j/enter-null-clientid-errors-0
     test('errors immediately for wildcard clientId', () async {
       final channelName = testChannelName('RTP8j-wild');
 
@@ -309,6 +315,7 @@ void main() {
   });
 
   group('RTP8h - NACK for missing presence permission', () {
+    // UTS: realtime/unit/RTP8h/nack-presence-permission-denied-0
     test('NACK results in error with correct code', () async {
       final channelName = testChannelName('RTP8h');
 
@@ -365,6 +372,7 @@ void main() {
   });
 
   group('RTP9a, RTP9d - update sends PRESENCE with UPDATE action', () {
+    // UTS: realtime/unit/RTP9a/update-sends-presence-update-0
     test('sends UPDATE without clientId', () async {
       final channelName = testChannelName('RTP9a');
 
@@ -417,6 +425,7 @@ void main() {
   });
 
   group('RTP10a, RTP10c - leave sends PRESENCE with LEAVE action', () {
+    // UTS: realtime/unit/RTP10a/leave-sends-presence-leave-0
     test('sends LEAVE without clientId', () async {
       final channelName = testChannelName('RTP10a');
 
@@ -466,6 +475,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTP10a/leave-with-data-1
     test('leave with data updates member data', () async {
       final channelName = testChannelName('RTP10a-data');
 
@@ -516,6 +526,7 @@ void main() {
   });
 
   group('RTP14a - enterClient enters on behalf of another clientId', () {
+    // UTS: realtime/unit/RTP14a/enterclient-on-behalf-0
     test('sends ENTER with specified clientId', () async {
       final channelName = testChannelName('RTP14a');
 
@@ -575,6 +586,7 @@ void main() {
   });
 
   group('RTP15a - updateClient and leaveClient', () {
+    // UTS: realtime/unit/RTP15a/updateclient-leaveclient-0
     test('sends UPDATE and LEAVE with specified clientId', () async {
       final channelName = testChannelName('RTP15a');
 
@@ -640,6 +652,7 @@ void main() {
   });
 
   group('RTP15e - enterClient implicitly attaches channel', () {
+    // UTS: realtime/unit/RTP15e/enterclient-implicitly-attaches-0
     test('INITIALIZED channel becomes ATTACHED', () async {
       final channelName = testChannelName('RTP15e');
 
@@ -687,6 +700,7 @@ void main() {
   });
 
   group('RTP15f - enterClient with mismatched clientId errors', () {
+    // UTS: realtime/unit/RTP15f/enterclient-mismatched-clientid-0
     test('errors when connection clientId does not match', () async {
       final channelName = testChannelName('RTP15f');
 
@@ -735,6 +749,7 @@ void main() {
   });
 
   group('RTP16a - Presence message sent when channel is ATTACHED', () {
+    // UTS: realtime/unit/RTP16a/presence-sent-when-attached-0
     test('message is sent immediately', () async {
       final channelName = testChannelName('RTP16a');
 
@@ -784,6 +799,7 @@ void main() {
   });
 
   group('RTP16b - Presence message queued when channel is ATTACHING', () {
+    // UTS: realtime/unit/RTP16b/presence-queued-when-attaching-0
     test('queued messages sent after attach completes', () async {
       final channelName = testChannelName('RTP16b');
 
@@ -847,6 +863,7 @@ void main() {
   });
 
   group('RTP16c - Presence message errors in other channel states', () {
+    // UTS: realtime/unit/RTP16c/presence-errors-other-states-0
     test('errors when channel is DETACHED', () async {
       final channelName = testChannelName('RTP16c');
 
@@ -906,6 +923,7 @@ void main() {
   });
 
   group('RTP15c - enterClient has no side effects on normal enter', () {
+    // UTS: realtime/unit/RTP15c/enterclient-no-side-effects-0
     test('enterClient/leaveClient do not affect normal enter', () async {
       final channelName = testChannelName('RTP15c');
 
@@ -975,6 +993,7 @@ void main() {
   });
 
   group('RTP4 - Bulk enterClient (same connection)', () {
+    // UTS: realtime/unit/RTP4/bulk-enterclient-same-connection-0
     test('50 members via enterClient with SYNC and get', () async {
       final channelName = testChannelName('RTP4-same');
       const memberCount = 50;
@@ -1098,6 +1117,7 @@ void main() {
   });
 
   group('RTP4 - Bulk enterClient (different connections)', () {
+    // UTS: realtime/unit/RTP4/bulk-enterclient-diff-connections-1
     test('client A enters 50 members, client B observes via subscribe and get',
         () async {
       final channelName = testChannelName('RTP4-diff');

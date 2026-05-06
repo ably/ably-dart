@@ -24,6 +24,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL32b, RTL32b1 - updateMessage sends MESSAGE_UPDATE', () {
+    // UTS: realtime/unit/RTL32b/update-message-action-0
     test('sends MESSAGE ProtocolMessage with action MESSAGE_UPDATE', () async {
       final channelName = testChannelName('RTL32-update');
       final capturedMessages = <ProtocolMessage>[];
@@ -106,6 +107,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL32b, RTL32b1 - deleteMessage sends MESSAGE_DELETE', () {
+    // UTS: realtime/unit/RTL32b/delete-message-action-1
     test('sends MESSAGE ProtocolMessage with action MESSAGE_DELETE', () async {
       final channelName = testChannelName('RTL32-delete');
       final capturedMessages = <ProtocolMessage>[];
@@ -180,6 +182,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL32b, RTL32b1 - appendMessage sends MESSAGE_APPEND', () {
+    // UTS: realtime/unit/RTL32b/append-message-action-2
     test('sends MESSAGE ProtocolMessage with action MESSAGE_APPEND', () async {
       final channelName = testChannelName('RTL32-append');
       final capturedMessages = <ProtocolMessage>[];
@@ -256,6 +259,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL32b2 - version field set from MessageOperation', () {
+    // UTS: realtime/unit/RTL32b2/version-from-operation-0
     test('version present when operation provided, absent when not', () async {
       final channelName = testChannelName('RTL32b2');
       final capturedMessages = <ProtocolMessage>[];
@@ -347,6 +351,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL32c - does not mutate user-supplied Message', () {
+    // UTS: realtime/unit/RTL32c/no-message-mutation-0
     test('original message unchanged after updateMessage', () async {
       final channelName = testChannelName('RTL32c');
 
@@ -419,6 +424,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL32d - returns UpdateDeleteResult from ACK', () {
+    // UTS: realtime/unit/RTL32d/ack-returns-result-0
     test('result contains versionSerial from ACK response', () async {
       final channelName = testChannelName('RTL32d');
 
@@ -487,6 +493,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL32d - NACK returns error', () {
+    // UTS: realtime/unit/RTL32d/nack-returns-error-1
     test('NACK results in AblyException with server error code', () async {
       final channelName = testChannelName('RTL32d-nack');
 
@@ -558,6 +565,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL32e - params sent in ProtocolMessage.params', () {
+    // UTS: realtime/unit/RTL32e/params-in-protocol-message-0
     test('optional params forwarded in ProtocolMessage', () async {
       final channelName = testChannelName('RTL32e');
       final capturedMessages = <ProtocolMessage>[];
@@ -632,6 +640,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL32a - serial validation', () {
+    // UTS: realtime/unit/RTL32a/serial-validation-required-0
     test('empty serial throws AblyException with code 40003', () async {
       final channelName = testChannelName('RTL32a');
 
@@ -703,6 +712,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('RTL32b, RSL15d - JSON data encoded per RSL4', () {
+    // UTS: realtime/unit/RTL32b/update-message-action-0.1
     test('Map data is JSON-encoded with encoding field', () async {
       final channelName = testChannelName('RTL32-encode');
       final capturedMessages = <ProtocolMessage>[];

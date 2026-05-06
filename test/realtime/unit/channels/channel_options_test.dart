@@ -13,6 +13,7 @@ import '../../../helpers/test_channel_name.dart';
 void main() {
   group('RealtimeChannelOptions - UTS Tests', () {
     group('TB2 - ChannelOptions attributes', () {
+      // UTS: realtime/unit/TB2/channel-options-attributes-0
       test('default values', () {
         const options = RealtimeChannelOptions();
 
@@ -22,6 +23,7 @@ void main() {
         expect(options.attachOnSubscribe, isTrue);
       });
 
+      // UTS: realtime/unit/TB2c/options-with-params-0
       test('TB2c - params attribute', () {
         final options = RealtimeChannelOptions(
           params: {'rewind': '1', 'delta': 'vcdiff'},
@@ -31,6 +33,7 @@ void main() {
         expect(options.params!['delta'], equals('vcdiff'));
       });
 
+      // UTS: realtime/unit/TB2d/options-with-modes-0
       test('TB2d - modes attribute', () {
         final options = RealtimeChannelOptions(
           modes: [ChannelMode.publish, ChannelMode.subscribe],
@@ -41,6 +44,7 @@ void main() {
         expect(options.modes!.length, equals(2));
       });
 
+      // UTS: realtime/unit/TB4/attach-on-subscribe-default-0
       test('TB4 - attachOnSubscribe default is true', () {
         const options1 = RealtimeChannelOptions();
         const options2 = RealtimeChannelOptions(attachOnSubscribe: false);
@@ -51,6 +55,7 @@ void main() {
     });
 
     group('TB3 - withCipherKey constructor', () {
+      // UTS: realtime/unit/TB3/with-cipher-key-0
       test('creates options with cipher params from base64 key', () {
         // 256-bit key (32 bytes) as base64
         final key = base64.encode(List.filled(32, 0x42));
@@ -63,6 +68,7 @@ void main() {
     });
 
     group('requiresReattachment', () {
+      // UTS: realtime/unit/RTS5a2/derived-with-params-0.1
       test('returns false when no params or modes', () {
         const options = RealtimeChannelOptions(
           attachOnSubscribe: false,
@@ -71,6 +77,7 @@ void main() {
         expect(options.requiresReattachment, isFalse);
       });
 
+      // UTS: realtime/unit/RTS3b/options-set-on-new-0.1
       test('returns true when params is set', () {
         final options = RealtimeChannelOptions(
           params: {'rewind': '1'},
@@ -79,6 +86,7 @@ void main() {
         expect(options.requiresReattachment, isTrue);
       });
 
+      // UTS: realtime/unit/RTS3b/options-set-on-new-0.2
       test('returns true when modes is set', () {
         final options = RealtimeChannelOptions(
           modes: [ChannelMode.subscribe],
@@ -90,6 +98,7 @@ void main() {
   });
 
   group('DeriveOptions - UTS Tests', () {
+    // UTS: realtime/unit/DO2a/filter-attribute-0
     test('DO2a - filter attribute', () {
       const deriveOptions = DeriveOptions(
         filter: "name == 'event' && data.count > 10",
@@ -134,6 +143,7 @@ void main() {
     });
 
     group('RTS3b - Options set on new channel', () {
+      // UTS: realtime/unit/RTS3b/options-set-on-new-0
       test('get() with options sets them on new channel', () {
         final channelName = testChannelName('RTS3b');
         final channelOptions = RealtimeChannelOptions(
@@ -149,6 +159,7 @@ void main() {
     });
 
     group('RTS3c - Options updated on existing channel', () {
+      // UTS: realtime/unit/RTS3c/options-updated-existing-0
       test('get() with options updates existing channel (no reattachment)', () {
         final channelName = testChannelName('RTS3c');
 
@@ -170,6 +181,7 @@ void main() {
     });
 
     group('RTS3c1 - Error if options would trigger reattachment', () {
+      // UTS: realtime/unit/RTS3c1/error-reattach-params-0
       test('throws error when params change on attached channel', () async {
         final channelName = testChannelName('RTS3c1');
 
@@ -196,6 +208,7 @@ void main() {
         expect(channel.options.params, isNull);
       });
 
+      // UTS: realtime/unit/RTS3c1/error-reattach-modes-1
       test('throws error when modes change on attaching channel', () async {
         final channelName = testChannelName('RTS3c1-modes');
 
@@ -249,6 +262,7 @@ void main() {
         noRespondMockWs.dispose();
       });
 
+      // UTS: realtime/unit/RTS3c1/error-reattach-params-0.1
       test('allows non-reattachment options on attached channel', () async {
         final channelName = testChannelName('RTS3c1-allowed');
 
@@ -265,6 +279,7 @@ void main() {
     });
 
     group('RTL16 - setOptions', () {
+      // UTS: realtime/unit/RTL16/set-options-updates-0
       test('updates channel options', () async {
         final channelName = testChannelName('RTL16');
         final channel = client.channels.get(channelName);
@@ -279,6 +294,7 @@ void main() {
         expect(channel.options.attachOnSubscribe, isFalse);
       });
 
+      // UTS: realtime/unit/RTL16a/triggers-reattach-0
       test('RTL16a - triggers reattachment when params change on attached',
           () async {
         final channelName = testChannelName('RTL16a');
@@ -305,6 +321,7 @@ void main() {
         await subscription.cancel();
       });
 
+      // UTS: realtime/unit/RTL16/set-options-updates-0.1
       test('does not trigger reattachment when only cipher changes', () async {
         final channelName = testChannelName('RTL16-cipher');
         final channel = client.channels.get(channelName);
@@ -330,6 +347,7 @@ void main() {
     });
 
     group('RTS5 - getDerived', () {
+      // UTS: realtime/unit/RTS5a/creates-derived-channel-0
       test('RTS5a - creates derived channel', () {
         final baseChannelName = testChannelName('RTS5a');
         const deriveOptions = DeriveOptions(filter: "name == 'foo'");
@@ -340,6 +358,7 @@ void main() {
         expect(channel.name, endsWith(']$baseChannelName'));
       });
 
+      // UTS: realtime/unit/RTS5a1/filter-base64-encoded-0
       test('RTS5a1 - filter is base64 encoded in channel name', () {
         final baseChannelName = testChannelName('RTS5a1');
         const filter = "name == 'test'";
@@ -352,6 +371,7 @@ void main() {
             channel.name, equals('[filter=$expectedEncoded]$baseChannelName'));
       });
 
+      // UTS: realtime/unit/RTS5a2/derived-with-params-0
       test('RTS5a2 - params included in derived channel name', () {
         final baseChannelName = testChannelName('RTS5a2');
         const deriveOptions = DeriveOptions(filter: "type == 'message'");
@@ -370,6 +390,7 @@ void main() {
         expect(channel.name, endsWith(']$baseChannelName'));
       });
 
+      // UTS: realtime/unit/RTS5a2/derived-with-params-0.2
       test('RTS5a2 - multiple params in derived channel name', () {
         final baseChannelName = testChannelName('RTS5a2-multi');
         const deriveOptions = DeriveOptions(filter: 'true');
@@ -404,6 +425,7 @@ void main() {
         expect(parsedParams.length, equals(2));
       });
 
+      // UTS: realtime/unit/RTS5/get-derived-with-options-0
       test('options passed to derived channel', () {
         final baseChannelName = testChannelName('RTS5-options');
         const deriveOptions = DeriveOptions(filter: 'true');
@@ -422,6 +444,7 @@ void main() {
         expect(channel.options.attachOnSubscribe, isFalse);
       });
 
+      // UTS: realtime/unit/RTS5/get-derived-with-options-0.1
       test('derived channel is tracked in channels collection', () {
         final baseChannelName = testChannelName('RTS5-tracked');
         const deriveOptions = DeriveOptions(filter: 'true');
@@ -434,6 +457,7 @@ void main() {
   });
 
   group('ChannelMode enum - UTS Tests', () {
+    // UTS: realtime/unit/TB2d/options-with-modes-0.1
     test('TB2d - all modes exist', () {
       expect(ChannelMode.values, contains(ChannelMode.presence));
       expect(ChannelMode.values, contains(ChannelMode.publish));

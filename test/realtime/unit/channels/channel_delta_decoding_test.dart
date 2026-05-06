@@ -18,6 +18,7 @@ import '../../../helpers/test_channel_name.dart';
 /// UTS spec: uts/test/realtime/unit/channels/channel_delta_decoding.md
 void main() {
   group('RTL21 - Messages in array decoded in ascending index order', () {
+    // UTS: realtime/unit/RTL21/ascending-index-order-0
     test('multi-message ProtocolMessage with chained deltas decodes correctly',
         () async {
       final channelName = testChannelName('RTL21-order');
@@ -102,6 +103,7 @@ void main() {
   });
 
   group('RTL19b - Non-delta message stores base payload', () {
+    // UTS: realtime/unit/RTL19b/stores-base-payload-0
     test('non-delta message data used as base for subsequent delta', () async {
       final channelName = testChannelName('RTL19b-base');
       final encoder = MockVCDiffEncoder();
@@ -183,6 +185,7 @@ void main() {
   });
 
   group('RTL19a - Base64 encoding decoded before storing base payload', () {
+    // UTS: realtime/unit/RTL19a/base64-decoded-before-store-0
     test('base64-encoded binary base used for subsequent delta', () async {
       final channelName = testChannelName('RTL19a-base64');
       final encoder = MockVCDiffEncoder();
@@ -270,6 +273,7 @@ void main() {
   });
 
   group('RTL19c - Delta result stored as new base payload', () {
+    // UTS: realtime/unit/RTL19c/delta-result-becomes-base-0
     test('chained deltas across separate ProtocolMessages', () async {
       final channelName = testChannelName('RTL19c-chain');
       final encoder = MockVCDiffEncoder();
@@ -372,6 +376,7 @@ void main() {
   });
 
   group('RTL20 - Delta with mismatched base message ID triggers recovery', () {
+    // UTS: realtime/unit/RTL20/mismatched-id-triggers-recovery-0
     test('mismatched delta.from triggers ATTACHING with correct channelSerial',
         () async {
       final channelName = testChannelName('RTL20-mismatch');
@@ -468,6 +473,7 @@ void main() {
   });
 
   group('RTL20 - Last message ID updated after successful decode', () {
+    // UTS: realtime/unit/RTL20/last-id-updated-on-decode-1
     test('stored ID is last message in ProtocolMessage array', () async {
       final channelName = testChannelName('RTL20-id-update');
       final encoder = MockVCDiffEncoder();
@@ -550,6 +556,7 @@ void main() {
   });
 
   group('PC3, PC3a - VCDiff plugin decodes delta messages', () {
+    // UTS: realtime/unit/PC3/vcdiff-plugin-decodes-0
     test('string base is UTF-8 encoded before passing to decoder', () async {
       final channelName = testChannelName('PC3-decode');
       final encoder = MockVCDiffEncoder();
@@ -648,6 +655,7 @@ void main() {
   });
 
   group('PC3 - No vcdiff plugin causes FAILED state', () {
+    // UTS: realtime/unit/PC3/no-plugin-fails-1
     test('delta message without plugin transitions channel to FAILED',
         () async {
       final channelName = testChannelName('PC3-no-plugin');
@@ -725,6 +733,7 @@ void main() {
   });
 
   group('RTL18 - Decode failure triggers recovery', () {
+    // UTS: realtime/unit/RTL18/decode-failure-recovery-0
     test('RTL18a/b/c: failed decode discards message and sends recovery ATTACH',
         () async {
       final channelName = testChannelName('RTL18-recovery');
@@ -828,6 +837,7 @@ void main() {
   });
 
   group('RTL18c - Recovery completes when server sends ATTACHED', () {
+    // UTS: realtime/unit/RTL18c/recovery-completes-on-attached-0
     test('channel returns to ATTACHED and receives new messages after recovery',
         () async {
       final channelName = testChannelName('RTL18c-complete');
@@ -935,6 +945,7 @@ void main() {
   });
 
   group('RTL18 - Only one recovery in progress at a time', () {
+    // UTS: realtime/unit/RTL18/single-recovery-at-time-1
     test('multiple decode failures trigger only one recovery ATTACH', () async {
       final channelName = testChannelName('RTL18-single');
 

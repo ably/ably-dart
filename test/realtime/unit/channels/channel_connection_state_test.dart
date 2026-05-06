@@ -28,6 +28,7 @@ void main() {
   // ---- RTL3e: DISCONNECTED has no effect on channels ----
 
   group('RTL3e - DISCONNECTED has no effect on ATTACHED channel', () {
+    // UTS: realtime/unit/RTL3e/disconnected-attached-noop-0
     test('channel remains ATTACHED when connection becomes DISCONNECTED',
         () async {
       final channelName = testChannelName('RTL3e-attached');
@@ -87,6 +88,7 @@ void main() {
   });
 
   group('RTL3e - DISCONNECTED has no effect on ATTACHING channel', () {
+    // UTS: realtime/unit/RTL3e/disconnected-attaching-noop-1
     test('channel remains ATTACHING when connection becomes DISCONNECTED',
         () async {
       final channelName = testChannelName('RTL3e-attaching');
@@ -147,6 +149,7 @@ void main() {
   // ---- RTL3a: FAILED connection transitions channels to FAILED ----
 
   group('RTL3a - FAILED connection transitions ATTACHED channel to FAILED', () {
+    // UTS: realtime/unit/RTL3a/failed-attached-to-failed-0
     test('attached channel moves to FAILED with error from connection',
         () async {
       final channelName = testChannelName('RTL3a-attached');
@@ -221,6 +224,7 @@ void main() {
 
   group('RTL3a - FAILED connection transitions ATTACHING channel to FAILED',
       () {
+    // UTS: realtime/unit/RTL3a/failed-attaching-to-failed-1
     test('attaching channel moves to FAILED with error from connection',
         () async {
       final channelName = testChannelName('RTL3a-attaching');
@@ -294,6 +298,7 @@ void main() {
   });
 
   group('RTL3a - Channels in other states unaffected by FAILED connection', () {
+    // UTS: realtime/unit/RTL3a/other-states-unaffected-2
     test('INITIALIZED and DETACHED channels are not affected', () async {
       final initializedName = testChannelName('RTL3a-init');
       final detachedName = testChannelName('RTL3a-detached');
@@ -374,6 +379,7 @@ void main() {
 
   group('RTL3b - CLOSED connection transitions ATTACHED channel to DETACHED',
       () {
+    // UTS: realtime/unit/RTL3c/suspended-attached-to-suspended-0
     test('attached channel moves to DETACHED when connection is closed',
         () async {
       final channelName = testChannelName('RTL3b-attached');
@@ -435,6 +441,7 @@ void main() {
 
   group('RTL3b - CLOSED connection transitions ATTACHING channel to DETACHED',
       () {
+    // UTS: realtime/unit/RTL3b/closed-attaching-to-detached-1
     test('attaching channel moves to DETACHED when connection is closed',
         () async {
       final channelName = testChannelName('RTL3b-attaching');
@@ -504,6 +511,7 @@ void main() {
   group(
       'RTL3c - SUSPENDED connection transitions ATTACHED channel to SUSPENDED',
       () {
+    // UTS: realtime/unit/RTL3b/closed-attached-to-detached-0
     test('attached channel moves to SUSPENDED when connection is SUSPENDED',
         () async {
       final testClock = TestClock();
@@ -596,6 +604,7 @@ void main() {
   group(
       'RTL3c - SUSPENDED connection transitions ATTACHING channel to SUSPENDED',
       () {
+    // UTS: realtime/unit/RTL3c/suspended-attaching-to-suspended-1
     test('attaching channel moves to SUSPENDED when connection is SUSPENDED',
         () async {
       final testClock = TestClock();
@@ -690,6 +699,7 @@ void main() {
   group(
       'RTL3d, RTL4c1 - CONNECTED re-attaches ATTACHED channels with channelSerial',
       () {
+    // UTS: realtime/unit/RTL3d/reattach-attached-with-serial-0
     test('re-attaches channel with channelSerial from previous attachment',
         () async {
       final channelName = testChannelName('RTL3d-attached');
@@ -771,6 +781,7 @@ void main() {
   });
 
   group('RTL3d - CONNECTED re-attaches SUSPENDED channels', () {
+    // UTS: realtime/unit/RTL3d/reattach-suspended-channels-1
     test('suspended channel is re-attached when connection is restored',
         () async {
       final testClock = TestClock();
@@ -890,6 +901,7 @@ void main() {
   group(
       'RTL3d - Channels in INITIALIZED or DETACHED are not re-attached on CONNECTED',
       () {
+    // UTS: realtime/unit/RTL3d/init-detached-not-reattached-2
     test('INITIALIZED and DETACHED channels are unaffected by reconnection',
         () async {
       final initializedName = testChannelName('RTL3d-init');
@@ -972,6 +984,7 @@ void main() {
   });
 
   group('RTL3d - Multiple channels re-attached on CONNECTED', () {
+    // UTS: realtime/unit/RTL3d/multiple-channels-reattached-3
     test('all eligible channels are re-attached after reconnection', () async {
       final channel1Name = testChannelName('RTL3d-multi1');
       final channel2Name = testChannelName('RTL3d-multi2');

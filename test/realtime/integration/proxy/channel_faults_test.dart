@@ -47,6 +47,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTL4f - Attach timeout (server doesn't respond)
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RTL4f/attach-timeout-suppressed-0
     test('RTL4f - Attach timeout (server does not respond)', () async {
       final channelName =
           'rtl4f-attach-timeout-${DateTime.now().millisecondsSinceEpoch}';
@@ -124,6 +125,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTL14 - Server responds with ERROR to ATTACH
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RTL14/error-on-attach-0
     test('RTL14 - Server responds with ERROR to ATTACH', () async {
       final channelName =
           'rtl14-error-attach-${DateTime.now().millisecondsSinceEpoch}';
@@ -187,6 +189,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTL5f - Detach timeout (server doesn't respond)
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RTL5f/detach-timeout-suppressed-0
     test('RTL5f - Detach timeout (server does not respond)', () async {
       final channelName =
           'rtl5f-detach-timeout-${DateTime.now().millisecondsSinceEpoch}';
@@ -270,6 +273,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTL13a - Unsolicited DETACHED triggers reattach
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RTL13a/unsolicited-detach-reattach-0
     test('RTL13a - Unsolicited DETACHED triggers reattach', () async {
       final channelName =
           'rtl13a-unsolicited-detach-${DateTime.now().millisecondsSinceEpoch}';
@@ -351,6 +355,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTL14 - Channel ERROR transitions to FAILED
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RTL14/channel-error-goes-failed-1
     test('RTL14 - Channel ERROR transitions to FAILED', () async {
       final channelName =
           'rtl14-channel-error-${DateTime.now().millisecondsSinceEpoch}';
@@ -416,6 +421,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTL12 - ATTACHED with resumed=false emits update
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RTL12/attached-non-resumed-update-0
     test('RTL12 - ATTACHED with resumed=false emits update', () async {
       final channelName =
           'rtl12-attached-update-${DateTime.now().millisecondsSinceEpoch}';
@@ -487,6 +493,7 @@ void main() {
     // -------------------------------------------------------------------------
     // RTL3d - Channels reattach after connection recovery
     // -------------------------------------------------------------------------
+    // UTS: realtime/proxy/RTL3d/channels-reattach-on-reconnect-0
     test('RTL3d - Channels reattach after connection recovery', () async {
       final channelName1 =
           'rtl3d-reattach1-${DateTime.now().millisecondsSinceEpoch}';

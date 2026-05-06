@@ -15,6 +15,7 @@ void main() {
       mockHttp = MockHttpClient();
     });
 
+    // UTS: rest/unit/RSC25/default-primary-domain-0
     test('default primary domain used for requests', () async {
       mockHttp = MockHttpClient(
         onRequest: (req) {
@@ -36,6 +37,7 @@ void main() {
       );
     });
 
+    // UTS: rest/unit/RSC25/custom-endpoint-domain-1
     test('custom endpoint used for requests', () async {
       mockHttp = MockHttpClient(
         onRequest: (req) {
@@ -60,6 +62,7 @@ void main() {
       );
     });
 
+    // UTS: rest/unit/RSC25/multiple-requests-primary-domain-2
     test('multiple requests all go to primary domain', () async {
       mockHttp = MockHttpClient(
         onRequest: (req) {
@@ -83,6 +86,7 @@ void main() {
       }
     });
 
+    // UTS: rest/unit/RSC25/primary-tried-before-fallback-3
     test('primary domain tried first before fallback', () async {
       var requestCount = 0;
 
@@ -119,6 +123,7 @@ void main() {
       );
     });
 
+    // UTS: rest/unit/RSC25/request-path-preserved-4
     test('request path preserved when sent to primary domain', () async {
       mockHttp = MockHttpClient(
         onRequest: (req) {

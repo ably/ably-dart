@@ -15,6 +15,7 @@ import '../../../helpers/protocol_message_helpers.dart';
 /// Spec: uts/test/realtime/unit/auth/realtime_authorize.md
 void main() {
   group('RTC8a - authorize() on CONNECTED sends AUTH protocol message', () {
+    // UTS: realtime/unit/RTC8a/authorize-connected-sends-auth-0
     test('sends AUTH with new token and resolves with TokenDetails', () async {
       var authCallbackCount = 0;
       final capturedAuthMessages = <ProtocolMessage>[];
@@ -91,6 +92,7 @@ void main() {
   });
 
   group('RTC8a1 - Successful reauth emits UPDATE event', () {
+    // UTS: realtime/unit/RTC8a1/successful-reauth-update-event-0
     test('emits UPDATE (not CONNECTED state change) and updates details',
         () async {
       var authCallbackCount = 0;
@@ -177,6 +179,7 @@ void main() {
   });
 
   group('RTC8a1 - Capability downgrade causes channel FAILED', () {
+    // UTS: realtime/unit/RTC8a1/capability-downgrade-channel-failed-1
     test('channel enters FAILED on channel-level ERROR after reauth', () async {
       var authCallbackCount = 0;
 
@@ -268,6 +271,7 @@ void main() {
   });
 
   group('RTC8a2 - Failed reauth transitions connection to FAILED', () {
+    // UTS: realtime/unit/RTC8a2/failed-reauth-connection-failed-0
     test('incompatible clientId causes FAILED state', () async {
       var authCallbackCount = 0;
 
@@ -337,6 +341,7 @@ void main() {
   });
 
   group('RTC8a3 - authorize() completes only after server response', () {
+    // UTS: realtime/unit/RTC8a3/authorize-completes-after-response-0
     test('future does not resolve until server responds', () async {
       var authCallbackCount = 0;
 
@@ -403,6 +408,7 @@ void main() {
   });
 
   group('RTC8b - authorize() while CONNECTING halts current attempt', () {
+    // UTS: realtime/unit/RTC8b/authorize-connecting-halts-attempt-0
     test('cancels current attempt and reconnects with new token', () async {
       var authCallbackCount = 0;
       final capturedWsUrls = <Uri>[];
@@ -473,6 +479,7 @@ void main() {
   });
 
   group('RTC8b1 - authorize() while CONNECTING fails on FAILED state', () {
+    // UTS: realtime/unit/RTC8b1/authorize-connecting-fails-on-failed-0
     test('authorize future completes with error if connection enters FAILED',
         () async {
       var authCallbackCount = 0;
@@ -532,6 +539,7 @@ void main() {
   });
 
   group('RTC8c - authorize() from non-connected states', () {
+    // UTS: realtime/unit/RTC8c/authorize-disconnected-initiates-connection-0
     test('authorize() from INITIALIZED initiates connection', () async {
       var authCallbackCount = 0;
       final capturedWsUrls = <Uri>[];
@@ -594,6 +602,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTC8c/authorize-failed-initiates-connection-1
     test('authorize() from FAILED recovers connection', () async {
       var authCallbackCount = 0;
       final capturedWsUrls = <Uri>[];
@@ -671,6 +680,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTC8c/authorize-closed-initiates-connection-2
     test('authorize() from CLOSED initiates connection', () async {
       var authCallbackCount = 0;
       var connectionAttemptCount = 0;

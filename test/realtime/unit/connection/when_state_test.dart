@@ -14,6 +14,7 @@ import '../../../helpers/protocol_message_helpers.dart';
 void main() {
   group('RTN26a - whenState calls listener immediately if already in state',
       () {
+    // UTS: realtime/unit/RTN26a/immediate-callback-current-state-0
     test('invokes callback immediately with null when already in target state',
         () async {
       final mockWs = MockWebSocketClient(
@@ -67,6 +68,7 @@ void main() {
   });
 
   group('RTN26b - whenState waits for state if not already in it', () {
+    // UTS: realtime/unit/RTN26b/deferred-callback-future-state-0
     test('waits for state transition when not currently in target state',
         () async {
       final mockWs = MockWebSocketClient(
@@ -132,6 +134,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN26b/fires-only-once-1
     test('whenState only fires once per call', () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -213,6 +216,7 @@ void main() {
   });
 
   group('RTN26 - Multiple whenState calls', () {
+    // UTS: realtime/unit/RTN26a/multiple-whenstate-calls-1
     test('multiple whenState listeners handled independently', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -268,6 +272,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN26a/no-fire-for-past-state-2
     test('whenState with already-passed state does not fire', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -315,6 +320,7 @@ void main() {
   });
 
   group('RTN26 - whenState with different states', () {
+    // UTS: realtime/unit/RTN26/whenstate-different-states-0
     test('whenState works correctly across different state transitions',
         () async {
       final mockWs = MockWebSocketClient(
@@ -378,6 +384,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN26/whenstate-different-states-0.1
     test('whenState for FAILED state', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
@@ -423,6 +430,7 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN26/whenstate-different-states-0.2
     test('whenState for CLOSED state', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {

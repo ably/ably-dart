@@ -18,6 +18,7 @@ void main() {
     });
 
     group('RSC16 - time() returns server time', () {
+      // UTS: rest/unit/RSC16/returns-server-time-0
       test('returns server time as DateTime', () async {
         const serverTimeMs = 1704067200000; // 2024-01-01 00:00:00 UTC
 
@@ -45,6 +46,7 @@ void main() {
     });
 
     group('RSC16 - time() request format', () {
+      // UTS: rest/unit/RSC16/request-format-get-time-1
       test('sends correctly formatted request with standard headers', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -71,6 +73,7 @@ void main() {
     });
 
     group('RSC16 - time() does not require authentication', () {
+      // UTS: rest/unit/RSC16/no-auth-required-2
       test('does not send Authorization header even with credentials',
           () async {
         mockHttp = MockHttpClient(
@@ -97,6 +100,7 @@ void main() {
     });
 
     group('RSC16 - time() works without TLS', () {
+      // UTS: rest/unit/RSC16/works-without-tls-3
       test('succeeds over HTTP without sending credentials', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -127,6 +131,7 @@ void main() {
     });
 
     group('RSC16 - time() error handling', () {
+      // UTS: rest/unit/RSC16/error-propagated-4
       test('properly propagates errors from time endpoint', () async {
         mockHttp = MockHttpClient(
           onRequest: (req) {
