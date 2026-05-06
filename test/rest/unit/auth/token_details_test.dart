@@ -388,9 +388,40 @@ void main() {
 
   group('RSA16d - tokenDetails null after switch to basic auth', () {
     // UTS: rest/unit/RSA16d/null-after-switch-to-basic-3
-    test('RSA16d - tokenDetails null after switch to basic auth', () {},
-        skip: 'Not yet implemented: authorize() with useTokenAuth:false '
-            'to switch back to basic auth');
+    test('RSA16d - tokenDetails null after switch to basic auth', () async {
+      final channelName = testChannelName('RSA16d');
+
+      final client = Rest.forTesting(
+        options: ClientOptions(
+          authCallback: (params) async {
+            return TokenDetails(
+              token: 'test-token-rsa16d',
+              expires: DateTime.now().millisecondsSinceEpoch + 3600000,
+              clientId: 'test-client',
+            );
+          },
+        ),
+        httpClient: mockHttp,
+      );
+
+      // First authorize to get a token
+      final token = await client.auth.authorize();
+      expect(token, isNotNull);
+      expect(client.auth.tokenDetails, isNotNull);
+      expect(client.auth.method, equals(AuthMethod.token));
+
+      // Now switch to basic auth
+      final result = await client.auth.authorize(
+        authOptions: AuthOptions(
+          key: 'appId.keyId:keySecret',
+          useTokenAuth: false,
+        ),
+      );
+
+      expect(result, isNull);
+      expect(client.auth.tokenDetails, isNull);
+      expect(client.auth.method, equals(AuthMethod.basic));
+    });
   });
 
   group('RSA16 - Edge cases', () {
