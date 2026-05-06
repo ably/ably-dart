@@ -386,6 +386,13 @@ void main() {
     });
   });
 
+  group('RSA16d - tokenDetails null after switch to basic auth', () {
+    // UTS: rest/unit/RSA16d/null-after-switch-to-basic-3
+    test('RSA16d - tokenDetails null after switch to basic auth', () {},
+        skip:
+            'DEVIATION: Dart SDK authorize() always performs token auth, cannot switch to basic auth');
+  });
+
   group('RSA16 - Edge cases', () {
     // UTS: rest/unit/RSA16a/preserved-across-requests-0
     test('tokenDetails preserved across multiple successful requests',

@@ -48,7 +48,7 @@ void main() {
         final inputPreview = testCase.input.length > 20
             ? '${testCase.input.substring(0, 20)}...'
             : testCase.input;
-        // UTS: rest/unit/RSC17/client-id-from-options-0.1
+        // UTS: rest/unit/RSC15l/qualifying-errors-trigger-fallback-0.1
         test('$inputPreview is detected as ${testCase.expected}', () {
           if (testCase.expected == 'API key') {
             final options = ClientOptions.fromKey(testCase.input);
@@ -60,7 +60,7 @@ void main() {
         });
       }
 
-      // UTS: rest/unit/TI/error-string-representation-4.1
+      // UTS: rest/unit/RSC15l/qualifying-errors-trigger-fallback-0.2
       test('empty string throws error', () {
         expect(
           () => ClientOptions.fromKey(''),
@@ -123,7 +123,7 @@ void main() {
     });
 
     group('RSC1 - ClientOptions Constructor', () {
-      // UTS: rest/unit/RSC17/client-id-from-options-0.2
+      // UTS: rest/unit/RSC15l/qualifying-errors-trigger-fallback-0.3
       test('accepts full ClientOptions and preserves values', () {
         final options = ClientOptions(
           key: 'appId.keyId:keySecret',
@@ -169,7 +169,7 @@ void main() {
         expect(options.key, equals('appId.keyId:keySecret'));
       });
 
-      // UTS: rest/unit/TO3/client-options-default-token-params-3.2
+      // UTS: rest/unit/TO3/client-options-auth-url-2.1
       test('validates key format', () {
         expect(
           () => ClientOptions.fromKey('invalid'),

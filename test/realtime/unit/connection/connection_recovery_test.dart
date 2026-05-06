@@ -574,6 +574,85 @@ void main() {
     });
   });
 
+  group('RTN16j - Channel serials from recovery key used on reattach', () {
+    // UTS: realtime/unit/RTN16j/recover-channel-serials-0
+    test(
+        'recovered channels include channelSerial in ATTACH messages '
+        'when reattaching after recovery', () async {
+      final sentMessages = <ProtocolMessage>[];
+
+      final recoveryKey = jsonEncode({
+        'connectionKey': 'old-key',
+        'msgSerial': 5,
+        'channelSerials': {
+          'channel-a': 'serial-a-100',
+          'channel-b': 'serial-b-200',
+        },
+      });
+
+      final mockWs = MockWebSocketClient(
+        onConnectionAttempt: (conn) {
+          conn.respondWithSuccess(
+            ProtocolMessageHelpers.connected(
+              connectionId: 'recovered-conn',
+              connectionKey: 'new-key',
+              maxIdleInterval: 15000,
+              connectionStateTtl: 120000,
+            ),
+          );
+        },
+        onMessageFromClient: (msg) {
+          sentMessages.add(msg);
+        },
+      );
+
+      final client = Realtime.forTesting(
+        options: ClientOptions(
+          key: 'appId.keyId:keySecret',
+          recover: recoveryKey,
+          autoConnect: false,
+        ),
+        webSocketClient: mockWs,
+      );
+
+      // Channels should already exist from recovery key
+      expect(client.channels.exists('channel-a'), isTrue);
+      expect(client.channels.exists('channel-b'), isTrue);
+
+      // Verify channel serials are set
+      final chA = client.channels.get('channel-a');
+      final chB = client.channels.get('channel-b');
+      expect(chA.properties.channelSerial, equals('serial-a-100'));
+      expect(chB.properties.channelSerial, equals('serial-b-200'));
+
+      // Connect
+      client.connect();
+      await _awaitState(client.connection, ConnectionState.connected);
+
+      // Attach channel-a
+      chA.attach();
+      await _pumpEventQueue();
+
+      // Find the ATTACH message for channel-a
+      final attachMsgs = sentMessages
+          .where(
+              (m) => m.action == ProtocolAction.attach && m.channel == 'channel-a')
+          .toList();
+      expect(attachMsgs, isNotEmpty,
+          reason: 'ATTACH message should have been sent for channel-a');
+
+      // The ATTACH message should include the channelSerial from recovery
+      // so the server can resume from where the channel left off
+      expect(attachMsgs.first.channelSerial, equals('serial-a-100'));
+
+      await client.close();
+      mockWs.dispose();
+    },
+        skip: 'ATTACH message does not yet include channelSerial from '
+            'recovery key - requires implementation of RTN16j attach '
+            'resume behavior');
+  });
+
   group('RTN16 - Resume behavior on reconnection (existing functionality)',
       () {
     // UTS: realtime/unit/RTN16k/recover-query-param-0

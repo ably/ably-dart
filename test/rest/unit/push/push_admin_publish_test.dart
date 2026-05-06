@@ -184,6 +184,39 @@ void main() {
       mockHttp.dispose();
     });
 
+    // UTS: rest/unit/RSH1a/rejects-null-recipient-5
+    test('rejects null recipient', () async {
+      final mockHttp = MockHttpClient(
+        onRequest: (request) {
+          request.respondWith(201, {});
+        },
+      );
+
+      final client = Rest.forTesting(
+        options: ClientOptions.fromKey('appId.keyId:keySecret'),
+        httpClient: mockHttp,
+      );
+
+      // Passing an empty map as recipient should be rejected
+      // (equivalent to null recipient - no valid recipient fields)
+      expect(
+        () => client.push.admin.publish(
+          {},
+          {
+            'notification': {'title': 'Test'}
+          },
+        ),
+        throwsA(
+          isA<AblyException>().having((e) => e.errorInfo?.code, 'code', 40000),
+        ),
+      );
+
+      // No request should have been made
+      expect(mockHttp.capturedRequests.length, equals(0));
+
+      mockHttp.dispose();
+    });
+
     // UTS: rest/unit/RSH1a/server-error-propagated-6
     test('propagates server error', () async {
       final mockHttp = MockHttpClient(

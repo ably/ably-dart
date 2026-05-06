@@ -11,6 +11,7 @@ import '../../../helpers/mock_http_client.dart';
 /// Spec: uts/test/rest/unit/push/push_channels.md
 void main() {
   group('RSH7a - subscribeDevice', () {
+    // UTS: rest/unit/RSH7a2/subscribe-device-post-0
     test(
         'RSH7a2, RSH7a3 - sends POST with deviceId, channel name, and device auth',
         () async {
@@ -146,6 +147,7 @@ void main() {
   });
 
   group('RSH7c - unsubscribeDevice', () {
+    // UTS: rest/unit/RSH7c2/unsubscribe-device-delete-0
     test(
         'RSH7c2, RSH7c3 - sends DELETE with deviceId, channel name, and device auth',
         () async {

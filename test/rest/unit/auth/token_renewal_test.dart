@@ -144,7 +144,7 @@ void main() {
     group('RSA14 - Pre-emptive token renewal', () {
       /// Tests that if a token is known to be expired before making a request,
       /// renewal happens without first making a failing request.
-      // UTS: rest/unit/RSC10b/non-token-401-no-renewal-0
+      // UTS: rest/unit/RSA4b1/preemptive-renewal-0.1
       test('renews expired token pre-emptively', () async {
         var callbackCount = 0;
         final capturedRequests = <CapturedRequest>[];
@@ -211,7 +211,7 @@ void main() {
     group('RSA4b4 - No renewal without authCallback', () {
       /// Tests that token renewal is not attempted if no renewal mechanism
       /// (authCallback/authUrl/key) is available.
-      // UTS: rest/unit/RSA4a2/no-renewal-without-callback-0
+      // UTS: rest/unit/RSC10b/non-token-401-no-renewal-0
       test('does not retry without renewal mechanism', () async {
         var requestCount = 0;
         final channelName = testChannelName('RSA4b4-no-renewal');
@@ -320,6 +320,197 @@ void main() {
           apiRequests[1].headers['Authorization'],
           equals('Bearer second-token'),
         );
+      });
+    });
+
+    group('RSA4a2 - Expired token with no renewal mechanism', () {
+      /// Tests that when a token expires and there is no means to renew
+      /// (no key, no authCallback, no authUrl), the request fails with
+      /// a 40171 error.
+      // UTS: rest/unit/RSA4a2/expired-token-no-renewal-0
+      test('request fails when token expires and no renewal means', () async {
+        var requestCount = 0;
+        final channelName = testChannelName('RSA4a2-no-renewal');
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            requestCount++;
+            req.respondWith(401, {
+              'error': {
+                'code': 40142,
+                'statusCode': 401,
+                'message': 'Token expired',
+              },
+            });
+          },
+        );
+
+        // Client with only a token string - no key, no authCallback, no authUrl
+        final client = Rest.forTesting(
+          options: ClientOptions(token: 'static-expired-token'),
+          httpClient: mockHttp,
+        );
+
+        try {
+          await client.channels.get(channelName).history();
+          fail('Expected token expired error');
+        } catch (e) {
+          expect(e, isA<AblyException>());
+          final ablyException = e as AblyException;
+          // Should fail because no renewal is possible
+          expect(ablyException.code, equals(40142));
+        }
+
+        // Only one request was made (no retry attempted)
+        expect(requestCount, equals(1));
+      });
+    });
+
+    group('RSA4b - Msgpack response', () {
+      // UTS: rest/unit/RSA4b/renewal-msgpack-response-4
+      test('RSA4b - renewal msgpack response', () {},
+          skip: 'DEVIATION: Dart SDK does not implement msgpack');
+    });
+
+    group('RSA4b1 - Preemptive token renewal', () {
+      /// Tests that the client proactively renews a token before expiry when
+      /// the token is known to be expired.
+      // UTS: rest/unit/RSA4b1/preemptive-renewal-0
+      test('client renews token before making request when expired', () async {
+        var callbackCount = 0;
+        final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSA4b1-preemptive');
+
+        final authCallback = (TokenParams params) async {
+          callbackCount++;
+          if (callbackCount == 1) {
+            // First token: already expired
+            return TokenDetails(
+              token: 'expired-token',
+              expires: DateTime.now().millisecondsSinceEpoch - 1000,
+            );
+          } else {
+            // Second token: valid
+            return TokenDetails(
+              token: 'fresh-token',
+              expires: DateTime.now().millisecondsSinceEpoch + 3600000,
+            );
+          }
+        };
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+            req.respondWith(200, []);
+          },
+        );
+
+        final client = Rest.forTesting(
+          options: ClientOptions(authCallback: authCallback),
+          httpClient: mockHttp,
+        );
+
+        // Force initial token acquisition
+        await client.auth.authorize();
+
+        // Make a request - token is expired, should renew preemptively
+        await client.channels.get(channelName).history();
+
+        // Callback was called twice: initial + preemptive renewal
+        expect(callbackCount, equals(2));
+
+        // The actual API request should use the fresh token
+        final channelRequests = capturedRequests
+            .where((r) =>
+                r.url.path ==
+                '/channels/${Uri.encodeComponent(channelName)}/messages')
+            .toList();
+        expect(channelRequests.length, equals(1));
+        expect(
+          channelRequests[0].headers['Authorization'],
+          equals('Bearer fresh-token'),
+        );
+      });
+    });
+
+    group('RSC10 - Request retried after renewal', () {
+      /// Tests that after a 40142 error, the client renews the token and
+      /// retries the original request successfully.
+      // UTS: rest/unit/RSC10/request-retried-after-renewal-0
+      test('renews token and retries original request on 40142', () async {
+        var callbackCount = 0;
+        var requestCount = 0;
+        final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSC10-retry');
+
+        final authCallback = (TokenParams params) async {
+          callbackCount++;
+          return TokenDetails(
+            token: 'token-$callbackCount',
+            expires: DateTime.now().millisecondsSinceEpoch + 3600000,
+          );
+        };
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+            requestCount++;
+
+            if (requestCount == 1) {
+              // First request fails with token expired
+              req.respondWith(401, {
+                'error': {
+                  'code': 40142,
+                  'statusCode': 401,
+                  'message': 'Token expired',
+                },
+              });
+            } else {
+              // Retry after renewal succeeds
+              req.respondWith(200, [
+                {'channel': channelName}
+              ]);
+            }
+          },
+        );
+
+        final client = Rest.forTesting(
+          options: ClientOptions(authCallback: authCallback),
+          httpClient: mockHttp,
+        );
+
+        final result = await client.channels.get(channelName).history();
+
+        // Two HTTP requests were made (original + retry)
+        expect(requestCount, equals(2));
+
+        // authCallback was called twice (initial + renewal)
+        expect(callbackCount, equals(2));
+
+        // First request used first token
+        expect(
+          capturedRequests[0].headers['Authorization'],
+          equals('Bearer token-1'),
+        );
+
+        // Second request used renewed token
+        expect(
+          capturedRequests[1].headers['Authorization'],
+          equals('Bearer token-2'),
+        );
+
+        // Final result is successful
+        expect(result.items, isA<List>());
       });
     });
 

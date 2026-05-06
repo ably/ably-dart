@@ -164,6 +164,91 @@ void main() {
       mockWs.dispose();
     });
 
+    // UTS: realtime/unit/RTN24/update-event-with-error-1
+    test('UPDATE event includes error when server sends CONNECTED with error',
+        () async {
+      final mockWs = MockWebSocketClient(
+        onConnectionAttempt: (conn) {
+          conn.respondWithSuccess(
+            ProtocolMessageHelpers.connected(
+              connectionId: 'connection-id-1',
+              connectionKey: 'connection-key-1',
+              maxIdleInterval: 15000,
+              connectionStateTtl: 120000,
+            ),
+          );
+        },
+      );
+
+      final client = Realtime.forTesting(
+        options: ClientOptions(
+          key: 'appId.keyId:keySecret',
+          autoConnect: false,
+        ),
+        webSocketClient: mockWs,
+      );
+
+      // Track UPDATE events
+      final updateEvents = <ConnectionStateChange>[];
+      final connectedEvents = <ConnectionStateChange>[];
+
+      client.connection.on(ConnectionEvent.update).listen((change) {
+        updateEvents.add(change);
+      });
+
+      client.connection.on(ConnectionEvent.connected).listen((change) {
+        connectedEvents.add(change);
+      });
+
+      // Start connection
+      client.connect();
+      await _awaitState(client.connection, ConnectionState.connected);
+
+      expect(connectedEvents.length, equals(1));
+      expect(updateEvents.length, equals(0));
+
+      // Server sends CONNECTED with different connectionDetails AND an error
+      // (e.g., token was renewed, or server-side config changed)
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessageHelpers.connected(
+          connectionId: 'connection-id-1',
+          connectionKey: 'connection-key-updated',
+          maxIdleInterval: 20000,
+          connectionStateTtl: 120000,
+          error: ErrorInfo(
+            code: 40142,
+            statusCode: 401,
+            message: 'Token expired; connection details updated',
+          ),
+        ),
+      );
+
+      // Allow stream events to be delivered
+      await Future<void>.delayed(Duration.zero);
+
+      // State remains CONNECTED
+      expect(client.connection.state, equals(ConnectionState.connected));
+
+      // No additional CONNECTED event
+      expect(connectedEvents.length, equals(1));
+
+      // UPDATE event was emitted
+      expect(updateEvents.length, equals(1));
+
+      // UPDATE event includes the error
+      final updateChange = updateEvents[0];
+      expect(updateChange.previous, equals(ConnectionState.connected));
+      expect(updateChange.current, equals(ConnectionState.connected));
+      expect(updateChange.reason, isNotNull);
+      expect(updateChange.reason!.code, equals(40142));
+      expect(updateChange.reason!.statusCode, equals(401));
+      expect(
+          updateChange.reason!.message, contains('Token expired'));
+
+      await client.close();
+      mockWs.dispose();
+    });
+
     // UTS: realtime/unit/RTN24/connection-details-override-2
     test('connectionDetails override stored details', () async {
       final mockWs = MockWebSocketClient(

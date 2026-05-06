@@ -323,6 +323,98 @@ void main() {
   });
 
   // ---------------------------------------------------------------------------
+  // RTL6i3 - Null fields in msgpack (skipped - Dart SDK does not support msgpack)
+  // ---------------------------------------------------------------------------
+
+  group('RTL6i3 - Null fields in msgpack', () {
+    // UTS: realtime/unit/RTL6i3/null-fields-msgpack-1
+    test('RTL6i3 - null fields in msgpack', () {},
+        skip: 'DEVIATION: Dart SDK does not implement msgpack');
+  });
+
+  // ---------------------------------------------------------------------------
+  // RTL19b - JSON wire form of base message fields
+  // ---------------------------------------------------------------------------
+
+  group('RTL19b - JSON wire form of base message fields', () {
+    // UTS: realtime/unit/RTL19b/json-wire-form-base-1
+    test('base message fields are correctly serialized in JSON wire format',
+        () async {
+      final channelName = testChannelName('RTL19b-json');
+      final capturedFrames = <Map<String, dynamic>>[];
+
+      late final MockWebSocketClient mockWs;
+      mockWs = MockWebSocketClient(
+        onConnectionAttempt: (conn) {
+          conn.respondWithSuccess(ProtocolMessageHelpers.connected());
+        },
+        onMessageFromClient: (msg) {
+          if (msg.action == ProtocolAction.attach) {
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessageHelpers.attached(channel: channelName),
+            );
+          } else if (msg.action == ProtocolAction.message) {
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessageHelpers.ack(
+                msgSerial: msg.msgSerial!,
+                count: 1,
+                res: [
+                  PublishResult(serials: const ['s']),
+                ],
+              ),
+            );
+          }
+        },
+        onTextDataFrame: (text) {
+          final decoded = jsonDecode(text) as Map<String, dynamic>;
+          // action 15 = MESSAGE
+          if (decoded['action'] == 15) {
+            capturedFrames.add(decoded);
+          }
+        },
+      );
+
+      final client = Realtime.forTesting(
+        options: ClientOptions(
+          key: 'appId.keyId:keySecret',
+          autoConnect: false,
+        ),
+        webSocketClient: mockWs,
+      );
+
+      final channel = client.channels.get(
+        channelName,
+        const RealtimeChannelOptions(attachOnSubscribe: false),
+      );
+
+      client.connect();
+      await _awaitConnectionState(
+        client.connection,
+        ConnectionState.connected,
+      );
+      await channel.attach();
+
+      // Publish with name and data
+      await channel.publish(name: 'greeting', data: 'hello');
+
+      expect(capturedFrames, hasLength(1));
+
+      // Verify JSON wire format of base message fields
+      final frame = capturedFrames[0];
+      expect(frame['action'], equals(15)); // MESSAGE action
+      expect(frame['channel'], equals(channelName));
+      expect(frame['msgSerial'], isA<int>());
+
+      final msg =
+          (frame['messages'] as List)[0] as Map<String, dynamic>;
+      expect(msg['name'], equals('greeting'));
+      expect(msg['data'], equals('hello'));
+
+      mockWs.dispose();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // RTL6c1 - Publish immediately when CONNECTED and channel ATTACHED
   // ---------------------------------------------------------------------------
 

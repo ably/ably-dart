@@ -14,6 +14,7 @@ import '../../../helpers/test_channel_name.dart';
 /// Spec: specification/uts/realtime/unit/connection/forwards_compatibility_test.md
 void main() {
   group('RTF1 - ProtocolMessage with unrecognised attributes', () {
+    // UTS: realtime/unit/RTF1/unrecognised-attributes-ignored-0
     test(
         'message with extra unknown fields is delivered to subscribers '
         'without error', () async {
@@ -103,6 +104,7 @@ void main() {
   });
 
   group('RTF1 - ProtocolMessage with unknown action enum value', () {
+    // UTS: realtime/unit/RTF1/unknown-action-handled-1
     test(
         'client does not crash or disconnect when receiving unknown '
         'action value', () async {
@@ -181,6 +183,7 @@ void main() {
   });
 
   group('RSF1 - Message with unrecognised attributes', () {
+    // UTS: realtime/unit/RSF1/message-unrecognised-attrs-0
     test(
         'messages with unknown fields are delivered with known fields '
         'correctly parsed', () async {

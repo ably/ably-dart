@@ -417,6 +417,95 @@ void main() {
       });
     });
 
+    group('RSA8c - authUrl custom headers', () {
+      // UTS: rest/unit/RSA8c/authurl-custom-headers-2
+      test('authUrl request includes custom headers from authHeaders', () async {
+        final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSA8c-headers');
+
+        final mockHttp = MockHttpClient(
+          onConnectionAttempt: (conn) => conn.respondWithSuccess(),
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ));
+
+            if (req.url.host == 'auth.example.com') {
+              req.respondWith(
+                200,
+                {'token': 'custom-header-token', 'expires': 9999999999999},
+                headers: {'Content-Type': 'application/json'},
+              );
+            } else {
+              req.respondWith(201, {
+                'serials': ['s1']
+              });
+            }
+          },
+        );
+
+        final client = Rest.forTesting(
+          options: ClientOptions(
+            authUrl: 'https://auth.example.com/get-token',
+            authHeaders: {
+              'X-Custom-Auth': 'my-secret',
+              'X-Another-Header': 'another-value',
+            },
+          ),
+          httpClient: mockHttp,
+        );
+
+        await client.channels.get(channelName).publish(name: 'e', data: 'd');
+
+        // First request goes to authUrl
+        final authRequest = capturedRequests[0];
+        expect(authRequest.url.host, equals('auth.example.com'));
+        expect(authRequest.headers['X-Custom-Auth'], equals('my-secret'));
+        expect(
+            authRequest.headers['X-Another-Header'], equals('another-value'));
+      });
+    });
+
+    group('RSA8c - authUrl error propagation', () {
+      // UTS: rest/unit/RSA8c/authurl-error-propagated-5
+      test('error from authUrl is propagated to the caller', () async {
+        final mockHttp = MockHttpClient(
+          onConnectionAttempt: (conn) => conn.respondWithSuccess(),
+          onRequest: (req) {
+            if (req.url.host == 'auth.example.com') {
+              // authUrl returns an error
+              req.respondWith(500, {
+                'error': {
+                  'code': 50000,
+                  'statusCode': 500,
+                  'message': 'Internal auth server error',
+                },
+              });
+            } else {
+              req.respondWith(200, {});
+            }
+          },
+        );
+
+        final client = Rest.forTesting(
+          options: ClientOptions(
+            authUrl: 'https://auth.example.com/get-token',
+          ),
+          httpClient: mockHttp,
+        );
+
+        expect(
+          () => client.channels
+              .get(testChannelName('RSA8c-error'))
+              .publish(name: 'e', data: 'd'),
+          throwsA(isA<AblyException>()),
+        );
+      });
+    });
+
     group('RSA8c2 - TokenParams take precedence over authParams', () {
       // UTS: rest/unit/RSA8d/callback-error-propagated-4
       test('uses TokenParams values when names conflict', () async {

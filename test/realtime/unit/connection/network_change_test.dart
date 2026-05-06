@@ -165,6 +165,7 @@ void main() {
   });
 
   group('RTN20b - Network comes online while DISCONNECTED', () {
+    // UTS: realtime/unit/RTN20b/network-available-disconnected-connects-0
     test(
         'immediately attempts reconnection when network becomes '
         'available while disconnected', () async {
@@ -361,6 +362,7 @@ void main() {
   });
 
   group('RTN20c - Network comes online while CONNECTING', () {
+    // UTS: realtime/unit/RTN20c/network-available-connecting-restarts-0
     test(
         'restarts pending connection attempt when network status '
         'changes during connection', () async {

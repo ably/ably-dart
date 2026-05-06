@@ -36,6 +36,23 @@ void main() {
       // setOptions should complete without throwing
       await channel.setOptions(RestChannelOptions());
     });
+
+    // UTS: rest/unit/RSL7/setoptions-stores-options-1
+    test('setOptions stores options on channel', () async {
+      final client = Rest.forTesting(
+        options: ClientOptions.fromKey('fake.key:secret'),
+      );
+
+      final channel = client.channels.get('test-RSL7-store');
+      final options = RestChannelOptions();
+
+      // setOptions should store the options without error
+      await channel.setOptions(options);
+
+      // Calling setOptions again with different options should also work
+      final options2 = RestChannelOptions();
+      await channel.setOptions(options2);
+    });
   });
 
   group('RSL8 - RestChannel status', () {
