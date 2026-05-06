@@ -315,7 +315,7 @@ void main() {
     group('RSL4 - Encoding fixtures and protocol', () {
       // UTS: rest/unit/RSL4/encoding-fixtures-ably-common-0
       test('RSL4 - encoding fixtures from ably-common', () {},
-          skip: 'PENDING: Requires ably-common test fixture files');
+          skip: 'Not yet implemented: ably-common test fixture loading');
 
       // UTS: rest/unit/RSL4/null-data-no-encoding-1
       test('null data should have no encoding header', () async {
@@ -393,7 +393,7 @@ void main() {
 
       // UTS: rest/unit/RSL4/msgpack-protocol-content-type-3
       test('RSL4 - msgpack protocol content-type', () {},
-          skip: 'DEVIATION: Dart SDK does not implement msgpack');
+          skip: 'Not yet implemented: msgpack encoding support');
     });
 
     group('RSL4a - Unsupported data types', () {
@@ -477,11 +477,11 @@ void main() {
     group('RSL6 - Msgpack decoding', () {
       // UTS: rest/unit/RSL6/msgpack-binary-stays-binary-0
       test('RSL6 - msgpack binary stays binary', () {},
-          skip: 'DEVIATION: Dart SDK does not implement msgpack');
+          skip: 'Not yet implemented: msgpack encoding support');
 
       // UTS: rest/unit/RSL6/msgpack-string-stays-string-1
       test('RSL6 - msgpack string stays string', () {},
-          skip: 'DEVIATION: Dart SDK does not implement msgpack');
+          skip: 'Not yet implemented: msgpack encoding support');
 
       // UTS: rest/unit/RSL6/complex-chained-encoding-3
       test('complex chained encoding utf-8/cipher+aes-128-cbc/base64',

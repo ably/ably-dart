@@ -173,129 +173,11 @@ void main() {
       });
     });
 
-    group('DEVIATIONS - Legacy options not supported', () {
-      // UTS: rest/unit/REC1b1/endpoint-conflicts-environment-0
-      test(
-        'REC1b1 - endpoint conflicts with environment',
-        () {},
-        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
-            'restHost/realtimeHost/environment',
-      );
-
-      // UTS: rest/unit/REC1b1/endpoint-conflicts-resthost-1
-      test(
-        'REC1b1 - endpoint conflicts with restHost',
-        () {},
-        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
-            'restHost/realtimeHost/environment',
-      );
-
-      // UTS: rest/unit/REC1b1/endpoint-conflicts-realtimehost-2
-      test(
-        'REC1b1 - endpoint conflicts with realtimeHost',
-        () {},
-        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
-            'restHost/realtimeHost/environment',
-      );
-
-      // UTS: rest/unit/REC1b1/endpoint-conflicts-fallback-default-3
-      test(
-        'REC1b1 - endpoint conflicts with fallbackHostsUseDefault',
-        () {},
-        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
-            'fallbackHostsUseDefault',
-      );
-
-      // UTS: rest/unit/REC1c1/environment-conflicts-resthost-0
-      test(
-        'REC1c1 - environment conflicts with restHost',
-        () {},
-        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
-            'restHost/realtimeHost/environment',
-      );
-
-      // UTS: rest/unit/REC1c1/environment-conflicts-realtimehost-1
-      test(
-        'REC1c1 - environment conflicts with realtimeHost',
-        () {},
-        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
-            'restHost/realtimeHost/environment',
-      );
-
-      // UTS: rest/unit/REC1c2/environment-sets-primary-domain-0
-      test(
-        'REC1c2 - environment sets primary domain',
-        () {},
-        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
-            'environment option',
-      );
-
-      // UTS: rest/unit/REC1d/resthost-precedence-over-realtimehost-0
-      test(
-        'REC1d - restHost takes precedence over realtimeHost',
-        () {},
-        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
-            'restHost/realtimeHost',
-      );
-
-      // UTS: rest/unit/REC1d1/resthost-sets-primary-domain-0
-      test(
-        'REC1d1 - restHost sets primary domain',
-        () {},
-        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
-            'restHost',
-      );
-
-      // UTS: rest/unit/REC1d2/realtimehost-sets-primary-domain-0
-      test(
-        'REC1d2 - realtimeHost sets primary domain',
-        () {},
-        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
-            'realtimeHost',
-      );
-
-      // UTS: rest/unit/REC2a1/fallback-hosts-conflicts-use-default-0
-      test(
-        'REC2a1 - fallbackHosts conflicts with fallbackHostsUseDefault',
-        () {},
-        skip: 'DEVIATION: Dart SDK does not implement '
-            'fallbackHostsUseDefault',
-      );
-
-      // UTS: rest/unit/REC2b/fallback-hosts-use-default-0
-      test(
-        'REC2b - fallbackHostsUseDefault forces default fallbacks',
-        () {},
-        skip: 'DEVIATION: Dart SDK does not implement '
-            'fallbackHostsUseDefault',
-      );
-
-      // UTS: rest/unit/REC2c6/custom-resthost-no-fallbacks-0
-      test(
-        'REC2c6 - custom restHost has no fallbacks',
-        () {},
-        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
-            'restHost',
-      );
-
-      // UTS: rest/unit/REC2c6/custom-realtimehost-no-fallbacks-1
-      test(
-        'REC2c6 - custom realtimeHost has no fallbacks',
-        () {},
-        skip: 'DEVIATION: Dart SDK uses endpoint only, does not implement '
-            'realtimeHost',
-      );
-    });
-
-    group('REC3 - Connectivity Check Validation', () {
-      // UTS: rest/unit/REC3/connectivity-check-validation-0
-      test(
-        'REC3 - invalid connectivity check URLs are rejected',
-        () {},
-        skip: 'PENDING: Dart SDK does not currently validate '
-            'connectivityCheckUrl at construction time',
-      );
-    });
+    // Note: UTS tests for legacy options (REC1b1, REC1c1, REC1c2, REC1d,
+    // REC1d1, REC1d2, REC2a1, REC2b, REC2c6) test restHost, realtimeHost,
+    // environment, and fallbackHostsUseDefault — deprecated options that this
+    // SDK does not implement. The Dart SDK uses `endpoint` exclusively per the
+    // modern spec (REC1b). These UTS test IDs are not applicable here.
 
     group('RSC15m - Fallback with empty hosts', () {
       // UTS: rest/unit/RSC15m/no-fallback-empty-hosts-0
@@ -628,9 +510,40 @@ void main() {
       test(
         'RSC15l4 - CloudFront Server header with status >= 400 '
         'triggers fallback',
-        () {},
-        skip: 'PENDING: Dart SDK does not implement CloudFront error '
-            'detection (RSC15l4)',
+        () async {
+          var requestCount = 0;
+
+          final mockHttp = MockHttpClient(
+            onRequest: (req) {
+              requestCount++;
+              if (requestCount == 1) {
+                req.respondWith(
+                  403,
+                  {
+                    'error': {
+                      'message': 'Forbidden',
+                      'code': 40300,
+                      'statusCode': 403,
+                    },
+                  },
+                  headers: {'Server': 'CloudFront'},
+                );
+              } else {
+                req.respondWith(200, [1000]);
+              }
+            },
+          );
+
+          final client = Rest.forTesting(
+            options: ClientOptions(key: 'appId.keyId:keySecret'),
+            httpClient: mockHttp,
+          );
+
+          final result = await client.time();
+          expect(result, isA<DateTime>());
+          expect(requestCount, equals(2),
+              reason: 'CloudFront 403 should trigger fallback retry');
+        },
       );
     });
 

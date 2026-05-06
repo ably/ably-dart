@@ -797,6 +797,9 @@ class ConnectionImpl implements Connection, WebSocketListener {
     // Add v parameter (protocol version) (RTN2f, CSV2)
     queryParams['v'] = ablyProtocolVersion;
 
+    // RTN23a: Request heartbeats from the server
+    queryParams['heartbeats'] = 'true';
+
     // RTN16k: Add recover parameter on first connect if recover option is set
     if (!_recoverAttempted && _options.recover != null) {
       final recoveryData = _parseRecoveryKey(_options.recover!);

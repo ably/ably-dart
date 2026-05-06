@@ -1124,7 +1124,7 @@ void main() {
 
       // UTS: rest/unit/RSP5/decode-msgpack-binary-3
       test('RSP5 - decode msgpack binary', () {},
-          skip: 'DEVIATION: Dart SDK does not implement msgpack');
+          skip: 'Not yet implemented: msgpack encoding support');
 
       // UTS: rest/unit/RSP5/decode-cipher-channel-7
       test('RSP5_7 - Cipher channel data decoded', () async {

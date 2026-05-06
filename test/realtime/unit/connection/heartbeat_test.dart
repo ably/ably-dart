@@ -464,24 +464,14 @@ void main() {
       expect(connectionUrls, hasLength(1));
 
       // RTN23a: The client should include heartbeats=true in the URL
-      // to request the server send periodic heartbeat messages.
-      // Note: The current implementation does not explicitly add
-      // heartbeats=true. The server sends heartbeats based on the
-      // maxIdleInterval in connectionDetails. This test documents
-      // the expected spec behavior.
-      // If the implementation adds heartbeats param, this would be:
-      // expect(connectionUrls[0].queryParameters['heartbeats'], 'true');
-
-      // For now, verify the URL has the basic expected query parameters
       final url = connectionUrls[0];
+      expect(url.queryParameters['heartbeats'], equals('true'));
       expect(url.queryParameters['format'], equals('json'));
       expect(url.queryParameters['v'], isNotNull);
 
       await client.close();
       mockWs.dispose();
-    },
-        skip: 'heartbeats=true query parameter not yet added to WebSocket URL '
-            'builder - server infers heartbeats from protocol version');
+    });
   });
 
   group('RTN23b - Client can request heartbeats in query params', () {
