@@ -128,7 +128,7 @@ void main() {
         final options = ClientOptions(
           key: 'appId.keyId:keySecret',
           clientId: 'testClient',
-          endpoint: 'sandbox',
+          endpoint: 'test',
           tls: true,
           httpRequestTimeout: 5000,
           idempotentRestPublishing: true,
@@ -142,7 +142,7 @@ void main() {
 
         expect(client.options.key, equals('appId.keyId:keySecret'));
         expect(client.options.clientId, equals('testClient'));
-        expect(client.options.endpoint, equals('sandbox'));
+        expect(client.options.endpoint, equals('test'));
         expect(client.options.tls, isTrue);
         expect(client.options.httpRequestTimeout, equals(5000));
         expect(client.options.idempotentRestPublishing, isTrue);

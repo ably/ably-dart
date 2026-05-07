@@ -76,14 +76,14 @@ void main() {
         });
 
         // UTS: rest/unit/REC2c5/production-environment-fallback-domains-0
-        test('sandbox is a production routing policy', () {
+        test('test is a production routing policy', () {
           final options = ClientOptions(
             key: 'appId.keyId:keySecret',
-            endpoint: 'sandbox',
+            endpoint: 'test',
           );
           expect(
             options.primaryDomain,
-            equals('sandbox.realtime.ably.net'),
+            equals('test.realtime.ably.net'),
           );
         });
       });

@@ -48,7 +48,7 @@ void main() {
       final client = Rest.forTesting(
         options: ClientOptions(
           key: 'appId.keyId:keySecret',
-          endpoint: 'sandbox',
+          endpoint: 'test',
         ),
         httpClient: mockHttp,
       );
@@ -58,7 +58,7 @@ void main() {
       expect(mockHttp.capturedRequests.length, equals(1));
       expect(
         mockHttp.capturedRequests[0].url.host,
-        equals('sandbox.realtime.ably.net'),
+        equals('test.realtime.ably.net'),
       );
     });
 

@@ -27,7 +27,7 @@ void main() {
         final options = ClientOptions(
           key: 'appId.keyId:keySecret',
           clientId: 'my-client',
-          endpoint: 'sandbox',
+          endpoint: 'test',
           tls: false,
           httpRequestTimeout: 30000,
           useBinaryProtocol: false,
@@ -37,7 +37,7 @@ void main() {
 
         expect(options.key, equals('appId.keyId:keySecret'));
         expect(options.clientId, equals('my-client'));
-        expect(options.endpoint, equals('sandbox'));
+        expect(options.endpoint, equals('test'));
         expect(options.tls, isFalse);
         expect(options.httpRequestTimeout, equals(30000));
         expect(options.useBinaryProtocol, isFalse);

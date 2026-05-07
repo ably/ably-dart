@@ -459,7 +459,7 @@ void main() {
         final client = Rest.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
-            endpoint: 'rest.ably.io',
+            endpoint: 'test.example.com',
           ),
           httpClient: mockHttp,
         );
@@ -469,7 +469,7 @@ void main() {
         await page1.next();
 
         // Second request should use the same host
-        expect(capturedRequests[1].url.host, equals('rest.ably.io'));
+        expect(capturedRequests[1].url.host, equals('test.example.com'));
         expect(capturedRequests[1].url.path,
             contains('/channels/$channelName/messages'));
         expect(capturedRequests[1].url.queryParameters['page'], equals('2'));

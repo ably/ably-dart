@@ -12,8 +12,8 @@ const _proxyRepo = 'ably/uts-proxy';
 const _controlPort = 9100;
 const _controlHost = 'http://localhost:$_controlPort';
 
-const _sandboxRealtimeHost = 'sandbox-realtime.ably.io';
-const _sandboxRestHost = 'sandbox-rest.ably.io';
+const _sandboxRealtimeHost = 'sandbox.realtime.ably-nonprod.net';
+const _sandboxRestHost = 'sandbox.realtime.ably-nonprod.net';
 
 const _checksums = {
   'uts-proxy_darwin_amd64.tar.gz':
