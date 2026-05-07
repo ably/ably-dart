@@ -13,7 +13,23 @@ class IOWebSocketClient implements WebSocketClient {
   @override
   Future<WebSocketConnection> connect(
       Uri url, WebSocketListener listener) async {
-    final ws = await io.WebSocket.connect(url.toString());
+    // Wrap in an error zone to catch async SocketExceptions that dart:io
+    // can post when the underlying socket is interrupted (e.g. by close()
+    // during the HTTP upgrade handshake).
+    final completer = Completer<io.WebSocket>();
+    runZonedGuarded(() async {
+      try {
+        final ws = await io.WebSocket.connect(url.toString());
+        if (!completer.isCompleted) completer.complete(ws);
+      } catch (e) {
+        if (!completer.isCompleted) completer.completeError(e);
+      }
+    }, (error, stack) {
+      if (!completer.isCompleted) {
+        completer.completeError(error);
+      }
+    });
+    final ws = await completer.future;
     return IOWebSocketConnection(ws, listener);
   }
 }

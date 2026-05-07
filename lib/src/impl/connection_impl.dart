@@ -79,6 +79,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
   Completer<void>? _pendingAuthCompleter; // RTC8a: awaiting AUTH response
   bool _abortingForReauth = false; // RTC8b: suppress onClose during abort
   bool _recoverAttempted = false; // RTN16k: track if recover was already sent
+  Future<void>? _pendingConnectionFuture;
 
   WebSocketConnection? _webSocketConnection;
 
@@ -106,6 +107,9 @@ class ConnectionImpl implements Connection, WebSocketListener {
 
   final _stateChangeController =
       StreamController<ConnectionStateChange>.broadcast();
+
+  bool get _isClosingOrClosed =>
+      _state == ConnectionState.closing || _state == ConnectionState.closed;
 
   /// The current connection state.
   ///
@@ -223,9 +227,16 @@ class ConnectionImpl implements Connection, WebSocketListener {
       case ConnectionState.connecting:
       case ConnectionState.disconnected:
       case ConnectionState.suspended:
-        // Transition to closing, then close WebSocket
+        _timerManager.cancelAll(owner: this);
         _transitionTo(ConnectionState.closing);
         await _closeWebSocket();
+        // Await any in-flight _startConnection() so its async errors
+        // don't leak as unhandled exceptions after close() returns.
+        final pending = _pendingConnectionFuture;
+        _pendingConnectionFuture = null;
+        if (pending != null) {
+          await pending.catchError((_) {});
+        }
         _transitionTo(ConnectionState.closed);
       case ConnectionState.closing:
       case ConnectionState.closed:
@@ -550,6 +561,8 @@ class ConnectionImpl implements Connection, WebSocketListener {
         _logger.debug('Connecting to host', {'host': host});
         await _connectToHost(host);
 
+        if (_isClosingOrClosed) return;
+
         // RSC15f: Cache successful fallback host as preferred
         if (!_hostSelector.isPrimaryHost(
             host, _options.effectiveRealtimeHost)) {
@@ -559,6 +572,8 @@ class ConnectionImpl implements Connection, WebSocketListener {
         _currentHost = host;
         return; // Successfully connected
       } catch (e) {
+        if (_isClosingOrClosed) return;
+
         lastError = e;
 
         // HandledErrorException means error was already processed (e.g., token error)
@@ -604,6 +619,8 @@ class ConnectionImpl implements Connection, WebSocketListener {
       }
     }
 
+    if (_isClosingOrClosed) return;
+
     // All hosts failed - check connectivity (RTN17j)
     // Only check connectivity if we actually tried fallback hosts
     // (i.e., more than one host was tried)
@@ -611,6 +628,8 @@ class ConnectionImpl implements Connection, WebSocketListener {
       final hasConnectivity = await _connectivityChecker.check(
         _options.effectiveConnectivityCheckUrl,
       );
+
+      if (_isClosingOrClosed) return;
 
       if (!hasConnectivity) {
         // No internet - report network error
@@ -640,9 +659,12 @@ class ConnectionImpl implements Connection, WebSocketListener {
     try {
       url = await _buildWebSocketUrlWithTimeout(host: host);
     } catch (e) {
+      if (_isClosingOrClosed) return;
       _handleAuthError(e);
       throw const HandledErrorException();
     }
+
+    if (_isClosingOrClosed) return;
 
     // Start connection timeout (RTN14c)
     _timerManager.schedule(
@@ -666,6 +688,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
       // so they don't fire later during elapseTime.
       _timerManager.cancel(owner: this, name: 'connectionTimeout');
       _connectionCompleter = null;
+      if (_isClosingOrClosed) return;
       rethrow;
     }
 
@@ -1356,7 +1379,8 @@ class ConnectionImpl implements Connection, WebSocketListener {
       scheduleMicrotask(() {
         if (_state == ConnectionState.disconnected) {
           _retryAttempt++;
-          _startConnection();
+          _pendingConnectionFuture =
+              _startConnection().catchError((_) {});
         }
       });
       return;
@@ -1381,7 +1405,8 @@ class ConnectionImpl implements Connection, WebSocketListener {
             return;
           }
           _retryAttempt++; // Increment for next retry
-          _startConnection();
+          _pendingConnectionFuture =
+              _startConnection().catchError((_) {});
         }
       },
     );
