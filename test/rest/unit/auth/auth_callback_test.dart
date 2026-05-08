@@ -43,6 +43,7 @@ void main() {
               );
             },
             clientId: 'test-client',
+            useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );
@@ -94,6 +95,7 @@ void main() {
               token: 'callback-token',
               expires: DateTime.now().millisecondsSinceEpoch + 3600000,
             ),
+            useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );
@@ -131,6 +133,7 @@ void main() {
         final client = Rest.forTesting(
           options: ClientOptions(
             authCallback: (params) async => 'raw-string-token',
+            useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );
@@ -184,6 +187,7 @@ void main() {
               nonce: 'unique-nonce',
               mac: 'valid-mac-signature',
             ),
+            useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );
@@ -239,6 +243,7 @@ void main() {
         final client = Rest.forTesting(
           options: ClientOptions(
             authUrl: 'https://auth.example.com/get-token',
+            useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );
@@ -295,6 +300,7 @@ void main() {
             authMethod: 'GET',
             authParams: {'custom': 'param1'},
             authHeaders: {'X-Custom-Header': 'value1'},
+            useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );
@@ -346,6 +352,7 @@ void main() {
             authMethod: 'POST',
             authParams: {'custom': 'param1'},
             authHeaders: {'X-Custom-Header': 'value1'},
+            useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );
@@ -402,6 +409,7 @@ void main() {
                 'https://auth.example.com/token?existing=value&another=123',
             authMethod: 'GET',
             authParams: {'added': 'new'},
+            useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );
@@ -454,6 +462,7 @@ void main() {
               'X-Custom-Auth': 'my-secret',
               'X-Another-Header': 'another-value',
             },
+            useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );
@@ -545,6 +554,7 @@ void main() {
               'custom': 'authParams-value',
             },
             clientId: 'from-tokenParams', // This becomes part of TokenParams
+            useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );

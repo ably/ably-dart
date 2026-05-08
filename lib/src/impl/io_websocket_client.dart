@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
+import 'dart:typed_data';
+
+import 'package:msgpack_dart/msgpack_dart.dart' as msgpack;
 
 import '../realtime/protocol_message.dart';
 import '../realtime/websocket_client.dart';
@@ -12,7 +15,10 @@ import '../realtime/websocket_client.dart';
 class IOWebSocketClient implements WebSocketClient {
   @override
   Future<WebSocketConnection> connect(
-      Uri url, WebSocketListener listener) async {
+    Uri url,
+    WebSocketListener listener, {
+    bool useBinaryProtocol = false,
+  }) async {
     // Wrap in an error zone to catch async SocketExceptions that dart:io
     // can post when the underlying socket is interrupted (e.g. by close()
     // during the HTTP upgrade handshake).
@@ -30,13 +36,21 @@ class IOWebSocketClient implements WebSocketClient {
       }
     });
     final ws = await completer.future;
-    return IOWebSocketConnection(ws, listener);
+    return IOWebSocketConnection(
+      ws,
+      listener,
+      useBinaryProtocol: useBinaryProtocol,
+    );
   }
 }
 
 /// Production WebSocket connection wrapping dart:io WebSocket.
 class IOWebSocketConnection implements WebSocketConnection {
-  IOWebSocketConnection(this._ws, this._listener) {
+  IOWebSocketConnection(
+    this._ws,
+    this._listener, {
+    this.useBinaryProtocol = false,
+  }) {
     // Set up subscription immediately - listener is already attached
     _subscription = _ws.listen(
       _handleMessage,
@@ -60,21 +74,42 @@ class IOWebSocketConnection implements WebSocketConnection {
 
   final io.WebSocket _ws;
   final WebSocketListener _listener;
+  final bool useBinaryProtocol;
   late final StreamSubscription<dynamic> _subscription;
   bool _closed = false;
 
   void _handleMessage(dynamic data) {
-    if (data is! String) {
-      return; // Ignore binary messages for now
-    }
-
     try {
-      final json = jsonDecode(data) as Map<String, dynamic>;
-      final message = ProtocolMessage.fromJson(json);
+      Map<String, dynamic> decoded;
+      if (useBinaryProtocol) {
+        final bytes =
+            data is Uint8List ? data : Uint8List.fromList(data as List<int>);
+        decoded =
+            _deepCast(msgpack.deserialize(bytes)) as Map<String, dynamic>;
+      } else {
+        if (data is! String) return;
+        decoded = jsonDecode(data) as Map<String, dynamic>;
+      }
+      final message = ProtocolMessage.fromJson(decoded);
       _listener.onMessage(message);
     } catch (e) {
       _listener.onError(e);
     }
+  }
+
+  static dynamic _deepCast(dynamic value) {
+    if (value is Map) {
+      return value.map<String, dynamic>(
+        (k, v) => MapEntry(k.toString(), _deepCast(v)),
+      );
+    }
+    if (value is Uint8List) {
+      return value;
+    }
+    if (value is List) {
+      return value.map(_deepCast).toList();
+    }
+    return value;
   }
 
   @override
@@ -82,8 +117,11 @@ class IOWebSocketConnection implements WebSocketConnection {
     if (_closed) {
       throw StateError('Connection closed');
     }
-    final json = jsonEncode(message.toJson());
-    _ws.add(json);
+    if (useBinaryProtocol) {
+      _ws.add(msgpack.serialize(message.toJson()));
+    } else {
+      _ws.add(jsonEncode(message.toJson()));
+    }
   }
 
   @override

@@ -46,6 +46,7 @@ void main() {
             realtimeRequestTimeout: 2000, // 2 seconds
             disconnectedRetryTimeout: 500,
             autoConnect: false,
+            useBinaryProtocol: false,
           ),
           webSocketClient: mockWs,
           timerManager: fakeTimers,
@@ -125,6 +126,7 @@ void main() {
             realtimeRequestTimeout: 1000, // 1 second
             disconnectedRetryTimeout: 500,
             autoConnect: false,
+            useBinaryProtocol: false,
           ),
           webSocketClient: mockWs,
           timerManager: fakeTimers,
@@ -202,6 +204,7 @@ void main() {
             realtimeRequestTimeout: 1000, // 1 second
             disconnectedRetryTimeout: 500,
             autoConnect: false,
+            useBinaryProtocol: false,
           ),
           webSocketClient: mockWs,
           timerManager: fakeTimers,
@@ -305,6 +308,7 @@ void main() {
             realtimeRequestTimeout: 1000, // 1 second
             disconnectedRetryTimeout: 500,
             autoConnect: false,
+            useBinaryProtocol: false,
           ),
           webSocketClient: mockWs,
           timerManager: fakeTimers,
@@ -383,6 +387,7 @@ void main() {
             realtimeRequestTimeout: 1000, // 1 second
             disconnectedRetryTimeout: 500,
             autoConnect: false,
+            useBinaryProtocol: false,
           ),
           webSocketClient: mockWs,
           timerManager: fakeTimers,
@@ -453,6 +458,7 @@ void main() {
         options: ClientOptions(
           key: 'appId.keyId:keySecret',
           autoConnect: false,
+          useBinaryProtocol: false,
         ),
         webSocketClient: mockWs,
       );
@@ -500,6 +506,7 @@ void main() {
         options: ClientOptions(
           key: 'appId.keyId:keySecret',
           autoConnect: false,
+          useBinaryProtocol: false,
         ),
         webSocketClient: mockWs,
       );
@@ -521,6 +528,7 @@ void main() {
         options: ClientOptions(
           key: 'appId.keyId:keySecret',
           autoConnect: false,
+          useBinaryProtocol: false,
           // Implementation may have a specific option for this
         ),
         webSocketClient: mockWs,
@@ -565,6 +573,7 @@ void main() {
             realtimeRequestTimeout: 2000, // 2 seconds
             disconnectedRetryTimeout: 500,
             autoConnect: false,
+            useBinaryProtocol: false,
           ),
           webSocketClient: mockWs,
           timerManager: fakeTimers,
@@ -630,6 +639,7 @@ void main() {
             realtimeRequestTimeout: 1000, // 1 second
             disconnectedRetryTimeout: 500,
             autoConnect: false,
+            useBinaryProtocol: false,
           ),
           webSocketClient: mockWs,
           timerManager: fakeTimers,
@@ -699,6 +709,7 @@ void main() {
             realtimeRequestTimeout: 1000,
             disconnectedRetryTimeout: 500,
             autoConnect: false,
+            useBinaryProtocol: false,
           ),
           webSocketClient: mockWs,
           timerManager: fakeTimers,
@@ -758,6 +769,7 @@ void main() {
             realtimeRequestTimeout: 1000,
             disconnectedRetryTimeout: 500,
             autoConnect: false,
+            useBinaryProtocol: false,
           ),
           webSocketClient: mockWs,
           timerManager: fakeTimers,
@@ -818,6 +830,7 @@ void main() {
             realtimeRequestTimeout: 1000, // timeout = 2000+1000 = 3000ms
             disconnectedRetryTimeout: 500,
             autoConnect: false,
+            useBinaryProtocol: false,
           ),
           webSocketClient: mockWs,
           timerManager: fakeTimers,
@@ -882,6 +895,7 @@ void main() {
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             autoConnect: false,
+            useBinaryProtocol: false,
             // Configure to disable heartbeats (implementation-specific)
           ),
           webSocketClient: mockWs,

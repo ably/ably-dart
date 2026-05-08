@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
+import 'package:msgpack_dart/msgpack_dart.dart' as msgpack;
 
 import '../../auth/client_options.dart';
 import '../../error/ably_exception.dart';
@@ -284,14 +286,18 @@ class AblyHttpClient {
       request.headers.addAll(headers);
 
       if (body != null) {
-        request.body = json.encode(body);
+        if (_options.useBinaryProtocol) {
+          request.bodyBytes = msgpack.serialize(body);
+        } else {
+          request.body = json.encode(body);
+        }
       }
 
       if (_logger.shouldLog(LogLevel.verbose)) {
         _logger.verbose('HTTP request detail', {
           'url': uri.toString(),
           'headers': headers.keys.toList(),
-          'bodyLength': body != null ? request.body.length : 0,
+          'bodyLength': body != null ? request.contentLength : 0,
         });
       }
 
@@ -347,12 +353,17 @@ class AblyHttpClient {
 
     // Parse response body
     dynamic parsedBody;
-    if (response.body.isNotEmpty) {
-      if (isJsonResponse || contentType.isEmpty) {
+    if (response.bodyBytes.isNotEmpty) {
+      if (isMsgpackResponse) {
+        try {
+          parsedBody = _deepCast(msgpack.deserialize(response.bodyBytes));
+        } catch (_) {
+          parsedBody = response.bodyBytes;
+        }
+      } else if (isJsonResponse || responseContentType.isEmpty) {
         try {
           parsedBody = json.decode(response.body);
         } catch (_) {
-          // Response might not be valid JSON
           parsedBody = response.body;
         }
       } else {
@@ -441,6 +452,21 @@ class AblyHttpClient {
     }
 
     return AblyException.fromErrorInfo(errorInfo, isRetryable: isRetryable);
+  }
+
+  static dynamic _deepCast(dynamic value) {
+    if (value is Map) {
+      return value.map<String, dynamic>(
+        (k, v) => MapEntry(k.toString(), _deepCast(v)),
+      );
+    }
+    if (value is Uint8List) {
+      return value;
+    }
+    if (value is List) {
+      return value.map(_deepCast).toList();
+    }
+    return value;
   }
 
   /// Closes the HTTP client.

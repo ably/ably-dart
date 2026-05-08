@@ -86,18 +86,25 @@ class PresenceMessage {
   /// Unique identifier for this member.
   String get memberKey => '$connectionId:$clientId';
 
-  /// Converts this PresenceMessage to a JSON map.
-  Map<String, dynamic> toMap() {
-    return {
+  /// Converts this PresenceMessage to a map for wire transmission.
+  Map<String, dynamic> toMap({bool useBinaryProtocol = false}) {
+    final map = <String, dynamic>{
       if (id != null) 'id': id,
       if (action != null) 'action': action!.toInt(),
       if (clientId != null) 'clientId': clientId,
       if (connectionId != null) 'connectionId': connectionId,
-      if (data != null) 'data': data,
-      if (encoding != null) 'encoding': encoding,
       if (extras != null) 'extras': extras!.toMap(),
       if (timestamp != null) 'timestamp': timestamp!.millisecondsSinceEpoch,
     };
+    if (data != null) {
+      Message.encodeDataInto(
+        map,
+        data!,
+        encoding,
+        useBinaryProtocol: useBinaryProtocol,
+      );
+    }
+    return map;
   }
 
   static _DecodeResult _decodePresenceData(Object? data, String? encoding) {

@@ -8,6 +8,7 @@ import '../error/error_info.dart';
 import '../logging/logger.dart';
 import '../message/annotation.dart';
 import '../message/annotation_action.dart';
+import '../message/message.dart';
 import '../pagination/paginated_result.dart';
 import 'channel_rest_api.dart';
 import 'http/http_client.dart';
@@ -95,16 +96,12 @@ class RestAnnotationsImpl implements RestAnnotations {
 
     // RSAN1c3: Encode data per RSL4
     if (annotation.data != null) {
-      final data = annotation.data;
-      if (data is String) {
-        wireAnnotation['data'] = data;
-      } else if (data is Map || data is List) {
-        wireAnnotation['data'] = json.encode(data);
-        wireAnnotation['encoding'] = 'json';
-      } else {
-        wireAnnotation['data'] = json.encode(data);
-        wireAnnotation['encoding'] = 'json';
-      }
+      Message.encodeDataInto(
+        wireAnnotation,
+        annotation.data!,
+        null,
+        useBinaryProtocol: _options.useBinaryProtocol,
+      );
     }
 
     if (annotation.extras != null) {

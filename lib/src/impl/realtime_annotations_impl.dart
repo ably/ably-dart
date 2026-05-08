@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import '../channels/rest_annotations.dart';
 import '../error/ably_exception.dart';
@@ -7,6 +6,7 @@ import '../error/error_info.dart';
 import '../logging/logger.dart';
 import '../message/annotation.dart';
 import '../message/annotation_action.dart';
+import '../message/message.dart';
 import '../pagination/paginated_result.dart';
 import '../realtime/channel_mode.dart';
 import '../realtime/channel_state.dart';
@@ -28,6 +28,7 @@ class RealtimeAnnotationsImpl implements RealtimeAnnotations {
     required ChannelState Function() getChannelState,
     required List<ChannelMode>? Function() getChannelModes,
     required bool Function() getAttachOnSubscribe,
+    required bool useBinaryProtocol,
     required Logger logger,
   })  : _channelName = channelName,
         _connection = connection,
@@ -36,6 +37,7 @@ class RealtimeAnnotationsImpl implements RealtimeAnnotations {
         _getChannelState = getChannelState,
         _getChannelModes = getChannelModes,
         _getAttachOnSubscribe = getAttachOnSubscribe,
+        _useBinaryProtocol = useBinaryProtocol,
         _logger = logger;
 
   final String _channelName;
@@ -45,6 +47,7 @@ class RealtimeAnnotationsImpl implements RealtimeAnnotations {
   final ChannelState Function() _getChannelState;
   final List<ChannelMode>? Function() _getChannelModes;
   final bool Function() _getAttachOnSubscribe;
+  final bool _useBinaryProtocol;
   final Logger _logger;
 
   /// Annotation subscribers.
@@ -246,16 +249,12 @@ class RealtimeAnnotationsImpl implements RealtimeAnnotations {
 
     // RTAN1a / RSAN1c3: Encode data per RSL4
     if (annotation.data != null) {
-      final data = annotation.data;
-      if (data is String) {
-        wireAnnotation['data'] = data;
-      } else if (data is Map || data is List) {
-        wireAnnotation['data'] = json.encode(data);
-        wireAnnotation['encoding'] = 'json';
-      } else {
-        wireAnnotation['data'] = json.encode(data);
-        wireAnnotation['encoding'] = 'json';
-      }
+      Message.encodeDataInto(
+        wireAnnotation,
+        annotation.data!,
+        null,
+        useBinaryProtocol: _useBinaryProtocol,
+      );
     }
 
     if (annotation.extras != null) {

@@ -219,25 +219,65 @@ class Message {
       ? DateTime.fromMillisecondsSinceEpoch(timestamp!)
       : null;
 
-  /// Converts this Message to a JSON map for transmission.
-  Map<String, dynamic> toMap() {
+  /// Encodes a data field into a wire map following RSL4 rules.
+  ///
+  /// RSL4c1: For msgpack, binary data ([Uint8List]) is sent natively.
+  /// RSL4d1: For JSON, binary data is base64-encoded with `/base64` added
+  /// to the encoding chain.
+  ///
+  /// This is the single canonical implementation of RSL4 data encoding,
+  /// used by Message, PresenceMessage, and Annotation serialization.
+  static void encodeDataInto(
+    Map<String, dynamic> body,
+    Object data,
+    String? existingEncoding, {
+    bool useBinaryProtocol = false,
+  }) {
+    if (data is String) {
+      body['data'] = data;
+      if (existingEncoding != null) body['encoding'] = existingEncoding;
+    } else if (data is Uint8List) {
+      if (useBinaryProtocol) {
+        body['data'] = data;
+        if (existingEncoding != null) body['encoding'] = existingEncoding;
+      } else {
+        body['data'] = base64.encode(data);
+        body['encoding'] = combineEncodings('base64', existingEncoding);
+      }
+    } else if (data is Map || data is List) {
+      body['data'] = json.encode(data);
+      body['encoding'] = combineEncodings('json', existingEncoding);
+    } else {
+      body['data'] = json.encode(data);
+      body['encoding'] = combineEncodings('json', existingEncoding);
+    }
+  }
+
+  /// Appends [newEncoding] to an existing encoding chain.
+  static String combineEncodings(String newEncoding, String? existingEncoding) {
+    if (existingEncoding == null || existingEncoding.isEmpty) {
+      return newEncoding;
+    }
+    return '$existingEncoding/$newEncoding';
+  }
+
+  /// Converts this Message to a map for wire transmission.
+  ///
+  /// When [useBinaryProtocol] is true (msgpack), binary data is sent
+  /// natively (RSL4c1). When false (JSON), binary data is base64-encoded
+  /// (RSL4d1).
+  Map<String, dynamic> toMap({bool useBinaryProtocol = false}) {
     final map = <String, dynamic>{};
 
     if (id != null) map['id'] = id;
     if (name != null) map['name'] = name;
     if (data != null) {
-      if (data is Uint8List) {
-        // Binary data needs base64 encoding for JSON
-        map['data'] = base64.encode(data as Uint8List);
-        map['encoding'] = _combineEncodings('base64', encoding);
-      } else if (data is Map || data is List) {
-        // JSON-encodable objects — encode to JSON string for wire format
-        map['data'] = json.encode(data);
-        map['encoding'] = _combineEncodings('json', encoding);
-      } else {
-        map['data'] = data;
-        if (encoding != null) map['encoding'] = encoding;
-      }
+      encodeDataInto(
+        map,
+        data!,
+        encoding,
+        useBinaryProtocol: useBinaryProtocol,
+      );
     }
     if (clientId != null) map['clientId'] = clientId;
     if (connectionId != null) map['connectionId'] = connectionId;
@@ -251,13 +291,6 @@ class Message {
     // annotations is read-only from wire, not sent by client
 
     return map;
-  }
-
-  String? _combineEncodings(String newEncoding, String? existingEncoding) {
-    if (existingEncoding == null || existingEncoding.isEmpty) {
-      return newEncoding;
-    }
-    return '$existingEncoding/$newEncoding';
   }
 
   /// Converts this Message to a JSON map.

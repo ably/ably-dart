@@ -151,7 +151,10 @@ class ClientOptions extends AuthOptions {
   /// Valid format is: `keyName:keySecret`
   ///
   /// Spec: RSC1
-  factory ClientOptions.fromKey(String key) {
+  factory ClientOptions.fromKey(
+    String key, {
+    bool useBinaryProtocol = true,
+  }) {
     if (key.isEmpty) {
       throw ArgumentError.value(key, 'key', 'API key cannot be empty');
     }
@@ -163,7 +166,7 @@ class ClientOptions extends AuthOptions {
         'Invalid API key format. Expected format: keyName:keySecret',
       );
     }
-    return ClientOptions._(key: key);
+    return ClientOptions._(key: key, useBinaryProtocol: useBinaryProtocol);
   }
 
   /// The clientId to use for this client.
@@ -226,7 +229,7 @@ class ClientOptions extends AuthOptions {
 
   /// Whether to use binary protocol (MessagePack) instead of JSON.
   ///
-  /// Defaults to false (use JSON).
+  /// Defaults to true.
   final bool useBinaryProtocol;
 
   /// Whether to use idempotent REST publishing.

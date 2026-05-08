@@ -81,11 +81,13 @@ class MockHttpClient extends http.BaseClient {
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    final bodyBytes =
+        request is http.Request ? request.bodyBytes : <int>[];
     final capturedRequest = CapturedRequest(
       method: request.method,
       url: request.url,
       headers: Map.from(request.headers),
-      body: request is http.Request ? request.body : null,
+      bodyBytes: bodyBytes,
     );
     capturedRequests.add(capturedRequest);
 
@@ -119,7 +121,7 @@ class MockHttpClient extends http.BaseClient {
       url: request.url,
       method: request.method,
       headers: Map.from(request.headers),
-      body: request is http.Request ? utf8.encode(request.body) : <int>[],
+      body: bodyBytes,
       timestamp: DateTime.now(),
     );
     if (!_requests.isClosed) {
@@ -287,15 +289,20 @@ class CapturedRequest {
   final String method;
   final Uri url;
   final Map<String, String> headers;
-  final String? body;
+  final List<int> bodyBytes;
 
   CapturedRequest({
     required this.method,
     required this.url,
     required this.headers,
-    this.body,
-  });
+    String? body,
+    List<int>? bodyBytes,
+  }) : bodyBytes = bodyBytes ?? (body != null ? utf8.encode(body) : []);
+
+  String get bodyAsString => utf8.decode(bodyBytes);
+
+  String? get body => bodyAsString;
 
   /// Parses the body as JSON.
-  dynamic get jsonBody => body != null ? json.decode(body!) : null;
+  dynamic get jsonBody => bodyBytes.isNotEmpty ? json.decode(bodyAsString) : null;
 }

@@ -123,11 +123,12 @@ class MockWebSocketClient implements WebSocketClient {
   @override
   Future<MockWebSocketConnection> connect(
     Uri url,
-    WebSocketListener listener,
-  ) async {
+    WebSocketListener listener, {
+    bool useBinaryProtocol = false,
+  }) async {
     final pendingConnection = PendingWebSocketConnection._(
       url: url,
-      protocol: 'json', // Default protocol
+      protocol: useBinaryProtocol ? 'msgpack' : 'json',
       timestamp: DateTime.now(),
       listener: listener,
       onMessageFromClient: onMessageFromClient,

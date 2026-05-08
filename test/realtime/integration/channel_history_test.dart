@@ -5,6 +5,7 @@ import 'package:ably_dart/ably_dart.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/poll_until.dart';
+import '../../helpers/protocol_variants.dart';
 import '../../helpers/test_app_helper.dart';
 import '../../helpers/test_channel_name.dart';
 import '../../helpers/wait_for_state.dart';
@@ -20,7 +21,7 @@ void main() {
     await testApp.delete();
   });
 
-  group('Realtime Channel History Integration Tests', () {
+  groupEachProtocol('Realtime Channel History Integration Tests', (protocol) {
     // -------------------------------------------------------------------------
     // RTL10d - History contains messages published by another client
     // -------------------------------------------------------------------------
@@ -32,7 +33,7 @@ void main() {
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
           endpoint: 'nonprod:sandbox',
-          useBinaryProtocol: false,
+          useBinaryProtocol: protocol == 'msgpack',
           autoConnect: false,
         ),
       );
@@ -42,7 +43,7 @@ void main() {
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
           endpoint: 'nonprod:sandbox',
-          useBinaryProtocol: false,
+          useBinaryProtocol: protocol == 'msgpack',
           autoConnect: false,
         ),
       );
