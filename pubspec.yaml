@@ -13,6 +13,7 @@ dependencies:
   collection: ^1.17.0
   crypto: ^3.0.0
   clock: ^1.1.1
+  msgpack_dart: ^1.0.1
 
 dev_dependencies:
   test: ^1.24.0

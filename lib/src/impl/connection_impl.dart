@@ -681,7 +681,11 @@ class ConnectionImpl implements Connection, WebSocketListener {
     // Connect WebSocket - pass this as the listener
     // The listener is attached before connect() returns, so no events are missed
     try {
-      _webSocketConnection = await _webSocketClient.connect(url, this);
+      _webSocketConnection = await _webSocketClient.connect(
+        url,
+        this,
+        useBinaryProtocol: _options.useBinaryProtocol,
+      );
     } catch (e) {
       // Connection failed immediately (e.g., connection refused).
       // Clean up the timer and completer before propagating the error
@@ -810,7 +814,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
     final queryParams = <String, String>{};
 
     // Add format parameter
-    queryParams['format'] = 'json';
+    queryParams['format'] = _options.useBinaryProtocol ? 'msgpack' : 'json';
 
     // Add echo parameter (RTN1a)
     if (!_options.echoMessages) {

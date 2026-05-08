@@ -19,7 +19,7 @@ void main() {
     // UTS: rest/unit/RSC5/auth-attribute-accessible-0
     test('RSC5 - auth attribute exists', () {
       final rest = Rest(
-        options: ClientOptions(key: 'fake.key:secret'),
+        options: ClientOptions(key: 'fake.key:secret', useBinaryProtocol: false),
       );
 
       expect(rest.auth, isNotNull);
@@ -32,6 +32,7 @@ void main() {
         options: ClientOptions(
           key: 'fake.key:secret',
           clientId: 'explicit-client-id',
+          useBinaryProtocol: false,
         ),
       );
 
@@ -57,7 +58,7 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -91,7 +92,7 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -132,6 +133,7 @@ void main() {
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             addRequestIds: true,
+            useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );
@@ -178,6 +180,7 @@ void main() {
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             addRequestIds: true,
+            useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );
@@ -198,7 +201,7 @@ void main() {
 
     group('RSC8a, RSC8b - Protocol selection', () {
       // UTS: rest/unit/RSC8a/protocol-selection-0
-      test('uses msgpack by default (useBinaryProtocol: true)', () async {
+      test('uses JSON by default (useBinaryProtocol: false)', () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSC8a');
 
@@ -209,6 +212,46 @@ void main() {
               url: req.url,
               headers: req.headers,
               body: req.bodyAsString,
+            ));
+
+            req.respondWith(201, {
+              'serials': ['s1']
+            });
+          },
+        );
+
+        final client = Rest.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
+          httpClient: mockHttp,
+        );
+
+        await client.channels.get(channelName).publish(name: 'e', data: 'd');
+
+        final request = capturedRequests[0];
+        expect(
+          request.headers['Content-Type'],
+          equals('application/json'),
+        );
+        expect(
+          request.headers['Accept'],
+          equals('application/json'),
+        );
+      });
+
+      test('uses msgpack when useBinaryProtocol is true', () async {
+        final capturedRequests = <CapturedRequest>[];
+        final channelName = testChannelName('RSC8a-msgpack');
+
+        mockHttp = MockHttpClient(
+          onRequest: (req) {
+            capturedRequests.add(CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              bodyBytes: req.body,
             ));
 
             req.respondWith(201, {
@@ -331,7 +374,7 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -360,7 +403,7 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -399,6 +442,7 @@ void main() {
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             tls: true,
+            useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );
@@ -431,6 +475,7 @@ void main() {
           options: ClientOptions(
             token: 'some-token',
             tls: false,
+            useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );
@@ -448,6 +493,7 @@ void main() {
             options: ClientOptions(
               key: 'appId.keyId:keySecret',
               tls: false,
+              useBinaryProtocol: false,
             ),
             httpClient: mockHttp,
           ),
@@ -487,6 +533,7 @@ void main() {
           options: ClientOptions(
             token: 'some-token-string',
             tls: false,
+            useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );
@@ -518,6 +565,7 @@ void main() {
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             httpRequestTimeout: 1000,
+            useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );
@@ -544,6 +592,7 @@ void main() {
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             endpoint: 'test',
+            useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );

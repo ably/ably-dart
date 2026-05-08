@@ -15,7 +15,10 @@ void main() {
     // UTS: rest/unit/RSL10/annotations-attribute-type-0
     test('exposes annotations attribute', () {
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('fake.key:secret'),
+        options: ClientOptions.fromKey(
+          'fake.key:secret',
+          useBinaryProtocol: false,
+        ),
       );
 
       final channel = client.channels.get('test-RSL10');
@@ -35,7 +38,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyId:keySecret'),
+        options: ClientOptions.fromKey(
+          'appId.keyId:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -78,7 +84,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyId:keySecret'),
+        options: ClientOptions.fromKey(
+          'appId.keyId:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -110,7 +119,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyId:keySecret'),
+        options: ClientOptions.fromKey(
+          'appId.keyId:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -156,6 +168,7 @@ void main() {
         options: ClientOptions(
           key: 'appId.keyId:keySecret',
           idempotentRestPublishing: true,
+          useBinaryProtocol: false,
         ),
         httpClient: mockHttp,
       );
@@ -192,6 +205,7 @@ void main() {
         options: ClientOptions(
           key: 'appId.keyId:keySecret',
           idempotentRestPublishing: false,
+          useBinaryProtocol: false,
         ),
         httpClient: mockHttp,
       );
@@ -222,7 +236,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyId:keySecret'),
+        options: ClientOptions.fromKey(
+          'appId.keyId:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -275,7 +292,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyId:keySecret'),
+        options: ClientOptions.fromKey(
+          'appId.keyId:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -303,7 +323,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyId:keySecret'),
+        options: ClientOptions.fromKey(
+          'appId.keyId:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -354,7 +377,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyId:keySecret'),
+        options: ClientOptions.fromKey(
+          'appId.keyId:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 

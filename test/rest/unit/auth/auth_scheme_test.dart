@@ -62,7 +62,10 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -105,7 +108,7 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions(token: 'my-token-string'),
+          options: ClientOptions(token: 'my-token-string', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -146,6 +149,7 @@ void main() {
               token: 'token-from-details',
               expires: DateTime.now().millisecondsSinceEpoch + 3600000,
             ),
+            useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );
@@ -189,6 +193,7 @@ void main() {
               token: 'callback-token',
               expires: DateTime.now().millisecondsSinceEpoch + 3600000,
             ),
+            useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );
@@ -238,6 +243,7 @@ void main() {
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             clientId: 'my-client',
+            useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );
@@ -280,7 +286,10 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -316,6 +325,7 @@ void main() {
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             authCallback: (params) async => 'callback-wins',
+            useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );
@@ -355,6 +365,7 @@ void main() {
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             token: 'explicit-token',
+            useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );

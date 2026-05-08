@@ -53,6 +53,7 @@ void main() {
           key: 'appId.keyId:keySecret',
           endpoint: 'custom.ably.example.com',
           fallbackHosts: ['fallback1.example.com', 'fallback2.example.com'],
+          useBinaryProtocol: false,
         );
 
         expect(options.endpoint, equals('custom.ably.example.com'));
@@ -71,6 +72,7 @@ void main() {
           authMethod: 'POST',
           authHeaders: {'X-API-Key': 'secret'},
           authParams: {'scope': 'full'},
+          useBinaryProtocol: false,
         );
 
         expect(options.authUrl, equals('https://auth.example.com/token'));
@@ -85,6 +87,7 @@ void main() {
       test('accepts default token parameters', () {
         final options = ClientOptions(
           key: 'appId.keyId:keySecret',
+          useBinaryProtocol: false,
           defaultTokenParams: TokenParams(
             ttl: 7200000,
             clientId: 'default-client',
@@ -105,7 +108,7 @@ void main() {
       // UTS: rest/unit/TO/conflicting-options-validation-1
       test('throws when no auth options provided', () {
         expect(
-          () => Rest(options: ClientOptions()),
+          () => Rest(options: ClientOptions(useBinaryProtocol: false)),
           throwsA(isA<AblyException>()),
         );
       });

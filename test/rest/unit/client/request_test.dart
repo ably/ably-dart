@@ -38,7 +38,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -66,7 +66,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -94,7 +94,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -122,7 +122,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -150,7 +150,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -178,7 +178,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -211,7 +211,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -243,7 +243,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -279,7 +279,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -307,7 +307,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -337,7 +337,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -365,7 +365,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions(token: 'test-token'),
+          options: ClientOptions(token: 'test-token', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -393,7 +393,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -515,7 +515,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -533,7 +533,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -558,7 +558,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -585,7 +585,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -617,7 +617,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -639,7 +639,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -665,7 +665,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -684,7 +684,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -704,7 +704,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -725,7 +725,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -744,7 +744,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -774,7 +774,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -802,7 +802,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -832,7 +832,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -858,7 +858,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -891,7 +891,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -918,7 +918,7 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret'),
+          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 

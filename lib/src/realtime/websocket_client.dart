@@ -30,7 +30,14 @@ abstract class WebSocketClient {
   /// The [listener] is attached before the connection completes, ensuring
   /// no events are missed. Returns a [WebSocketConnection] that can be used
   /// to send messages and close the connection.
-  Future<WebSocketConnection> connect(Uri url, WebSocketListener listener);
+  ///
+  /// When [useBinaryProtocol] is true, the connection sends and receives
+  /// MessagePack-encoded binary frames instead of JSON text frames.
+  Future<WebSocketConnection> connect(
+    Uri url,
+    WebSocketListener listener, {
+    bool useBinaryProtocol = false,
+  });
 }
 
 /// Abstract WebSocket connection interface.

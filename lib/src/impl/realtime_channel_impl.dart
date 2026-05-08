@@ -74,6 +74,7 @@ class RealtimeChannelImpl implements RealtimeChannel {
       getChannelState: () => _state,
       getChannelModes: () => _modes,
       getAttachOnSubscribe: () => _options.attachOnSubscribe,
+      useBinaryProtocol: _clientOptions.useBinaryProtocol,
       logger: logger,
     );
     _push = PushChannelImpl(
@@ -399,7 +400,11 @@ class RealtimeChannelImpl implements RealtimeChannel {
     final protocolMessage = ProtocolMessage(
       action: ProtocolAction.message,
       channel: _name,
-      messages: messageList.map((m) => m.toMap()).toList(),
+      messages: messageList
+          .map((m) => m.toMap(
+                useBinaryProtocol: _clientOptions.useBinaryProtocol,
+              ))
+          .toList(),
     );
 
     final connState = _connection.state;
@@ -1031,7 +1036,8 @@ class RealtimeChannelImpl implements RealtimeChannel {
     for (var i = 0; i < rawMessages.length; i++) {
       final map = rawMessages[i] is Map<String, dynamic>
           ? Map<String, dynamic>.from(rawMessages[i] as Map<String, dynamic>)
-          : (rawMessages[i] as Message).toMap();
+          : (rawMessages[i] as Message)
+              .toMap(useBinaryProtocol: _clientOptions.useBinaryProtocol);
       if (map['connectionId'] == null && protocolMessage.connectionId != null) {
         map['connectionId'] = protocolMessage.connectionId;
       }
@@ -1535,7 +1541,12 @@ class RealtimeChannelImpl implements RealtimeChannel {
 
     // RTL32b / RSL15d: Encode data per RSL4
     if (message.data != null) {
-      _encodeDataInto(body, message.data!, message.encoding);
+      Message.encodeDataInto(
+        body,
+        message.data!,
+        message.encoding,
+        useBinaryProtocol: _clientOptions.useBinaryProtocol,
+      );
     }
 
     // RTL32b2: Include version only when operation is provided
@@ -1597,34 +1608,6 @@ class RealtimeChannelImpl implements RealtimeChannel {
     final versionSerial =
         (serials.isNotEmpty && serials[0] != null) ? serials[0] : null;
     return UpdateDeleteResult(versionSerial: versionSerial);
-  }
-
-  /// Encodes data into a wire body map following RSL4 rules.
-  void _encodeDataInto(
-    Map<String, dynamic> body,
-    Object data,
-    String? existingEncoding,
-  ) {
-    if (data is String) {
-      body['data'] = data;
-    } else if (data is Uint8List) {
-      body['data'] = base64.encode(data);
-      body['encoding'] = _combineEncodings('base64', existingEncoding);
-    } else if (data is List || data is Map) {
-      body['data'] = json.encode(data);
-      body['encoding'] = _combineEncodings('json', existingEncoding);
-    } else {
-      body['data'] = json.encode(data);
-      body['encoding'] = _combineEncodings('json', existingEncoding);
-    }
-  }
-
-  String? _combineEncodings(String? newEncoding, String? existingEncoding) {
-    if (newEncoding == null) return existingEncoding;
-    if (existingEncoding == null || existingEncoding.isEmpty) {
-      return newEncoding;
-    }
-    return '$existingEncoding/$newEncoding';
   }
 
   /// Validates that a serial is non-null and non-empty.

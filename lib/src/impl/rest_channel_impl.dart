@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:msgpack_dart/msgpack_dart.dart' as msgpack;
+
 import '../auth/client_options.dart';
 import '../channels/channel_details.dart';
 import '../channels/rest_annotations.dart';
@@ -113,17 +115,22 @@ class RestChannelImpl implements RestChannel {
     final encodedMessages = messagesToPublish.map(_encodeMessage).toList();
 
     // Check message size
-    final jsonBody = json.encode(encodedMessages);
-    if (jsonBody.length > _options.maxMessageSize) {
+    final int wireSize;
+    if (_options.useBinaryProtocol) {
+      wireSize = msgpack.serialize(encodedMessages).length;
+    } else {
+      wireSize = json.encode(encodedMessages).length;
+    }
+    if (wireSize > _options.maxMessageSize) {
       _logger.error('Message exceeds maxMessageSize', {
-        'size': jsonBody.length,
+        'size': wireSize,
         'max': _options.maxMessageSize,
       });
       throw AblyException(
         message: 'Message size exceeds maximum',
         errorInfo: ErrorInfo(
           message:
-              'Message size ${jsonBody.length} exceeds maximum ${_options.maxMessageSize}',
+              'Message size $wireSize exceeds maximum ${_options.maxMessageSize}',
           code: 40009,
           statusCode: 400,
         ),
@@ -243,7 +250,12 @@ class RestChannelImpl implements RestChannel {
 
     // RSL15d: Encode data per RSL4
     if (message.data != null) {
-      _encodeDataInto(body, message.data!, message.encoding);
+      Message.encodeDataInto(
+        body,
+        message.data!,
+        message.encoding,
+        useBinaryProtocol: _options.useBinaryProtocol,
+      );
     }
 
     // RSL15b7: Include version only when operation is provided
@@ -252,26 +264,6 @@ class RestChannelImpl implements RestChannel {
     }
 
     return _restApi.patchMessage(message.serial!, body, params: params);
-  }
-
-  /// Encodes data into a wire body map following RSL4 rules.
-  void _encodeDataInto(
-    Map<String, dynamic> body,
-    Object data,
-    String? existingEncoding,
-  ) {
-    if (data is String) {
-      body['data'] = data;
-    } else if (data is Uint8List) {
-      body['data'] = base64.encode(data);
-      body['encoding'] = _combineEncodings('base64', existingEncoding);
-    } else if (data is List || data is Map) {
-      body['data'] = json.encode(data);
-      body['encoding'] = _combineEncodings('json', existingEncoding);
-    } else {
-      body['data'] = json.encode(data);
-      body['encoding'] = _combineEncodings('json', existingEncoding);
-    }
   }
 
   /// Validates that a serial is non-null and non-empty.
@@ -298,20 +290,16 @@ class RestChannelImpl implements RestChannel {
     if (msg.clientId != null) encoded['clientId'] = msg.clientId;
     if (msg.extras != null) encoded['extras'] = msg.extras!.toMap();
 
-    // Encode data based on type (RSL4)
     if (msg.data != null) {
-      _encodeDataInto(encoded, msg.data!, msg.encoding);
+      Message.encodeDataInto(
+        encoded,
+        msg.data!,
+        msg.encoding,
+        useBinaryProtocol: _options.useBinaryProtocol,
+      );
     }
 
     return encoded;
-  }
-
-  String? _combineEncodings(String? newEncoding, String? existingEncoding) {
-    if (newEncoding == null) return existingEncoding;
-    if (existingEncoding == null || existingEncoding.isEmpty) {
-      return newEncoding;
-    }
-    return '$existingEncoding/$newEncoding';
   }
 
   void _addIdempotencyIds(List<Map<String, dynamic>> messages) {
