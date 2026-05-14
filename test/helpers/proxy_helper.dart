@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
-
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 
-const _proxyVersion = 'v0.1.0';
+const _proxyVersion = 'v0.2.0';
 const _proxyRepo = 'ably/uts-proxy';
 
 const _controlPort = 9100;
@@ -16,14 +14,14 @@ const _sandboxRealtimeHost = 'sandbox.realtime.ably-nonprod.net';
 const _sandboxRestHost = 'sandbox.realtime.ably-nonprod.net';
 
 const _checksums = {
-  'uts-proxy_darwin_amd64.tar.gz':
-      'eb8abf5eec7f7137cf9e7cb6ab6f45fd162303c242b4567ab9e354c4b9a4a4ff',
-  'uts-proxy_darwin_arm64.tar.gz':
-      '845da80af7d5b1daacbdf30b34aff6ca1b2bb88c708065bdc5d9a636baf32a1f',
-  'uts-proxy_linux_amd64.tar.gz':
-      '79f444c23362cc277d163deb243dc16063c74665ff63b8bd3e56789b9d9610c7',
-  'uts-proxy_linux_arm64.tar.gz':
-      '7357e4605f19451d83bb419ee959537d6e95ca74b766721eae006d4171371030',
+  'uts-proxy_0.2.0_darwin_amd64.tar.gz':
+      '4abc4bd0682b61d53889c3ad3b240b44cf942878ed9fb04e8912a48070d2666d',
+  'uts-proxy_0.2.0_darwin_arm64.tar.gz':
+      '2b95cdb5659988f54ad3d413c713f94f944e3b0014011aba2e339b9537c59b2f',
+  'uts-proxy_0.2.0_linux_amd64.tar.gz':
+      'aa6d536101ebc3bfa6870ca4cfb75be1947360dc5c1c77d7a8536baa1fee7caa',
+  'uts-proxy_0.2.0_linux_arm64.tar.gz':
+      'c8f9363ae579508004727175a098bd0b73518ee3f08cf9071b0c372f8199767a',
 };
 
 String _cacheDir() {
@@ -38,7 +36,8 @@ String _proxyBinPath() => '${_cacheDir()}/uts-proxy';
 String _assetName() {
   final platform = Platform.isMacOS ? 'darwin' : 'linux';
   final arch = _isArm64() ? 'arm64' : 'amd64';
-  return 'uts-proxy_${platform}_$arch.tar.gz';
+  final version = _proxyVersion.replaceFirst('v', '');
+  return 'uts-proxy_${version}_${platform}_$arch.tar.gz';
 }
 
 bool _isArm64() {
@@ -109,10 +108,6 @@ Future<void> _downloadProxy() async {
     tmpDir.deleteSync(recursive: true);
   }
 }
-
-int _nextPort = 19000 + Random().nextInt(1000);
-
-int allocatePort() => _nextPort++;
 
 Process? _proxyProcess;
 bool _proxyEnsured = false;
@@ -191,16 +186,16 @@ class ProxySession {
     List<Map<String, dynamic>>? rules,
     int? timeoutMs,
   }) async {
-    final sessionPort = port ?? allocatePort();
-
     final body = <String, dynamic>{
       'target': {
         'realtimeHost': _sandboxRealtimeHost,
         'restHost': _sandboxRestHost,
       },
-      'port': sessionPort,
       'rules': rules ?? [],
     };
+    if (port != null) {
+      body['port'] = port;
+    }
     if (timeoutMs != null) {
       body['timeoutMs'] = timeoutMs;
     }
@@ -218,10 +213,12 @@ class ProxySession {
     }
 
     final data = jsonDecode(resp.body) as Map<String, dynamic>;
+    final proxy = data['proxy'] as Map<String, dynamic>?;
+    final proxyPort = proxy?['port'] as int? ?? port!;
     return ProxySession._(
       sessionId: data['sessionId'] as String,
       proxyHost: 'localhost',
-      proxyPort: sessionPort,
+      proxyPort: proxyPort,
     );
   }
 
