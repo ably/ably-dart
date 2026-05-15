@@ -25,7 +25,8 @@ void main() {
       );
 
       // Make a request
-      final response = await mock.get(Uri.parse('https://main.realtime.ably.net/time'));
+      final response =
+          await mock.get(Uri.parse('https://main.realtime.ably.net/time'));
 
       expect(response.statusCode, 200);
       expect(mock.capturedRequests.length, 1);
@@ -44,7 +45,8 @@ void main() {
         },
       );
 
-      final response = await mock.get(Uri.parse('https://main.realtime.ably.net/test'));
+      final response =
+          await mock.get(Uri.parse('https://main.realtime.ably.net/test'));
       expect(response.statusCode, 200);
     });
 
@@ -113,10 +115,12 @@ void main() {
         },
       );
 
-      final response1 = await mock.get(Uri.parse('https://main.realtime.ably.net/test'));
+      final response1 =
+          await mock.get(Uri.parse('https://main.realtime.ably.net/test'));
       expect(response1.statusCode, 200);
 
-      final response2 = await mock.get(Uri.parse('https://main.realtime.ably.net/test'));
+      final response2 =
+          await mock.get(Uri.parse('https://main.realtime.ably.net/test'));
       expect(response2.statusCode, 201);
 
       expect(mock.capturedRequests.length, 2);
@@ -147,7 +151,8 @@ void main() {
         },
       );
 
-      final response = await mock.get(Uri.parse('https://main.realtime.ably.net/test'));
+      final response =
+          await mock.get(Uri.parse('https://main.realtime.ably.net/test'));
       expect(response.headers['x-response-header'], 'response-value');
       // Note: content-type is set by StreamedResponse, not always in headers map
     });
@@ -164,7 +169,8 @@ void main() {
       mock = MockHttpClient();
 
       // Start a request in the background
-      final requestFuture = mock.get(Uri.parse('https://main.realtime.ably.net/test'));
+      final requestFuture =
+          mock.get(Uri.parse('https://main.realtime.ably.net/test'));
 
       // Await the request in test code
       final pendingRequest = await mock.awaitRequest();
@@ -183,7 +189,8 @@ void main() {
       mock = MockHttpClient();
 
       // Start a request in the background
-      final requestFuture = mock.get(Uri.parse('https://main.realtime.ably.net/test'));
+      final requestFuture =
+          mock.get(Uri.parse('https://main.realtime.ably.net/test'));
 
       // Both connection and request will be emitted
       final request = await mock.awaitRequest();
@@ -237,7 +244,8 @@ void main() {
       );
 
       final stopwatch = Stopwatch()..start();
-      final response = await mock.get(Uri.parse('https://main.realtime.ably.net/test'));
+      final response =
+          await mock.get(Uri.parse('https://main.realtime.ably.net/test'));
       stopwatch.stop();
 
       expect(response.statusCode, 200);
@@ -279,7 +287,8 @@ void main() {
       await mock.get(Uri.parse('https://a.fallback.ably-realtime.com/test'));
       await mock.get(Uri.parse('https://main.realtime.ably.net/test2'));
 
-      final ablyRequests = mock.capturedRequestsForHost('main.realtime.ably.net');
+      final ablyRequests =
+          mock.capturedRequestsForHost('main.realtime.ably.net');
       expect(ablyRequests.length, 2);
       expect(ablyRequests[0].url.path, '/test');
       expect(ablyRequests[1].url.path, '/test2');
@@ -353,7 +362,8 @@ void main() {
       );
 
       // Should succeed even without onConnectionAttempt handler
-      final response = await mock.get(Uri.parse('https://main.realtime.ably.net/test'));
+      final response =
+          await mock.get(Uri.parse('https://main.realtime.ably.net/test'));
       expect(response.statusCode, 200);
     });
 
@@ -361,7 +371,8 @@ void main() {
       mock = MockHttpClient();
 
       // Should get default 200 response
-      final response = await mock.get(Uri.parse('https://main.realtime.ably.net/test'));
+      final response =
+          await mock.get(Uri.parse('https://main.realtime.ably.net/test'));
       expect(response.statusCode, 200);
     });
   });
@@ -382,7 +393,8 @@ void main() {
         },
       );
 
-      final requestFuture = mock.get(Uri.parse('https://main.realtime.ably.net/test'));
+      final requestFuture =
+          mock.get(Uri.parse('https://main.realtime.ably.net/test'));
       final pendingRequest = await mock.awaitRequest();
 
       expect(handlerCalled, true);

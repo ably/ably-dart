@@ -330,7 +330,8 @@ void main() {
 
       // Presence map is cleared (check directly — get() would trigger
       // implicit reattach per RTP11b since channel is DETACHED)
-      expect((channel.presence as RealtimePresenceImpl).members.values().length, equals(0));
+      expect((channel.presence as RealtimePresenceImpl).members.values().length,
+          equals(0));
 
       mockWs.dispose();
     });

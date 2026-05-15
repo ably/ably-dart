@@ -788,8 +788,7 @@ void main() {
         expect(connectionAttempts, hasLength(2));
 
         // First connection: no resume
-        expect(
-            connectionAttempts[0].queryParameters.containsKey('resume'),
+        expect(connectionAttempts[0].queryParameters.containsKey('resume'),
             isFalse);
 
         // Second connection: resume with original key

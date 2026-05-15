@@ -44,14 +44,12 @@ void main() {
       // way, allowing for network latency and minor clock skew).
       final diff = serverTime.difference(before).abs();
       final diffFromAfter = serverTime.difference(after).abs();
-      final minDiff =
-          diff < diffFromAfter ? diff : diffFromAfter;
+      final minDiff = diff < diffFromAfter ? diff : diffFromAfter;
 
       expect(
         minDiff,
         lessThan(const Duration(seconds: 5)),
-        reason:
-            'Server time ($serverTime) differs from client time ($before) '
+        reason: 'Server time ($serverTime) differs from client time ($before) '
             'by more than 5 seconds',
       );
     });

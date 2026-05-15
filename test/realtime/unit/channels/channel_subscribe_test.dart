@@ -1217,8 +1217,7 @@ void main() {
       await channel.attach();
 
       final filteredMessages = <Message>[];
-      const filter =
-          MessageFilter(refTimeserial: 'abc123@1700000000000-0');
+      const filter = MessageFilter(refTimeserial: 'abc123@1700000000000-0');
       channel.subscribeFilter(
         filter,
         (message) => filteredMessages.add(message),
@@ -1460,8 +1459,7 @@ void main() {
       await channel.attach();
 
       final filteredMessages = <Message>[];
-      const filter =
-          MessageFilter(name: 'comment', refType: 'com.ably.reply');
+      const filter = MessageFilter(name: 'comment', refType: 'com.ably.reply');
       channel.subscribeFilter(
         filter,
         (message) => filteredMessages.add(message),

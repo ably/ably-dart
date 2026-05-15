@@ -195,7 +195,8 @@ void main() {
   group('CHD2, CHS2, CHO2, CHM2 - status() parses all ChannelMetrics fields',
       () {
     // UTS: rest/unit/CHM2/parses-all-metrics-fields-0
-    test('parses all metric fields including objectPublishers/objectSubscribers',
+    test(
+        'parses all metric fields including objectPublishers/objectSubscribers',
         () async {
       final mockHttp = MockHttpClient(
         onRequest: (request) {

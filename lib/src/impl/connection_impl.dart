@@ -403,8 +403,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
       final parsed = jsonDecode(recoveryKey) as Map<String, dynamic>;
       final connectionKey = parsed['connectionKey'] as String?;
       final msgSerial = parsed['msgSerial'] as int?;
-      final channelSerials =
-          (parsed['channelSerials'] as Map<String, dynamic>?)
+      final channelSerials = (parsed['channelSerials'] as Map<String, dynamic>?)
               ?.map((k, v) => MapEntry(k, v as String)) ??
           {};
 
@@ -1383,8 +1382,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
       scheduleMicrotask(() {
         if (_state == ConnectionState.disconnected) {
           _retryAttempt++;
-          _pendingConnectionFuture =
-              _startConnection().catchError((_) {});
+          _pendingConnectionFuture = _startConnection().catchError((_) {});
         }
       });
       return;
@@ -1409,8 +1407,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
             return;
           }
           _retryAttempt++; // Increment for next retry
-          _pendingConnectionFuture =
-              _startConnection().catchError((_) {});
+          _pendingConnectionFuture = _startConnection().catchError((_) {});
         }
       },
     );

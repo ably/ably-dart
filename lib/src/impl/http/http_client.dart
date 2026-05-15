@@ -380,12 +380,10 @@ class AblyHttpClient {
     // Check for errors
     if (!ablyResponse.isSuccess && !returnErrorBody) {
       // RSC15l4: CloudFront errors are retryable
-      final isCloudFront = normalizedHeaders['server']
-              ?.toLowerCase()
-              .contains('cloudfront') ??
-          false;
-      final forceRetry =
-          isCloudFront && response.statusCode >= 400;
+      final isCloudFront =
+          normalizedHeaders['server']?.toLowerCase().contains('cloudfront') ??
+              false;
+      final forceRetry = isCloudFront && response.statusCode >= 400;
       throw _parseError(
         ablyResponse,
         queryParams?['request_id'],

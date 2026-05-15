@@ -81,8 +81,7 @@ class MockHttpClient extends http.BaseClient {
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
-    final bodyBytes =
-        request is http.Request ? request.bodyBytes : <int>[];
+    final bodyBytes = request is http.Request ? request.bodyBytes : <int>[];
     final capturedRequest = CapturedRequest(
       method: request.method,
       url: request.url,
@@ -304,5 +303,6 @@ class CapturedRequest {
   String? get body => bodyAsString;
 
   /// Parses the body as JSON.
-  dynamic get jsonBody => bodyBytes.isNotEmpty ? json.decode(bodyAsString) : null;
+  dynamic get jsonBody =>
+      bodyBytes.isNotEmpty ? json.decode(bodyAsString) : null;
 }

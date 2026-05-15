@@ -265,8 +265,7 @@ void main() {
             },
           },
           'times': 1,
-          'comment':
-              'Return 503 with JSON error body on first /time request',
+          'comment': 'Return 503 with JSON error body on first /time request',
         },
       ],
     );
@@ -371,8 +370,7 @@ void main() {
             },
           },
           'times': 1,
-          'comment':
-              'Return 403 with JSON error body on first /time request',
+          'comment': 'Return 403 with JSON error body on first /time request',
         },
       ],
     );
@@ -438,8 +436,7 @@ void main() {
             },
           },
           'times': 1,
-          'comment':
-              'RSL1k4: Forward first publish to server, return fake 503',
+          'comment': 'RSL1k4: Forward first publish to server, return fake 503',
         },
       ],
     );

@@ -151,9 +151,12 @@ void main() {
           .timeout(const Duration(seconds: 15));
 
       expect(client.connection.state, equals(ConnectionState.connected));
-      expect(authCallbackCount, greaterThanOrEqualTo(2),
-          reason: 'authCallback should be called at least twice '
-              '(initial + renewal)',);
+      expect(
+        authCallbackCount,
+        greaterThanOrEqualTo(2),
+        reason: 'authCallback should be called at least twice '
+            '(initial + renewal)',
+      );
     });
 
     // -------------------------------------------------------------------------
@@ -318,8 +321,11 @@ void main() {
       await disconnectedFuture;
 
       expect(client.connection.state, equals(ConnectionState.disconnected));
-      expect(client.connection.errorReason, isNotNull,
-          reason: 'Should have timeout error',);
+      expect(
+        client.connection.errorReason,
+        isNotNull,
+        reason: 'Should have timeout error',
+      );
     });
   });
 }

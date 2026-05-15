@@ -41,7 +41,8 @@ void main() {
 
       // Connect and await CONNECTED state
       client.connect();
-      await waitForConnectionState(client.connection, ConnectionState.connected);
+      await waitForConnectionState(
+          client.connection, ConnectionState.connected);
 
       // Record the connection ID
       final connectionId = client.connection.id;
@@ -66,9 +67,8 @@ void main() {
 
       // Assert: no state transitions where current != previous
       // (i.e., the connection stayed connected throughout)
-      final disruptiveChanges = stateChanges
-          .where((sc) => sc.current != sc.previous)
-          .toList();
+      final disruptiveChanges =
+          stateChanges.where((sc) => sc.current != sc.previous).toList();
       expect(
         disruptiveChanges,
         isEmpty,
@@ -103,7 +103,8 @@ void main() {
       final token = await client.auth.authorize();
 
       // Await CONNECTED state
-      await waitForConnectionState(client.connection, ConnectionState.connected);
+      await waitForConnectionState(
+          client.connection, ConnectionState.connected);
 
       // Assert: token non-null
       expect(token, isNotNull);
@@ -136,7 +137,8 @@ void main() {
 
       // Connect and await CONNECTED
       client.connect();
-      await waitForConnectionState(client.connection, ConnectionState.connected);
+      await waitForConnectionState(
+          client.connection, ConnectionState.connected);
 
       expect(client.connection.id, isNotNull);
       expect(client.connection.errorReason, isNull);
@@ -148,7 +150,8 @@ void main() {
     // UTS: realtime/integration/RSA7/matching-clientid-succeeds-0
     test('RSA7 - matching clientId succeeds', () async {
       final apiKey = testApp.keys[0].keyStr;
-      final testClientId = 'test-client-${DateTime.now().millisecondsSinceEpoch}';
+      final testClientId =
+          'test-client-${DateTime.now().millisecondsSinceEpoch}';
 
       final client = Realtime(
         options: ClientOptions(
@@ -168,7 +171,8 @@ void main() {
 
       // Connect and await CONNECTED
       client.connect();
-      await waitForConnectionState(client.connection, ConnectionState.connected);
+      await waitForConnectionState(
+          client.connection, ConnectionState.connected);
 
       // Assert: auth.clientId matches
       expect(client.auth.clientId, equals(testClientId));

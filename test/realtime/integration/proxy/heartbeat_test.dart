@@ -94,26 +94,47 @@ void main() {
       final secondConnected =
           states.indexOf(ConnectionState.connected, disconnected + 1);
 
-      expect(firstConnecting, greaterThanOrEqualTo(0),
-          reason: 'Should have initial CONNECTING',);
-      expect(firstConnected, greaterThan(firstConnecting),
-          reason: 'Should have initial CONNECTED after CONNECTING',);
-      expect(disconnected, greaterThan(firstConnected),
-          reason: 'Should have DISCONNECTED after CONNECTED',);
-      expect(secondConnecting, greaterThan(disconnected),
-          reason: 'Should have second CONNECTING after DISCONNECTED',);
-      expect(secondConnected, greaterThan(secondConnecting),
-          reason: 'Should have second CONNECTED after second CONNECTING',);
+      expect(
+        firstConnecting,
+        greaterThanOrEqualTo(0),
+        reason: 'Should have initial CONNECTING',
+      );
+      expect(
+        firstConnected,
+        greaterThan(firstConnecting),
+        reason: 'Should have initial CONNECTED after CONNECTING',
+      );
+      expect(
+        disconnected,
+        greaterThan(firstConnected),
+        reason: 'Should have DISCONNECTED after CONNECTED',
+      );
+      expect(
+        secondConnecting,
+        greaterThan(disconnected),
+        reason: 'Should have second CONNECTING after DISCONNECTED',
+      );
+      expect(
+        secondConnected,
+        greaterThan(secondConnecting),
+        reason: 'Should have second CONNECTED after second CONNECTING',
+      );
 
       // Verify proxy log shows >= 2 ws_connect and second has resume param
       final log = await session.getLog();
       final wsConnects = log.where((e) => e['type'] == 'ws_connect').toList();
-      expect(wsConnects.length, greaterThanOrEqualTo(2),
-          reason: 'Should have at least 2 WebSocket connections',);
+      expect(
+        wsConnects.length,
+        greaterThanOrEqualTo(2),
+        reason: 'Should have at least 2 WebSocket connections',
+      );
 
       final secondUrl = wsConnects[1]['url'] as String? ?? '';
-      expect(secondUrl, contains('resume='),
-          reason: 'Second connection should include resume parameter',);
+      expect(
+        secondUrl,
+        contains('resume='),
+        reason: 'Second connection should include resume parameter',
+      );
     });
   });
 }

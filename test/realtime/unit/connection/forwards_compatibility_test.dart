@@ -386,7 +386,9 @@ void main() {
         'futureField3': true,
         'futureField4': null,
         'futureField5': [1, 'two', 3.0],
-        'futureField6': {'nested': {'deep': true}},
+        'futureField6': {
+          'nested': {'deep': true}
+        },
       });
 
       // All known fields are correctly parsed

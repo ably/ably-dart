@@ -427,7 +427,8 @@ void main() {
 
     group('RSA8c - authUrl custom headers', () {
       // UTS: rest/unit/RSA8c/authurl-custom-headers-2
-      test('authUrl request includes custom headers from authHeaders', () async {
+      test('authUrl request includes custom headers from authHeaders',
+          () async {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSA8c-headers');
 

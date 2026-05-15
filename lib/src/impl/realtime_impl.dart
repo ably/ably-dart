@@ -130,9 +130,8 @@ class RealtimeImpl extends BaseClientImpl implements Realtime {
     try {
       final parsed = jsonDecode(recoveryKey) as Map<String, dynamic>;
       final msgSerial = parsed['msgSerial'] as int?;
-      final channelSerials =
-          (parsed['channelSerials'] as Map<String, dynamic>?)
-              ?.map((k, v) => MapEntry(k, v as String));
+      final channelSerials = (parsed['channelSerials'] as Map<String, dynamic>?)
+          ?.map((k, v) => MapEntry(k, v as String));
 
       // RTN16f: Initialize msgSerial
       if (msgSerial != null) {

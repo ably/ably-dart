@@ -74,8 +74,8 @@ void main() {
       await _awaitState(client.connection, ConnectionState.disconnected);
 
       // Verify a DISCONNECTED state change was emitted from CONNECTED
-      final disconnectedChange = stateChanges.firstWhere(
-          (c) => c.current == ConnectionState.disconnected);
+      final disconnectedChange = stateChanges
+          .firstWhere((c) => c.current == ConnectionState.disconnected);
       expect(disconnectedChange.previous, equals(ConnectionState.connected));
 
       await client.close();
@@ -531,9 +531,7 @@ void main() {
   group(
       'RTN20 - Multiple rapid network changes do not cause state '
       'machine issues', () {
-    test(
-        'rapid disconnect/reconnect cycles are handled gracefully',
-        () async {
+    test('rapid disconnect/reconnect cycles are handled gracefully', () async {
       var connectionAttemptCount = 0;
 
       final mockWs = MockWebSocketClient(

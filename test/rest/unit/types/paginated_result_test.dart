@@ -478,7 +478,8 @@ void main() {
 
     group('TG - Pagination with absolute URLs', () {
       // UTS: rest/unit/TG/pagination-presence-results-7
-      test('absolute URLs extract path and query, use primary domain', () async {
+      test('absolute URLs extract path and query, use primary domain',
+          () async {
         final capturedRequests = <CapturedRequest>[];
         var requestCount = 0;
         final channelName = testChannelName('TG-absolute');
@@ -528,8 +529,8 @@ void main() {
         expect(
             capturedRequests[1].url.queryParameters['cursor'], equals('abc'));
         // But the request goes to the client's primary domain, not the Link host
-        expect(capturedRequests[1].url.host,
-            equals(client.options.primaryDomain));
+        expect(
+            capturedRequests[1].url.host, equals(client.options.primaryDomain));
       });
     });
 

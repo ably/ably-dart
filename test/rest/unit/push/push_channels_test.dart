@@ -323,8 +323,7 @@ void main() {
       );
 
       final channel = client.channels.get('my-channel');
-      final result =
-          await channel.push.listSubscriptions({'limit': '10'});
+      final result = await channel.push.listSubscriptions({'limit': '10'});
 
       expect(mockHttp.capturedRequests.length, equals(1));
 

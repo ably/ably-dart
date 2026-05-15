@@ -101,8 +101,7 @@ void main() {
             final presenceFrames = log.where((event) {
               if (event['type'] != 'ws_frame') return false;
               if (event['direction'] != 'client_to_server') return false;
-              final message =
-                  event['message'] as Map<String, dynamic>? ?? {};
+              final message = event['message'] as Map<String, dynamic>? ?? {};
               return message['action'] == 14; // PRESENCE
             }).toList();
             if (presenceFrames.length > baselinePresenceCount) {
@@ -131,9 +130,9 @@ void main() {
         final reenterFrame = presenceFrames.last;
         final reenterMessage =
             reenterFrame['message'] as Map<String, dynamic>? ?? {};
-        final presenceList =
-            reenterMessage['presence'] as List<dynamic>? ?? [];
-        expect(presenceList, isNotEmpty, reason: 'PRESENCE frame should have presence data');
+        final presenceList = reenterMessage['presence'] as List<dynamic>? ?? [];
+        expect(presenceList, isNotEmpty,
+            reason: 'PRESENCE frame should have presence data');
 
         final presenceEntry = presenceList.first as Map<String, dynamic>;
         expect(
@@ -200,8 +199,7 @@ void main() {
               },
             },
             'times': 1,
-            'comment':
-                'RTP17i: Replace 2nd ATTACHED with non-resumed to '
+            'comment': 'RTP17i: Replace 2nd ATTACHED with non-resumed to '
                 'trigger re-entry',
           },
         ],
@@ -282,8 +280,7 @@ void main() {
           final event = log[i];
           if (event['type'] == 'ws_frame' &&
               event['direction'] == 'client_to_server') {
-            final message =
-                event['message'] as Map<String, dynamic>? ?? {};
+            final message = event['message'] as Map<String, dynamic>? ?? {};
             if (message['action'] == 14) {
               // PRESENCE
               presenceAfterReconnect.add(event);
@@ -302,13 +299,15 @@ void main() {
       final reenterFrame = presenceAfterReconnect.first;
       final reenterMessage =
           reenterFrame['message'] as Map<String, dynamic>? ?? {};
-      final presenceList =
-          reenterMessage['presence'] as List<dynamic>? ?? [];
+      final presenceList = reenterMessage['presence'] as List<dynamic>? ?? [];
       expect(presenceList, isNotEmpty);
 
       final presenceEntry = presenceList.first as Map<String, dynamic>;
-      expect(presenceEntry['action'], equals(2),
-          reason: 'Re-enter action should be ENTER (2)',);
+      expect(
+        presenceEntry['action'],
+        equals(2),
+        reason: 'Re-enter action should be ENTER (2)',
+      );
       expect(presenceEntry['clientId'], equals(clientId));
       expect(presenceEntry['data'], equals('hello'));
     });

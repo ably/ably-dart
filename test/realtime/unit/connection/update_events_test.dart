@@ -242,8 +242,7 @@ void main() {
       expect(updateChange.reason, isNotNull);
       expect(updateChange.reason!.code, equals(40142));
       expect(updateChange.reason!.statusCode, equals(401));
-      expect(
-          updateChange.reason!.message, contains('Token expired'));
+      expect(updateChange.reason!.message, contains('Token expired'));
 
       await client.close();
       mockWs.dispose();
