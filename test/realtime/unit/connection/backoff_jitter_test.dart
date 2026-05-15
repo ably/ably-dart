@@ -30,10 +30,8 @@ void main() {
 
       // Verify exact values for the first few retries
       expect(coefficients[0], closeTo(1.0, 0.001)); // n=1: (1+2)/3 = 1
-      expect(
-          coefficients[1], closeTo(4.0 / 3.0, 0.001)); // n=2: (2+2)/3 = 4/3
-      expect(
-          coefficients[2], closeTo(5.0 / 3.0, 0.001)); // n=3: (3+2)/3 = 5/3
+      expect(coefficients[1], closeTo(4.0 / 3.0, 0.001)); // n=2: (2+2)/3 = 4/3
+      expect(coefficients[2], closeTo(5.0 / 3.0, 0.001)); // n=3: (3+2)/3 = 5/3
       expect(coefficients[3], closeTo(2.0, 0.001)); // n=4: (4+2)/3 = 2, capped
 
       // Verify all subsequent retries are capped at 2.0
@@ -187,10 +185,8 @@ void main() {
             reason: 'Retry 3 upper bound');
 
         // Retry 4+: backoff = 2.0 (capped)
-        expect(
-            retryDelays[3],
-            greaterThanOrEqualTo(
-                (disconnectedRetryTimeout * 2.0 * 0.8).ceil()),
+        expect(retryDelays[3],
+            greaterThanOrEqualTo((disconnectedRetryTimeout * 2.0 * 0.8).ceil()),
             reason: 'Retry 4 lower bound');
         expect(
             retryDelays[3],
@@ -198,10 +194,8 @@ void main() {
                 (disconnectedRetryTimeout * 2.0 * 1.0).floor() + 1),
             reason: 'Retry 4 upper bound');
 
-        expect(
-            retryDelays[4],
-            greaterThanOrEqualTo(
-                (disconnectedRetryTimeout * 2.0 * 0.8).ceil()),
+        expect(retryDelays[4],
+            greaterThanOrEqualTo((disconnectedRetryTimeout * 2.0 * 0.8).ceil()),
             reason: 'Retry 5 lower bound');
         expect(
             retryDelays[4],

@@ -157,8 +157,11 @@ void main() {
           .timeout(const Duration(seconds: 15));
 
       // Assert: connectionId is preserved after resume
-      expect(client.connection.id, equals(originalId),
-          reason: 'connectionId should be preserved after successful resume',);
+      expect(
+        client.connection.id,
+        equals(originalId),
+        reason: 'connectionId should be preserved after successful resume',
+      );
 
       // Verify proxy log shows resume with original key
       final log = await session.getLog();
@@ -166,8 +169,11 @@ void main() {
       expect(wsConnects.length, greaterThanOrEqualTo(2));
 
       final secondUrl = wsConnects[1]['url'] as String? ?? '';
-      expect(secondUrl, contains('resume='),
-          reason: 'Second connection should include resume parameter',);
+      expect(
+        secondUrl,
+        contains('resume='),
+        reason: 'Second connection should include resume parameter',
+      );
     });
 
     // -------------------------------------------------------------------------
@@ -217,8 +223,7 @@ void main() {
               },
             },
             'times': 1,
-            'comment':
-                'RTN15c7: Replace 2nd CONNECTED with failed resume '
+            'comment': 'RTN15c7: Replace 2nd CONNECTED with failed resume '
                 '(different connectionId + error 80008)',
           },
         ],
@@ -257,13 +262,19 @@ void main() {
           .timeout(const Duration(seconds: 15));
 
       // Assert: new connectionId from proxy injection
-      expect(client.connection.id, equals('proxy-injected-new-id'),
-          reason: 'After failed resume, should have proxy-injected new id',);
+      expect(
+        client.connection.id,
+        equals('proxy-injected-new-id'),
+        reason: 'After failed resume, should have proxy-injected new id',
+      );
 
       // Assert: errorReason.code == 80008
       expect(client.connection.errorReason, isNotNull);
-      expect(client.connection.errorReason!.code, equals(80008),
-          reason: 'Error code should be 80008 for failed resume',);
+      expect(
+        client.connection.errorReason!.code,
+        equals(80008),
+        reason: 'Error code should be 80008 for failed resume',
+      );
     });
 
     // -------------------------------------------------------------------------
@@ -362,7 +373,7 @@ void main() {
             'times': 1,
             'comment':
                 'RTN15h3: Inject DISCONNECTED with non-token error (80003) '
-                'after 1s, once only',
+                    'after 1s, once only',
           },
         ],
       );
@@ -403,8 +414,11 @@ void main() {
 
       // Assert: no FAILED state in the history
       final states = stateChanges.map((e) => e.current).toList();
-      expect(states, isNot(contains(ConnectionState.failed)),
-          reason: 'Non-token error should not cause FAILED state',);
+      expect(
+        states,
+        isNot(contains(ConnectionState.failed)),
+        reason: 'Non-token error should not cause FAILED state',
+      );
     });
 
     // -------------------------------------------------------------------------
@@ -504,8 +518,7 @@ void main() {
               },
             },
             'times': 1,
-            'comment':
-                'RTN15g: Replace 1st CONNECTED with short '
+            'comment': 'RTN15g: Replace 1st CONNECTED with short '
                 'connectionStateTtl (2s)',
           },
           // Rule 2: Close WebSocket after 1s to trigger disconnect
@@ -513,8 +526,7 @@ void main() {
             'match': {'type': 'delay_after_ws_connect', 'delayMs': 1000},
             'action': {'type': 'close'},
             'times': 1,
-            'comment':
-                'RTN15g: Close WebSocket after 1s to trigger disconnect',
+            'comment': 'RTN15g: Close WebSocket after 1s to trigger disconnect',
           },
           // Rule 3: Refuse 2nd connection so SDK stays in disconnected
           // until TTL expires
@@ -522,8 +534,7 @@ void main() {
             'match': {'type': 'ws_connect', 'count': 2},
             'action': {'type': 'refuse_connection'},
             'times': 1,
-            'comment':
-                'RTN15g: Refuse 2nd connection so SDK stays in '
+            'comment': 'RTN15g: Refuse 2nd connection so SDK stays in '
                 'disconnected until TTL expires',
           },
         ],
@@ -570,15 +581,21 @@ void main() {
           .timeout(const Duration(seconds: 15));
 
       // Assert: new connectionId (fresh connect, not resumed)
-      expect(client.connection.id, isNot(equals(originalId)),
-          reason: 'After TTL expiry, should get a new connectionId',);
+      expect(
+        client.connection.id,
+        isNot(equals(originalId)),
+        reason: 'After TTL expiry, should get a new connectionId',
+      );
 
       // Verify proxy log: last ws_connect has no resume param
       final log = await session.getLog();
       final wsConnects = log.where((e) => e['type'] == 'ws_connect').toList();
       final lastUrl = wsConnects.last['url'] as String? ?? '';
-      expect(lastUrl, isNot(contains('resume=')),
-          reason: 'Fresh connect after TTL expiry should not include resume',);
+      expect(
+        lastUrl,
+        isNot(contains('resume=')),
+        reason: 'Fresh connect after TTL expiry should not include resume',
+      );
     });
 
     // -------------------------------------------------------------------------
@@ -628,23 +645,26 @@ void main() {
       final publishFuture = channel.publish(name: 'test', data: 'hello');
 
       // Poll proxy log until we see the MESSAGE sent and ACK suppressed
-      await pollUntil(() async {
-        final log = await session.getLog();
-        final hasMessage = log.any((e) {
-          if (e['type'] != 'ws_frame') return false;
-          if (e['direction'] != 'client_to_server') return false;
-          final msg = e['message'] as Map<String, dynamic>? ?? {};
-          return msg['action'] == 15; // MESSAGE
-        });
-        final hasDroppedAck = log.any((e) {
-          if (e['type'] != 'ws_frame') return false;
-          if (e['direction'] != 'server_to_client') return false;
-          final msg = e['message'] as Map<String, dynamic>? ?? {};
-          return msg['action'] == 1 && e['ruleMatched'] != null; // ACK suppressed
-        });
-        if (hasMessage && hasDroppedAck) return true;
-        return null;
-      },);
+      await pollUntil(
+        () async {
+          final log = await session.getLog();
+          final hasMessage = log.any((e) {
+            if (e['type'] != 'ws_frame') return false;
+            if (e['direction'] != 'client_to_server') return false;
+            final msg = e['message'] as Map<String, dynamic>? ?? {};
+            return msg['action'] == 15; // MESSAGE
+          });
+          final hasDroppedAck = log.any((e) {
+            if (e['type'] != 'ws_frame') return false;
+            if (e['direction'] != 'server_to_client') return false;
+            final msg = e['message'] as Map<String, dynamic>? ?? {};
+            return msg['action'] == 1 &&
+                e['ruleMatched'] != null; // ACK suppressed
+          });
+          if (hasMessage && hasDroppedAck) return true;
+          return null;
+        },
+      );
 
       // Set up reconnect listener before triggering close
       final reconnectedFuture = client.connection
@@ -669,8 +689,11 @@ void main() {
         final msg = e['message'] as Map<String, dynamic>? ?? {};
         return msg['action'] == 15; // MESSAGE
       }).toList();
-      expect(messageFrames.length, greaterThanOrEqualTo(2),
-          reason: 'Message should be resent after resume',);
+      expect(
+        messageFrames.length,
+        greaterThanOrEqualTo(2),
+        reason: 'Message should be resent after resume',
+      );
     });
   });
 }

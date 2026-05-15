@@ -123,8 +123,8 @@ void main() {
       );
 
       final listener = TestWebSocketListener();
-      final connection =
-          await mock.connect(Uri.parse('wss://main.realtime.ably.net'), listener);
+      final connection = await mock.connect(
+          Uri.parse('wss://main.realtime.ably.net'), listener);
 
       // Should receive error message via listener
       expect(listener.messages.length, 1);
@@ -288,8 +288,8 @@ void main() {
       );
 
       final listener = TestWebSocketListener();
-      final connection =
-          await mock.connect(Uri.parse('wss://main.realtime.ably.net'), listener);
+      final connection = await mock.connect(
+          Uri.parse('wss://main.realtime.ably.net'), listener);
 
       // Pump microtask queue so scheduleMicrotask-delivered CONNECTED arrives
       await Future.value();
@@ -309,8 +309,8 @@ void main() {
       );
 
       final listener = TestWebSocketListener();
-      final connection =
-          await mock.connect(Uri.parse('wss://main.realtime.ably.net'), listener);
+      final connection = await mock.connect(
+          Uri.parse('wss://main.realtime.ably.net'), listener);
 
       // Pump microtask queue so scheduleMicrotask-delivered CONNECTED arrives
       await Future.value();
@@ -354,8 +354,8 @@ void main() {
       );
 
       final listener = TestWebSocketListener();
-      final connection =
-          await mock.connect(Uri.parse('wss://main.realtime.ably.net'), listener);
+      final connection = await mock.connect(
+          Uri.parse('wss://main.realtime.ably.net'), listener);
 
       // Pump microtask queue so scheduleMicrotask-delivered CONNECTED arrives
       await Future.value();
@@ -409,8 +409,8 @@ void main() {
         },
       );
 
-      final connection =
-          await mock.connect(Uri.parse('wss://main.realtime.ably.net'), listener);
+      final connection = await mock.connect(
+          Uri.parse('wss://main.realtime.ably.net'), listener);
 
       expect(connection.isClosed, false);
 
@@ -429,8 +429,8 @@ void main() {
         },
       );
 
-      final connection =
-          await mock.connect(Uri.parse('wss://main.realtime.ably.net'), listener);
+      final connection = await mock.connect(
+          Uri.parse('wss://main.realtime.ably.net'), listener);
 
       // Pump microtask queue so scheduleMicrotask-delivered CONNECTED arrives
       await Future.value();
@@ -462,8 +462,8 @@ void main() {
         },
       );
 
-      final connection =
-          await mock.connect(Uri.parse('wss://main.realtime.ably.net'), listener);
+      final connection = await mock.connect(
+          Uri.parse('wss://main.realtime.ably.net'), listener);
 
       // Pump microtask queue so scheduleMicrotask-delivered CONNECTED arrives
       await Future.value();

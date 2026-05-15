@@ -87,7 +87,6 @@ void main() {
           );
         });
       });
-
     });
 
     group('REC2 - Fallback Domains Configuration', () {
@@ -147,7 +146,6 @@ void main() {
         expect(fallbacks[0], equals('myapp.a.fallback.ably-realtime.com'));
         expect(fallbacks[1], equals('myapp.b.fallback.ably-realtime.com'));
       });
-
     });
 
     group('REC3 - Connectivity Check URL', () {
@@ -156,7 +154,8 @@ void main() {
         final options = ClientOptions.fromKey('appId.keyId:keySecret');
         expect(
           options.effectiveConnectivityCheckUrl,
-          equals('https://internet-up.ably-realtime.com/is-the-internet-up.txt'),
+          equals(
+              'https://internet-up.ably-realtime.com/is-the-internet-up.txt'),
         );
       });
 
@@ -595,7 +594,8 @@ void main() {
 
     group('RSC15f - Fallback host caching', () {
       // UTS: rest/unit/RSC15f/successful-fallback-cached-0
-      test('RSC15f - successful fallback host is cached for subsequent requests',
+      test(
+          'RSC15f - successful fallback host is cached for subsequent requests',
           () async {
         var requestCount = 0;
 
@@ -689,7 +689,6 @@ void main() {
           equals('main.realtime.ably.net'),
         );
       });
-
     });
 
     group('RSC15f - Fallback host caching (legacy)', () {

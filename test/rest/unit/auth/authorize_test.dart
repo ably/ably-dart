@@ -239,7 +239,8 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions(authCallback: originalCallback, useBinaryProtocol: false),
+          options: ClientOptions(
+              authCallback: originalCallback, useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -407,7 +408,8 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('invalid.key:secret', useBinaryProtocol: false),
+          options: ClientOptions.fromKey('invalid.key:secret',
+              useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 

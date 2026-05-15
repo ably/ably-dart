@@ -28,8 +28,7 @@ class TokenParams {
   /// Creates a TokenParams from a JSON map.
   ///
   /// Alias for [fromMap].
-  factory TokenParams.fromJson(Map<String, dynamic> json) =
-      TokenParams.fromMap;
+  factory TokenParams.fromJson(Map<String, dynamic> json) = TokenParams.fromMap;
 
   /// JSON-encoded capability for this token.
   ///

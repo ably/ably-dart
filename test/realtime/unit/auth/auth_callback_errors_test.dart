@@ -483,8 +483,7 @@ void main() {
       'RSA4f - authCallback returns invalid type treated as invalid format '
       'error', () {
     // UTS: realtime/unit/RSA4f/callback-invalid-type-format-0
-    test(
-        'non-token return type causes DISCONNECTED with code 80019', () async {
+    test('non-token return type causes DISCONNECTED with code 80019', () async {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
           conn.respondWithSuccess(

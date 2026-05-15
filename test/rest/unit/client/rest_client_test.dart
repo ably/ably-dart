@@ -19,7 +19,8 @@ void main() {
     // UTS: rest/unit/RSC5/auth-attribute-accessible-0
     test('RSC5 - auth attribute exists', () {
       final rest = Rest(
-        options: ClientOptions(key: 'fake.key:secret', useBinaryProtocol: false),
+        options:
+            ClientOptions(key: 'fake.key:secret', useBinaryProtocol: false),
       );
 
       expect(rest.auth, isNotNull);
@@ -58,7 +59,8 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
+          options: ClientOptions.fromKey('appId.keyId:keySecret',
+              useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -92,7 +94,8 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
+          options: ClientOptions.fromKey('appId.keyId:keySecret',
+              useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -374,7 +377,8 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
+          options: ClientOptions.fromKey('appId.keyId:keySecret',
+              useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 
@@ -403,7 +407,8 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret', useBinaryProtocol: false),
+          options: ClientOptions.fromKey('appId.keyId:keySecret',
+              useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 

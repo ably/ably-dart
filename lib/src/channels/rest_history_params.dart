@@ -75,9 +75,8 @@ class RestHistoryParams {
     return {
       if (start != null) 'start': start.toString(),
       if (end != null) 'end': end.toString(),
-      'direction': direction == HistoryDirection.forwards
-          ? 'forwards'
-          : 'backwards',
+      'direction':
+          direction == HistoryDirection.forwards ? 'forwards' : 'backwards',
       'limit': limit.toString(),
     };
   }

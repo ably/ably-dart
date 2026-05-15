@@ -760,10 +760,8 @@ void main() {
         );
         final channel = client.channels.get(channelName);
 
-        final start =
-            DateTime(2021, 1, 1, 0, 0, 0).millisecondsSinceEpoch;
-        final end =
-            DateTime(2021, 1, 2, 0, 0, 0).millisecondsSinceEpoch;
+        final start = DateTime(2021, 1, 1, 0, 0, 0).millisecondsSinceEpoch;
+        final end = DateTime(2021, 1, 2, 0, 0, 0).millisecondsSinceEpoch;
 
         await channel.presence.history(RestHistoryParams(
           start: start,

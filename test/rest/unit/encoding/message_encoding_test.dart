@@ -317,8 +317,8 @@ void main() {
       // UTS: rest/unit/RSL4/encoding-fixtures-ably-common-0
       test('RSL4 - encoding fixtures from ably-common', () async {
         final fixtureFile = _loadFixtureFile('messages-encoding.json');
-        final fixtures = jsonDecode(fixtureFile.readAsStringSync())
-            as Map<String, dynamic>;
+        final fixtures =
+            jsonDecode(fixtureFile.readAsStringSync()) as Map<String, dynamic>;
         final messages = fixtures['messages'] as List;
 
         for (final fixture in messages) {
@@ -348,7 +348,9 @@ void main() {
                 headers: req.headers,
                 body: req.bodyAsString,
               ));
-              req.respondWith(201, {'serials': ['s1']});
+              req.respondWith(201, {
+                'serials': ['s1']
+              });
             },
           );
 
@@ -373,8 +375,7 @@ void main() {
                 reason: 'Wire encoding mismatch for $expectedType');
           } else {
             expect(wireMsg.containsKey('encoding'), isFalse,
-                reason:
-                    'Should not have encoding field for $expectedType');
+                reason: 'Should not have encoding field for $expectedType');
           }
         }
       });

@@ -111,8 +111,7 @@ void main() {
     });
   });
 
-  group(
-      'RTN22 - Connection remains CONNECTED during server-initiated reauth',
+  group('RTN22 - Connection remains CONNECTED during server-initiated reauth',
       () {
     // UTS: realtime/unit/RTN22/server-auth-triggers-reauth-0
     test('connection state does not change during server-initiated reauth',
@@ -187,8 +186,7 @@ void main() {
 
   group('RTN22a - Forced disconnect on reauth failure', () {
     // UTS: realtime/unit/RTN22a/forced-disconnect-reauth-failure-0
-    test(
-        'auth fails during server-initiated reauth, server force disconnects',
+    test('auth fails during server-initiated reauth, server force disconnects',
         () async {
       var authCallbackCount = 0;
 

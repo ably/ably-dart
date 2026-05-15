@@ -405,8 +405,7 @@ void main() {
       expect(frame['channel'], equals(channelName));
       expect(frame['msgSerial'], isA<int>());
 
-      final msg =
-          (frame['messages'] as List)[0] as Map<String, dynamic>;
+      final msg = (frame['messages'] as List)[0] as Map<String, dynamic>;
       expect(msg['name'], equals('greeting'));
       expect(msg['data'], equals('hello'));
 
@@ -2496,7 +2495,8 @@ void main() {
     });
   });
 
-  group('RTN7e - Error passed to publish callback represents state change reason',
+  group(
+      'RTN7e - Error passed to publish callback represents state change reason',
       () {
     // UTS: realtime/unit/RTN7e/error-represents-reason-4
     test('publish callback error matches the connection failure reason',

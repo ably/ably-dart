@@ -224,9 +224,12 @@ void main() {
     });
   });
 
-  group('RTL4c/RTL24 - errorReason cleared on successful attach, preserved through detach', () {
+  group(
+      'RTL4c/RTL24 - errorReason cleared on successful attach, preserved through detach',
+      () {
     // UTS: realtime/unit/RTL4c/error-cleared-preserved-detach-1
-    test('errorReason cleared by reattach, stays null through detach', () async {
+    test('errorReason cleared by reattach, stays null through detach',
+        () async {
       final channelName = testChannelName('RTL24-clear-detach');
       var attachCount = 0;
 

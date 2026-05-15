@@ -84,8 +84,7 @@ class IOWebSocketConnection implements WebSocketConnection {
       if (useBinaryProtocol) {
         final bytes =
             data is Uint8List ? data : Uint8List.fromList(data as List<int>);
-        decoded =
-            _deepCast(msgpack.deserialize(bytes)) as Map<String, dynamic>;
+        decoded = _deepCast(msgpack.deserialize(bytes)) as Map<String, dynamic>;
       } else {
         if (data is! String) return;
         decoded = jsonDecode(data) as Map<String, dynamic>;

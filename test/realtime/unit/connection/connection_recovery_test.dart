@@ -24,7 +24,8 @@ void main() {
     });
   }
 
-  group('RTN16g, RTN16g1 - createRecoveryKey returns string with '
+  group(
+      'RTN16g, RTN16g1 - createRecoveryKey returns string with '
       'connectionKey, msgSerial, and channel/channelSerial pairs', () {
     test(
         'recovery key contains connectionKey, msgSerial, '
@@ -105,8 +106,7 @@ void main() {
       expect(parsed['msgSerial'], isA<int>());
 
       // RTN16g1: channelSerials map includes all attached channels
-      final channelSerials =
-          parsed['channelSerials'] as Map<String, dynamic>;
+      final channelSerials = parsed['channelSerials'] as Map<String, dynamic>;
       expect(channelSerials['channel-alpha'], equals('serial-a-001'));
       expect(channelSerials['channel-éàü-世界'], equals('serial-b-002'));
 
@@ -274,8 +274,7 @@ void main() {
 
   group('RTN16k - recover option adds recover query param to WebSocket URL',
       () {
-    test(
-        'recover param sent on first connection, resume on subsequent',
+    test('recover param sent on first connection, resume on subsequent',
         () async {
       final testClock = TestClock();
       final fakeTimers = FakeTimerManager(testClock);
@@ -335,8 +334,7 @@ void main() {
         // RTN16k: First connection uses recover param with connectionKey
         expect(capturedUrls[0].queryParameters['recover'],
             equals('recovered-key-xyz'));
-        expect(
-            capturedUrls[0].queryParameters.containsKey('resume'), isFalse);
+        expect(capturedUrls[0].queryParameters.containsKey('resume'), isFalse);
 
         // Simulate disconnect and reconnection
         mockWs.activeConnection!.simulateDisconnect();
@@ -351,8 +349,7 @@ void main() {
         expect(capturedUrls.length, greaterThanOrEqualTo(2));
         expect(capturedUrls[1].queryParameters['resume'],
             equals('new-key-after-recovery'));
-        expect(capturedUrls[1].queryParameters.containsKey('recover'),
-            isFalse);
+        expect(capturedUrls[1].queryParameters.containsKey('recover'), isFalse);
 
         await client.close();
         mockWs.dispose();
@@ -440,8 +437,7 @@ void main() {
     });
   });
 
-  group('RTN16f1 - Malformed recoveryKey logs error and connects normally',
-      () {
+  group('RTN16f1 - Malformed recoveryKey logs error and connects normally', () {
     test(
         'malformed recoveryKey is handled gracefully, '
         'connection proceeds without recover param', () async {
@@ -482,12 +478,10 @@ void main() {
       expect(client.connection.key, equals('fresh-key'));
 
       // No recover param was sent (malformed key → normal fresh connection)
-      expect(
-          capturedUrls[0].queryParameters.containsKey('recover'), isFalse);
+      expect(capturedUrls[0].queryParameters.containsKey('recover'), isFalse);
 
       // No resume param either (fresh connection)
-      expect(
-          capturedUrls[0].queryParameters.containsKey('resume'), isFalse);
+      expect(capturedUrls[0].queryParameters.containsKey('resume'), isFalse);
 
       // Only one connection attempt
       expect(connectionAttemptCount, equals(1));
@@ -577,83 +571,83 @@ void main() {
   group('RTN16j - Channel serials from recovery key used on reattach', () {
     // UTS: realtime/unit/RTN16j/recover-channel-serials-0
     test(
-        'recovered channels include channelSerial in ATTACH messages '
-        'when reattaching after recovery', () async {
-      final sentMessages = <ProtocolMessage>[];
+      'recovered channels include channelSerial in ATTACH messages '
+      'when reattaching after recovery',
+      () async {
+        final sentMessages = <ProtocolMessage>[];
 
-      final recoveryKey = jsonEncode({
-        'connectionKey': 'old-key',
-        'msgSerial': 5,
-        'channelSerials': {
-          'channel-a': 'serial-a-100',
-          'channel-b': 'serial-b-200',
-        },
-      });
+        final recoveryKey = jsonEncode({
+          'connectionKey': 'old-key',
+          'msgSerial': 5,
+          'channelSerials': {
+            'channel-a': 'serial-a-100',
+            'channel-b': 'serial-b-200',
+          },
+        });
 
-      final mockWs = MockWebSocketClient(
-        onConnectionAttempt: (conn) {
-          conn.respondWithSuccess(
-            ProtocolMessageHelpers.connected(
-              connectionId: 'recovered-conn',
-              connectionKey: 'new-key',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
-            ),
-          );
-        },
-        onMessageFromClient: (msg) {
-          sentMessages.add(msg);
-        },
-      );
+        final mockWs = MockWebSocketClient(
+          onConnectionAttempt: (conn) {
+            conn.respondWithSuccess(
+              ProtocolMessageHelpers.connected(
+                connectionId: 'recovered-conn',
+                connectionKey: 'new-key',
+                maxIdleInterval: 15000,
+                connectionStateTtl: 120000,
+              ),
+            );
+          },
+          onMessageFromClient: (msg) {
+            sentMessages.add(msg);
+          },
+        );
 
-      final client = Realtime.forTesting(
-        options: ClientOptions(
-          key: 'appId.keyId:keySecret',
-          recover: recoveryKey,
-          autoConnect: false,
-        ),
-        webSocketClient: mockWs,
-      );
+        final client = Realtime.forTesting(
+          options: ClientOptions(
+            key: 'appId.keyId:keySecret',
+            recover: recoveryKey,
+            autoConnect: false,
+          ),
+          webSocketClient: mockWs,
+        );
 
-      // Channels should already exist from recovery key
-      expect(client.channels.exists('channel-a'), isTrue);
-      expect(client.channels.exists('channel-b'), isTrue);
+        // Channels should already exist from recovery key
+        expect(client.channels.exists('channel-a'), isTrue);
+        expect(client.channels.exists('channel-b'), isTrue);
 
-      // Verify channel serials are set
-      final chA = client.channels.get('channel-a');
-      final chB = client.channels.get('channel-b');
-      expect(chA.properties.channelSerial, equals('serial-a-100'));
-      expect(chB.properties.channelSerial, equals('serial-b-200'));
+        // Verify channel serials are set
+        final chA = client.channels.get('channel-a');
+        final chB = client.channels.get('channel-b');
+        expect(chA.properties.channelSerial, equals('serial-a-100'));
+        expect(chB.properties.channelSerial, equals('serial-b-200'));
 
-      // Connect
-      client.connect();
-      await _awaitState(client.connection, ConnectionState.connected);
+        // Connect
+        client.connect();
+        await _awaitState(client.connection, ConnectionState.connected);
 
-      // Attach channel-a — ignore the returned Future since we won't
-      // send an ATTACHED response; we just need the outgoing message.
-      unawaited(chA.attach().catchError((_) {}));
-      await _pumpEventQueue();
+        // Attach channel-a — ignore the returned Future since we won't
+        // send an ATTACHED response; we just need the outgoing message.
+        unawaited(chA.attach().catchError((_) {}));
+        await _pumpEventQueue();
 
-      // Find the ATTACH message for channel-a
-      final attachMsgs = sentMessages
-          .where(
-              (m) => m.action == ProtocolAction.attach && m.channel == 'channel-a')
-          .toList();
-      expect(attachMsgs, isNotEmpty,
-          reason: 'ATTACH message should have been sent for channel-a');
+        // Find the ATTACH message for channel-a
+        final attachMsgs = sentMessages
+            .where((m) =>
+                m.action == ProtocolAction.attach && m.channel == 'channel-a')
+            .toList();
+        expect(attachMsgs, isNotEmpty,
+            reason: 'ATTACH message should have been sent for channel-a');
 
-      // The ATTACH message should include the channelSerial from recovery
-      // so the server can resume from where the channel left off
-      expect(attachMsgs.first.channelSerial, equals('serial-a-100'));
+        // The ATTACH message should include the channelSerial from recovery
+        // so the server can resume from where the channel left off
+        expect(attachMsgs.first.channelSerial, equals('serial-a-100'));
 
-      await client.close();
-      mockWs.dispose();
-    },
-);
+        await client.close();
+        mockWs.dispose();
+      },
+    );
   });
 
-  group('RTN16 - Resume behavior on reconnection (existing functionality)',
-      () {
+  group('RTN16 - Resume behavior on reconnection (existing functionality)', () {
     // UTS: realtime/unit/RTN16k/recover-query-param-0
     test('resume param includes connectionKey on reconnect', () async {
       final testClock = TestClock();
@@ -706,8 +700,7 @@ void main() {
         expect(client.connection.key, equals('key-original'));
 
         // First connection should not have resume parameter
-        expect(
-            capturedUrls[0].queryParameters.containsKey('resume'), isFalse);
+        expect(capturedUrls[0].queryParameters.containsKey('resume'), isFalse);
 
         // Simulate disconnect
         mockWs.activeConnection!.simulateDisconnect();
@@ -721,8 +714,8 @@ void main() {
         await _pumpEventQueue();
 
         // Second connection should include resume parameter with original key
-        expect(capturedUrls[1].queryParameters['resume'],
-            equals('key-original'));
+        expect(
+            capturedUrls[1].queryParameters['resume'], equals('key-original'));
 
         // Connection key updated after resume
         expect(client.connection.key, equals('key-resumed'));

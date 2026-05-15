@@ -108,7 +108,8 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions(token: 'my-token-string', useBinaryProtocol: false),
+          options:
+              ClientOptions(token: 'my-token-string', useBinaryProtocol: false),
           httpClient: mockHttp,
         );
 

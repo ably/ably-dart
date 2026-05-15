@@ -30,7 +30,8 @@ void main() {
       'test-device-$tag-${DateTime.now().millisecondsSinceEpoch}';
 
   // Helper: create a minimal DeviceDetails with an APNs-style recipient.
-  DeviceDetails makeDevice(String deviceId, {String? clientId, String token = 'fake-apns-token'}) {
+  DeviceDetails makeDevice(String deviceId,
+      {String? clientId, String token = 'fake-apns-token'}) {
     return DeviceDetails(
       id: deviceId,
       clientId: clientId,
@@ -50,7 +51,8 @@ void main() {
   // ---------------------------------------------------------------------------
   group('RSH1a - push.admin.publish', () {
     // UTS: rest/integration/RSH1a/push-publish-clientid-0
-    test('RSH1a - publish to valid clientId recipient does not throw', () async {
+    test('RSH1a - publish to valid clientId recipient does not throw',
+        () async {
       final client = buildClient();
       addTearDown(client.close);
 
@@ -110,7 +112,8 @@ void main() {
     });
 
     // UTS: rest/integration/RSH1b3/update-device-registration-1
-    test('RSH1b3 update - save device twice with different token, verify via get',
+    test(
+        'RSH1b3 update - save device twice with different token, verify via get',
         () async {
       final client = buildClient();
       addTearDown(client.close);
@@ -227,8 +230,7 @@ void main() {
         () async {
       final client = buildClient();
       addTearDown(client.close);
-      final clientId =
-          'shared-client-${DateTime.now().millisecondsSinceEpoch}';
+      final clientId = 'shared-client-${DateTime.now().millisecondsSinceEpoch}';
       final deviceId1 = uniqueDeviceId('b5-a');
       final deviceId2 = uniqueDeviceId('b5-b');
 
@@ -297,8 +299,7 @@ void main() {
         () async {
       final client = buildClient();
       addTearDown(client.close);
-      final clientId =
-          'push-client-${DateTime.now().millisecondsSinceEpoch}';
+      final clientId = 'push-client-${DateTime.now().millisecondsSinceEpoch}';
       final channelName =
           'pushenabled:test-clientsub-${DateTime.now().millisecondsSinceEpoch}';
 
@@ -327,12 +328,12 @@ void main() {
   // ---------------------------------------------------------------------------
   group('RSH1c2 - listChannels', () {
     // UTS: rest/integration/RSH1c2/list-channels-with-subscriptions-0
-    test('RSH1c2 listChannels - save clientId subscription, listChannels returns channel',
+    test(
+        'RSH1c2 listChannels - save clientId subscription, listChannels returns channel',
         () async {
       final client = buildClient();
       addTearDown(client.close);
-      final clientId =
-          'lc-client-${DateTime.now().millisecondsSinceEpoch}';
+      final clientId = 'lc-client-${DateTime.now().millisecondsSinceEpoch}';
       final channelName =
           'pushenabled:listchannels-${DateTime.now().millisecondsSinceEpoch}';
 
@@ -383,15 +384,15 @@ void main() {
       await client.push.admin.channelSubscriptions.save(sub);
 
       // Verify it was saved
-      final before =
-          await client.push.admin.channelSubscriptions.list({'channel': channelName});
+      final before = await client.push.admin.channelSubscriptions
+          .list({'channel': channelName});
       expect(before.items, isNotEmpty);
 
       // Remove the subscription
       await client.push.admin.channelSubscriptions.remove(sub);
 
-      final after =
-          await client.push.admin.channelSubscriptions.list({'channel': channelName});
+      final after = await client.push.admin.channelSubscriptions
+          .list({'channel': channelName});
       expect(after.items, isEmpty);
     });
 
@@ -403,7 +404,8 @@ void main() {
       await expectLater(
         client.push.admin.channelSubscriptions.remove(
           PushChannelSubscription.forClientId(
-            channel: 'pushenabled:nonexistent-${DateTime.now().millisecondsSinceEpoch}',
+            channel:
+                'pushenabled:nonexistent-${DateTime.now().millisecondsSinceEpoch}',
             clientId: 'nonexistent-client',
           ),
         ),
@@ -421,8 +423,7 @@ void main() {
         () async {
       final client = buildClient();
       addTearDown(client.close);
-      final clientId =
-          'c5-client-${DateTime.now().millisecondsSinceEpoch}';
+      final clientId = 'c5-client-${DateTime.now().millisecondsSinceEpoch}';
       final channel1 =
           'pushenabled:c5-ch1-${DateTime.now().millisecondsSinceEpoch}';
       final channel2 =
@@ -446,10 +447,10 @@ void main() {
           .removeWhere({'clientId': clientId});
 
       // Both subscriptions should be removed
-      final result1 =
-          await client.push.admin.channelSubscriptions.list({'channel': channel1});
-      final result2 =
-          await client.push.admin.channelSubscriptions.list({'channel': channel2});
+      final result1 = await client.push.admin.channelSubscriptions
+          .list({'channel': channel1});
+      final result2 = await client.push.admin.channelSubscriptions
+          .list({'channel': channel2});
 
       expect(result1.items, isEmpty);
       expect(result2.items, isEmpty);

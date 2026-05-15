@@ -12,7 +12,8 @@ void main() {
   group('PresenceMessage', () {
     group('TP2 - PresenceAction enum values', () {
       // UTS: rest/unit/TP5/presence-message-size-0
-      test('TP2 - enum values are ordered from zero: '
+      test(
+          'TP2 - enum values are ordered from zero: '
           'absent, present, enter, leave, update', () {
         expect(PresenceAction.absent.index, equals(0));
         expect(PresenceAction.present.index, equals(1));

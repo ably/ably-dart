@@ -114,8 +114,7 @@ void main() {
         expect(
           disruptiveChanges,
           isEmpty,
-          reason:
-              'Expected no disruptive state transitions during re-auth, '
+          reason: 'Expected no disruptive state transitions during re-auth, '
               'but got: $disruptiveChanges',
         );
 
@@ -130,7 +129,8 @@ void main() {
         expect(
           authFramesFromClient,
           isNotEmpty,
-          reason: 'Proxy log should contain an AUTH frame from client to server',
+          reason:
+              'Proxy log should contain an AUTH frame from client to server',
         );
       },
     );

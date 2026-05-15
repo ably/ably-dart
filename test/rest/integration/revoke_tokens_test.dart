@@ -113,8 +113,7 @@ void main() {
       expect(
         stateChange.reason!.code,
         anyOf(equals(40141), equals(40171)),
-        reason:
-            'Expected error code 40141 or 40171 (token revoked), '
+        reason: 'Expected error code 40141 or 40171 (token revoked), '
             'got ${stateChange.reason?.code}',
       );
 
@@ -130,7 +129,8 @@ void main() {
   // ---------------------------------------------------------------------------
   group('RSA17d - Token auth client cannot revoke tokens', () {
     // UTS: rest/integration/RSA17d/token-auth-revoke-rejected-0
-    test('RSA17d - REST client using JWT token calling revokeTokens throws 40162',
+    test(
+        'RSA17d - REST client using JWT token calling revokeTokens throws 40162',
         () async {
       final jwt = JwtHelper.generateToken(
         apiKey: testApp.keys[4].keyStr,
@@ -226,8 +226,7 @@ void main() {
       final restClient = buildRevocableKeyClient();
       addTearDown(restClient.close);
 
-      final clientId =
-          'rsa17c-mixed-${DateTime.now().millisecondsSinceEpoch}';
+      final clientId = 'rsa17c-mixed-${DateTime.now().millisecondsSinceEpoch}';
 
       final response = await restClient.auth.revokeTokens([
         // Valid target
@@ -244,7 +243,8 @@ void main() {
       expect(response.results, hasLength(2));
 
       // Find the failure result
-      final failures = response.results.whereType<TokenRevocationFailureResult>().toList();
+      final failures =
+          response.results.whereType<TokenRevocationFailureResult>().toList();
       expect(failures, hasLength(1));
 
       // TRF2: Failure result should have an error with statusCode 400

@@ -104,8 +104,7 @@ void main() {
     test('RSC15m/REC2c2 - HTTP 503 error (no fallback through proxy)',
         () async {
       final apiKey = testApp.keys[0].keyStr;
-      final channelName =
-          'rsc15m-503-${DateTime.now().millisecondsSinceEpoch}';
+      final channelName = 'rsc15m-503-${DateTime.now().millisecondsSinceEpoch}';
 
       // Proxy rule: HTTP request to /channels/ returns 503
       final session = await ProxySession.create(

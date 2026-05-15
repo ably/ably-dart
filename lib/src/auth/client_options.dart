@@ -550,8 +550,7 @@ class ClientOptions extends AuthOptions {
           disconnectedRetryTimeout ?? this.disconnectedRetryTimeout,
       suspendedRetryTimeout:
           suspendedRetryTimeout ?? this.suspendedRetryTimeout,
-      channelRetryTimeout:
-          channelRetryTimeout ?? this.channelRetryTimeout,
+      channelRetryTimeout: channelRetryTimeout ?? this.channelRetryTimeout,
       recover: recover ?? this.recover,
       plugins: plugins ?? this.plugins,
     );
