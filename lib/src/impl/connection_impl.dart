@@ -72,8 +72,6 @@ class ConnectionImpl implements Connection, WebSocketListener {
   int? _maxIdleInterval; // RTN23a
   ErrorInfo? _pendingDisconnectError; // Error to use when onClose is triggered
   DateTime? _disconnectedAt;
-  DateTime? _lastActivityAt; // RTN23a - last message received time
-  String? _currentHost; // RTN17e - track which host we're connected to
   bool _shouldResume = false;
   int _retryAttempt = 0; // Track retry attempts for RTB1
   Completer<void>? _pendingAuthCompleter; // RTC8a: awaiting AUTH response
@@ -570,7 +568,6 @@ class ConnectionImpl implements Connection, WebSocketListener {
           _hostSelector.clearFailureTracking(preferredHost: host);
         }
 
-        _currentHost = host;
         return; // Successfully connected
       } catch (e) {
         if (_isClosingOrClosed) return;
@@ -888,7 +885,6 @@ class ConnectionImpl implements Connection, WebSocketListener {
     }
 
     // RTN23a: Any message from server resets idle timer
-    _lastActivityAt = clock.now();
     _scheduleIdleTimeout();
 
     switch (message.action) {

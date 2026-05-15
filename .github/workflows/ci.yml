@@ -16,14 +16,12 @@ jobs:
           submodules: recursive
       - uses: dart-lang/setup-dart@v1
       - run: dart pub get
+      - run: dart analyze --fatal-infos
       - run: dart format --output=none --set-exit-if-changed .
 
   test:
     name: Test
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: vcdiff
     steps:
       - uses: actions/checkout@v4
         with:

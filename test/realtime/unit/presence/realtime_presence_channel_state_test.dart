@@ -319,10 +319,6 @@ void main() {
       final leaveEvents = <PresenceMessage>[];
       channel.presence.subscribe(
         (event) {
-          print(
-            '[DEBUG] LEAVE event: clientId=${event.clientId}, action=${event.action}, id=${event.id}',
-          );
-          print('[DEBUG] Stack: ${StackTrace.current}');
           leaveEvents.add(event);
         },
         action: PresenceAction.leave,

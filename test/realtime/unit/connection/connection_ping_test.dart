@@ -244,14 +244,11 @@ void main() {
         await _awaitState(client.connection, ConnectionState.connected);
 
         // Register listener BEFORE triggering the error
-        Object? pingError;
         final pingFuture =
             client.connection.ping().catchError((Object e) => e as Duration);
         pingFuture.then(
           (_) {},
-          onError: (Object e) {
-            pingError = e;
-          },
+          onError: (Object e) {},
         );
         // Simpler: just use a completer pattern
         final errorCompleter = _capturePingError(client.connection.ping());

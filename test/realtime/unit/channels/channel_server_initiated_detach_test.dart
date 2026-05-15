@@ -154,7 +154,10 @@ void main() {
             action: ProtocolAction.detached,
             channel: channelName,
             error: const ErrorInfo(
-                code: 90198, statusCode: 500, message: 'Detach 1'),
+              code: 90198,
+              statusCode: 500,
+              message: 'Detach 1',
+            ),
           ),
         );
         await _pumpEventQueue();
@@ -171,7 +174,10 @@ void main() {
             action: ProtocolAction.detached,
             channel: channelName,
             error: const ErrorInfo(
-                code: 90199, statusCode: 500, message: 'Detach 2'),
+              code: 90199,
+              statusCode: 500,
+              message: 'Detach 2',
+            ),
           ),
         );
 
@@ -456,7 +462,10 @@ void main() {
             action: ProtocolAction.detached,
             channel: channelName,
             error: const ErrorInfo(
-                code: 90198, statusCode: 500, message: 'Detach'),
+              code: 90198,
+              statusCode: 500,
+              message: 'Detach',
+            ),
           ),
         );
         await _pumpEventQueue();
@@ -556,7 +565,10 @@ void main() {
             action: ProtocolAction.detached,
             channel: channelName,
             error: const ErrorInfo(
-                code: 90198, statusCode: 500, message: 'Detach'),
+              code: 90198,
+              statusCode: 500,
+              message: 'Detach',
+            ),
           ),
         );
         await _pumpEventQueue();
@@ -650,7 +662,10 @@ void main() {
             action: ProtocolAction.detached,
             channel: channelName,
             error: const ErrorInfo(
-                code: 90198, statusCode: 500, message: 'Detached'),
+              code: 90198,
+              statusCode: 500,
+              message: 'Detached',
+            ),
           ),
         );
         await _pumpEventQueue();

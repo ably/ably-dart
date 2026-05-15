@@ -29,21 +29,6 @@ void main() {
   String uniqueDeviceId(String tag) =>
       'test-device-$tag-${DateTime.now().millisecondsSinceEpoch}';
 
-  // Helper: create a minimal DeviceDetails for registration.
-  DeviceDetails makeDeviceDetails(String deviceId) {
-    return DeviceDetails(
-      id: deviceId,
-      platform: 'ios',
-      formFactor: 'phone',
-      push: DevicePushDetails(
-        recipient: {
-          'transportType': 'apns',
-          'deviceToken': 'fake-apns-token-$deviceId',
-        },
-      ),
-    );
-  }
-
   // ---------------------------------------------------------------------------
   // RSH7a+RSH7c — subscribeDevice / unsubscribeDevice
   // ---------------------------------------------------------------------------

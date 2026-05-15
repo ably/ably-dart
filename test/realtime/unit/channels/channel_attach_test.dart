@@ -1,21 +1,12 @@
 import 'dart:async';
 
 import 'package:clock/clock.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/testing.dart' as http_testing;
 import 'package:test/test.dart';
 import 'package:ably_dart/ably_dart.dart';
 import '../../../helpers/fake_timer_manager.dart';
 import '../../../helpers/mock_websocket_client.dart';
 import '../../../helpers/protocol_message_helpers.dart';
 import '../../../helpers/test_channel_name.dart';
-
-/// Creates a mock HTTP client that returns 'yes' for connectivity checks.
-http.Client _createMockHttpClient() {
-  return http_testing.MockClient((request) async {
-    return http.Response('yes', 200);
-  });
-}
 
 /// Unit tests for RealtimeChannel attach (RTL4).
 ///

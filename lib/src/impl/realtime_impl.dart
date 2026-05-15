@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:meta/meta.dart';
+
 import '../auth/auth.dart';
 import '../push/local_device.dart';
 import '../push/push.dart';
@@ -33,7 +35,8 @@ class RealtimeImpl extends BaseClientImpl implements Realtime {
   }
 
   @override
-  String get _clientType => 'realtime';
+  @protected
+  String get clientType => 'realtime';
 
   final WebSocketClient? _webSocketClient;
   final TimerManager? _timerManager;

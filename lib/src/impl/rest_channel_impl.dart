@@ -40,7 +40,6 @@ class RestChannelImpl implements RestChannel {
         _httpClient = httpClient,
         _options = options,
         _logger = logger,
-        _channelOptions = channelOptions,
         _random = Random() {
     _restApi = ChannelRestApi(channelName: name, httpClient: httpClient);
     _presence = RestPresenceImpl(
@@ -66,7 +65,6 @@ class RestChannelImpl implements RestChannel {
   final AblyHttpClient _httpClient;
   final ClientOptions _options;
   final Logger _logger;
-  RestChannelOptions? _channelOptions;
   late final ChannelRestApi _restApi;
   late final RestPresenceImpl _presence;
   late final RestAnnotationsImpl _annotations;
@@ -334,7 +332,6 @@ class RestChannelImpl implements RestChannel {
   @override
   Future<void> setOptions(RestChannelOptions options) async {
     _logger.info('setOptions() called', {'channel': _name});
-    _channelOptions = options;
     // Note: Encryption setup would go here if implemented
   }
 }

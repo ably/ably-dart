@@ -510,10 +510,8 @@ void main() {
       client1.connect();
       await _awaitState(client1.connection, ConnectionState.connected);
 
-      // Check URL includes heartbeats parameter
-      final url1 = connectionUrls[0];
-      // Default is true or omitted, implementation-specific
-      // expect(url1.queryParameters['heartbeats'], anyOf('true', isNull));
+      // Check URL includes heartbeats parameter (default is true or omitted)
+      // expect(connectionUrls[0].queryParameters['heartbeats'], anyOf('true', isNull));
 
       await client1.close();
 
@@ -532,8 +530,8 @@ void main() {
       client2.connect();
       await _awaitState(client2.connection, ConnectionState.connected);
 
-      final url2 = connectionUrls[1];
       // Verify implementation adds heartbeats query param
+      // expect(connectionUrls[1].queryParameters['heartbeats'], ...);
 
       await client2.close();
       mockWs.dispose();

@@ -221,11 +221,8 @@ void main() {
     group('RSC15a - Fallback host order', () {
       // UTS: rest/unit/RSC15a/fallback-random-order-0
       test('RSC15a - primary tried first, then fallback hosts', () async {
-        var requestCount = 0;
-
         final mockHttp = MockHttpClient(
           onRequest: (req) {
-            requestCount++;
             req.respondWith(500, {
               'error': {
                 'message': 'Server error',

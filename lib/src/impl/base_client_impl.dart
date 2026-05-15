@@ -53,11 +53,12 @@ abstract class BaseClientImpl {
       ablyHttpClient.tokenRenewer = () => authImpl.authorize();
     }
 
-    logger.info('Client created', {'type': _clientType});
+    logger.info('Client created', {'type': clientType});
   }
 
   /// The client type name for logging. Overridden by subclasses.
-  String get _clientType => 'rest';
+  @protected
+  String get clientType => 'rest';
 
   final ClientOptions _options;
 

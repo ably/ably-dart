@@ -368,7 +368,9 @@ void main() {
         final messages = [
           const Message(id: 'client-id-1', name: 'event1', data: 'data1'),
           const Message(
-              name: 'event2', data: 'data2'), // No ID - should be generated
+            name: 'event2',
+            data: 'data2',
+          ), // No ID - should be generated
           const Message(id: 'client-id-2', name: 'event3', data: 'data3'),
         ];
         await channel.publish(messages: messages);

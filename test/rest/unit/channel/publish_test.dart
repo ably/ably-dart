@@ -416,7 +416,6 @@ void main() {
       // UTS: rest/unit/RSL1m/clientid-not-injected-0
       test('RSL1m1 - message with no clientId, library has clientId', () async {
         final capturedRequests = <CapturedRequest>[];
-        var requestCount = 0;
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -429,7 +428,6 @@ void main() {
               ),
             );
 
-            requestCount++;
             if (req.url.path.contains('requestToken')) {
               // Token request (RSA4b: key + clientId triggers token auth)
               req.respondWith(200, {
