@@ -458,7 +458,10 @@ void main() {
             action: ProtocolAction.detached,
             channel: channelName,
             error: const ErrorInfo(
-                code: 90198, statusCode: 500, message: 'Detached'),
+              code: 90198,
+              statusCode: 500,
+              message: 'Detached',
+            ),
           ),
         );
         await _pumpEventQueue();

@@ -279,7 +279,6 @@ void main() {
     test('performs connectivity check before trying fallback hosts', () async {
       final httpRequests = <String>[];
       final connectionAttempts = <String>[];
-      var connectionAttemptCount = 0;
 
       // Mock HTTP client for connectivity check
       final mockHttp = MockHttpClient(
@@ -307,7 +306,6 @@ void main() {
       final mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
           connectionAttempts.add(conn.url.host);
-          connectionAttemptCount++;
 
           // All hosts fail to trigger connectivity check
           conn.respondWithTimeout();
@@ -515,7 +513,6 @@ void main() {
     test('HTTP requests prefer same host as active realtime connection',
         () async {
       final connectionAttempts = <String>[];
-      final httpRequests = <String>[];
       var connectionAttemptCount = 0;
 
       final mockWs = MockWebSocketClient(
@@ -534,23 +531,6 @@ void main() {
                 connectionKey: 'connection-key',
               ),
             );
-          }
-        },
-      );
-
-      final mockHttp = MockHttpClient(
-        onRequest: (request) {
-          httpRequests.add(request.url.host);
-
-          // Respond successfully to HTTP requests
-          if (request.url.path.contains('/history')) {
-            request.respondWith(200, {
-              'items': [],
-              'start': 0,
-              'end': 0,
-            });
-          } else {
-            request.respondWith(200, {});
           }
         },
       );

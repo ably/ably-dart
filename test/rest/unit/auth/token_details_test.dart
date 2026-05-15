@@ -389,8 +389,6 @@ void main() {
   group('RSA16d - tokenDetails null after switch to basic auth', () {
     // UTS: rest/unit/RSA16d/null-after-switch-to-basic-3
     test('RSA16d - tokenDetails null after switch to basic auth', () async {
-      final channelName = testChannelName('RSA16d');
-
       final client = Rest.forTesting(
         options: ClientOptions(
           authCallback: (params) async {

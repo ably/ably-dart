@@ -235,7 +235,6 @@ void main() {
     test('name-only publish omits data key from wire JSON', () async {
       final channelName = testChannelName('RTL6i3-json');
       final capturedFrames = <Map<String, dynamic>>[];
-      const msgSerialCounter = 0;
 
       late final MockWebSocketClient mockWs;
       mockWs = MockWebSocketClient(

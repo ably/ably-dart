@@ -802,7 +802,7 @@ void main() {
         );
         final channel = client.channels.get(channelName);
 
-        final start = DateTime(2021, 1).millisecondsSinceEpoch;
+        final start = DateTime(2021).millisecondsSinceEpoch;
         final end = DateTime(2021, 1, 2).millisecondsSinceEpoch;
 
         await channel.presence.history(

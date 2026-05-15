@@ -710,7 +710,7 @@ void main() {
           action: ProtocolAction.message,
           channel: channelName,
           messages: [
-            const Message(name: 'premature', data: 'should-not-deliver')
+            const Message(name: 'premature', data: 'should-not-deliver'),
           ],
         ),
       );

@@ -312,7 +312,7 @@ void main() {
       );
 
       final listener = TestWebSocketListener();
-      final connection = await mock.connect(
+      await mock.connect(
         Uri.parse('wss://main.realtime.ably.net'),
         listener,
       );

@@ -33,7 +33,10 @@ void main() {
       final channel = client.channels.get(channelName);
       await channel.updateMessage(
         const Message(
-            serial: 'msg-serial-1', name: 'updated', data: 'new-data'),
+          serial: 'msg-serial-1',
+          name: 'updated',
+          data: 'new-data',
+        ),
       );
 
       expect(mockHttp.capturedRequests.length, equals(1));

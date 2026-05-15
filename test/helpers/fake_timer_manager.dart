@@ -263,20 +263,17 @@ class _FakePeriodicTimerEntry {
     required this.owner,
     required this.name,
     required this.period,
-    required DateTime nextFireAt,
+    required this.nextFireAt,
     required this.callback,
     required this.timer,
-  }) : _nextFireAt = nextFireAt;
+  });
 
   final Object owner;
   final String name;
   final Duration period;
-  DateTime _nextFireAt;
+  DateTime nextFireAt;
   final void Function(Timer) callback;
   final _FakePeriodicTimer timer;
-
-  DateTime get nextFireAt => _nextFireAt;
-  set nextFireAt(DateTime value) => _nextFireAt = value;
 }
 
 /// A fake Timer for periodic timer entries.
