@@ -47,16 +47,18 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, {
               'channelId': channelName,
-              'status': {'isActive': true}
+              'status': {'isActive': true},
             });
           },
         );
@@ -93,16 +95,18 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, {
               'channelId': channelName,
-              'status': {'isActive': true}
+              'status': {'isActive': true},
             });
           },
         );
@@ -130,16 +134,18 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, {
               'channelId': channelName,
-              'status': {'isActive': true}
+              'status': {'isActive': true},
             });
           },
         );
@@ -174,16 +180,18 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, {
               'channelId': channelName,
-              'status': {'isActive': true}
+              'status': {'isActive': true},
             });
           },
         );
@@ -216,12 +224,14 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             if (req.url.path.contains('requestToken')) {
               // Token request
@@ -234,7 +244,7 @@ void main() {
               // Actual request
               req.respondWith(200, {
                 'channelId': channelName,
-                'status': {'isActive': true}
+                'status': {'isActive': true},
               });
             }
           },
@@ -272,16 +282,18 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, {
               'channelId': channelName,
-              'status': {'isActive': true}
+              'status': {'isActive': true},
             });
           },
         );
@@ -308,16 +320,18 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, {
               'channelId': channelName,
-              'status': {'isActive': true}
+              'status': {'isActive': true},
             });
           },
         );
@@ -348,16 +362,18 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, {
               'channelId': channelName,
-              'status': {'isActive': true}
+              'status': {'isActive': true},
             });
           },
         );

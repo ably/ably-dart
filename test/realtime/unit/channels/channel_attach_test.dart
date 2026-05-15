@@ -223,7 +223,7 @@ void main() {
                 ProtocolMessage(
                   action: ProtocolAction.error,
                   channel: channelName,
-                  error: ErrorInfo(code: 40160, message: 'Denied'),
+                  error: const ErrorInfo(code: 40160, message: 'Denied'),
                 ),
               );
             } else {
@@ -709,7 +709,7 @@ void main() {
         webSocketClient: mockWs,
       );
 
-      final channelOptions = const RealtimeChannelOptions(
+      const channelOptions = RealtimeChannelOptions(
         params: {'rewind': '1', 'delta': 'vcdiff'},
       );
       final channel = client.channels.get(channelName, channelOptions);
@@ -759,7 +759,7 @@ void main() {
         webSocketClient: mockWs,
       );
 
-      final channelOptions = const RealtimeChannelOptions(
+      const channelOptions = RealtimeChannelOptions(
         modes: [ChannelMode.publish, ChannelMode.subscribe],
       );
       final channel = client.channels.get(channelName, channelOptions);
@@ -961,15 +961,17 @@ void main() {
         expect(attachCount, equals(1));
 
         // Server-initiated DETACHED with error → auto reattach → timeout
-        mockWs.activeConnection!.sendToClient(ProtocolMessage(
-          action: ProtocolAction.detached,
-          channel: channelName,
-          error: ErrorInfo(
-            code: 90198,
-            statusCode: 500,
-            message: 'Server detached',
+        mockWs.activeConnection!.sendToClient(
+          ProtocolMessage(
+            action: ProtocolAction.detached,
+            channel: channelName,
+            error: const ErrorInfo(
+              code: 90198,
+              statusCode: 500,
+              message: 'Server detached',
+            ),
           ),
-        ));
+        );
         await Future<void>.delayed(Duration.zero);
 
         // Advance past realtimeRequestTimeout to trigger attach timeout

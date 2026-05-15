@@ -65,9 +65,13 @@ void main() {
           clientB.connect();
           await Future.wait([
             waitForConnectionState(
-                clientA.connection, ConnectionState.connected),
+              clientA.connection,
+              ConnectionState.connected,
+            ),
             waitForConnectionState(
-                clientB.connection, ConnectionState.connected),
+              clientB.connection,
+              ConnectionState.connected,
+            ),
           ]);
 
           final channelA = clientA.channels.get(channelName);
@@ -149,9 +153,13 @@ void main() {
           clientB.connect();
           await Future.wait([
             waitForConnectionState(
-                clientA.connection, ConnectionState.connected),
+              clientA.connection,
+              ConnectionState.connected,
+            ),
             waitForConnectionState(
-                clientB.connection, ConnectionState.connected),
+              clientB.connection,
+              ConnectionState.connected,
+            ),
           ]);
 
           final channelA = clientA.channels.get(channelName);

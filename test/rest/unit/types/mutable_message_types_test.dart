@@ -21,24 +21,34 @@ void main() {
 
     // UTS: rest/unit/TM5/message-action-enum-values-0.1
     test('round-trips from int', () {
-      expect(MessageActionExtension.fromInt(0),
-          equals(MessageAction.messageCreate));
-      expect(MessageActionExtension.fromInt(1),
-          equals(MessageAction.messageUpdate));
-      expect(MessageActionExtension.fromInt(2),
-          equals(MessageAction.messageDelete));
+      expect(
+        MessageActionExtension.fromInt(0),
+        equals(MessageAction.messageCreate),
+      );
+      expect(
+        MessageActionExtension.fromInt(1),
+        equals(MessageAction.messageUpdate),
+      );
+      expect(
+        MessageActionExtension.fromInt(2),
+        equals(MessageAction.messageDelete),
+      );
       expect(MessageActionExtension.fromInt(3), equals(MessageAction.meta));
-      expect(MessageActionExtension.fromInt(4),
-          equals(MessageAction.messageSummary));
-      expect(MessageActionExtension.fromInt(5),
-          equals(MessageAction.messageAppend));
+      expect(
+        MessageActionExtension.fromInt(4),
+        equals(MessageAction.messageSummary),
+      );
+      expect(
+        MessageActionExtension.fromInt(5),
+        equals(MessageAction.messageAppend),
+      );
     });
   });
 
   group('TM2j, TM2r - Message action and serial fields', () {
     // UTS: rest/unit/TM2j/action-and-serial-fields-0
     test('supports action and serial with correct wire serialization', () {
-      final msg = Message(
+      const msg = Message(
         name: 'test',
         data: 'hello',
         serial: 'serial-1',
@@ -121,7 +131,7 @@ void main() {
   group('MOP2a-c - MessageOperation fields', () {
     // UTS: rest/unit/MOP2a/message-operation-fields-0
     test('constructs with all fields and serializes correctly', () {
-      final op = MessageOperation(
+      const op = MessageOperation(
         clientId: 'user-1',
         description: 'edit description',
         metadata: {'reason': 'typo', 'tool': 'editor'},

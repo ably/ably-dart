@@ -27,8 +27,11 @@ class Logger {
   bool shouldLog(LogLevel level) => level.index <= _level.index;
 
   /// Logs a message at the given [level] with optional [context].
-  void log(LogLevel level, String message,
-      [Map<String, dynamic> context = const {}]) {
+  void log(
+    LogLevel level,
+    String message, [
+    Map<String, dynamic> context = const {},
+  ]) {
     if (shouldLog(level)) {
       _handler(level, message, context);
     }
@@ -55,7 +58,10 @@ class Logger {
       log(LogLevel.verbose, message, context);
 
   static void _defaultHandler(
-      LogLevel level, String message, Map<String, dynamic> context) {
+    LogLevel level,
+    String message,
+    Map<String, dynamic> context,
+  ) {
     final contextStr = context.isEmpty ? '' : ' $context';
     // ignore: avoid_print
     print('[ably] ${level.name}: $message$contextStr');

@@ -63,6 +63,7 @@ class RealtimeChannelsImpl implements RealtimeChannels {
   ///     and the channel is attached/attaching, an error is thrown (RTS3c1)
   ///
   /// Spec: RTS3a, RTS3b, RTS3c, RTS3c1
+  @override
   RealtimeChannel get(String name, [RealtimeChannelOptions? options]) {
     final existingChannel = _channels[name];
 
@@ -73,7 +74,7 @@ class RealtimeChannelsImpl implements RealtimeChannels {
         if (options.requiresReattachment &&
             (existingChannel.state == ChannelState.attached ||
                 existingChannel.state == ChannelState.attaching)) {
-          throw AblyException(
+          throw const AblyException(
             errorInfo: ErrorInfo(
               message: 'Cannot update channel options that require '
                   'reattachment via get(). Use channel.setOptions() instead.',
@@ -119,6 +120,7 @@ class RealtimeChannelsImpl implements RealtimeChannels {
   /// Same as [get] without options.
   ///
   /// Spec: RTS3a
+  @override
   RealtimeChannel operator [](String name) => get(name);
 
   /// Returns an existing channel or null without creating one.
@@ -136,6 +138,7 @@ class RealtimeChannelsImpl implements RealtimeChannels {
   /// `[filter=<base64-encoded-filter>?rewind=1]channelName`
   ///
   /// Spec: RTS5, RTS5a, RTS5a1, RTS5a2
+  @override
   RealtimeChannel getDerived(
     String name,
     DeriveOptions deriveOptions, [
@@ -184,6 +187,7 @@ class RealtimeChannelsImpl implements RealtimeChannels {
   /// false otherwise.
   ///
   /// Spec: RTS2
+  @override
   bool exists(String name) {
     return _channels.containsKey(name);
   }
@@ -193,6 +197,7 @@ class RealtimeChannelsImpl implements RealtimeChannels {
   /// The channel will be detached if currently attached.
   ///
   /// Spec: RTS4, RTS4a
+  @override
   Future<void> release(String name) async {
     final channel = _channels[name];
     if (channel != null) {
@@ -206,6 +211,7 @@ class RealtimeChannelsImpl implements RealtimeChannels {
   /// Returns an iterator over all channel names.
   ///
   /// Spec: RTS2
+  @override
   Iterable<String> get names => _channels.keys;
 
   /// Returns a map of channel name to channelSerial for all attached channels.

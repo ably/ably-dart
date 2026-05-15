@@ -99,7 +99,6 @@ void main() {
       final realtime2 = Realtime(
         options: ClientOptions(
           key: 'fake.key:secret',
-          echoMessages: true,
           autoConnect: false,
         ),
       );
@@ -284,7 +283,9 @@ void main() {
       expect(connectingEvents.length, equals(1));
       expect(connectingEvents.first.event, equals(ConnectionEvent.connecting));
       expect(
-          connectingEvents.first.current, equals(ConnectionState.connecting));
+        connectingEvents.first.current,
+        equals(ConnectionState.connecting),
+      );
 
       await subscription.cancel();
       await realtime.close();

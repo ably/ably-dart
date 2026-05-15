@@ -24,31 +24,35 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, [
               {
                 'channel': 'channel1',
                 'messageId': 'msg1',
-                'serials': ['s1']
+                'serials': ['s1'],
               },
             ]);
           },
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
         await client.batchPublish(
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['channel1'],
             messages: [Message(name: 'event', data: 'data')],
           ),
@@ -66,12 +70,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, [
               {'channel': 'channel1', 'messageId': 'msg1'},
@@ -81,17 +87,19 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
         await client.batchPublish([
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['channel1'],
             messages: [Message(name: 'event1')],
           ),
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['channel2'],
             messages: [Message(name: 'event2')],
           ),
@@ -114,20 +122,22 @@ void main() {
               {
                 'channel': 'channel1',
                 'messageId': 'msg1',
-                'serials': ['s1']
+                'serials': ['s1'],
               },
             ]);
           },
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
         final results = await client.batchPublish(
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['channel1'],
             messages: [Message(name: 'event')],
           ),
@@ -149,17 +159,19 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
         final results = await client.batchPublish([
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['channel1'],
             messages: [Message(name: 'event1')],
           ),
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['channel2'],
             messages: [Message(name: 'event2')],
           ),
@@ -184,13 +196,15 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
         final results = await client.batchPublish(
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['channel1', 'channel2', 'channel3'],
             messages: [Message(name: 'event')],
           ),
@@ -205,12 +219,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, [
               {'channel': 'channel1', 'messageId': 'msg1'},
@@ -219,13 +235,15 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
         await client.batchPublish(
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['channel1'],
             messages: [
               Message(
@@ -252,12 +270,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, [
               {'channel': 'channel1', 'messageId': 'msg1'},
@@ -266,13 +286,15 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
         await client.batchPublish(
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['channel1'],
             messages: [Message(name: 'event')],
           ),
@@ -290,12 +312,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, [
               {'channel': 'channel1', 'messageId': 'msg1'},
@@ -306,14 +330,13 @@ void main() {
         final client = Rest.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
-            idempotentRestPublishing: true,
             useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );
 
         await client.batchPublish(
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['channel1'],
             messages: [Message(name: 'event1'), Message(name: 'event2')],
           ),
@@ -337,12 +360,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, [
               {'channel': 'channel1', 'messageId': 'my-custom-id'},
@@ -353,14 +378,13 @@ void main() {
         final client = Rest.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
-            idempotentRestPublishing: true,
             useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
         );
 
         await client.batchPublish(
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['channel1'],
             messages: [Message(id: 'my-custom-id', name: 'event')],
           ),
@@ -379,12 +403,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, [
               {'channel': 'channel1', 'messageId': 'msg1'},
@@ -402,7 +428,7 @@ void main() {
         );
 
         await client.batchPublish(
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['channel1'],
             messages: [Message(name: 'event')],
           ),
@@ -424,12 +450,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, [
               {'channel': 'ch1', 'messageId': 'msg1'},
@@ -439,13 +467,15 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
         await client.batchPublish(
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['ch1', 'ch2'],
             messages: [Message(name: 'event')],
           ),
@@ -464,12 +494,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, [
               {'channel': 'channel1', 'messageId': 'msg1'},
@@ -478,13 +510,15 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
         await client.batchPublish(
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['channel1'],
             messages: [
               Message(name: 'event1', data: 'data1'),
@@ -513,13 +547,15 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
         final results = await client.batchPublish(
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['my-channel'],
             messages: [Message(name: 'event')],
           ),
@@ -539,21 +575,25 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
         final results = await client.batchPublish(
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['channel1'],
             messages: [Message(name: 'event')],
           ),
         );
 
         expect(results[0], isA<BatchPublishSuccessResult>());
-        expect((results[0] as BatchPublishSuccessResult).messageId,
-            equals('abc123'));
+        expect(
+          (results[0] as BatchPublishSuccessResult).messageId,
+          equals('abc123'),
+        );
       });
 
       // UTS: rest/unit/BPR2c/serials-array-0
@@ -571,13 +611,15 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
         final results = await client.batchPublish(
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['channel1'],
             messages: [Message(name: 'e1'), Message(name: 'e2')],
           ),
@@ -603,13 +645,15 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
         final results = await client.batchPublish(
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['channel1'],
             messages: [
               Message(name: 'e1'),
@@ -640,13 +684,15 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
         final results = await client.batchPublish(
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['ok-channel', 'failed-channel'],
             messages: [Message(name: 'event')],
           ),
@@ -673,13 +719,15 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
         final results = await client.batchPublish(
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['channel1'],
             messages: [Message(name: 'event')],
           ),
@@ -710,13 +758,15 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
         final results = await client.batchPublish(
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['channel1', 'channel2', 'channel3'],
             messages: [Message(name: 'event')],
           ),
@@ -744,13 +794,15 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
         final results = await client.batchPublish(
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['channel1', 'channel2'],
             messages: [Message(name: 'event')],
           ),
@@ -786,14 +838,16 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
         expect(
           () => client.batchPublish(
-            BatchPublishSpec(
+            const BatchPublishSpec(
               channels: [],
               messages: [Message(name: 'event')],
             ),
@@ -819,14 +873,16 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
         expect(
           () => client.batchPublish(
-            BatchPublishSpec(
+            const BatchPublishSpec(
               channels: ['channel1'],
               messages: [],
             ),
@@ -841,12 +897,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, [
               {'channel': 'ch1', 'messageId': 'msg1'},
@@ -857,13 +915,15 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
         final results = await client.batchPublish(
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['ch1', 'ch2', 'ch3'],
             messages: [
               Message(name: 'event1', data: 'data1'),
@@ -886,12 +946,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, [
               {
@@ -904,13 +966,15 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
         final results = await client.batchPublish(
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['my-channel'],
             messages: [
               Message(name: 'event1', data: 'data1'),
@@ -935,12 +999,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, [
               {'channel': 'channel1', 'messageId': 'msg1'},
@@ -958,7 +1024,7 @@ void main() {
         );
 
         await client.batchPublish(
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['channel1'],
             messages: [Message(name: 'event')],
           ),
@@ -984,14 +1050,16 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
         expect(
           () => client.batchPublish(
-            BatchPublishSpec(
+            const BatchPublishSpec(
               channels: ['channel1'],
               messages: [Message(name: 'event')],
             ),
@@ -1009,8 +1077,10 @@ void main() {
       // UTS: rest/unit/RSC22/server-error-propagated-0
       test('RSC22_Error2 - Invalid argument throws ArgumentError', () async {
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -1028,12 +1098,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, [
               {'channel': 'channel1', 'messageId': 'msg1'},
@@ -1042,13 +1114,15 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
         await client.batchPublish(
-          BatchPublishSpec(
+          const BatchPublishSpec(
             channels: ['channel1'],
             messages: [Message(name: 'event')],
           ),

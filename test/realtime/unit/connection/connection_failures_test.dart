@@ -53,7 +53,7 @@ void main() {
       // Server sends DISCONNECTED with token error and closes connection
       mockWs.activeConnection!.sendToClientAndClose(
         ProtocolMessageHelpers.disconnected(
-          error: ErrorInfo(
+          error: const ErrorInfo(
             code: 40142,
             statusCode: 401,
             message: 'Token expired',
@@ -127,7 +127,7 @@ void main() {
       // Server sends DISCONNECTED with token error
       mockWs.activeConnection!.sendToClientAndClose(
         ProtocolMessageHelpers.disconnected(
-          error: ErrorInfo(
+          error: const ErrorInfo(
             code: 40142,
             statusCode: 401,
             message: 'Token expired',
@@ -142,7 +142,6 @@ void main() {
       await _awaitState(
         client.connection,
         ConnectionState.connected,
-        timeout: const Duration(seconds: 5),
       );
 
       expect(client.connection.state, equals(ConnectionState.connected));
@@ -200,7 +199,7 @@ void main() {
       // Server sends DISCONNECTED with token error
       mockWs.activeConnection!.sendToClientAndClose(
         ProtocolMessageHelpers.disconnected(
-          error: ErrorInfo(
+          error: const ErrorInfo(
             code: 40142,
             statusCode: 401,
             message: 'Token expired',
@@ -271,7 +270,7 @@ void main() {
         // Server sends DISCONNECTED with non-token error
         mockWs.activeConnection!.sendToClientAndClose(
           ProtocolMessageHelpers.disconnected(
-            error: ErrorInfo(
+            error: const ErrorInfo(
               code: 80003,
               statusCode: 503,
               message: 'Service unavailable',
@@ -512,7 +511,7 @@ void main() {
                 ProtocolMessageHelpers.connected(
                   connectionId: 'connection-2', // Different ID
                   connectionKey: 'key-2',
-                  error: ErrorInfo(
+                  error: const ErrorInfo(
                     code: 80008,
                     statusCode: 400,
                     message: 'Unable to recover connection',
@@ -651,15 +650,16 @@ void main() {
 
         // Verify the state change sequence includes SUSPENDED
         expect(
-            stateChanges,
-            containsAllInOrder([
-              ConnectionState.connecting,
-              ConnectionState.connected,
-              ConnectionState.disconnected,
-              ConnectionState.suspended,
-              ConnectionState.connecting,
-              ConnectionState.connected,
-            ]));
+          stateChanges,
+          containsAllInOrder([
+            ConnectionState.connecting,
+            ConnectionState.connected,
+            ConnectionState.disconnected,
+            ConnectionState.suspended,
+            ConnectionState.connecting,
+            ConnectionState.connected,
+          ]),
+        );
 
         // RTN15g: New connection (different ID, not resumed - TTL expired)
         expect(client.connection.id, equals('connection-2'));

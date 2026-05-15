@@ -58,6 +58,7 @@ class RealtimeAnnotationsImpl implements RealtimeAnnotations {
   /// Sends an ANNOTATION ProtocolMessage with ANNOTATION_CREATE action.
   ///
   /// Spec: RTAN1
+  @override
   Future<void> publish(String messageSerial, Annotation annotation) async {
     _logger.info('annotations.publish() called', {
       'channel': _channelName,
@@ -76,6 +77,7 @@ class RealtimeAnnotationsImpl implements RealtimeAnnotations {
   /// Sends an ANNOTATION ProtocolMessage with ANNOTATION_DELETE action.
   ///
   /// Spec: RTAN2
+  @override
   Future<void> delete(String messageSerial, Annotation annotation) async {
     _logger.info('annotations.delete() called', {
       'channel': _channelName,
@@ -94,6 +96,7 @@ class RealtimeAnnotationsImpl implements RealtimeAnnotations {
   /// Identical to RestAnnotations#get (RTAN3a).
   ///
   /// Spec: RTAN3
+  @override
   Future<PaginatedResult<Annotation>> get(
     String messageSerial, {
     Map<String, String>? params,
@@ -111,6 +114,7 @@ class RealtimeAnnotationsImpl implements RealtimeAnnotations {
   /// Logs a warning if ANNOTATION_SUBSCRIBE mode is missing (RTAN4e).
   ///
   /// Spec: RTAN4
+  @override
   void subscribe(void Function(Annotation) listener, {String? type}) {
     _logger.info('annotations.subscribe() called', {'channel': _channelName});
 
@@ -142,6 +146,7 @@ class RealtimeAnnotationsImpl implements RealtimeAnnotations {
   /// If both [listener] and [type] are null, all subscriptions are removed.
   ///
   /// Spec: RTAN5
+  @override
   void unsubscribe({void Function(Annotation)? listener, String? type}) {
     _logger.info('annotations.unsubscribe() called', {
       'channel': _channelName,
@@ -214,9 +219,9 @@ class RealtimeAnnotationsImpl implements RealtimeAnnotations {
   ) async {
     // RTAN1a3: type is required
     if (annotation.type == null || annotation.type!.isEmpty) {
-      throw AblyException(
+      throw const AblyException(
         message: 'Annotation type is required',
-        errorInfo: const ErrorInfo(
+        errorInfo: ErrorInfo(
           message: 'Annotation type is required',
           code: 40003,
           statusCode: 400,

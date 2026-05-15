@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:ably_dart/ably_dart.dart';
@@ -44,37 +43,37 @@ void main() {
     group('TP3a-TP3i - PresenceMessage attributes', () {
       // UTS: rest/unit/TP3a/presence-message-attributes-0
       test('TP3a - id attribute', () {
-        final msg = PresenceMessage(id: 'presence-123');
+        const msg = PresenceMessage(id: 'presence-123');
         expect(msg.id, equals('presence-123'));
       });
 
       // UTS: rest/unit/TP3a/presence-message-attributes-0.1
       test('TP3b - action attribute', () {
-        final msg = PresenceMessage(action: PresenceAction.enter);
+        const msg = PresenceMessage(action: PresenceAction.enter);
         expect(msg.action, equals(PresenceAction.enter));
       });
 
       // UTS: rest/unit/TP3a/presence-message-attributes-0.2
       test('TP3c - clientId attribute', () {
-        final msg = PresenceMessage(clientId: 'user-1');
+        const msg = PresenceMessage(clientId: 'user-1');
         expect(msg.clientId, equals('user-1'));
       });
 
       // UTS: rest/unit/TP3a/presence-message-attributes-0.3
       test('TP3d - connectionId attribute', () {
-        final msg = PresenceMessage(connectionId: 'conn-1');
+        const msg = PresenceMessage(connectionId: 'conn-1');
         expect(msg.connectionId, equals('conn-1'));
       });
 
       // UTS: rest/unit/TP3a/presence-message-attributes-0.4
       test('TP3e - data attribute (string)', () {
-        final msg = PresenceMessage(data: 'hello');
+        const msg = PresenceMessage(data: 'hello');
         expect(msg.data, equals('hello'));
       });
 
       // UTS: rest/unit/TP3a/presence-message-attributes-0.5
       test('TP3e - data attribute (object)', () {
-        final msg = PresenceMessage(data: {'status': 'online'});
+        const msg = PresenceMessage(data: {'status': 'online'});
         expect(msg.data, equals({'status': 'online'}));
       });
 
@@ -87,7 +86,7 @@ void main() {
 
       // UTS: rest/unit/TP3a/presence-message-attributes-0.7
       test('TP3f - encoding attribute', () {
-        final msg = PresenceMessage(encoding: 'json');
+        const msg = PresenceMessage(encoding: 'json');
         expect(msg.encoding, equals('json'));
       });
 
@@ -101,10 +100,12 @@ void main() {
 
       // UTS: rest/unit/TP3a/presence-message-attributes-0.9
       test('TP3i - extras attribute', () {
-        final msg = PresenceMessage(
-          extras: MessageExtras(data: {
-            'headers': {'x-custom': 'value'},
-          }),
+        const msg = PresenceMessage(
+          extras: MessageExtras(
+            data: {
+              'headers': {'x-custom': 'value'},
+            },
+          ),
         );
         expect(msg.extras?.data['headers']['x-custom'], equals('value'));
       });
@@ -113,7 +114,7 @@ void main() {
     group('TP3h - memberKey combines connectionId and clientId', () {
       // UTS: rest/unit/TP3h/member-key-combines-ids-0
       test('TP3h - memberKey format is connectionId:clientId', () {
-        final msg = PresenceMessage(
+        const msg = PresenceMessage(
           connectionId: 'conn-1',
           clientId: 'user-1',
         );
@@ -122,11 +123,11 @@ void main() {
 
       // UTS: rest/unit/TP3d/connectionid-from-protocol-message-0
       test('TP3h - different connectionId produces different memberKey', () {
-        final msg1 = PresenceMessage(
+        const msg1 = PresenceMessage(
           connectionId: 'conn-1',
           clientId: 'user-1',
         );
-        final msg2 = PresenceMessage(
+        const msg2 = PresenceMessage(
           connectionId: 'conn-2',
           clientId: 'user-1',
         );
@@ -193,13 +194,15 @@ void main() {
     group('TP3 - PresenceMessage to JSON (wire format)', () {
       // UTS: rest/unit/TP3a/presence-message-attributes-0.10
       test('serializes correctly for transmission', () {
-        final msg = PresenceMessage(
+        const msg = PresenceMessage(
           action: PresenceAction.enter,
           clientId: 'user-1',
           data: 'hello',
-          extras: MessageExtras(data: {
-            'headers': {'x-key': 'x-value'},
-          }),
+          extras: MessageExtras(
+            data: {
+              'headers': {'x-key': 'x-value'},
+            },
+          ),
         );
 
         final jsonData = msg.toMap();
@@ -224,7 +227,7 @@ void main() {
     group('TP3 - Null/missing attributes omitted from serialization', () {
       // UTS: rest/unit/TP3/null-attributes-omitted-3
       test('null or missing optional attributes are omitted', () {
-        final msg = PresenceMessage(
+        const msg = PresenceMessage(
           action: PresenceAction.enter,
           clientId: 'user-1',
         );
@@ -289,9 +292,11 @@ void main() {
           data: 'round-trip-data',
           encoding: 'utf-8',
           timestamp: DateTime.fromMillisecondsSinceEpoch(9999999),
-          extras: MessageExtras(data: {
-            'headers': {'x-round': 'trip'},
-          }),
+          extras: const MessageExtras(
+            data: {
+              'headers': {'x-round': 'trip'},
+            },
+          ),
         );
 
         final jsonData = original.toMap();
@@ -317,19 +322,19 @@ void main() {
     group('TP - PresenceMessage equality', () {
       // UTS: rest/unit/TP3a/id-from-protocol-message-1
       test('messages with same id/action/clientId/connectionId are equal', () {
-        final msg1 = PresenceMessage(
+        const msg1 = PresenceMessage(
           id: 'same-id',
           action: PresenceAction.enter,
           clientId: 'user-1',
           connectionId: 'conn-1',
         );
-        final msg2 = PresenceMessage(
+        const msg2 = PresenceMessage(
           id: 'same-id',
           action: PresenceAction.enter,
           clientId: 'user-1',
           connectionId: 'conn-1',
         );
-        final msg3 = PresenceMessage(
+        const msg3 = PresenceMessage(
           id: 'different-id',
           action: PresenceAction.enter,
           clientId: 'user-1',

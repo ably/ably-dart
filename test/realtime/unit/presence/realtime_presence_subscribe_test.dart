@@ -58,48 +58,54 @@ void main() {
       await _awaitChannelState(channel, ChannelState.attached);
 
       // Server delivers ENTER, UPDATE, and LEAVE events
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.presence,
-        channel: channelName,
-        presence: [
-          PresenceMessage(
-            action: PresenceAction.enter,
-            clientId: 'alice',
-            connectionId: 'c1',
-            id: 'c1:0:0',
-            timestamp: DateTime.fromMillisecondsSinceEpoch(1000),
-          ),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.presence,
+          channel: channelName,
+          presence: [
+            PresenceMessage(
+              action: PresenceAction.enter,
+              clientId: 'alice',
+              connectionId: 'c1',
+              id: 'c1:0:0',
+              timestamp: DateTime.fromMillisecondsSinceEpoch(1000),
+            ),
+          ],
+        ),
+      );
 
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.presence,
-        channel: channelName,
-        presence: [
-          PresenceMessage(
-            action: PresenceAction.update,
-            clientId: 'alice',
-            connectionId: 'c1',
-            id: 'c1:1:0',
-            timestamp: DateTime.fromMillisecondsSinceEpoch(2000),
-            data: 'updated',
-          ),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.presence,
+          channel: channelName,
+          presence: [
+            PresenceMessage(
+              action: PresenceAction.update,
+              clientId: 'alice',
+              connectionId: 'c1',
+              id: 'c1:1:0',
+              timestamp: DateTime.fromMillisecondsSinceEpoch(2000),
+              data: 'updated',
+            ),
+          ],
+        ),
+      );
 
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.presence,
-        channel: channelName,
-        presence: [
-          PresenceMessage(
-            action: PresenceAction.leave,
-            clientId: 'alice',
-            connectionId: 'c1',
-            id: 'c1:2:0',
-            timestamp: DateTime.fromMillisecondsSinceEpoch(3000),
-          ),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.presence,
+          channel: channelName,
+          presence: [
+            PresenceMessage(
+              action: PresenceAction.leave,
+              clientId: 'alice',
+              connectionId: 'c1',
+              id: 'c1:2:0',
+              timestamp: DateTime.fromMillisecondsSinceEpoch(3000),
+            ),
+          ],
+        ),
+      );
 
       expect(receivedEvents.length, equals(3));
       expect(receivedEvents[0].action, equals(PresenceAction.enter));
@@ -163,33 +169,35 @@ void main() {
       );
 
       // Server delivers all three action types in one ProtocolMessage
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.presence,
-        channel: channelName,
-        presence: [
-          PresenceMessage(
-            action: PresenceAction.enter,
-            clientId: 'alice',
-            connectionId: 'c1',
-            id: 'c1:0:0',
-            timestamp: DateTime.fromMillisecondsSinceEpoch(1000),
-          ),
-          PresenceMessage(
-            action: PresenceAction.update,
-            clientId: 'alice',
-            connectionId: 'c1',
-            id: 'c1:1:0',
-            timestamp: DateTime.fromMillisecondsSinceEpoch(2000),
-          ),
-          PresenceMessage(
-            action: PresenceAction.leave,
-            clientId: 'alice',
-            connectionId: 'c1',
-            id: 'c1:2:0',
-            timestamp: DateTime.fromMillisecondsSinceEpoch(3000),
-          ),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.presence,
+          channel: channelName,
+          presence: [
+            PresenceMessage(
+              action: PresenceAction.enter,
+              clientId: 'alice',
+              connectionId: 'c1',
+              id: 'c1:0:0',
+              timestamp: DateTime.fromMillisecondsSinceEpoch(1000),
+            ),
+            PresenceMessage(
+              action: PresenceAction.update,
+              clientId: 'alice',
+              connectionId: 'c1',
+              id: 'c1:1:0',
+              timestamp: DateTime.fromMillisecondsSinceEpoch(2000),
+            ),
+            PresenceMessage(
+              action: PresenceAction.leave,
+              clientId: 'alice',
+              connectionId: 'c1',
+              id: 'c1:2:0',
+              timestamp: DateTime.fromMillisecondsSinceEpoch(3000),
+            ),
+          ],
+        ),
+      );
 
       // ENTER listener only gets ENTER events
       expect(enterEvents.length, equals(1));
@@ -245,33 +253,35 @@ void main() {
         actions: [PresenceAction.enter, PresenceAction.leave],
       );
 
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.presence,
-        channel: channelName,
-        presence: [
-          PresenceMessage(
-            action: PresenceAction.enter,
-            clientId: 'alice',
-            connectionId: 'c1',
-            id: 'c1:0:0',
-            timestamp: DateTime.fromMillisecondsSinceEpoch(1000),
-          ),
-          PresenceMessage(
-            action: PresenceAction.update,
-            clientId: 'alice',
-            connectionId: 'c1',
-            id: 'c1:1:0',
-            timestamp: DateTime.fromMillisecondsSinceEpoch(2000),
-          ),
-          PresenceMessage(
-            action: PresenceAction.leave,
-            clientId: 'alice',
-            connectionId: 'c1',
-            id: 'c1:2:0',
-            timestamp: DateTime.fromMillisecondsSinceEpoch(3000),
-          ),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.presence,
+          channel: channelName,
+          presence: [
+            PresenceMessage(
+              action: PresenceAction.enter,
+              clientId: 'alice',
+              connectionId: 'c1',
+              id: 'c1:0:0',
+              timestamp: DateTime.fromMillisecondsSinceEpoch(1000),
+            ),
+            PresenceMessage(
+              action: PresenceAction.update,
+              clientId: 'alice',
+              connectionId: 'c1',
+              id: 'c1:1:0',
+              timestamp: DateTime.fromMillisecondsSinceEpoch(2000),
+            ),
+            PresenceMessage(
+              action: PresenceAction.leave,
+              clientId: 'alice',
+              connectionId: 'c1',
+              id: 'c1:2:0',
+              timestamp: DateTime.fromMillisecondsSinceEpoch(3000),
+            ),
+          ],
+        ),
+      );
 
       // Only ENTER and LEAVE events received — UPDATE filtered out
       expect(enterLeaveEvents.length, equals(2));
@@ -434,19 +444,21 @@ void main() {
       channel.presence.subscribe((event) => eventsB.add(event));
 
       // Deliver first event — both listeners receive it
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.presence,
-        channel: channelName,
-        presence: [
-          PresenceMessage(
-            action: PresenceAction.enter,
-            clientId: 'alice',
-            connectionId: 'c1',
-            id: 'c1:0:0',
-            timestamp: DateTime.fromMillisecondsSinceEpoch(1000),
-          ),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.presence,
+          channel: channelName,
+          presence: [
+            PresenceMessage(
+              action: PresenceAction.enter,
+              clientId: 'alice',
+              connectionId: 'c1',
+              id: 'c1:0:0',
+              timestamp: DateTime.fromMillisecondsSinceEpoch(1000),
+            ),
+          ],
+        ),
+      );
 
       expect(eventsA.length, equals(1));
       expect(eventsB.length, equals(1));
@@ -455,19 +467,21 @@ void main() {
       channel.presence.unsubscribe();
 
       // Deliver second event — no listeners receive it
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.presence,
-        channel: channelName,
-        presence: [
-          PresenceMessage(
-            action: PresenceAction.enter,
-            clientId: 'bob',
-            connectionId: 'c2',
-            id: 'c2:0:0',
-            timestamp: DateTime.fromMillisecondsSinceEpoch(2000),
-          ),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.presence,
+          channel: channelName,
+          presence: [
+            PresenceMessage(
+              action: PresenceAction.enter,
+              clientId: 'bob',
+              connectionId: 'c2',
+              id: 'c2:0:0',
+              timestamp: DateTime.fromMillisecondsSinceEpoch(2000),
+            ),
+          ],
+        ),
+      );
 
       expect(eventsA.length, equals(1)); // No new events after unsubscribe
       expect(eventsB.length, equals(1));
@@ -526,19 +540,21 @@ void main() {
       // Unsubscribe only listenerA
       channel.presence.unsubscribe(listener: listenerA);
 
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.presence,
-        channel: channelName,
-        presence: [
-          PresenceMessage(
-            action: PresenceAction.enter,
-            clientId: 'alice',
-            connectionId: 'c1',
-            id: 'c1:0:0',
-            timestamp: DateTime.fromMillisecondsSinceEpoch(1000),
-          ),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.presence,
+          channel: channelName,
+          presence: [
+            PresenceMessage(
+              action: PresenceAction.enter,
+              clientId: 'alice',
+              connectionId: 'c1',
+              id: 'c1:0:0',
+              timestamp: DateTime.fromMillisecondsSinceEpoch(1000),
+            ),
+          ],
+        ),
+      );
 
       expect(eventsA.length, equals(0)); // Unsubscribed — no events
       expect(eventsB.length, equals(1)); // Still subscribed — receives event
@@ -598,26 +614,28 @@ void main() {
         action: PresenceAction.enter,
       );
 
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.presence,
-        channel: channelName,
-        presence: [
-          PresenceMessage(
-            action: PresenceAction.enter,
-            clientId: 'alice',
-            connectionId: 'c1',
-            id: 'c1:0:0',
-            timestamp: DateTime.fromMillisecondsSinceEpoch(1000),
-          ),
-          PresenceMessage(
-            action: PresenceAction.leave,
-            clientId: 'alice',
-            connectionId: 'c1',
-            id: 'c1:1:0',
-            timestamp: DateTime.fromMillisecondsSinceEpoch(2000),
-          ),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.presence,
+          channel: channelName,
+          presence: [
+            PresenceMessage(
+              action: PresenceAction.enter,
+              clientId: 'alice',
+              connectionId: 'c1',
+              id: 'c1:0:0',
+              timestamp: DateTime.fromMillisecondsSinceEpoch(1000),
+            ),
+            PresenceMessage(
+              action: PresenceAction.leave,
+              clientId: 'alice',
+              connectionId: 'c1',
+              id: 'c1:1:0',
+              timestamp: DateTime.fromMillisecondsSinceEpoch(2000),
+            ),
+          ],
+        ),
+      );
 
       // Only LEAVE received — ENTER subscription was removed
       expect(received.length, equals(1));
@@ -668,20 +686,22 @@ void main() {
       channel.presence.subscribe((event) {});
 
       // Server delivers ENTER
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.presence,
-        channel: channelName,
-        presence: [
-          PresenceMessage(
-            action: PresenceAction.enter,
-            clientId: 'alice',
-            connectionId: 'c1',
-            id: 'c1:0:0',
-            timestamp: DateTime.fromMillisecondsSinceEpoch(1000),
-            data: 'hello',
-          ),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.presence,
+          channel: channelName,
+          presence: [
+            PresenceMessage(
+              action: PresenceAction.enter,
+              clientId: 'alice',
+              connectionId: 'c1',
+              id: 'c1:0:0',
+              timestamp: DateTime.fromMillisecondsSinceEpoch(1000),
+              data: 'hello',
+            ),
+          ],
+        ),
+      );
 
       final members = await channel.presence.get(waitForSync: false);
 
@@ -735,33 +755,35 @@ void main() {
       channel.presence.subscribe((event) => received.add(event));
 
       // Server delivers multiple presence events in one ProtocolMessage
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.presence,
-        channel: channelName,
-        presence: [
-          PresenceMessage(
-            action: PresenceAction.enter,
-            clientId: 'alice',
-            connectionId: 'c1',
-            id: 'c1:0:0',
-            timestamp: DateTime.fromMillisecondsSinceEpoch(1000),
-          ),
-          PresenceMessage(
-            action: PresenceAction.enter,
-            clientId: 'bob',
-            connectionId: 'c2',
-            id: 'c2:0:0',
-            timestamp: DateTime.fromMillisecondsSinceEpoch(1000),
-          ),
-          PresenceMessage(
-            action: PresenceAction.enter,
-            clientId: 'carol',
-            connectionId: 'c3',
-            id: 'c3:0:0',
-            timestamp: DateTime.fromMillisecondsSinceEpoch(1000),
-          ),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.presence,
+          channel: channelName,
+          presence: [
+            PresenceMessage(
+              action: PresenceAction.enter,
+              clientId: 'alice',
+              connectionId: 'c1',
+              id: 'c1:0:0',
+              timestamp: DateTime.fromMillisecondsSinceEpoch(1000),
+            ),
+            PresenceMessage(
+              action: PresenceAction.enter,
+              clientId: 'bob',
+              connectionId: 'c2',
+              id: 'c2:0:0',
+              timestamp: DateTime.fromMillisecondsSinceEpoch(1000),
+            ),
+            PresenceMessage(
+              action: PresenceAction.enter,
+              clientId: 'carol',
+              connectionId: 'c3',
+              id: 'c3:0:0',
+              timestamp: DateTime.fromMillisecondsSinceEpoch(1000),
+            ),
+          ],
+        ),
+      );
 
       expect(received.length, equals(3));
       expect(received[0].clientId, equals('alice'));

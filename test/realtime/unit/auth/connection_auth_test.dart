@@ -104,7 +104,9 @@ void main() {
       // WebSocket URL contains the token from authCallback
       expect(capturedUrl, isNotNull);
       expect(
-          capturedUrl!.queryParameters['accessToken'], equals('my-auth-token'));
+        capturedUrl!.queryParameters['accessToken'],
+        equals('my-auth-token'),
+      );
 
       // WebSocket URL does NOT contain a key parameter (using token auth)
       expect(capturedUrl!.queryParameters['key'], isNull);
@@ -354,8 +356,10 @@ void main() {
 
       // URL contains accessToken (not key)
       expect(capturedUrl, isNotNull);
-      expect(capturedUrl!.queryParameters['accessToken'],
-          equals('callback-token'));
+      expect(
+        capturedUrl!.queryParameters['accessToken'],
+        equals('callback-token'),
+      );
       expect(capturedUrl!.queryParameters['key'], isNull);
 
       mockWs.dispose();
@@ -391,7 +395,9 @@ void main() {
       // URL contains key (basic auth)
       expect(capturedUrl, isNotNull);
       expect(
-          capturedUrl!.queryParameters['key'], equals('appId.keyId:keySecret'));
+        capturedUrl!.queryParameters['key'],
+        equals('appId.keyId:keySecret'),
+      );
       expect(capturedUrl!.queryParameters['accessToken'], isNull);
 
       mockWs.dispose();
@@ -413,8 +419,10 @@ Future<void> _awaitState(
 
   await connection
       .on()
-      .firstWhere((change) =>
-          change.current == targetState ||
-          (orState != null && change.current == orState))
+      .firstWhere(
+        (change) =>
+            change.current == targetState ||
+            (orState != null && change.current == orState),
+      )
       .timeout(timeout);
 }

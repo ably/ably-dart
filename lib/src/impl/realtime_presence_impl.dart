@@ -71,6 +71,7 @@ class RealtimePresenceImpl implements RealtimePresence {
   /// Whether the presence sync is complete.
   ///
   /// Spec: RTP13
+  @override
   bool get syncComplete => _syncComplete;
 
   // ─── Subscribe / Unsubscribe (RTP6, RTP7) ───
@@ -84,6 +85,7 @@ class RealtimePresenceImpl implements RealtimePresence {
   /// Optionally triggers an implicit attach (RTP6d).
   ///
   /// Spec: RTP6, RTP6a, RTP6b, RTP6d, RTP6e
+  @override
   void subscribe(
     void Function(PresenceMessage) listener, {
     PresenceAction? action,
@@ -118,6 +120,7 @@ class RealtimePresenceImpl implements RealtimePresence {
   /// action subscription for that listener is removed (RTP7b).
   ///
   /// Spec: RTP7, RTP7a, RTP7b, RTP7c
+  @override
   void unsubscribe({
     void Function(PresenceMessage)? listener,
     PresenceAction? action,
@@ -147,6 +150,7 @@ class RealtimePresenceImpl implements RealtimePresence {
   /// Enters the presence set for the current clientId.
   ///
   /// Spec: RTP8, RTP8a, RTP8c, RTP8d, RTP8e, RTP8j
+  @override
   Future<void> enter([Object? data]) async {
     _logger.info('presence.enter() called', {'channel': _channelName});
     final clientId = _getClientId();
@@ -172,6 +176,7 @@ class RealtimePresenceImpl implements RealtimePresence {
   /// Updates the presence data for the current clientId.
   ///
   /// Spec: RTP9, RTP9a, RTP9d
+  @override
   Future<void> update([Object? data]) async {
     _logger.info('presence.update() called', {'channel': _channelName});
     final clientId = _getClientId();
@@ -196,6 +201,7 @@ class RealtimePresenceImpl implements RealtimePresence {
   /// Leaves the presence set for the current clientId.
   ///
   /// Spec: RTP10, RTP10a, RTP10c
+  @override
   Future<void> leave([Object? data]) async {
     _logger.info('presence.leave() called', {'channel': _channelName});
     final clientId = _getClientId();
@@ -222,6 +228,7 @@ class RealtimePresenceImpl implements RealtimePresence {
   /// Requires the connection to have a wildcard clientId or the same clientId.
   ///
   /// Spec: RTP14, RTP14a, RTP15e, RTP15f
+  @override
   Future<void> enterClient(String clientId, [Object? data]) async {
     _logger.info('presence.enterClient() called', {
       'channel': _channelName,
@@ -240,6 +247,7 @@ class RealtimePresenceImpl implements RealtimePresence {
   /// Updates presence data for a specific clientId.
   ///
   /// Spec: RTP15, RTP15a
+  @override
   Future<void> updateClient(String clientId, [Object? data]) async {
     _logger.info('presence.updateClient() called', {
       'channel': _channelName,
@@ -258,6 +266,7 @@ class RealtimePresenceImpl implements RealtimePresence {
   /// Leaves the presence set for a specific clientId.
   ///
   /// Spec: RTP15, RTP15a
+  @override
   Future<void> leaveClient(String clientId, [Object? data]) async {
     _logger.info('presence.leaveClient() called', {
       'channel': _channelName,
@@ -299,6 +308,7 @@ class RealtimePresenceImpl implements RealtimePresence {
   /// to return immediately with whatever members are available.
   ///
   /// Spec: RTP11, RTP11a, RTP11b, RTP11c1, RTP11c2, RTP11c3, RTP11d
+  @override
   Future<List<PresenceMessage>> get({
     bool waitForSync = true,
     String? clientId,
@@ -350,6 +360,7 @@ class RealtimePresenceImpl implements RealtimePresence {
   /// Delegates to the REST presence history endpoint.
   ///
   /// Spec: RTP12, RTP12a, RTP12c, RTP12d
+  @override
   Future<PaginatedResult<PresenceMessage>> history([
     RestHistoryParams? params,
   ]) {

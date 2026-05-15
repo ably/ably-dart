@@ -20,7 +20,7 @@ void main() {
       onRequest: (req) {
         req.respondWith(200, {
           'channelId': defaultChannelName,
-          'status': {'isActive': true}
+          'status': {'isActive': true},
         });
       },
     );
@@ -68,7 +68,7 @@ void main() {
           } else {
             req.respondWith(200, {
               'channelId': channelName,
-              'status': {'isActive': true}
+              'status': {'isActive': true},
             });
           }
         },
@@ -254,7 +254,7 @@ void main() {
             // Subsequent requests succeed
             req.respondWith(200, {
               'channelId': channelName,
-              'status': {'isActive': true}
+              'status': {'isActive': true},
             });
           }
         },
@@ -412,7 +412,7 @@ void main() {
 
       // Now switch to basic auth
       final result = await client.auth.authorize(
-        authOptions: AuthOptions(
+        authOptions: const AuthOptions(
           key: 'appId.keyId:keySecret',
           useTokenAuth: false,
         ),

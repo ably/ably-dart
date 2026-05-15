@@ -23,8 +23,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'connection-id',
               connectionKey: 'connection-key',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },
@@ -77,8 +75,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'connection-id',
               connectionKey: 'connection-key',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },
@@ -156,8 +152,6 @@ void main() {
                 ProtocolMessageHelpers.connected(
                   connectionId: 'connection-id-$connectionAttemptCount',
                   connectionKey: 'connection-key-$connectionAttemptCount',
-                  maxIdleInterval: 15000,
-                  connectionStateTtl: 120000,
                 ),
               );
             }
@@ -224,8 +218,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'connection-id',
               connectionKey: 'connection-key',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },
@@ -280,8 +272,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'connection-id',
               connectionKey: 'connection-key',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },
@@ -371,7 +361,6 @@ void main() {
       await _awaitState(
         client.connection,
         ConnectionState.disconnected,
-        timeout: const Duration(seconds: 5),
       );
       await Future<void>.delayed(Duration.zero);
 
@@ -393,7 +382,6 @@ void main() {
               code: 50000,
               statusCode: 500,
               message: 'Internal server error',
-              channel: null,
             ),
           );
         },
@@ -438,8 +426,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'connection-id',
               connectionKey: 'connection-key',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },

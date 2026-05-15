@@ -15,7 +15,7 @@ void main() {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
           request.respondWith(201, {
-            'serials': ['serial-abc']
+            'serials': ['serial-abc'],
           });
         },
       );
@@ -41,7 +41,7 @@ void main() {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
           request.respondWith(201, {
-            'serials': ['s1', 's2', 's3']
+            'serials': ['s1', 's2', 's3'],
           });
         },
       );
@@ -53,9 +53,9 @@ void main() {
 
       final channel = client.channels.get('test-RSL1n-batch');
       final messages = [
-        Message(name: 'event1', data: 'data1'),
-        Message(name: 'event2', data: 'data2'),
-        Message(name: 'event3', data: 'data3'),
+        const Message(name: 'event1', data: 'data1'),
+        const Message(name: 'event2', data: 'data2'),
+        const Message(name: 'event3', data: 'data3'),
       ];
       final result = await channel.publish(messages: messages);
 
@@ -73,7 +73,7 @@ void main() {
       final mockHttp = MockHttpClient(
         onRequest: (request) {
           request.respondWith(201, {
-            'serials': [null, 's2']
+            'serials': [null, 's2'],
           });
         },
       );
@@ -85,8 +85,8 @@ void main() {
 
       final channel = client.channels.get('test-RSL1n-null');
       final messages = [
-        Message(name: 'event1', data: 'data1'),
-        Message(name: 'event2', data: 'data2'),
+        const Message(name: 'event1', data: 'data1'),
+        const Message(name: 'event2', data: 'data2'),
       ];
       final result = await channel.publish(messages: messages);
 

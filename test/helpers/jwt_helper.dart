@@ -51,7 +51,6 @@ class JwtHelper {
 
     return jwt.sign(
       SecretKey(keySecret),
-      algorithm: JWTAlgorithm.HS256,
     );
   }
 

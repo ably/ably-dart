@@ -27,23 +27,25 @@ void main() {
         var requestCount = 0;
         final channelName = testChannelName('RSA4b4-40142');
 
-        final authCallback = (TokenParams params) async {
+        Future<TokenDetails> authCallback(TokenParams params) async {
           final token = tokens[callbackCount];
           callbackCount++;
           return TokenDetails(
             token: token,
             expires: DateTime.now().millisecondsSinceEpoch + 3600000,
           );
-        };
+        }
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
             requestCount++;
 
             if (requestCount == 1) {
@@ -58,7 +60,7 @@ void main() {
             } else {
               // Second request (after renewal) succeeds
               req.respondWith(200, [
-                {'channel': channelName}
+                {'channel': channelName},
               ]);
             }
           },
@@ -102,13 +104,13 @@ void main() {
         var requestCount = 0;
         final channelName = testChannelName('RSA4b4-40140');
 
-        final authCallback = (TokenParams params) async {
+        Future<TokenDetails> authCallback(TokenParams params) async {
           callbackCount++;
           return TokenDetails(
             token: 'token-$callbackCount',
             expires: DateTime.now().millisecondsSinceEpoch + 3600000,
           );
-        };
+        }
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -150,7 +152,7 @@ void main() {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSA14');
 
-        final authCallback = (TokenParams params) async {
+        Future<TokenDetails> authCallback(TokenParams params) async {
           callbackCount++;
           if (callbackCount == 1) {
             // First token is already expired
@@ -164,16 +166,18 @@ void main() {
               expires: DateTime.now().millisecondsSinceEpoch + 3600000,
             );
           }
-        };
+        }
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
             // Only success response (no 401 expected)
             req.respondWith(200, []);
           },
@@ -196,9 +200,11 @@ void main() {
         // Only ONE HTTP request to the API (history)
         // No failed request with expired token
         final requestsToChannels = capturedRequests
-            .where((r) =>
-                r.url.path ==
-                '/channels/${Uri.encodeComponent(channelName)}/messages')
+            .where(
+              (r) =>
+                  r.url.path ==
+                  '/channels/${Uri.encodeComponent(channelName)}/messages',
+            )
             .toList();
         expect(requestsToChannels.length, equals(1));
         expect(
@@ -259,12 +265,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
             requestCount++;
 
             if (req.url.host == 'example.com') {
@@ -368,8 +376,11 @@ void main() {
 
     group('RSA4b - Msgpack response', () {
       // UTS: rest/unit/RSA4b/renewal-msgpack-response-4
-      test('RSA4b - renewal msgpack response', () {},
-          skip: 'Not yet implemented: msgpack encoding support');
+      test(
+        'RSA4b - renewal msgpack response',
+        () {},
+        skip: 'Not yet implemented: msgpack encoding support',
+      );
     });
 
     group('RSA4b1 - Preemptive token renewal', () {
@@ -381,7 +392,7 @@ void main() {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSA4b1-preemptive');
 
-        final authCallback = (TokenParams params) async {
+        Future<TokenDetails> authCallback(TokenParams params) async {
           callbackCount++;
           if (callbackCount == 1) {
             // First token: already expired
@@ -396,16 +407,18 @@ void main() {
               expires: DateTime.now().millisecondsSinceEpoch + 3600000,
             );
           }
-        };
+        }
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
             req.respondWith(200, []);
           },
         );
@@ -426,9 +439,11 @@ void main() {
 
         // The actual API request should use the fresh token
         final channelRequests = capturedRequests
-            .where((r) =>
-                r.url.path ==
-                '/channels/${Uri.encodeComponent(channelName)}/messages')
+            .where(
+              (r) =>
+                  r.url.path ==
+                  '/channels/${Uri.encodeComponent(channelName)}/messages',
+            )
             .toList();
         expect(channelRequests.length, equals(1));
         expect(
@@ -448,22 +463,24 @@ void main() {
         final capturedRequests = <CapturedRequest>[];
         final channelName = testChannelName('RSC10-retry');
 
-        final authCallback = (TokenParams params) async {
+        Future<TokenDetails> authCallback(TokenParams params) async {
           callbackCount++;
           return TokenDetails(
             token: 'token-$callbackCount',
             expires: DateTime.now().millisecondsSinceEpoch + 3600000,
           );
-        };
+        }
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
             requestCount++;
 
             if (requestCount == 1) {
@@ -478,7 +495,7 @@ void main() {
             } else {
               // Retry after renewal succeeds
               req.respondWith(200, [
-                {'channel': channelName}
+                {'channel': channelName},
               ]);
             }
           },
@@ -523,13 +540,13 @@ void main() {
         var requestCount = 0;
         final channelName = testChannelName('RSA4b4-limit');
 
-        final authCallback = (TokenParams params) async {
+        Future<TokenDetails> authCallback(TokenParams params) async {
           callbackCount++;
           return TokenDetails(
             token: 'token-$callbackCount',
             expires: DateTime.now().millisecondsSinceEpoch + 3600000,
           );
-        };
+        }
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -559,7 +576,9 @@ void main() {
         // Should not retry indefinitely (implementation-specific limit)
         expect(callbackCount, lessThanOrEqualTo(3)); // Reasonable retry limit
         expect(
-            requestCount, lessThanOrEqualTo(3)); // Should stop making requests
+          requestCount,
+          lessThanOrEqualTo(3),
+        ); // Should stop making requests
       });
     });
   });

@@ -87,8 +87,9 @@ void main() {
                         presence: [],
                       ),
                     );
-            if (resultA.presence.isEmpty || resultB.presence.isEmpty)
+            if (resultA.presence.isEmpty || resultB.presence.isEmpty) {
               return null;
+            }
             return true;
           },
           timeout: const Duration(seconds: 20),

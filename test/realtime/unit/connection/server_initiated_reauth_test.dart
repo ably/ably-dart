@@ -256,7 +256,7 @@ void main() {
       // (RTN22a: server force disconnects after reauth timeout).
       mockWs.activeConnection!.sendToClientAndClose(
         ProtocolMessageHelpers.disconnected(
-          error: ErrorInfo(
+          error: const ErrorInfo(
             message: 'Token expired, reauth timed out',
             code: 40142,
             statusCode: 401,
@@ -319,7 +319,7 @@ void main() {
       // timeout)
       mockWs.activeConnection!.sendToClient(
         ProtocolMessageHelpers.disconnected(
-          error: ErrorInfo(
+          error: const ErrorInfo(
             message: 'Token expired',
             code: 40142,
             statusCode: 401,

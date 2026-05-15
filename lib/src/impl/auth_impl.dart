@@ -401,7 +401,7 @@ class AuthImpl implements Auth {
     if (result is String) {
       // RSA4f: Validate token string size (max 128KiB = 131072 bytes)
       if (result.length > 131072) {
-        throw AblyException(
+        throw const AblyException(
           message: 'Invalid authCallback result: token string exceeds 128KiB',
           errorInfo: ErrorInfo(
             message: 'Invalid authCallback result: token string exceeds 128KiB',

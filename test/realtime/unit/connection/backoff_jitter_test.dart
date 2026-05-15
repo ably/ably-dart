@@ -36,8 +36,11 @@ void main() {
 
       // Verify all subsequent retries are capped at 2.0
       for (var i = 3; i < 10; i++) {
-        expect(coefficients[i], closeTo(2.0, 0.001),
-            reason: 'Retry ${i + 1} should be capped at 2.0');
+        expect(
+          coefficients[i],
+          closeTo(2.0, 0.001),
+          reason: 'Retry ${i + 1} should be capped at 2.0',
+        );
       }
     });
   });
@@ -97,7 +100,6 @@ void main() {
                 ProtocolMessageHelpers.connected(
                   connectionId: 'connection-id',
                   connectionKey: 'connection-key',
-                  maxIdleInterval: 15000,
                   connectionStateTtl: 60000,
                 ),
               );
@@ -151,57 +153,77 @@ void main() {
         // where jitter is in [0.8, 1.0]
 
         // Retry 1: backoff = 1.0, range = [2000*0.8, 2000*1.0] = [1600, 2000]
-        expect(retryDelays[0],
-            greaterThanOrEqualTo((disconnectedRetryTimeout * 1.0 * 0.8).ceil()),
-            reason: 'Retry 1 lower bound');
         expect(
-            retryDelays[0],
-            lessThanOrEqualTo(
-                (disconnectedRetryTimeout * 1.0 * 1.0).floor() + 1),
-            reason: 'Retry 1 upper bound');
+          retryDelays[0],
+          greaterThanOrEqualTo((disconnectedRetryTimeout * 1.0 * 0.8).ceil()),
+          reason: 'Retry 1 lower bound',
+        );
+        expect(
+          retryDelays[0],
+          lessThanOrEqualTo(
+            (disconnectedRetryTimeout * 1.0 * 1.0).floor() + 1,
+          ),
+          reason: 'Retry 1 upper bound',
+        );
 
         // Retry 2: backoff = 4/3
         expect(
-            retryDelays[1],
-            greaterThanOrEqualTo(
-                (disconnectedRetryTimeout * (4.0 / 3.0) * 0.8).ceil()),
-            reason: 'Retry 2 lower bound');
+          retryDelays[1],
+          greaterThanOrEqualTo(
+            (disconnectedRetryTimeout * (4.0 / 3.0) * 0.8).ceil(),
+          ),
+          reason: 'Retry 2 lower bound',
+        );
         expect(
-            retryDelays[1],
-            lessThanOrEqualTo(
-                (disconnectedRetryTimeout * (4.0 / 3.0) * 1.0).floor() + 1),
-            reason: 'Retry 2 upper bound');
+          retryDelays[1],
+          lessThanOrEqualTo(
+            (disconnectedRetryTimeout * (4.0 / 3.0) * 1.0).floor() + 1,
+          ),
+          reason: 'Retry 2 upper bound',
+        );
 
         // Retry 3: backoff = 5/3
         expect(
-            retryDelays[2],
-            greaterThanOrEqualTo(
-                (disconnectedRetryTimeout * (5.0 / 3.0) * 0.8).ceil()),
-            reason: 'Retry 3 lower bound');
+          retryDelays[2],
+          greaterThanOrEqualTo(
+            (disconnectedRetryTimeout * (5.0 / 3.0) * 0.8).ceil(),
+          ),
+          reason: 'Retry 3 lower bound',
+        );
         expect(
-            retryDelays[2],
-            lessThanOrEqualTo(
-                (disconnectedRetryTimeout * (5.0 / 3.0) * 1.0).floor() + 1),
-            reason: 'Retry 3 upper bound');
+          retryDelays[2],
+          lessThanOrEqualTo(
+            (disconnectedRetryTimeout * (5.0 / 3.0) * 1.0).floor() + 1,
+          ),
+          reason: 'Retry 3 upper bound',
+        );
 
         // Retry 4+: backoff = 2.0 (capped)
-        expect(retryDelays[3],
-            greaterThanOrEqualTo((disconnectedRetryTimeout * 2.0 * 0.8).ceil()),
-            reason: 'Retry 4 lower bound');
         expect(
-            retryDelays[3],
-            lessThanOrEqualTo(
-                (disconnectedRetryTimeout * 2.0 * 1.0).floor() + 1),
-            reason: 'Retry 4 upper bound');
+          retryDelays[3],
+          greaterThanOrEqualTo((disconnectedRetryTimeout * 2.0 * 0.8).ceil()),
+          reason: 'Retry 4 lower bound',
+        );
+        expect(
+          retryDelays[3],
+          lessThanOrEqualTo(
+            (disconnectedRetryTimeout * 2.0 * 1.0).floor() + 1,
+          ),
+          reason: 'Retry 4 upper bound',
+        );
 
-        expect(retryDelays[4],
-            greaterThanOrEqualTo((disconnectedRetryTimeout * 2.0 * 0.8).ceil()),
-            reason: 'Retry 5 lower bound');
         expect(
-            retryDelays[4],
-            lessThanOrEqualTo(
-                (disconnectedRetryTimeout * 2.0 * 1.0).floor() + 1),
-            reason: 'Retry 5 upper bound');
+          retryDelays[4],
+          greaterThanOrEqualTo((disconnectedRetryTimeout * 2.0 * 0.8).ceil()),
+          reason: 'Retry 5 lower bound',
+        );
+        expect(
+          retryDelays[4],
+          lessThanOrEqualTo(
+            (disconnectedRetryTimeout * 2.0 * 1.0).floor() + 1,
+          ),
+          reason: 'Retry 5 upper bound',
+        );
 
         await client.close();
         mockWs.dispose();
@@ -226,7 +248,6 @@ void main() {
                 ProtocolMessageHelpers.connected(
                   connectionId: 'connection-id',
                   connectionKey: 'connection-key',
-                  maxIdleInterval: 15000,
                   connectionStateTtl: 60000,
                 ),
               );
@@ -281,15 +302,19 @@ void main() {
         // Verify retries 4+ are all within the capped range
         for (var i = 3; i < retryDelays.length; i++) {
           expect(
-              retryDelays[i],
-              greaterThanOrEqualTo(
-                  (disconnectedRetryTimeout * 2.0 * 0.8).ceil()),
-              reason: 'Retry ${i + 1} should be at capped minimum');
+            retryDelays[i],
+            greaterThanOrEqualTo(
+              (disconnectedRetryTimeout * 2.0 * 0.8).ceil(),
+            ),
+            reason: 'Retry ${i + 1} should be at capped minimum',
+          );
           expect(
-              retryDelays[i],
-              lessThanOrEqualTo(
-                  (disconnectedRetryTimeout * 2.0 * 1.0).floor() + 1),
-              reason: 'Retry ${i + 1} should be at capped maximum');
+            retryDelays[i],
+            lessThanOrEqualTo(
+              (disconnectedRetryTimeout * 2.0 * 1.0).floor() + 1,
+            ),
+            reason: 'Retry ${i + 1} should be at capped maximum',
+          );
         }
 
         await client.close();

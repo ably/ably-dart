@@ -125,8 +125,11 @@ void main() {
         final channel1 = client.channels.get(channelName);
         final channel2 = client.channels.get(channelName);
 
-        expect(identical(channel1, channel2), isTrue,
-            reason: 'Should return same object reference');
+        expect(
+          identical(channel1, channel2),
+          isTrue,
+          reason: 'Should return same object reference',
+        );
         expect(channel1.name, equals(channelName));
       });
     });
@@ -199,8 +202,11 @@ void main() {
 
         final channel2 = client.channels.get(channelName);
 
-        expect(identical(channel1, channel2), isFalse,
-            reason: 'Should be different object instances');
+        expect(
+          identical(channel1, channel2),
+          isFalse,
+          reason: 'Should be different object instances',
+        );
         expect(channel2.name, equals(channelName));
         expect(client.channels.exists(channelName), isTrue);
       });

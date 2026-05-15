@@ -84,8 +84,11 @@ Future<void> _downloadProxy() async {
     final tarball = '${tmpDir.path}/$asset';
     File(tarball).writeAsBytesSync(resp.bodyBytes);
 
-    final result = await Process.run('tar', ['xzf', tarball],
-        workingDirectory: tmpDir.path);
+    final result = await Process.run(
+      'tar',
+      ['xzf', tarball],
+      workingDirectory: tmpDir.path,
+    );
     if (result.exitCode != 0) {
       throw StateError('Failed to extract $asset: ${result.stderr}');
     }

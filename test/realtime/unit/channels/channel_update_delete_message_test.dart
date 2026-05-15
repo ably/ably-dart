@@ -47,7 +47,6 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
                 res: [
                   const PublishResult(serials: ['version-serial-1']),
                 ],
@@ -79,7 +78,10 @@ void main() {
 
       await channel.updateMessage(
         const Message(
-            serial: 'msg-serial-1', name: 'updated', data: 'new-data'),
+          serial: 'msg-serial-1',
+          name: 'updated',
+          data: 'new-data',
+        ),
       );
 
       // Find the MESSAGE ProtocolMessage (not the ATTACH)
@@ -130,7 +132,6 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
                 res: [
                   const PublishResult(serials: ['version-serial-1']),
                 ],
@@ -205,7 +206,6 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
                 res: [
                   const PublishResult(serials: ['version-serial-1']),
                 ],
@@ -282,7 +282,6 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
                 res: [
                   const PublishResult(serials: ['version-serial-1']),
                 ],
@@ -372,7 +371,6 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
                 res: [
                   const PublishResult(serials: ['version-serial-1']),
                 ],
@@ -445,7 +443,6 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
                 res: [
                   const PublishResult(
                     serials: ['01770000000000-000@abcdef:000'],
@@ -588,7 +585,6 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
                 res: [
                   const PublishResult(serials: ['version-serial-1']),
                 ],
@@ -735,7 +731,6 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
                 res: [
                   const PublishResult(serials: ['version-serial-1']),
                 ],
@@ -766,11 +761,11 @@ void main() {
       await channel.attach();
 
       await channel.updateMessage(
-        Message(
+        const Message(
           serial: 'msg-serial-1',
           data: {
             'key': 'value',
-            'nested': {'a': 1}
+            'nested': {'a': 1},
           },
         ),
       );
@@ -786,7 +781,7 @@ void main() {
         json.decode(msg['data'] as String),
         equals({
           'key': 'value',
-          'nested': {'a': 1}
+          'nested': {'a': 1},
         }),
       );
 

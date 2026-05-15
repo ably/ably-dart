@@ -95,7 +95,10 @@ class SimpleVCDiffDecoder implements VCDiffDecoder {
         final segPos = _readInteger(delta, offset);
         offset = segPos.nextOffset;
         sourceSegment = Uint8List.sublistView(
-            base, segPos.value, segPos.value + segLen.value);
+          base,
+          segPos.value,
+          segPos.value + segLen.value,
+        );
       } else if (winIndicator & 0x02 != 0) {
         // VCD_TARGET: source is target data built so far
         final segLen = _readInteger(delta, offset);
@@ -332,7 +335,9 @@ void main() {
 
         client.connect();
         await waitForConnectionState(
-            client.connection, ConnectionState.connected);
+          client.connection,
+          ConnectionState.connected,
+        );
 
         final channel = client.channels.get(
           channelName,
@@ -410,7 +415,9 @@ void main() {
 
         client.connect();
         await waitForConnectionState(
-            client.connection, ConnectionState.connected);
+          client.connection,
+          ConnectionState.connected,
+        );
 
         // Channel WITHOUT delta param
         final channel = client.channels.get(channelName);
@@ -477,7 +484,9 @@ void main() {
 
         client.connect();
         await waitForConnectionState(
-            client.connection, ConnectionState.connected);
+          client.connection,
+          ConnectionState.connected,
+        );
 
         final channel = client.channels.get(
           channelName,
@@ -593,7 +602,9 @@ void main() {
 
         client.connect();
         await waitForConnectionState(
-            client.connection, ConnectionState.connected);
+          client.connection,
+          ConnectionState.connected,
+        );
 
         final channel = client.channels.get(
           channelName,

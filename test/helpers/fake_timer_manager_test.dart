@@ -6,18 +6,18 @@ import 'fake_timer_manager.dart';
 void main() {
   group('TestClock', () {
     test('advances time', () {
-      final testClock = TestClock(DateTime(2024, 1, 1, 12, 0));
+      final testClock = TestClock(DateTime(2024, 1, 1, 12));
 
       withClock(testClock, () {
-        expect(clock.now(), DateTime(2024, 1, 1, 12, 0));
+        expect(clock.now(), DateTime(2024, 1, 1, 12));
 
         testClock.advance(const Duration(hours: 1));
-        expect(clock.now(), DateTime(2024, 1, 1, 13, 0));
+        expect(clock.now(), DateTime(2024, 1, 1, 13));
       });
     });
 
     test('setTime sets absolute time', () {
-      final testClock = TestClock(DateTime(2024, 1, 1, 12, 0));
+      final testClock = TestClock(DateTime(2024, 1, 1, 12));
 
       withClock(testClock, () {
         testClock.setTime(DateTime(2025, 6, 15, 10, 30));
@@ -28,7 +28,7 @@ void main() {
 
   group('FakeTimerManager', () {
     test('fires one-shot timer when time elapses', () async {
-      final testClock = TestClock(DateTime(2024, 1, 1, 12, 0));
+      final testClock = TestClock(DateTime(2024, 1, 1, 12));
       final fakeTimers = FakeTimerManager(testClock);
 
       var fired = false;
@@ -57,7 +57,7 @@ void main() {
     });
 
     test('fires multiple timers in order', () async {
-      final testClock = TestClock(DateTime(2024, 1, 1, 12, 0));
+      final testClock = TestClock(DateTime(2024, 1, 1, 12));
       final fakeTimers = FakeTimerManager(testClock);
 
       final firedOrder = <String>[];
@@ -85,7 +85,7 @@ void main() {
     });
 
     test('cancel removes timer', () async {
-      final testClock = TestClock(DateTime(2024, 1, 1, 12, 0));
+      final testClock = TestClock(DateTime(2024, 1, 1, 12));
       final fakeTimers = FakeTimerManager(testClock);
 
       var fired = false;
@@ -108,7 +108,7 @@ void main() {
     });
 
     test('cancelAll removes all timers for owner', () async {
-      final testClock = TestClock(DateTime(2024, 1, 1, 12, 0));
+      final testClock = TestClock(DateTime(2024, 1, 1, 12));
       final fakeTimers = FakeTimerManager(testClock);
 
       var fired1 = false;
@@ -139,7 +139,7 @@ void main() {
     });
 
     test('isActive returns correct state', () async {
-      final testClock = TestClock(DateTime(2024, 1, 1, 12, 0));
+      final testClock = TestClock(DateTime(2024, 1, 1, 12));
       final fakeTimers = FakeTimerManager(testClock);
 
       final owner = Object();
@@ -167,7 +167,7 @@ void main() {
 
   group('Clock affects code using clock.now()', () {
     test('token expiry check respects fake clock', () {
-      final testClock = TestClock(DateTime(2024, 1, 1, 12, 0));
+      final testClock = TestClock(DateTime(2024, 1, 1, 12));
 
       withClock(testClock, () {
         // Expires 1 hour from "now"

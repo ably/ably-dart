@@ -229,8 +229,11 @@ void main() {
 
         final page = await channel.history();
 
-        expect(page.items, isEmpty,
-            reason: 'Fresh channel should have no history');
+        expect(
+          page.items,
+          isEmpty,
+          reason: 'Fresh channel should have no history',
+        );
         expect(
           page.hasNext(),
           isFalse,

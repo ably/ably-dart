@@ -47,20 +47,24 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, {'time': 1234567890000});
           },
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -82,20 +86,24 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, {'time': 1234567890000});
           },
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -121,12 +129,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, {'time': 1234567890000});
           },
@@ -159,18 +169,20 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             requestCount++;
             if (requestCount == 1) {
               // First request fails with 500
               req.respondWith(500, {
-                'error': {'code': 50000}
+                'error': {'code': 50000},
               });
             } else {
               // Retry succeeds
@@ -210,15 +222,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1']
+              'serials': ['s1'],
             });
           },
         );
@@ -250,15 +264,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              bodyBytes: req.body,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                bodyBytes: req.body,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1']
+              'serials': ['s1'],
             });
           },
         );
@@ -266,7 +282,6 @@ void main() {
         final client = Rest.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
-            useBinaryProtocol: true,
           ),
           httpClient: mockHttp,
         );
@@ -291,15 +306,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1']
+              'serials': ['s1'],
             });
           },
         );
@@ -334,15 +351,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1']
+              'serials': ['s1'],
             });
           },
         );
@@ -377,8 +396,10 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -407,8 +428,10 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -432,12 +455,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, {'time': 1234567890000});
           },
@@ -446,7 +471,6 @@ void main() {
         final client = Rest.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
-            tls: true,
             useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
@@ -464,12 +488,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, {'time': 1234567890000});
           },
@@ -519,12 +545,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             // Return channel status response
             req.respondWith(200, {
@@ -552,8 +580,10 @@ void main() {
         // Verify request was made over HTTP with Bearer token
         final request = capturedRequests[0];
         expect(request.url.scheme, equals('http'));
-        expect(request.headers['Authorization'],
-            equals('Bearer some-token-string'));
+        expect(
+          request.headers['Authorization'],
+          equals('Bearer some-token-string'),
+        );
       });
     });
 

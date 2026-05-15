@@ -495,27 +495,31 @@ void main() {
         final map = PresenceMap();
 
         // Pre-populate with a member via ENTER
-        map.put(PresenceMessage(
-          action: PresenceAction.enter,
-          clientId: 'alice',
-          connectionId: 'c1',
-          id: 'c1:5:0',
-          timestamp: DateTime.fromMillisecondsSinceEpoch(500),
-          data: 'original',
-        ));
+        map.put(
+          PresenceMessage(
+            action: PresenceAction.enter,
+            clientId: 'alice',
+            connectionId: 'c1',
+            id: 'c1:5:0',
+            timestamp: DateTime.fromMillisecondsSinceEpoch(500),
+            data: 'original',
+          ),
+        );
 
         // Start sync
         map.startSync();
 
         // SYNC message arrives with OLDER id (stale — lower msgSerial)
-        final result = map.put(PresenceMessage(
-          action: PresenceAction.present,
-          clientId: 'alice',
-          connectionId: 'c1',
-          id: 'c1:3:0',
-          timestamp: DateTime.fromMillisecondsSinceEpoch(300),
-          data: 'stale',
-        ));
+        final result = map.put(
+          PresenceMessage(
+            action: PresenceAction.present,
+            clientId: 'alice',
+            connectionId: 'c1',
+            id: 'c1:3:0',
+            timestamp: DateTime.fromMillisecondsSinceEpoch(300),
+            data: 'stale',
+          ),
+        );
 
         final leaveEvents = map.endSync();
 
@@ -539,14 +543,16 @@ void main() {
 
         // Simulate server echoing PRESENCE events for 3 members
         for (var i = 0; i < 3; i++) {
-          map.put(PresenceMessage(
-            action: PresenceAction.enter,
-            clientId: 'user-$i',
-            connectionId: 'c1',
-            id: 'c1:$i:0',
-            timestamp: DateTime.fromMillisecondsSinceEpoch(100),
-            data: 'data-$i',
-          ));
+          map.put(
+            PresenceMessage(
+              action: PresenceAction.enter,
+              clientId: 'user-$i',
+              connectionId: 'c1',
+              id: 'c1:$i:0',
+              timestamp: DateTime.fromMillisecondsSinceEpoch(100),
+              data: 'data-$i',
+            ),
+          );
         }
 
         expect(map.values().length, equals(3));
@@ -556,14 +562,16 @@ void main() {
 
         // SYNC messages arrive with the SAME ids as the PRESENCE echoes (stale)
         for (var i = 0; i < 3; i++) {
-          map.put(PresenceMessage(
-            action: PresenceAction.present,
-            clientId: 'user-$i',
-            connectionId: 'c1',
-            id: 'c1:$i:0',
-            timestamp: DateTime.fromMillisecondsSinceEpoch(100),
-            data: 'data-$i',
-          ));
+          map.put(
+            PresenceMessage(
+              action: PresenceAction.present,
+              clientId: 'user-$i',
+              connectionId: 'c1',
+              id: 'c1:$i:0',
+              timestamp: DateTime.fromMillisecondsSinceEpoch(100),
+              data: 'data-$i',
+            ),
+          );
         }
 
         final leaveEvents = map.endSync();

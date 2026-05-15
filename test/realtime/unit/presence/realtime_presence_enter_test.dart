@@ -185,11 +185,13 @@ void main() {
         },
         onMessageFromClient: (msg) {
           if (msg.action == ProtocolAction.attach) {
-            mockWs.activeConnection!.sendToClient(ProtocolMessage(
-              action: ProtocolAction.error,
-              channel: channelName,
-              error: ErrorInfo(code: 90001, message: 'Channel failed'),
-            ));
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessage(
+                action: ProtocolAction.error,
+                channel: channelName,
+                error: const ErrorInfo(code: 90001, message: 'Channel failed'),
+              ),
+            );
           }
         },
       );
@@ -332,16 +334,18 @@ void main() {
               ProtocolMessageHelpers.attached(channel: channelName),
             );
           } else if (msg.action == ProtocolAction.presence) {
-            mockWs.activeConnection!.sendToClient(ProtocolMessage(
-              action: ProtocolAction.nack,
-              msgSerial: msg.msgSerial,
-              count: 1,
-              error: ErrorInfo(
-                code: 40160,
-                statusCode: 401,
-                message: 'Presence permission denied',
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessage(
+                action: ProtocolAction.nack,
+                msgSerial: msg.msgSerial,
+                count: 1,
+                error: const ErrorInfo(
+                  code: 40160,
+                  statusCode: 401,
+                  message: 'Presence permission denied',
+                ),
               ),
-            ));
+            );
           }
         },
       );
@@ -879,7 +883,7 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.detached(
                 channel: channelName,
-                error: ErrorInfo(code: 90001, message: 'Detached'),
+                error: const ErrorInfo(code: 90001, message: 'Detached'),
               ),
             );
           }
@@ -1027,20 +1031,22 @@ void main() {
               final p = raw is PresenceMessage
                   ? raw
                   : PresenceMessage.fromMap(raw as Map<String, dynamic>);
-              mockWs.activeConnection!.sendToClient(ProtocolMessage(
-                action: ProtocolAction.presence,
-                channel: channelName,
-                presence: [
-                  PresenceMessage(
-                    action: PresenceAction.enter,
-                    clientId: p.clientId,
-                    connectionId: 'conn-1',
-                    id: 'conn-1:${msg.msgSerial}:$idx',
-                    timestamp: DateTime.now(),
-                    data: p.data,
-                  ),
-                ],
-              ));
+              mockWs.activeConnection!.sendToClient(
+                ProtocolMessage(
+                  action: ProtocolAction.presence,
+                  channel: channelName,
+                  presence: [
+                    PresenceMessage(
+                      action: PresenceAction.enter,
+                      clientId: p.clientId,
+                      connectionId: 'conn-1',
+                      id: 'conn-1:${msg.msgSerial}:$idx',
+                      timestamp: DateTime.now(),
+                      data: p.data,
+                    ),
+                  ],
+                ),
+              );
             }
           }
         },
@@ -1075,22 +1081,26 @@ void main() {
       // Send a complete SYNC with all 50 members as PRESENT
       final syncMembers = <PresenceMessage>[];
       for (var i = 0; i < memberCount; i++) {
-        syncMembers.add(PresenceMessage(
-          action: PresenceAction.present,
-          clientId: 'user-$i',
-          connectionId: 'conn-1',
-          id: 'conn-1:$i:0',
-          timestamp: DateTime.now(),
-          data: 'data-$i',
-        ));
+        syncMembers.add(
+          PresenceMessage(
+            action: PresenceAction.present,
+            clientId: 'user-$i',
+            connectionId: 'conn-1',
+            id: 'conn-1:$i:0',
+            timestamp: DateTime.now(),
+            data: 'data-$i',
+          ),
+        );
       }
 
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.sync,
-        channel: channelName,
-        channelSerial: 'seq1:',
-        presence: syncMembers,
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.sync,
+          channel: channelName,
+          channelSerial: 'seq1:',
+          presence: syncMembers,
+        ),
+      );
 
       // Get all members after sync
       final members = await channel.presence.get();
@@ -1107,8 +1117,11 @@ void main() {
       // Verify each member exists with correct data
       for (var i = 0; i < memberCount; i++) {
         final member = members.where((m) => m.clientId == 'user-$i');
-        expect(member.isNotEmpty, isTrue,
-            reason: 'Member user-$i should be present');
+        expect(
+          member.isNotEmpty,
+          isTrue,
+          reason: 'Member user-$i should be present',
+        );
         expect(member.first.data, equals('data-$i'));
       }
 
@@ -1213,41 +1226,47 @@ void main() {
 
       // Server delivers those ENTER events to client B as PRESENCE messages
       for (var i = 0; i < memberCount; i++) {
-        mockWsB.activeConnection!.sendToClient(ProtocolMessage(
-          action: ProtocolAction.presence,
-          channel: channelName,
-          presence: [
-            PresenceMessage(
-              action: PresenceAction.enter,
-              clientId: 'user-$i',
-              connectionId: 'conn-A',
-              id: 'conn-A:$i:0',
-              timestamp: DateTime.now(),
-              data: 'data-$i',
-            ),
-          ],
-        ));
+        mockWsB.activeConnection!.sendToClient(
+          ProtocolMessage(
+            action: ProtocolAction.presence,
+            channel: channelName,
+            presence: [
+              PresenceMessage(
+                action: PresenceAction.enter,
+                clientId: 'user-$i',
+                connectionId: 'conn-A',
+                id: 'conn-A:$i:0',
+                timestamp: DateTime.now(),
+                data: 'data-$i',
+              ),
+            ],
+          ),
+        );
       }
 
       // Server sends a SYNC to client B with all 50 members
       final syncMembers = <PresenceMessage>[];
       for (var i = 0; i < memberCount; i++) {
-        syncMembers.add(PresenceMessage(
-          action: PresenceAction.present,
-          clientId: 'user-$i',
-          connectionId: 'conn-A',
-          id: 'conn-A:$i:0',
-          timestamp: DateTime.now(),
-          data: 'data-$i',
-        ));
+        syncMembers.add(
+          PresenceMessage(
+            action: PresenceAction.present,
+            clientId: 'user-$i',
+            connectionId: 'conn-A',
+            id: 'conn-A:$i:0',
+            timestamp: DateTime.now(),
+            data: 'data-$i',
+          ),
+        );
       }
 
-      mockWsB.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.sync,
-        channel: channelName,
-        channelSerial: 'seq1:',
-        presence: syncMembers,
-      ));
+      mockWsB.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.sync,
+          channel: channelName,
+          channelSerial: 'seq1:',
+          presence: syncMembers,
+        ),
+      );
 
       // Client B gets all members
       final members = await channelB.presence.get();
@@ -1264,8 +1283,11 @@ void main() {
       // Verify each member has correct data and connectionId from conn-A
       for (var i = 0; i < memberCount; i++) {
         final member = members.where((m) => m.clientId == 'user-$i');
-        expect(member.isNotEmpty, isTrue,
-            reason: 'Member user-$i should be present');
+        expect(
+          member.isNotEmpty,
+          isTrue,
+          reason: 'Member user-$i should be present',
+        );
         expect(member.first.data, equals('data-$i'));
         expect(member.first.connectionId, equals('conn-A'));
       }

@@ -78,8 +78,11 @@ void main() {
         // Should have info-level logs
         final infoLogs =
             capturedLogs.where((l) => l.level == LogLevel.info).toList();
-        expect(infoLogs, isNotEmpty,
-            reason: 'Expected info-level logs with verbose');
+        expect(
+          infoLogs,
+          isNotEmpty,
+          reason: 'Expected info-level logs with verbose',
+        );
 
         // Should have debug-level logs for HTTP request
         final debugLogs =
@@ -87,8 +90,11 @@ void main() {
         final httpRequestLogs = debugLogs.where(
           (l) => l.message.contains('HTTP request'),
         );
-        expect(httpRequestLogs, isNotEmpty,
-            reason: 'Expected debug log for HTTP request');
+        expect(
+          httpRequestLogs,
+          isNotEmpty,
+          reason: 'Expected debug log for HTTP request',
+        );
       });
     });
 
@@ -122,8 +128,11 @@ void main() {
         final logsWithContext = capturedLogs.where(
           (l) => l.context.isNotEmpty,
         );
-        expect(logsWithContext, isNotEmpty,
-            reason: 'Expected at least one log with non-empty context');
+        expect(
+          logsWithContext,
+          isNotEmpty,
+          reason: 'Expected at least one log with non-empty context',
+        );
       });
 
       // UTS: rest/unit/TO3c2/context-contains-expected-keys-0
@@ -189,8 +198,11 @@ void main() {
 
         await client.time();
 
-        expect(capturedLogs, isEmpty,
-            reason: 'No logs should be captured with LogLevel.none');
+        expect(
+          capturedLogs,
+          isEmpty,
+          reason: 'No logs should be captured with LogLevel.none',
+        );
       });
     });
   });

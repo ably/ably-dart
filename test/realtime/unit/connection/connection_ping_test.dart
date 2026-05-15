@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:clock/clock.dart';
 import 'package:test/test.dart';
 import 'package:ably_dart/ably_dart.dart';
-import 'package:ably_dart/src/realtime/protocol_message.dart';
 import '../../../helpers/fake_timer_manager.dart';
 import '../../../helpers/mock_websocket_client.dart';
 import '../../../helpers/protocol_message_helpers.dart';
@@ -248,9 +247,12 @@ void main() {
         Object? pingError;
         final pingFuture =
             client.connection.ping().catchError((Object e) => e as Duration);
-        pingFuture.then((_) {}, onError: (Object e) {
-          pingError = e;
-        });
+        pingFuture.then(
+          (_) {},
+          onError: (Object e) {
+            pingError = e;
+          },
+        );
         // Simpler: just use a completer pattern
         final errorCompleter = _capturePingError(client.connection.ping());
 

@@ -33,20 +33,22 @@ void main() {
                 flags: flagHasPresence,
               ),
             );
-            mockWs.activeConnection!.sendToClient(ProtocolMessage(
-              action: ProtocolAction.sync,
-              channel: channelName,
-              channelSerial: 'seq1:',
-              presence: [
-                PresenceMessage(
-                  action: PresenceAction.present,
-                  clientId: 'alice',
-                  connectionId: 'c1',
-                  id: 'c1:0:0',
-                  timestamp: DateTime.fromMillisecondsSinceEpoch(100),
-                ),
-              ],
-            ));
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessage(
+                action: ProtocolAction.sync,
+                channel: channelName,
+                channelSerial: 'seq1:',
+                presence: [
+                  PresenceMessage(
+                    action: PresenceAction.present,
+                    clientId: 'alice',
+                    connectionId: 'c1',
+                    id: 'c1:0:0',
+                    timestamp: DateTime.fromMillisecondsSinceEpoch(100),
+                  ),
+                ],
+              ),
+            );
           }
         },
       );
@@ -150,27 +152,29 @@ void main() {
                   flags: flagHasPresence,
                 ),
               );
-              mockWs.activeConnection!.sendToClient(ProtocolMessage(
-                action: ProtocolAction.sync,
-                channel: channelName,
-                channelSerial: 'seq1:',
-                presence: [
-                  PresenceMessage(
-                    action: PresenceAction.present,
-                    clientId: 'alice',
-                    connectionId: 'c1',
-                    id: 'c1:0:0',
-                    timestamp: DateTime.fromMillisecondsSinceEpoch(100),
-                  ),
-                  PresenceMessage(
-                    action: PresenceAction.present,
-                    clientId: 'bob',
-                    connectionId: 'c2',
-                    id: 'c2:0:0',
-                    timestamp: DateTime.fromMillisecondsSinceEpoch(100),
-                  ),
-                ],
-              ));
+              mockWs.activeConnection!.sendToClient(
+                ProtocolMessage(
+                  action: ProtocolAction.sync,
+                  channel: channelName,
+                  channelSerial: 'seq1:',
+                  presence: [
+                    PresenceMessage(
+                      action: PresenceAction.present,
+                      clientId: 'alice',
+                      connectionId: 'c1',
+                      id: 'c1:0:0',
+                      timestamp: DateTime.fromMillisecondsSinceEpoch(100),
+                    ),
+                    PresenceMessage(
+                      action: PresenceAction.present,
+                      clientId: 'bob',
+                      connectionId: 'c2',
+                      id: 'c2:0:0',
+                      timestamp: DateTime.fromMillisecondsSinceEpoch(100),
+                    ),
+                  ],
+                ),
+              );
             } else {
               // Second attach: no HAS_PRESENCE
               mockWs.activeConnection!.sendToClient(
@@ -266,20 +270,22 @@ void main() {
                 flags: flagHasPresence,
               ),
             );
-            mockWs.activeConnection!.sendToClient(ProtocolMessage(
-              action: ProtocolAction.sync,
-              channel: channelName,
-              channelSerial: 'seq1:',
-              presence: [
-                PresenceMessage(
-                  action: PresenceAction.present,
-                  clientId: 'alice',
-                  connectionId: 'c1',
-                  id: 'c1:0:0',
-                  timestamp: DateTime.fromMillisecondsSinceEpoch(100),
-                ),
-              ],
-            ));
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessage(
+                action: ProtocolAction.sync,
+                channel: channelName,
+                channelSerial: 'seq1:',
+                presence: [
+                  PresenceMessage(
+                    action: PresenceAction.present,
+                    clientId: 'alice',
+                    connectionId: 'c1',
+                    id: 'c1:0:0',
+                    timestamp: DateTime.fromMillisecondsSinceEpoch(100),
+                  ),
+                ],
+              ),
+            );
           } else if (msg.action == ProtocolAction.detach) {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.detached(channel: channelName),
@@ -314,7 +320,8 @@ void main() {
       channel.presence.subscribe(
         (event) {
           print(
-              '[DEBUG] LEAVE event: clientId=${event.clientId}, action=${event.action}, id=${event.id}');
+            '[DEBUG] LEAVE event: clientId=${event.clientId}, action=${event.action}, id=${event.id}',
+          );
           print('[DEBUG] Stack: ${StackTrace.current}');
           leaveEvents.add(event);
         },
@@ -330,8 +337,10 @@ void main() {
 
       // Presence map is cleared (check directly — get() would trigger
       // implicit reattach per RTP11b since channel is DETACHED)
-      expect((channel.presence as RealtimePresenceImpl).members.values().length,
-          equals(0));
+      expect(
+        (channel.presence as RealtimePresenceImpl).members.values().length,
+        equals(0),
+      );
 
       mockWs.dispose();
     });
@@ -357,20 +366,22 @@ void main() {
                 flags: flagHasPresence,
               ),
             );
-            mockWs.activeConnection!.sendToClient(ProtocolMessage(
-              action: ProtocolAction.sync,
-              channel: channelName,
-              channelSerial: 'seq1:',
-              presence: [
-                PresenceMessage(
-                  action: PresenceAction.present,
-                  clientId: 'alice',
-                  connectionId: 'c1',
-                  id: 'c1:0:0',
-                  timestamp: DateTime.fromMillisecondsSinceEpoch(100),
-                ),
-              ],
-            ));
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessage(
+                action: ProtocolAction.sync,
+                channel: channelName,
+                channelSerial: 'seq1:',
+                presence: [
+                  PresenceMessage(
+                    action: PresenceAction.present,
+                    clientId: 'alice',
+                    connectionId: 'c1',
+                    id: 'c1:0:0',
+                    timestamp: DateTime.fromMillisecondsSinceEpoch(100),
+                  ),
+                ],
+              ),
+            );
           }
         },
       );
@@ -402,11 +413,13 @@ void main() {
       );
 
       // Server sends channel ERROR to put channel in FAILED state
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.error,
-        channel: channelName,
-        error: const ErrorInfo(code: 90001, message: 'Channel failed'),
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.error,
+          channel: channelName,
+          error: const ErrorInfo(code: 90001, message: 'Channel failed'),
+        ),
+      );
 
       await _awaitChannelState(channel, ChannelState.failed);
 
@@ -502,27 +515,29 @@ void main() {
                 flags: flagHasPresence,
               ),
             );
-            mockWs.activeConnection!.sendToClient(ProtocolMessage(
-              action: ProtocolAction.sync,
-              channel: channelName,
-              channelSerial: 'seq1:',
-              presence: [
-                PresenceMessage(
-                  action: PresenceAction.present,
-                  clientId: 'alice',
-                  connectionId: 'c1',
-                  id: 'c1:0:0',
-                  timestamp: DateTime.fromMillisecondsSinceEpoch(100),
-                ),
-                PresenceMessage(
-                  action: PresenceAction.present,
-                  clientId: 'bob',
-                  connectionId: 'c2',
-                  id: 'c2:0:0',
-                  timestamp: DateTime.fromMillisecondsSinceEpoch(100),
-                ),
-              ],
-            ));
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessage(
+                action: ProtocolAction.sync,
+                channel: channelName,
+                channelSerial: 'seq1:',
+                presence: [
+                  PresenceMessage(
+                    action: PresenceAction.present,
+                    clientId: 'alice',
+                    connectionId: 'c1',
+                    id: 'c1:0:0',
+                    timestamp: DateTime.fromMillisecondsSinceEpoch(100),
+                  ),
+                  PresenceMessage(
+                    action: PresenceAction.present,
+                    clientId: 'bob',
+                    connectionId: 'c2',
+                    id: 'c2:0:0',
+                    timestamp: DateTime.fromMillisecondsSinceEpoch(100),
+                  ),
+                ],
+              ),
+            );
           }
         },
       );
@@ -584,20 +599,22 @@ void main() {
               ),
             );
             // Start multi-message SYNC (cursor is non-empty)
-            mockWs.activeConnection!.sendToClient(ProtocolMessage(
-              action: ProtocolAction.sync,
-              channel: channelName,
-              channelSerial: 'seq1:cursor1',
-              presence: [
-                PresenceMessage(
-                  action: PresenceAction.present,
-                  clientId: 'alice',
-                  connectionId: 'c1',
-                  id: 'c1:0:0',
-                  timestamp: DateTime.fromMillisecondsSinceEpoch(100),
-                ),
-              ],
-            ));
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessage(
+                action: ProtocolAction.sync,
+                channel: channelName,
+                channelSerial: 'seq1:cursor1',
+                presence: [
+                  PresenceMessage(
+                    action: PresenceAction.present,
+                    clientId: 'alice',
+                    connectionId: 'c1',
+                    id: 'c1:0:0',
+                    timestamp: DateTime.fromMillisecondsSinceEpoch(100),
+                  ),
+                ],
+              ),
+            );
           }
         },
       );
@@ -623,20 +640,22 @@ void main() {
       expect(channel.presence.syncComplete, isFalse);
 
       // Complete the sync (empty cursor)
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.sync,
-        channel: channelName,
-        channelSerial: 'seq1:',
-        presence: [
-          PresenceMessage(
-            action: PresenceAction.present,
-            clientId: 'bob',
-            connectionId: 'c2',
-            id: 'c2:0:0',
-            timestamp: DateTime.fromMillisecondsSinceEpoch(100),
-          ),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.sync,
+          channel: channelName,
+          channelSerial: 'seq1:',
+          presence: [
+            PresenceMessage(
+              action: PresenceAction.present,
+              clientId: 'bob',
+              connectionId: 'c2',
+              id: 'c2:0:0',
+              timestamp: DateTime.fromMillisecondsSinceEpoch(100),
+            ),
+          ],
+        ),
+      );
 
       expect(channel.presence.syncComplete, isTrue);
 
@@ -728,11 +747,13 @@ void main() {
       expect(capturedPresence.length, equals(0));
 
       // Server sends ERROR for this channel — channel goes FAILED
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.error,
-        channel: channelName,
-        error: const ErrorInfo(code: 90001, message: 'Channel failed'),
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.error,
+          channel: channelName,
+          error: const ErrorInfo(code: 90001, message: 'Channel failed'),
+        ),
+      );
 
       await _awaitChannelState(channel, ChannelState.failed);
       // Allow error to propagate
@@ -872,10 +893,12 @@ void main() {
       expect(capturedPresence.length, equals(0));
 
       // Server sends DETACHED for this channel -- channel goes DETACHED
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.detached,
-        channel: channelName,
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.detached,
+          channel: channelName,
+        ),
+      );
 
       // Allow the DETACHED processing to propagate
       await Future<void>.delayed(Duration.zero);

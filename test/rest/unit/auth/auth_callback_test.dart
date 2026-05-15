@@ -19,15 +19,17 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1']
+              'serials': ['s1'],
             });
           },
         );
@@ -76,15 +78,17 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1']
+              'serials': ['s1'],
             });
           },
         );
@@ -117,15 +121,17 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1']
+              'serials': ['s1'],
             });
           },
         );
@@ -155,12 +161,14 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             if (req.url.path.contains('requestToken')) {
               // First request: exchange TokenRequest for TokenDetails
@@ -172,7 +180,7 @@ void main() {
             } else {
               // Second request: actual publish
               req.respondWith(201, {
-                'serials': ['s1']
+                'serials': ['s1'],
               });
             }
           },
@@ -217,12 +225,14 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             if (req.url.host == 'auth.example.com') {
               // Response from authUrl
@@ -234,7 +244,7 @@ void main() {
             } else {
               // Response from Ably for publish
               req.respondWith(201, {
-                'serials': ['s1']
+                'serials': ['s1'],
               });
             }
           },
@@ -273,12 +283,14 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             if (req.url.host == 'auth.example.com') {
               req.respondWith(
@@ -288,7 +300,7 @@ void main() {
               );
             } else {
               req.respondWith(201, {
-                'serials': ['s1']
+                'serials': ['s1'],
               });
             }
           },
@@ -325,12 +337,14 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             if (req.url.host == 'auth.example.com') {
               req.respondWith(
@@ -340,7 +354,7 @@ void main() {
               );
             } else {
               req.respondWith(201, {
-                'serials': ['s1']
+                'serials': ['s1'],
               });
             }
           },
@@ -382,12 +396,14 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             if (req.url.host == 'auth.example.com') {
               req.respondWith(
@@ -397,7 +413,7 @@ void main() {
               );
             } else {
               req.respondWith(201, {
-                'serials': ['s1']
+                'serials': ['s1'],
               });
             }
           },
@@ -435,12 +451,14 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             if (req.url.host == 'auth.example.com') {
               req.respondWith(
@@ -450,7 +468,7 @@ void main() {
               );
             } else {
               req.respondWith(201, {
-                'serials': ['s1']
+                'serials': ['s1'],
               });
             }
           },
@@ -475,7 +493,9 @@ void main() {
         expect(authRequest.url.host, equals('auth.example.com'));
         expect(authRequest.headers['X-Custom-Auth'], equals('my-secret'));
         expect(
-            authRequest.headers['X-Another-Header'], equals('another-value'));
+          authRequest.headers['X-Another-Header'],
+          equals('another-value'),
+        );
       });
     });
 
@@ -525,12 +545,14 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             if (req.url.host == 'auth.example.com') {
               req.respondWith(
@@ -540,7 +562,7 @@ void main() {
               );
             } else {
               req.respondWith(201, {
-                'serials': ['s1']
+                'serials': ['s1'],
               });
             }
           },

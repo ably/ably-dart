@@ -26,20 +26,24 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -55,20 +59,24 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, []);
           },
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -84,20 +92,24 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -113,20 +125,24 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -142,20 +158,24 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(204, '');
           },
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -171,20 +191,24 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -205,20 +229,24 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -238,20 +266,24 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, []);
           },
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -275,20 +307,24 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -304,20 +340,24 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -335,20 +375,24 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -364,12 +408,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -392,20 +438,24 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -428,12 +478,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -459,12 +511,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -473,7 +527,6 @@ void main() {
         final client = TestClient(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
-            useBinaryProtocol: true,
           ),
           httpClient: mockHttp,
         );
@@ -490,12 +543,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, []);
           },
@@ -527,8 +582,10 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -546,8 +603,10 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -564,7 +623,7 @@ void main() {
             req.respondWith(
               400,
               {
-                'error': {'message': 'Bad request', 'code': 40000}
+                'error': {'message': 'Bad request', 'code': 40000},
               },
               headers: {'X-Ably-Errorcode': '40000'},
             );
@@ -572,8 +631,10 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -592,7 +653,7 @@ void main() {
             req.respondWith(
               400,
               {
-                'error': {'message': 'Invalid request', 'code': 40000}
+                'error': {'message': 'Invalid request', 'code': 40000},
               },
               headers: {'X-Ably-Errormessage': 'Invalid request'},
             );
@@ -600,8 +661,10 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -633,8 +696,10 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -656,8 +721,10 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -675,7 +742,7 @@ void main() {
             req.respondWith(
               200,
               [
-                {'id': '1'}
+                {'id': '1'},
               ],
               headers: {'Link': '</test?page=2>; rel="next"'},
             );
@@ -683,8 +750,10 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -703,8 +772,10 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -724,8 +795,10 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -746,8 +819,10 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -766,8 +841,10 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -785,20 +862,24 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -814,20 +895,24 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -845,20 +930,24 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -880,14 +969,16 @@ void main() {
               'items': [
                 {'name': 'item1'},
                 {'name': 'item2'},
-              ]
+              ],
             });
           },
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -920,8 +1011,10 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -948,8 +1041,10 @@ void main() {
         );
 
         final client = TestClient(
-          options: ClientOptions.fromKey('appId.keyId:keySecret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'appId.keyId:keySecret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 

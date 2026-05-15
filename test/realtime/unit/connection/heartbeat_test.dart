@@ -33,7 +33,6 @@ void main() {
                 connectionId: 'connection-id-$connectionAttemptCount',
                 connectionKey: 'connection-key-$connectionAttemptCount',
                 maxIdleInterval: 5000, // 5 seconds
-                connectionStateTtl: 120000,
               ),
             );
             // Server sends CONNECTED but then no further messages
@@ -75,14 +74,15 @@ void main() {
         // Verify the sequence of state changes:
         // CONNECTING -> CONNECTED -> DISCONNECTED -> CONNECTING -> CONNECTED
         expect(
-            stateChanges,
-            containsAllInOrder([
-              ConnectionState.connecting,
-              ConnectionState.connected,
-              ConnectionState.disconnected,
-              ConnectionState.connecting,
-              ConnectionState.connected,
-            ]));
+          stateChanges,
+          containsAllInOrder([
+            ConnectionState.connecting,
+            ConnectionState.connected,
+            ConnectionState.disconnected,
+            ConnectionState.connecting,
+            ConnectionState.connected,
+          ]),
+        );
 
         // Verify the client closed the first WebSocket connection
         expect(mockWs.clientCloseEvents, hasLength(1));
@@ -114,7 +114,6 @@ void main() {
                 connectionId: 'connection-id-$connectionAttemptCount',
                 connectionKey: 'connection-key-$connectionAttemptCount',
                 maxIdleInterval: 3000, // 3 seconds
-                connectionStateTtl: 120000,
               ),
             );
           },
@@ -192,7 +191,6 @@ void main() {
                 connectionId: 'connection-id-$connectionAttemptCount',
                 connectionKey: 'connection-key-$connectionAttemptCount',
                 maxIdleInterval: 2000, // 2 seconds
-                connectionStateTtl: 120000,
               ),
             );
           },
@@ -259,14 +257,15 @@ void main() {
 
         // Verify the state change sequence includes disconnected
         expect(
-            stateChanges,
-            containsAllInOrder([
-              ConnectionState.connecting,
-              ConnectionState.connected,
-              ConnectionState.disconnected,
-              ConnectionState.connecting,
-              ConnectionState.connected,
-            ]));
+          stateChanges,
+          containsAllInOrder([
+            ConnectionState.connecting,
+            ConnectionState.connected,
+            ConnectionState.disconnected,
+            ConnectionState.connecting,
+            ConnectionState.connected,
+          ]),
+        );
 
         // Verify the client closed the WebSocket connection
         expect(mockWs.clientCloseEvents, hasLength(1));
@@ -296,7 +295,6 @@ void main() {
                 connectionId: 'connection-id-$connectionAttemptCount',
                 connectionKey: 'connection-key-$connectionAttemptCount',
                 maxIdleInterval: 2000, // 2 seconds
-                connectionStateTtl: 120000,
               ),
             );
           },
@@ -334,14 +332,15 @@ void main() {
 
         // Verify the state change sequence shows disconnected then reconnected
         expect(
-            stateChanges,
-            containsAllInOrder([
-              ConnectionState.connecting,
-              ConnectionState.connected,
-              ConnectionState.disconnected,
-              ConnectionState.connecting,
-              ConnectionState.connected,
-            ]));
+          stateChanges,
+          containsAllInOrder([
+            ConnectionState.connecting,
+            ConnectionState.connected,
+            ConnectionState.disconnected,
+            ConnectionState.connecting,
+            ConnectionState.connected,
+          ]),
+        );
 
         // Verify two connection attempts were made (initial + reconnect)
         expect(connectionAttemptCount, equals(2));
@@ -375,7 +374,6 @@ void main() {
                 connectionId: 'connection-id-${connectionAttempts.length}',
                 connectionKey: 'connection-key-${connectionAttempts.length}',
                 maxIdleInterval: 2000, // 2 seconds
-                connectionStateTtl: 120000,
               ),
             );
           },
@@ -410,14 +408,15 @@ void main() {
 
         // Verify the state change sequence shows disconnected
         expect(
-            stateChanges,
-            containsAllInOrder([
-              ConnectionState.connecting,
-              ConnectionState.connected,
-              ConnectionState.disconnected,
-              ConnectionState.connecting,
-              ConnectionState.connected,
-            ]));
+          stateChanges,
+          containsAllInOrder([
+            ConnectionState.connecting,
+            ConnectionState.connected,
+            ConnectionState.disconnected,
+            ConnectionState.connecting,
+            ConnectionState.connected,
+          ]),
+        );
 
         expect(connectionAttempts, hasLength(2));
 
@@ -447,8 +446,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'connection-id',
               connectionKey: 'connection-key',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },
@@ -494,8 +491,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'connection-id',
               connectionKey: 'connection-key',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },
@@ -561,7 +556,6 @@ void main() {
                 connectionId: 'connection-id-$connectionAttemptCount',
                 connectionKey: 'connection-key-$connectionAttemptCount',
                 maxIdleInterval: 4000, // 4 seconds
-                connectionStateTtl: 120000,
               ),
             );
           },
@@ -597,14 +591,15 @@ void main() {
 
         expect(connectionAttemptCount, equals(2));
         expect(
-            stateChanges,
-            containsAllInOrder([
-              ConnectionState.connecting,
-              ConnectionState.connected,
-              ConnectionState.disconnected,
-              ConnectionState.connecting,
-              ConnectionState.connected,
-            ]));
+          stateChanges,
+          containsAllInOrder([
+            ConnectionState.connecting,
+            ConnectionState.connected,
+            ConnectionState.disconnected,
+            ConnectionState.connecting,
+            ConnectionState.connected,
+          ]),
+        );
 
         await client.close();
         mockWs.dispose();
@@ -627,7 +622,6 @@ void main() {
                 connectionId: 'connection-id-$connectionAttemptCount',
                 connectionKey: 'connection-key-$connectionAttemptCount',
                 maxIdleInterval: 3000, // 3 seconds
-                connectionStateTtl: 120000,
               ),
             );
           },
@@ -697,7 +691,6 @@ void main() {
                 connectionId: 'connection-id-$connectionAttemptCount',
                 connectionKey: 'connection-key-$connectionAttemptCount',
                 maxIdleInterval: 2000,
-                connectionStateTtl: 120000,
               ),
             );
           },
@@ -757,7 +750,6 @@ void main() {
                 connectionId: 'connection-id-${connectionAttempts.length}',
                 connectionKey: 'connection-key-${connectionAttempts.length}',
                 maxIdleInterval: 2000,
-                connectionStateTtl: 120000,
               ),
             );
           },
@@ -788,12 +780,16 @@ void main() {
         expect(connectionAttempts, hasLength(2));
 
         // First connection: no resume
-        expect(connectionAttempts[0].queryParameters.containsKey('resume'),
-            isFalse);
+        expect(
+          connectionAttempts[0].queryParameters.containsKey('resume'),
+          isFalse,
+        );
 
         // Second connection: resume with original key
-        expect(connectionAttempts[1].queryParameters['resume'],
-            equals('connection-key-1'));
+        expect(
+          connectionAttempts[1].queryParameters['resume'],
+          equals('connection-key-1'),
+        );
 
         await client.close();
         mockWs.dispose();
@@ -817,7 +813,6 @@ void main() {
                 connectionId: 'connection-id-$connectionAttemptCount',
                 connectionKey: 'connection-key-$connectionAttemptCount',
                 maxIdleInterval: 2000,
-                connectionStateTtl: 120000,
               ),
             );
           },
@@ -883,7 +878,6 @@ void main() {
                 connectionId: 'connection-id',
                 connectionKey: 'connection-key',
                 maxIdleInterval: 2000, // 2 seconds
-                connectionStateTtl: 120000,
               ),
             );
             // Server sends no HEARTBEAT messages

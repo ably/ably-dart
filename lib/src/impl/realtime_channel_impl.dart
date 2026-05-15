@@ -401,9 +401,11 @@ class RealtimeChannelImpl implements RealtimeChannel {
       action: ProtocolAction.message,
       channel: _name,
       messages: messageList
-          .map((m) => m.toMap(
-                useBinaryProtocol: _clientOptions.useBinaryProtocol,
-              ))
+          .map(
+            (m) => m.toMap(
+              useBinaryProtocol: _clientOptions.useBinaryProtocol,
+            ),
+          )
           .toList(),
     );
 
@@ -583,14 +585,16 @@ class RealtimeChannelImpl implements RealtimeChannel {
 
       case ChannelState.attaching:
         // Already attaching - wait for completion (RTL4h)
-        final result = await on().firstWhere((change) =>
-            change.current == ChannelState.attached ||
-            change.current == ChannelState.suspended ||
-            change.current == ChannelState.failed);
+        final result = await on().firstWhere(
+          (change) =>
+              change.current == ChannelState.attached ||
+              change.current == ChannelState.suspended ||
+              change.current == ChannelState.failed,
+        );
         if (result.current != ChannelState.attached) {
           throw AblyException(
             errorInfo: result.reason ??
-                ErrorInfo(code: 90007, message: 'Channel attach failed'),
+                const ErrorInfo(code: 90007, message: 'Channel attach failed'),
           );
         }
         return;
@@ -602,9 +606,11 @@ class RealtimeChannelImpl implements RealtimeChannel {
 
       case ChannelState.detaching:
         // Wait for detach to complete, then attach (RTL4h)
-        await on().firstWhere((change) =>
-            change.current == ChannelState.detached ||
-            change.current == ChannelState.failed);
+        await on().firstWhere(
+          (change) =>
+              change.current == ChannelState.detached ||
+              change.current == ChannelState.failed,
+        );
         break;
 
       default:
@@ -666,15 +672,17 @@ class RealtimeChannelImpl implements RealtimeChannel {
 
       case ChannelState.detaching:
         // Already detaching - wait for completion (RTL5i)
-        await on().firstWhere((change) =>
-            change.current == ChannelState.detached ||
-            change.current == ChannelState.attached ||
-            change.current == ChannelState.failed);
+        await on().firstWhere(
+          (change) =>
+              change.current == ChannelState.detached ||
+              change.current == ChannelState.attached ||
+              change.current == ChannelState.failed,
+        );
         return;
 
       case ChannelState.failed:
         // Cannot detach from failed state (RTL5b)
-        throw AblyException(
+        throw const AblyException(
           errorInfo: ErrorInfo(
             code: 90001,
             message: 'Cannot detach from failed state',
@@ -695,11 +703,13 @@ class RealtimeChannelImpl implements RealtimeChannel {
           break;
         }
         // Wait for attach to complete, then detach (RTL5i)
-        final attachResult = await on().firstWhere((change) =>
-            change.current == ChannelState.attached ||
-            change.current == ChannelState.suspended ||
-            change.current == ChannelState.failed ||
-            change.current == ChannelState.detached);
+        final attachResult = await on().firstWhere(
+          (change) =>
+              change.current == ChannelState.attached ||
+              change.current == ChannelState.suspended ||
+              change.current == ChannelState.failed ||
+              change.current == ChannelState.detached,
+        );
         // If attach failed, the channel may already be in a state
         // where detach is a no-op
         if (attachResult.current == ChannelState.detached ||
@@ -707,7 +717,7 @@ class RealtimeChannelImpl implements RealtimeChannel {
           return;
         }
         if (attachResult.current == ChannelState.failed) {
-          throw AblyException(
+          throw const AblyException(
             errorInfo: ErrorInfo(
               code: 90001,
               message: 'Cannot detach from failed state',
@@ -1286,22 +1296,26 @@ class RealtimeChannelImpl implements RealtimeChannel {
         ? _lastPayloadProtocolMessageChannelSerial
         : properties.channelSerial;
 
-    _connection.sendMessage(ProtocolMessage(
-      action: ProtocolAction.attach,
-      channel: _name,
-      channelSerial: channelSerial,
-      flags: flags != 0 ? flags : null,
-      params: _options.params,
-    ));
+    _connection.sendMessage(
+      ProtocolMessage(
+        action: ProtocolAction.attach,
+        channel: _name,
+        channelSerial: channelSerial,
+        flags: flags != 0 ? flags : null,
+        params: _options.params,
+      ),
+    );
   }
 
   /// Sends a DETACH protocol message.
   void _sendDetachMessage() {
     _logger.debug('Sending DETACH', {'channel': _name});
-    _connection.sendMessage(ProtocolMessage(
-      action: ProtocolAction.detach,
-      channel: _name,
-    ));
+    _connection.sendMessage(
+      ProtocolMessage(
+        action: ProtocolAction.detach,
+        channel: _name,
+      ),
+    );
   }
 
   /// Starts the attach timeout timer (RTL4f).
@@ -1314,7 +1328,7 @@ class RealtimeChannelImpl implements RealtimeChannel {
         if (_state != ChannelState.attaching) return;
 
         _logger.warn('Attach timeout', {'channel': _name});
-        final error = ErrorInfo(
+        const error = ErrorInfo(
           code: 90007,
           message: 'Channel attach timed out',
         );
@@ -1322,7 +1336,7 @@ class RealtimeChannelImpl implements RealtimeChannel {
 
         if (_attachCompleter != null && !_attachCompleter!.isCompleted) {
           _attachCompleter!.completeError(
-            AblyException(errorInfo: error),
+            const AblyException(errorInfo: error),
           );
         }
         _attachCompleter = null;
@@ -1370,7 +1384,7 @@ class RealtimeChannelImpl implements RealtimeChannel {
         if (_state != ChannelState.detaching) return;
 
         _logger.warn('Detach timeout', {'channel': _name});
-        final error = ErrorInfo(
+        const error = ErrorInfo(
           code: 90007,
           message: 'Channel detach timed out',
         );
@@ -1380,7 +1394,7 @@ class RealtimeChannelImpl implements RealtimeChannel {
 
         if (_detachCompleter != null && !_detachCompleter!.isCompleted) {
           _detachCompleter!.completeError(
-            AblyException(errorInfo: error),
+            const AblyException(errorInfo: error),
           );
         }
         _detachCompleter = null;
@@ -1390,13 +1404,15 @@ class RealtimeChannelImpl implements RealtimeChannel {
 
   /// Emits an UPDATE event when ATTACHED received while already attached (RTL12).
   void _emitUpdate({ErrorInfo? reason, bool? hasBacklog}) {
-    _stateChangeController.add(ChannelStateChange(
-      event: ChannelEvent.update,
-      current: ChannelState.attached,
-      previous: ChannelState.attached,
-      reason: reason,
-      hasBacklog: hasBacklog,
-    ));
+    _stateChangeController.add(
+      ChannelStateChange(
+        event: ChannelEvent.update,
+        current: ChannelState.attached,
+        previous: ChannelState.attached,
+        reason: reason,
+        hasBacklog: hasBacklog,
+      ),
+    );
   }
 
   /// Transitions to a new state and emits a state change event.
@@ -1615,9 +1631,9 @@ class RealtimeChannelImpl implements RealtimeChannel {
   /// Spec: RTL32a
   void _validateSerial(String? serial) {
     if (serial == null || serial.isEmpty) {
-      throw AblyException(
+      throw const AblyException(
         message: 'Message serial is required',
-        errorInfo: const ErrorInfo(
+        errorInfo: ErrorInfo(
           message: 'Message serial is required',
           code: 40003,
           statusCode: 400,
@@ -1666,10 +1682,10 @@ class _Subscription {
       if (!filter.isRef! && hasRef) return false;
     }
     if (filter.refTimeserial != null) {
-      if (!hasRef || ref!['timeserial'] != filter.refTimeserial) return false;
+      if (!hasRef || ref['timeserial'] != filter.refTimeserial) return false;
     }
     if (filter.refType != null) {
-      if (!hasRef || ref!['type'] != filter.refType) return false;
+      if (!hasRef || ref['type'] != filter.refType) return false;
     }
     if (filter.name != null) {
       if (message.name != filter.name) return false;

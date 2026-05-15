@@ -80,8 +80,11 @@ void main() {
       await Future<void>.delayed(Duration.zero);
 
       // RTP17i: Automatic re-entry sends ENTER for the member
-      expect(capturedPresence.isNotEmpty, isTrue,
-          reason: 'Re-entry should have sent ENTER');
+      expect(
+        capturedPresence.isNotEmpty,
+        isTrue,
+        reason: 'Re-entry should have sent ENTER',
+      );
 
       final reentryMsg = capturedPresence.firstWhere(
         (m) => m.action == ProtocolAction.presence,
@@ -269,8 +272,11 @@ void main() {
       );
       final pm = _decodePresence(reentry);
       expect(pm.action, equals(PresenceAction.enter));
-      expect(pm.id, isNull,
-          reason: 'RTP17g1: id not set when connectionId changed');
+      expect(
+        pm.id,
+        isNull,
+        reason: 'RTP17g1: id not set when connectionId changed',
+      );
       expect(pm.data, equals('hello'));
 
       mockWs.dispose();
@@ -327,11 +333,13 @@ void main() {
       capturedPresence.clear();
 
       // Server sends ATTACHED with RESUMED flag while already attached
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.attached,
-        channel: channelName,
-        flags: flagResumed,
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.attached,
+          channel: channelName,
+          flags: flagResumed,
+        ),
+      );
 
       // Allow any potential re-entry to fire
       await Future<void>.delayed(Duration.zero);
@@ -373,16 +381,18 @@ void main() {
               );
             } else {
               // Second connection: NACK the re-entry
-              mockWs.activeConnection!.sendToClient(ProtocolMessage(
-                action: ProtocolAction.nack,
-                msgSerial: msg.msgSerial,
-                count: 1,
-                error: const ErrorInfo(
-                  code: 40160,
-                  statusCode: 401,
-                  message: 'Presence denied',
+              mockWs.activeConnection!.sendToClient(
+                ProtocolMessage(
+                  action: ProtocolAction.nack,
+                  msgSerial: msg.msgSerial,
+                  count: 1,
+                  error: const ErrorInfo(
+                    code: 40160,
+                    statusCode: 401,
+                    message: 'Presence denied',
+                  ),
                 ),
-              ));
+              );
             }
           }
         },
@@ -427,8 +437,11 @@ void main() {
         await Future<void>.delayed(Duration.zero);
       }
 
-      expect(channelEvents.isNotEmpty, isTrue,
-          reason: 'Should have received UPDATE event for failed re-entry');
+      expect(
+        channelEvents.isNotEmpty,
+        isTrue,
+        reason: 'Should have received UPDATE event for failed re-entry',
+      );
 
       final updateEvent = channelEvents.first;
       expect(updateEvent.resumed, isTrue);
@@ -470,19 +483,21 @@ void main() {
               ProtocolMessageHelpers.ack(msgSerial: msg.msgSerial!),
             );
             // Server delivers the presence event back to the client
-            mockWs.activeConnection!.sendToClient(ProtocolMessage(
-              action: ProtocolAction.presence,
-              channel: channelName,
-              presence: [
-                PresenceMessage(
-                  action: PresenceAction.enter,
-                  clientId: 'my-client',
-                  connectionId: 'conn-1',
-                  id: 'conn-1:0:0',
-                  timestamp: DateTime.now(),
-                ),
-              ],
-            ));
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessage(
+                action: ProtocolAction.presence,
+                channel: channelName,
+                presence: [
+                  PresenceMessage(
+                    action: PresenceAction.enter,
+                    clientId: 'my-client',
+                    connectionId: 'conn-1',
+                    id: 'conn-1:0:0',
+                    timestamp: DateTime.now(),
+                  ),
+                ],
+              ),
+            );
           }
         },
       );

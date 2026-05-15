@@ -9,19 +9,19 @@ void main() {
     group('TI1-TI5 - ErrorInfo attributes', () {
       // UTS: rest/unit/TI1/errorinfo-attributes-0
       test('TI1 - code attribute', () {
-        final error = ErrorInfo(code: 40000);
+        const error = ErrorInfo(code: 40000);
         expect(error.code, equals(40000));
       });
 
       // UTS: rest/unit/TI1/errorinfo-attributes-0.1
       test('TI2 - statusCode attribute', () {
-        final error = ErrorInfo(code: 40100, statusCode: 401);
+        const error = ErrorInfo(code: 40100, statusCode: 401);
         expect(error.statusCode, equals(401));
       });
 
       // UTS: rest/unit/TI1/errorinfo-attributes-0.2
       test('TI3 - message attribute', () {
-        final error = ErrorInfo(
+        const error = ErrorInfo(
           code: 40000,
           statusCode: 400,
           message: 'Bad request: invalid parameter',
@@ -31,7 +31,7 @@ void main() {
 
       // UTS: rest/unit/TI1/errorinfo-attributes-0.3
       test('TI4 - href attribute (optional)', () {
-        final error = ErrorInfo(
+        const error = ErrorInfo(
           code: 40000,
           href: 'https://help.ably.io/error/40000',
         );
@@ -127,7 +127,7 @@ void main() {
     group('TI - Error string representation', () {
       // UTS: rest/unit/TI/error-string-representation-4
       test('has useful string representation', () {
-        final error = ErrorInfo(
+        const error = ErrorInfo(
           code: 40100,
           statusCode: 401,
           message: 'Unauthorized: token expired',
@@ -143,17 +143,17 @@ void main() {
     group('TI - Error equality', () {
       // UTS: rest/unit/TI/error-equality-5
       test('errors with same content are equal', () {
-        final error1 = ErrorInfo(
+        const error1 = ErrorInfo(
           code: 40000,
           statusCode: 400,
           message: 'Bad request',
         );
-        final error2 = ErrorInfo(
+        const error2 = ErrorInfo(
           code: 40000,
           statusCode: 400,
           message: 'Bad request',
         );
-        final error3 = ErrorInfo(
+        const error3 = ErrorInfo(
           code: 40100,
           statusCode: 401,
           message: 'Unauthorized',
@@ -168,13 +168,13 @@ void main() {
   group('AblyException', () {
     // UTS: rest/unit/TI/ably-exception-wraps-errorinfo-2
     test('wraps ErrorInfo', () {
-      final errorInfo = ErrorInfo(
+      const errorInfo = ErrorInfo(
         code: 40000,
         statusCode: 400,
         message: 'Bad request',
       );
 
-      final exception = AblyException(errorInfo: errorInfo);
+      const exception = AblyException(errorInfo: errorInfo);
 
       expect(exception.code, equals(40000));
       expect(exception.statusCode, equals(400));

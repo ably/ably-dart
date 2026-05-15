@@ -164,8 +164,10 @@ void main() {
             page.items.firstWhere((m) => m.clientId == 'client_string');
 
         expect(member.data, isA<String>());
-        expect(member.data as String,
-            equals('This is a string clientData payload'));
+        expect(
+          member.data as String,
+          equals('This is a string clientData payload'),
+        );
       });
     });
 

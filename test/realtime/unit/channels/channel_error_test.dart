@@ -327,17 +327,22 @@ void main() {
 
         client.connect();
         await _awaitConnectionState(
-            client.connection, ConnectionState.connected);
+          client.connection,
+          ConnectionState.connected,
+        );
 
         await channel.attach();
         expect(attachCount, equals(1));
 
         // Trigger server-initiated DETACHED -> reattach -> timeout -> SUSPENDED
-        mockWs.activeConnection!.sendToClient(ProtocolMessage(
-          action: ProtocolAction.detached,
-          channel: channelName,
-          error: ErrorInfo(code: 90198, statusCode: 500, message: 'Detach'),
-        ));
+        mockWs.activeConnection!.sendToClient(
+          ProtocolMessage(
+            action: ProtocolAction.detached,
+            channel: channelName,
+            error: const ErrorInfo(
+                code: 90198, statusCode: 500, message: 'Detach'),
+          ),
+        );
         await _pumpEventQueue();
         fakeTimers.elapseTime(const Duration(milliseconds: 150));
         await _pumpEventQueue();

@@ -275,7 +275,8 @@ void main() {
         // UTS: rest/unit/TG/link-header-parsing-1
         test('parses ${testCase.description}', () async {
           final channelName = testChannelName(
-              'TG-link-${testCase.description.replaceAll(' ', '-')}');
+            'TG-link-${testCase.description.replaceAll(' ', '-')}',
+          );
           final mockHttp = MockHttpClient(
             onRequest: (req) {
               req.respondWith(
@@ -373,12 +374,14 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             requestCount++;
             if (requestCount == 1) {
@@ -429,12 +432,14 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             requestCount++;
             if (requestCount == 1) {
@@ -470,8 +475,10 @@ void main() {
 
         // Second request should use the same host
         expect(capturedRequests[1].url.host, equals('test.example.com'));
-        expect(capturedRequests[1].url.path,
-            contains('/channels/$channelName/messages'));
+        expect(
+          capturedRequests[1].url.path,
+          contains('/channels/$channelName/messages'),
+        );
         expect(capturedRequests[1].url.queryParameters['page'], equals('2'));
       });
     });
@@ -487,12 +494,14 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             requestCount++;
             if (requestCount == 1) {
@@ -524,13 +533,19 @@ void main() {
         await page1.next();
 
         // Path and query params from Link header are followed
-        expect(capturedRequests[1].url.path,
-            contains('/channels/$channelName/messages'));
         expect(
-            capturedRequests[1].url.queryParameters['cursor'], equals('abc'));
+          capturedRequests[1].url.path,
+          contains('/channels/$channelName/messages'),
+        );
+        expect(
+          capturedRequests[1].url.queryParameters['cursor'],
+          equals('abc'),
+        );
         // But the request goes to the client's primary domain, not the Link host
         expect(
-            capturedRequests[1].url.host, equals(client.options.primaryDomain));
+          capturedRequests[1].url.host,
+          equals(client.options.primaryDomain),
+        );
       });
     });
 
@@ -576,12 +591,14 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             requestCount++;
             if (requestCount == 1) {
@@ -630,12 +647,14 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             requestCount++;
             if (requestCount == 1) {
@@ -690,12 +709,14 @@ void main() {
         final mockHttp = MockHttpClient(
           onConnectionAttempt: (conn) => conn.respondWithSuccess(),
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             requestCount++;
             if (requestCount == 1) {
