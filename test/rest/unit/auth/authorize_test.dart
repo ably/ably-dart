@@ -27,12 +27,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             if (req.url.path.contains('requestToken')) {
               // Token request
@@ -45,7 +47,7 @@ void main() {
               // Subsequent request to verify token is used
               req.respondWith(200, {
                 'channelId': channelName,
-                'status': {'isActive': true}
+                'status': {'isActive': true},
               });
             }
           },
@@ -102,7 +104,7 @@ void main() {
         );
 
         await client.auth.authorize(
-          tokenParams: TokenParams(
+          tokenParams: const TokenParams(
             clientId: 'override-client',
             ttl: 7200000,
           ),
@@ -129,7 +131,7 @@ void main() {
             onRequest: (req) {
               req.respondWith(200, {
                 'channelId': channelName,
-                'status': {'isActive': true}
+                'status': {'isActive': true},
               });
             },
           );
@@ -150,7 +152,7 @@ void main() {
 
           // First authorize with custom params
           await client.auth.authorize(
-            tokenParams: TokenParams(
+            tokenParams: const TokenParams(
               clientId: 'saved-client',
               ttl: 3600000,
             ),
@@ -216,21 +218,21 @@ void main() {
         var newCallbackCalled = false;
         final channelName = testChannelName('RSA10h');
 
-        final originalCallback = (TokenParams params) async {
+        Future<TokenDetails> originalCallback(TokenParams params) async {
           originalCallbackCalled = true;
           return TokenDetails(
             token: 'original',
             expires: DateTime.now().millisecondsSinceEpoch + 3600000,
           );
-        };
+        }
 
-        final newCallback = (TokenParams params) async {
+        Future<TokenDetails> newCallback(TokenParams params) async {
           newCallbackCalled = true;
           return TokenDetails(
             token: 'new',
             expires: DateTime.now().millisecondsSinceEpoch + 3600000,
           );
-        };
+        }
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
@@ -240,7 +242,9 @@ void main() {
 
         final client = Rest.forTesting(
           options: ClientOptions(
-              authCallback: originalCallback, useBinaryProtocol: false),
+            authCallback: originalCallback,
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 
@@ -263,12 +267,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             if (req.url.path.contains('requestToken')) {
               // Initial token request using key
@@ -293,7 +299,7 @@ void main() {
 
         // Call authorize with new authUrl but no key
         await client.auth.authorize(
-          authOptions: AuthOptions(
+          authOptions: const AuthOptions(
             authUrl: 'https://new-auth.example.com/token',
           ),
         );
@@ -349,12 +355,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             if (req.url.path == '/time') {
               // Time query
@@ -378,7 +386,7 @@ void main() {
         );
 
         await client.auth.authorize(
-          authOptions: AuthOptions(queryTime: true),
+          authOptions: const AuthOptions(queryTime: true),
         );
 
         // Should have made two requests: time query + token request
@@ -408,8 +416,10 @@ void main() {
         );
 
         final client = Rest.forTesting(
-          options: ClientOptions.fromKey('invalid.key:secret',
-              useBinaryProtocol: false),
+          options: ClientOptions.fromKey(
+            'invalid.key:secret',
+            useBinaryProtocol: false,
+          ),
           httpClient: mockHttp,
         );
 

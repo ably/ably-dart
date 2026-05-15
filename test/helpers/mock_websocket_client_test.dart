@@ -57,7 +57,9 @@ void main() {
       );
 
       final connection = await mock.connect(
-          Uri.parse('wss://main.realtime.ably.net'), TestWebSocketListener());
+        Uri.parse('wss://main.realtime.ably.net'),
+        TestWebSocketListener(),
+      );
 
       expect(connection, isNotNull);
       expect(mock.activeConnection, equals(connection));
@@ -74,7 +76,9 @@ void main() {
 
       expect(
         () => mock.connect(
-            Uri.parse('wss://main.realtime.ably.net'), TestWebSocketListener()),
+          Uri.parse('wss://main.realtime.ably.net'),
+          TestWebSocketListener(),
+        ),
         throwsA(isA<Exception>()),
       );
 
@@ -90,7 +94,9 @@ void main() {
 
       expect(
         () => mock.connect(
-            Uri.parse('wss://main.realtime.ably.net'), TestWebSocketListener()),
+          Uri.parse('wss://main.realtime.ably.net'),
+          TestWebSocketListener(),
+        ),
         throwsA(isA<Exception>()),
       );
     });
@@ -104,7 +110,9 @@ void main() {
 
       expect(
         () => mock.connect(
-            Uri.parse('wss://invalid.host.example'), TestWebSocketListener()),
+          Uri.parse('wss://invalid.host.example'),
+          TestWebSocketListener(),
+        ),
         throwsA(isA<Exception>()),
       );
     });
@@ -117,14 +125,15 @@ void main() {
               code: 40140,
               message: 'Token expired',
             ),
-            thenClose: true,
           );
         },
       );
 
       final listener = TestWebSocketListener();
       final connection = await mock.connect(
-          Uri.parse('wss://main.realtime.ably.net'), listener);
+        Uri.parse('wss://main.realtime.ably.net'),
+        listener,
+      );
 
       // Should receive error message via listener
       expect(listener.messages.length, 1);
@@ -148,7 +157,9 @@ void main() {
       );
 
       final connection = await mock.connect(
-          Uri.parse('wss://main.realtime.ably.net'), TestWebSocketListener());
+        Uri.parse('wss://main.realtime.ably.net'),
+        TestWebSocketListener(),
+      );
 
       connection.send(ProtocolMessageHelpers.heartbeat());
 
@@ -175,14 +186,17 @@ void main() {
       // First connection fails
       expect(
         () => mock.connect(
-            Uri.parse('wss://main.realtime.ably.net'), TestWebSocketListener()),
+          Uri.parse('wss://main.realtime.ably.net'),
+          TestWebSocketListener(),
+        ),
         throwsA(isA<Exception>()),
       );
 
       // Second connection succeeds
       final connection = await mock.connect(
-          Uri.parse('wss://a.fallback.ably-realtime.com'),
-          TestWebSocketListener());
+        Uri.parse('wss://a.fallback.ably-realtime.com'),
+        TestWebSocketListener(),
+      );
       expect(connection, isNotNull);
       expect(mock.events.length, 2);
     });
@@ -203,7 +217,9 @@ void main() {
 
       // Start connection in background
       final connectFuture = mock.connect(
-          Uri.parse('wss://main.realtime.ably.net'), TestWebSocketListener());
+        Uri.parse('wss://main.realtime.ably.net'),
+        TestWebSocketListener(),
+      );
 
       // Await and inspect connection attempt
       final pendingConn = await awaitFuture;
@@ -226,7 +242,9 @@ void main() {
       );
 
       final connection = await mock.connect(
-          Uri.parse('wss://main.realtime.ably.net'), TestWebSocketListener());
+        Uri.parse('wss://main.realtime.ably.net'),
+        TestWebSocketListener(),
+      );
 
       // Send message in background
       final heartbeat = ProtocolMessageHelpers.heartbeat();
@@ -245,7 +263,9 @@ void main() {
       );
 
       final connection = await mock.connect(
-          Uri.parse('wss://main.realtime.ably.net'), TestWebSocketListener());
+        Uri.parse('wss://main.realtime.ably.net'),
+        TestWebSocketListener(),
+      );
 
       // Close in background
       connection.close();
@@ -261,7 +281,9 @@ void main() {
       // Set up await BEFORE connecting
       final awaitFuture = mock.awaitConnectionAttempt();
       final connectFuture = mock.connect(
-          Uri.parse('wss://main.realtime.ably.net'), TestWebSocketListener());
+        Uri.parse('wss://main.realtime.ably.net'),
+        TestWebSocketListener(),
+      );
 
       final pendingConn = await awaitFuture;
       pendingConn.respondWithRefused();
@@ -280,16 +302,20 @@ void main() {
     test('receives CONNECTED message on successful connection', () async {
       mock = MockWebSocketClient(
         onConnectionAttempt: (conn) {
-          conn.respondWithSuccess(ProtocolMessageHelpers.connected(
-            connectionId: 'conn-123',
-            connectionKey: 'key-456',
-          ));
+          conn.respondWithSuccess(
+            ProtocolMessageHelpers.connected(
+              connectionId: 'conn-123',
+              connectionKey: 'key-456',
+            ),
+          );
         },
       );
 
       final listener = TestWebSocketListener();
       final connection = await mock.connect(
-          Uri.parse('wss://main.realtime.ably.net'), listener);
+        Uri.parse('wss://main.realtime.ably.net'),
+        listener,
+      );
 
       // Pump microtask queue so scheduleMicrotask-delivered CONNECTED arrives
       await Future.value();
@@ -310,7 +336,9 @@ void main() {
 
       final listener = TestWebSocketListener();
       final connection = await mock.connect(
-          Uri.parse('wss://main.realtime.ably.net'), listener);
+        Uri.parse('wss://main.realtime.ably.net'),
+        listener,
+      );
 
       // Pump microtask queue so scheduleMicrotask-delivered CONNECTED arrives
       await Future.value();
@@ -335,7 +363,9 @@ void main() {
       );
 
       final connection = await mock.connect(
-          Uri.parse('wss://main.realtime.ably.net'), TestWebSocketListener());
+        Uri.parse('wss://main.realtime.ably.net'),
+        TestWebSocketListener(),
+      );
 
       connection.send(ProtocolMessageHelpers.heartbeat());
       connection
@@ -355,7 +385,9 @@ void main() {
 
       final listener = TestWebSocketListener();
       final connection = await mock.connect(
-          Uri.parse('wss://main.realtime.ably.net'), listener);
+        Uri.parse('wss://main.realtime.ably.net'),
+        listener,
+      );
 
       // Pump microtask queue so scheduleMicrotask-delivered CONNECTED arrives
       await Future.value();
@@ -381,7 +413,9 @@ void main() {
       );
 
       final connection = mock.connect(
-          Uri.parse('wss://main.realtime.ably.net'), TestWebSocketListener());
+        Uri.parse('wss://main.realtime.ably.net'),
+        TestWebSocketListener(),
+      );
 
       connection.then((conn) {
         conn.close();
@@ -410,7 +444,9 @@ void main() {
       );
 
       final connection = await mock.connect(
-          Uri.parse('wss://main.realtime.ably.net'), listener);
+        Uri.parse('wss://main.realtime.ably.net'),
+        listener,
+      );
 
       expect(connection.isClosed, false);
 
@@ -430,7 +466,9 @@ void main() {
       );
 
       final connection = await mock.connect(
-          Uri.parse('wss://main.realtime.ably.net'), listener);
+        Uri.parse('wss://main.realtime.ably.net'),
+        listener,
+      );
 
       // Pump microtask queue so scheduleMicrotask-delivered CONNECTED arrives
       await Future.value();
@@ -442,7 +480,7 @@ void main() {
       // Send DISCONNECTED and close
       connection.sendToClientAndClose(
         ProtocolMessageHelpers.disconnected(
-          error: ErrorInfo(code: 80003, message: 'Test disconnect'),
+          error: const ErrorInfo(code: 80003, message: 'Test disconnect'),
         ),
       );
 
@@ -463,7 +501,9 @@ void main() {
       );
 
       final connection = await mock.connect(
-          Uri.parse('wss://main.realtime.ably.net'), listener);
+        Uri.parse('wss://main.realtime.ably.net'),
+        listener,
+      );
 
       // Pump microtask queue so scheduleMicrotask-delivered CONNECTED arrives
       await Future.value();
@@ -471,7 +511,7 @@ void main() {
       // Listener received CONNECTED message
       expect(listener.messages.length, 1);
 
-      final errorInfo = ErrorInfo(
+      const errorInfo = ErrorInfo(
         code: 50000,
         message: 'Connection lost',
       );
@@ -493,7 +533,9 @@ void main() {
       );
 
       final connection = await mock.connect(
-          Uri.parse('wss://main.realtime.ably.net'), TestWebSocketListener());
+        Uri.parse('wss://main.realtime.ably.net'),
+        TestWebSocketListener(),
+      );
 
       expect(mock.activeConnection, equals(connection));
 
@@ -520,7 +562,9 @@ void main() {
       );
 
       await mock.connect(
-          Uri.parse('wss://main.realtime.ably.net'), TestWebSocketListener());
+        Uri.parse('wss://main.realtime.ably.net'),
+        TestWebSocketListener(),
+      );
 
       expect(mock.events.length, 1);
       expect(mock.events[0].type, MockEventType.connectionAttempt);
@@ -538,16 +582,20 @@ void main() {
 
       final before = DateTime.now();
       await mock.connect(
-          Uri.parse('wss://main.realtime.ably.net'), TestWebSocketListener());
+        Uri.parse('wss://main.realtime.ably.net'),
+        TestWebSocketListener(),
+      );
       final after = DateTime.now();
 
       expect(mock.events.length, 1);
       expect(
-        mock.events[0].timestamp.isAfter(before.subtract(Duration(seconds: 1))),
+        mock.events[0].timestamp
+            .isAfter(before.subtract(const Duration(seconds: 1))),
         true,
       );
       expect(
-        mock.events[0].timestamp.isBefore(after.add(Duration(seconds: 1))),
+        mock.events[0].timestamp
+            .isBefore(after.add(const Duration(seconds: 1))),
         true,
       );
     });
@@ -570,18 +618,24 @@ void main() {
       // First attempt fails
       try {
         await mock.connect(
-            Uri.parse('wss://main.realtime.ably.net'), TestWebSocketListener());
+          Uri.parse('wss://main.realtime.ably.net'),
+          TestWebSocketListener(),
+        );
       } catch (_) {}
 
       // Second attempt fails
       try {
-        await mock.connect(Uri.parse('wss://a.fallback.ably-realtime.com'),
-            TestWebSocketListener());
+        await mock.connect(
+          Uri.parse('wss://a.fallback.ably-realtime.com'),
+          TestWebSocketListener(),
+        );
       } catch (_) {}
 
       // Third attempt succeeds
-      await mock.connect(Uri.parse('wss://b.fallback.ably-realtime.com'),
-          TestWebSocketListener());
+      await mock.connect(
+        Uri.parse('wss://b.fallback.ably-realtime.com'),
+        TestWebSocketListener(),
+      );
 
       expect(mock.events.length, 3);
       expect(mock.events[0].type, MockEventType.connectionAttempt);
@@ -616,7 +670,9 @@ void main() {
 
       final awaitFuture = mock.awaitConnectionAttempt();
       final connectFuture = mock.connect(
-          Uri.parse('wss://main.realtime.ably.net'), TestWebSocketListener());
+        Uri.parse('wss://main.realtime.ably.net'),
+        TestWebSocketListener(),
+      );
       final pendingConn = await awaitFuture;
 
       expect(handlerCalled, true);
@@ -637,7 +693,9 @@ void main() {
       );
 
       final connection = await mock.connect(
-          Uri.parse('wss://main.realtime.ably.net'), TestWebSocketListener());
+        Uri.parse('wss://main.realtime.ably.net'),
+        TestWebSocketListener(),
+      );
 
       connection.send(ProtocolMessageHelpers.heartbeat());
 
@@ -653,7 +711,9 @@ void main() {
 
       final awaitFuture = mock.awaitConnectionAttempt();
       final connectFuture = mock.connect(
-          Uri.parse('wss://main.realtime.ably.net'), TestWebSocketListener());
+        Uri.parse('wss://main.realtime.ably.net'),
+        TestWebSocketListener(),
+      );
       final pendingConn = await awaitFuture;
 
       // Must manually respond (no auto-success like HTTP mock)

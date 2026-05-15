@@ -68,18 +68,20 @@ void main() {
 
       // Send a ProtocolMessage with 3 messages that have no id field.
       // The ProtocolMessage itself has id "abc123:5".
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'abc123:5',
-        connectionId: 'abc123',
-        timestamp: 1700000000000,
-        messages: [
-          Message(name: 'first', data: 'a'),
-          Message(name: 'second', data: 'b'),
-          Message(name: 'third', data: 'c'),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'abc123:5',
+          connectionId: 'abc123',
+          timestamp: 1700000000000,
+          messages: [
+            const Message(name: 'first', data: 'a'),
+            const Message(name: 'second', data: 'b'),
+            const Message(name: 'third', data: 'c'),
+          ],
+        ),
+      );
 
       expect(received, hasLength(3));
 
@@ -139,14 +141,16 @@ void main() {
       await channel.attach();
 
       // Message already has its own id -- should not be overwritten
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'proto-id:0',
-        messages: [
-          Message(id: 'my-custom-id', name: 'msg', data: 'hello'),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'proto-id:0',
+          messages: [
+            const Message(id: 'my-custom-id', name: 'msg', data: 'hello'),
+          ],
+        ),
+      );
 
       expect(received, hasLength(1));
       expect(received[0].id, equals('my-custom-id'));
@@ -202,14 +206,16 @@ void main() {
       await channel.attach();
 
       // ProtocolMessage has no id field -- messages should not get computed ids
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        connectionId: 'abc123',
-        messages: [
-          Message(name: 'msg', data: 'hello'),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          connectionId: 'abc123',
+          messages: [
+            const Message(name: 'msg', data: 'hello'),
+          ],
+        ),
+      );
 
       expect(received, hasLength(1));
       expect(received[0].id, isNull);
@@ -265,15 +271,17 @@ void main() {
       await channel.attach();
 
       // Message has no connectionId -- should inherit from ProtocolMessage
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg:0',
-        connectionId: 'server-conn-xyz',
-        messages: [
-          Message(name: 'msg', data: 'hello'),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg:0',
+          connectionId: 'server-conn-xyz',
+          messages: [
+            const Message(name: 'msg', data: 'hello'),
+          ],
+        ),
+      );
 
       expect(received, hasLength(1));
       expect(received[0].connectionId, equals('server-conn-xyz'));
@@ -330,19 +338,21 @@ void main() {
       await channel.attach();
 
       // Message already has its own connectionId -- should not be overwritten
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg:0',
-        connectionId: 'proto-conn',
-        messages: [
-          Message(
-            connectionId: 'msg-conn',
-            name: 'msg',
-            data: 'hello',
-          ),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg:0',
+          connectionId: 'proto-conn',
+          messages: [
+            const Message(
+              connectionId: 'msg-conn',
+              name: 'msg',
+              data: 'hello',
+            ),
+          ],
+        ),
+      );
 
       expect(received, hasLength(1));
       expect(received[0].connectionId, equals('msg-conn'));
@@ -398,15 +408,17 @@ void main() {
       await channel.attach();
 
       // Message has no timestamp -- should inherit from ProtocolMessage
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg:0',
-        timestamp: 1700000000000,
-        messages: [
-          Message(name: 'msg', data: 'hello'),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg:0',
+          timestamp: 1700000000000,
+          messages: [
+            const Message(name: 'msg', data: 'hello'),
+          ],
+        ),
+      );
 
       expect(received, hasLength(1));
       expect(received[0].timestamp, equals(1700000000000));
@@ -462,15 +474,17 @@ void main() {
       await channel.attach();
 
       // Message already has its own timestamp -- should not be overwritten
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg:0',
-        timestamp: 1700000000000,
-        messages: [
-          Message(timestamp: 1600000000000, name: 'msg', data: 'hello'),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg:0',
+          timestamp: 1700000000000,
+          messages: [
+            const Message(timestamp: 1600000000000, name: 'msg', data: 'hello'),
+          ],
+        ),
+      );
 
       expect(received, hasLength(1));
       expect(received[0].timestamp, equals(1600000000000));
@@ -528,17 +542,19 @@ void main() {
       await channel.attach();
 
       // ProtocolMessage with all parent fields set, messages with none
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'connId:7',
-        connectionId: 'connId',
-        timestamp: 1700000000000,
-        messages: [
-          Message(name: 'first', data: 'a'),
-          Message(name: 'second', data: 'b'),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'connId:7',
+          connectionId: 'connId',
+          timestamp: 1700000000000,
+          messages: [
+            const Message(name: 'first', data: 'a'),
+            const Message(name: 'second', data: 'b'),
+          ],
+        ),
+      );
 
       expect(received, hasLength(2));
 

@@ -42,9 +42,8 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
                 res: [
-                  PublishResult(serials: const ['s1']),
+                  const PublishResult(serials: ['s1']),
                 ],
               ),
             );
@@ -106,9 +105,8 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
                 res: [
-                  PublishResult(serials: const ['s1']),
+                  const PublishResult(serials: ['s1']),
                 ],
               ),
             );
@@ -176,10 +174,9 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
                 res: [
-                  PublishResult(
-                    serials: const ['s1', 's2', 's3'],
+                  const PublishResult(
+                    serials: ['s1', 's2', 's3'],
                   ),
                 ],
               ),
@@ -208,11 +205,13 @@ void main() {
       );
       await channel.attach();
 
-      await channel.publish(messages: const [
-        Message(name: 'event1', data: 'data1'),
-        Message(name: 'event2', data: 'data2'),
-        Message(name: 'event3', data: 'data3'),
-      ]);
+      await channel.publish(
+        messages: const [
+          Message(name: 'event1', data: 'data1'),
+          Message(name: 'event2', data: 'data2'),
+          Message(name: 'event3', data: 'data3'),
+        ],
+      );
 
       // Single ProtocolMessage with 3 messages
       expect(capturedMessages, hasLength(1));
@@ -236,7 +235,7 @@ void main() {
     test('name-only publish omits data key from wire JSON', () async {
       final channelName = testChannelName('RTL6i3-json');
       final capturedFrames = <Map<String, dynamic>>[];
-      var msgSerialCounter = 0;
+      const msgSerialCounter = 0;
 
       late final MockWebSocketClient mockWs;
       mockWs = MockWebSocketClient(
@@ -252,9 +251,8 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
                 res: [
-                  PublishResult(serials: const ['s']),
+                  const PublishResult(serials: ['s']),
                 ],
               ),
             );
@@ -328,8 +326,11 @@ void main() {
 
   group('RTL6i3 - Null fields in msgpack', () {
     // UTS: realtime/unit/RTL6i3/null-fields-msgpack-1
-    test('RTL6i3 - null fields in msgpack', () {},
-        skip: 'Not yet implemented: msgpack encoding support');
+    test(
+      'RTL6i3 - null fields in msgpack',
+      () {},
+      skip: 'Not yet implemented: msgpack encoding support',
+    );
   });
 
   // ---------------------------------------------------------------------------
@@ -357,9 +358,8 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
                 res: [
-                  PublishResult(serials: const ['s']),
+                  const PublishResult(serials: ['s']),
                 ],
               ),
             );
@@ -438,9 +438,8 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
                 res: [
-                  PublishResult(serials: const ['s']),
+                  const PublishResult(serials: ['s']),
                 ],
               ),
             );
@@ -502,9 +501,8 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
                 res: [
-                  PublishResult(serials: const ['s']),
+                  const PublishResult(serials: ['s']),
                 ],
               ),
             );
@@ -562,9 +560,8 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
                 res: [
-                  PublishResult(serials: const ['s']),
+                  const PublishResult(serials: ['s']),
                 ],
               ),
             );
@@ -623,9 +620,8 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
                 res: [
-                  PublishResult(serials: const ['s']),
+                  const PublishResult(serials: ['s']),
                 ],
               ),
             );
@@ -699,9 +695,8 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
                 res: [
-                  PublishResult(serials: const ['s']),
+                  const PublishResult(serials: ['s']),
                 ],
               ),
             );
@@ -761,9 +756,8 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
                 res: [
-                  PublishResult(serials: const ['s']),
+                  const PublishResult(serials: ['s']),
                 ],
               ),
             );
@@ -927,7 +921,6 @@ void main() {
               code: 80000,
               message: 'Fatal error',
             ),
-            thenClose: true,
           );
         },
       );
@@ -1035,15 +1028,17 @@ void main() {
         },
         onMessageFromClient: (msg) {
           if (msg.action == ProtocolAction.attach) {
-            mockWs.activeConnection!.sendToClient(ProtocolMessage(
-              action: ProtocolAction.error,
-              channel: channelName,
-              error: const ErrorInfo(
-                code: 40160,
-                statusCode: 401,
-                message: 'Not permitted',
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessage(
+                action: ProtocolAction.error,
+                channel: channelName,
+                error: const ErrorInfo(
+                  code: 40160,
+                  statusCode: 401,
+                  message: 'Not permitted',
+                ),
               ),
-            ));
+            );
           } else if (msg.action == ProtocolAction.message) {
             capturedMessages.add(msg);
           }
@@ -1190,9 +1185,8 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
                 res: [
-                  PublishResult(serials: const ['s']),
+                  const PublishResult(serials: ['s']),
                 ],
               ),
             );
@@ -1259,9 +1253,8 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
                 res: [
-                  PublishResult(serials: const ['abc123']),
+                  const PublishResult(serials: ['abc123']),
                 ],
               ),
             );
@@ -1323,9 +1316,8 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
                 res: [
-                  PublishResult(serials: const ['serial-1', null, 'serial-3']),
+                  const PublishResult(serials: ['serial-1', null, 'serial-3']),
                 ],
               ),
             );
@@ -1353,11 +1345,13 @@ void main() {
       );
       await channel.attach();
 
-      final result = await channel.publish(messages: const [
-        Message(name: 'event1', data: 'data1'),
-        Message(name: 'event2', data: 'data2'),
-        Message(name: 'event3', data: 'data3'),
-      ]);
+      final result = await channel.publish(
+        messages: const [
+          Message(name: 'event1', data: 'data1'),
+          Message(name: 'event2', data: 'data2'),
+          Message(name: 'event3', data: 'data3'),
+        ],
+      );
 
       // Single ProtocolMessage with 3 messages
       expect(capturedMessages, hasLength(1));
@@ -1392,7 +1386,6 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
                 res: [
                   PublishResult(serials: ['serial-${msg.msgSerial}']),
                 ],
@@ -1456,16 +1449,18 @@ void main() {
             );
           } else if (msg.action == ProtocolAction.message) {
             // Respond with NACK
-            mockWs.activeConnection!.sendToClient(ProtocolMessage(
-              action: ProtocolAction.nack,
-              msgSerial: msg.msgSerial,
-              count: 1,
-              error: const ErrorInfo(
-                code: 40160,
-                statusCode: 401,
-                message: 'Publish rejected',
+            mockWs.activeConnection!.sendToClient(
+              ProtocolMessage(
+                action: ProtocolAction.nack,
+                msgSerial: msg.msgSerial,
+                count: 1,
+                error: const ErrorInfo(
+                  code: 40160,
+                  statusCode: 401,
+                  message: 'Publish rejected',
+                ),
               ),
-            ));
+            );
           }
         },
       );
@@ -1586,13 +1581,15 @@ void main() {
             // Respond with fatal ERROR instead of ACK
             // Schedule asynchronously so the publish future is returned first
             scheduleMicrotask(() {
-              mockWs.activeConnection?.sendToClientAndClose(ProtocolMessage(
-                action: ProtocolAction.error,
-                error: const ErrorInfo(
-                  code: 80000,
-                  message: 'Fatal error',
+              mockWs.activeConnection?.sendToClientAndClose(
+                ProtocolMessage(
+                  action: ProtocolAction.error,
+                  error: const ErrorInfo(
+                    code: 80000,
+                    message: 'Fatal error',
+                  ),
                 ),
-              ));
+              );
             });
           }
         },
@@ -1690,13 +1687,15 @@ void main() {
         // Publish but don't ACK — message stays pending.
         // Capture error eagerly to prevent unhandled error in test zone.
         Object? publishError;
-        unawaited(channel
-            .publish(name: 'pending', data: 'data')
-            .then((_) => null)
-            .catchError((Object e) {
-          publishError = e;
-          return null;
-        }));
+        unawaited(
+          channel
+              .publish(name: 'pending', data: 'data')
+              .then((_) => null)
+              .catchError((Object e) {
+            publishError = e;
+            return null;
+          }),
+        );
 
         // Disconnect — reconnection attempts will be refused
         mockWs.activeConnection!.simulateDisconnect();
@@ -1840,13 +1839,15 @@ void main() {
       // Publish but don't ACK — message stays pending.
       // Capture error eagerly to prevent unhandled error in test zone.
       Object? publishError;
-      unawaited(channel
-          .publish(name: 'pending', data: 'data')
-          .then((_) => null)
-          .catchError((Object e) {
-        publishError = e;
-        return null;
-      }));
+      unawaited(
+        channel
+            .publish(name: 'pending', data: 'data')
+            .then((_) => null)
+            .catchError((Object e) {
+          publishError = e;
+          return null;
+        }),
+      );
 
       // Disconnect — triggers DISCONNECTED state
       mockWs.activeConnection!.simulateDisconnect();
@@ -1889,9 +1890,8 @@ void main() {
                 mockWs.activeConnection!.sendToClient(
                   ProtocolMessageHelpers.ack(
                     msgSerial: msg.msgSerial!,
-                    count: 1,
                     res: [
-                      PublishResult(serials: const ['serial-ack']),
+                      const PublishResult(serials: ['serial-ack']),
                     ],
                   ),
                 );
@@ -1984,9 +1984,8 @@ void main() {
                 mockWs.activeConnection!.sendToClient(
                   ProtocolMessageHelpers.ack(
                     msgSerial: msg.msgSerial!,
-                    count: 1,
                     res: [
-                      PublishResult(serials: const ['serial-resent']),
+                      const PublishResult(serials: ['serial-resent']),
                     ],
                   ),
                 );
@@ -2045,8 +2044,10 @@ void main() {
 
         // Message should have been sent on both transports
         final secondTransportMsgs = capturedMessages
-            .where((m) =>
-                m.connection == 2 && m.msg.action == ProtocolAction.message)
+            .where(
+              (m) =>
+                  m.connection == 2 && m.msg.action == ProtocolAction.message,
+            )
             .toList();
         expect(secondTransportMsgs, isNotEmpty);
 
@@ -2086,10 +2087,12 @@ void main() {
           onConnectionAttempt: (conn) {
             connectionCount++;
             // Both connections use same connectionId = successful resume
-            conn.respondWithSuccess(ProtocolMessageHelpers.connected(
-              connectionId: originalConnectionId,
-              connectionKey: 'key-$connectionCount',
-            ));
+            conn.respondWithSuccess(
+              ProtocolMessageHelpers.connected(
+                connectionId: originalConnectionId,
+                connectionKey: 'key-$connectionCount',
+              ),
+            );
           },
           onMessageFromClient: (msg) {
             if (msg.action == ProtocolAction.attach) {
@@ -2104,9 +2107,8 @@ void main() {
                 mockWs.activeConnection!.sendToClient(
                   ProtocolMessageHelpers.ack(
                     msgSerial: msg.msgSerial!,
-                    count: 1,
                     res: [
-                      PublishResult(serials: const ['serial-resumed']),
+                      const PublishResult(serials: ['serial-resumed']),
                     ],
                   ),
                 );
@@ -2142,8 +2144,10 @@ void main() {
 
         // Capture original msgSerials
         final firstTransportMsgs = capturedMessages
-            .where((m) =>
-                m.connection == 1 && m.msg.action == ProtocolAction.message)
+            .where(
+              (m) =>
+                  m.connection == 1 && m.msg.action == ProtocolAction.message,
+            )
             .toList();
         final originalSerial1 = firstTransportMsgs[0].msg.msgSerial!;
         final originalSerial2 = firstTransportMsgs[1].msg.msgSerial!;
@@ -2164,8 +2168,10 @@ void main() {
 
         // Messages resent on second transport should have the SAME msgSerials
         final secondTransportMsgs = capturedMessages
-            .where((m) =>
-                m.connection == 2 && m.msg.action == ProtocolAction.message)
+            .where(
+              (m) =>
+                  m.connection == 2 && m.msg.action == ProtocolAction.message,
+            )
             .toList();
         expect(secondTransportMsgs, hasLength(2));
         expect(secondTransportMsgs[0].msg.msgSerial, equals(originalSerial1));
@@ -2193,20 +2199,24 @@ void main() {
           onConnectionAttempt: (conn) {
             connectionCount++;
             if (connectionCount == 1) {
-              conn.respondWithSuccess(ProtocolMessageHelpers.connected(
-                connectionId: 'connection-first',
-                connectionKey: 'key-first',
-              ));
+              conn.respondWithSuccess(
+                ProtocolMessageHelpers.connected(
+                  connectionId: 'connection-first',
+                  connectionKey: 'key-first',
+                ),
+              );
             } else {
               // Failed resume — different connectionId + error (RTN15c7)
-              conn.respondWithSuccess(ProtocolMessageHelpers.connected(
-                connectionId: 'connection-new',
-                connectionKey: 'key-new',
-                error: const ErrorInfo(
-                  code: 80018,
-                  message: 'Connection not resumable',
+              conn.respondWithSuccess(
+                ProtocolMessageHelpers.connected(
+                  connectionId: 'connection-new',
+                  connectionKey: 'key-new',
+                  error: const ErrorInfo(
+                    code: 80018,
+                    message: 'Connection not resumable',
+                  ),
                 ),
-              ));
+              );
             }
           },
           onMessageFromClient: (msg) {
@@ -2222,9 +2232,8 @@ void main() {
                 mockWs.activeConnection!.sendToClient(
                   ProtocolMessageHelpers.ack(
                     msgSerial: msg.msgSerial!,
-                    count: 1,
                     res: [
-                      PublishResult(serials: const ['serial-new']),
+                      const PublishResult(serials: ['serial-new']),
                     ],
                   ),
                 );
@@ -2260,8 +2269,10 @@ void main() {
 
         // Verify original serials
         final firstTransportMsgs = capturedMessages
-            .where((m) =>
-                m.connection == 1 && m.msg.action == ProtocolAction.message)
+            .where(
+              (m) =>
+                  m.connection == 1 && m.msg.action == ProtocolAction.message,
+            )
             .toList();
         expect(firstTransportMsgs[0].msg.msgSerial, equals(0));
         expect(firstTransportMsgs[1].msg.msgSerial, equals(1));
@@ -2283,8 +2294,10 @@ void main() {
         // Messages resent on second transport should have NEW msgSerials
         // starting from 0 (RTN15c7 resets the internal counter)
         final secondTransportMsgs = capturedMessages
-            .where((m) =>
-                m.connection == 2 && m.msg.action == ProtocolAction.message)
+            .where(
+              (m) =>
+                  m.connection == 2 && m.msg.action == ProtocolAction.message,
+            )
             .toList();
         expect(secondTransportMsgs, hasLength(2));
         expect(secondTransportMsgs[0].msg.msgSerial, equals(0));
@@ -2518,7 +2531,7 @@ void main() {
             mockWs.activeConnection!.sendToClientAndClose(
               ProtocolMessage(
                 action: ProtocolAction.error,
-                error: ErrorInfo(
+                error: const ErrorInfo(
                   code: 80019,
                   statusCode: 400,
                   message: 'Connection closed due to admin action',

@@ -23,25 +23,27 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, [
               {
                 'id': 'msg1',
                 'name': 'event1',
                 'data': 'data1',
-                'timestamp': 1000
+                'timestamp': 1000,
               },
               {
                 'id': 'msg2',
                 'name': 'event2',
                 'data': 'data2',
-                'timestamp': 2000
+                'timestamp': 2000,
               },
             ]);
           },
@@ -83,12 +85,14 @@ void main() {
 
           mockHttp = MockHttpClient(
             onRequest: (req) {
-              capturedRequests.add(CapturedRequest(
-                method: req.method,
-                url: req.url,
-                headers: req.headers,
-                body: req.bodyAsString,
-              ));
+              capturedRequests.add(
+                CapturedRequest(
+                  method: req.method,
+                  url: req.url,
+                  headers: req.headers,
+                  body: req.bodyAsString,
+                ),
+              );
 
               req.respondWith(200, []);
             },
@@ -121,12 +125,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -158,12 +164,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, [
               {'id': 'msg1', 'name': 'e', 'data': 'd', 'timestamp': 1000},
@@ -179,7 +187,7 @@ void main() {
         );
         final channel = client.channels.get(channelName);
 
-        await channel.history(RestHistoryParams(limit: 10));
+        await channel.history(const RestHistoryParams(limit: 10));
 
         final request = capturedRequests[0];
         expect(request.url.queryParameters['limit'], equals('10'));
@@ -194,12 +202,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -247,12 +257,14 @@ void main() {
 
           mockHttp = MockHttpClient(
             onRequest: (req) {
-              capturedRequests.add(CapturedRequest(
-                method: req.method,
-                url: req.url,
-                headers: req.headers,
-                body: req.bodyAsString,
-              ));
+              capturedRequests.add(
+                CapturedRequest(
+                  method: req.method,
+                  url: req.url,
+                  headers: req.headers,
+                  body: req.bodyAsString,
+                ),
+              );
 
               req.respondWith(200, []);
             },
@@ -281,12 +293,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, [
               {'id': 'msg1', 'name': 'e', 'data': 'd', 'timestamp': 1500},
@@ -301,7 +315,7 @@ void main() {
         final channel = client.channels.get(channelName);
 
         await channel.history(
-          RestHistoryParams(start: 1000, end: 2000),
+          const RestHistoryParams(start: 1000, end: 2000),
         );
 
         final request = capturedRequests[0];

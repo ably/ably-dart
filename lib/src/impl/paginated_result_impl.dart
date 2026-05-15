@@ -104,7 +104,8 @@ class PaginatedResultImpl<T> implements PaginatedResult<T> {
 
 /// Function type for fetching HTTP paginated results.
 typedef HttpPageFetcher<T> = Future<HttpPaginatedResponse<T>> Function(
-    String url);
+  String url,
+);
 
 /// Type-specific parsers for paginated results.
 class PaginatedResultParser {

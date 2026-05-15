@@ -131,8 +131,11 @@ void main() {
         final reenterMessage =
             reenterFrame['message'] as Map<String, dynamic>? ?? {};
         final presenceList = reenterMessage['presence'] as List<dynamic>? ?? [];
-        expect(presenceList, isNotEmpty,
-            reason: 'PRESENCE frame should have presence data');
+        expect(
+          presenceList,
+          isNotEmpty,
+          reason: 'PRESENCE frame should have presence data',
+        );
 
         final presenceEntry = presenceList.first as Map<String, dynamic>;
         expect(

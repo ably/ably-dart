@@ -84,8 +84,11 @@ void main() {
         final request = mockHttp.capturedRequests[0];
 
         // Stats requires authentication (unlike time)
-        expect(request.headers.containsKey('Authorization'), isTrue,
-            reason: 'stats() must send Authorization header');
+        expect(
+          request.headers.containsKey('Authorization'),
+          isTrue,
+          reason: 'stats() must send Authorization header',
+        );
 
         // Standard Ably headers
         expect(request.headers.containsKey('X-Ably-Version'), isTrue);
@@ -107,7 +110,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        final startTime = DateTime.utc(2024, 1, 1); // 1704067200000
+        final startTime = DateTime.utc(2024); // 1704067200000
 
         await client.stats(start: startTime);
 
@@ -157,7 +160,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        final startTime = DateTime.utc(2024, 1, 1);
+        final startTime = DateTime.utc(2024);
         final endTime = DateTime.utc(2024, 1, 31, 23, 59, 59);
 
         await client.stats(start: startTime, end: endTime);
@@ -234,8 +237,11 @@ void main() {
 
         expect(mockHttp.capturedRequests.length, equals(1));
         final request = mockHttp.capturedRequests[0];
-        expect(request.url.queryParameters.containsKey('direction'), isFalse,
-            reason: 'direction should be omitted to let server apply default');
+        expect(
+          request.url.queryParameters.containsKey('direction'),
+          isFalse,
+          reason: 'direction should be omitted to let server apply default',
+        );
       });
     });
 
@@ -277,8 +283,11 @@ void main() {
 
         expect(mockHttp.capturedRequests.length, equals(1));
         final request = mockHttp.capturedRequests[0];
-        expect(request.url.queryParameters.containsKey('limit'), isFalse,
-            reason: 'limit should be omitted to let server apply default');
+        expect(
+          request.url.queryParameters.containsKey('limit'),
+          isFalse,
+          reason: 'limit should be omitted to let server apply default',
+        );
       });
     });
 
@@ -322,8 +331,11 @@ void main() {
 
         expect(mockHttp.capturedRequests.length, equals(1));
         final request = mockHttp.capturedRequests[0];
-        expect(request.url.queryParameters.containsKey('unit'), isFalse,
-            reason: 'unit should be omitted to let server apply default');
+        expect(
+          request.url.queryParameters.containsKey('unit'),
+          isFalse,
+          reason: 'unit should be omitted to let server apply default',
+        );
       });
     });
 
@@ -341,7 +353,7 @@ void main() {
           httpClient: mockHttp,
         );
 
-        final startTime = DateTime.utc(2024, 1, 1);
+        final startTime = DateTime.utc(2024);
         final endTime = DateTime.utc(2024, 1, 31, 23, 59, 59);
 
         await client.stats(
@@ -388,8 +400,11 @@ void main() {
         final request = mockHttp.capturedRequests[0];
         expect(request.method, equals('GET'));
         expect(request.url.path, equals('/stats'));
-        expect(request.url.queryParameters, isEmpty,
-            reason: 'no query parameters should be sent with default call');
+        expect(
+          request.url.queryParameters,
+          isEmpty,
+          reason: 'no query parameters should be sent with default call',
+        );
       });
     });
 

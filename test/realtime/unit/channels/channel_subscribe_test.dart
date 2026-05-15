@@ -63,21 +63,27 @@ void main() {
       channel.subscribe((message) => received.add(message));
 
       // Send messages with different names
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [Message(name: 'event1', data: 'data1')],
-      ));
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [Message(name: 'event2', data: 'data2')],
-      ));
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [const Message(data: 'data3')],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [const Message(name: 'event1', data: 'data1')],
+        ),
+      );
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [const Message(name: 'event2', data: 'data2')],
+        ),
+      );
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [const Message(data: 'data3')],
+        ),
+      );
 
       expect(received, hasLength(3));
       expect(received[0].name, equals('event1'));
@@ -131,15 +137,17 @@ void main() {
       final received = <Message>[];
       channel.subscribe((message) => received.add(message));
 
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [
-          Message(name: 'batch1', data: 'first'),
-          Message(name: 'batch2', data: 'second'),
-          Message(name: 'batch3', data: 'third'),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [
+            const Message(name: 'batch1', data: 'first'),
+            const Message(name: 'batch2', data: 'second'),
+            const Message(name: 'batch3', data: 'third'),
+          ],
+        ),
+      );
 
       expect(received, hasLength(3));
       expect(received[0].name, equals('batch1'));
@@ -196,21 +204,27 @@ void main() {
       final received = <Message>[];
       channel.subscribe((message) => received.add(message), name: 'target');
 
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [Message(name: 'other', data: 'should-not-receive')],
-      ));
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [Message(name: 'target', data: 'should-receive')],
-      ));
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [const Message(data: 'no-name-should-not-receive')],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [const Message(name: 'other', data: 'should-not-receive')],
+        ),
+      );
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [const Message(name: 'target', data: 'should-receive')],
+        ),
+      );
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [const Message(data: 'no-name-should-not-receive')],
+        ),
+      );
 
       expect(received, hasLength(1));
       expect(received[0].name, equals('target'));
@@ -269,16 +283,18 @@ void main() {
         name: 'beta',
       );
 
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [
-          Message(name: 'alpha', data: 'a1'),
-          Message(name: 'beta', data: 'b1'),
-          Message(name: 'alpha', data: 'a2'),
-          Message(name: 'gamma', data: 'g1'),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [
+            const Message(name: 'alpha', data: 'a1'),
+            const Message(name: 'beta', data: 'b1'),
+            const Message(name: 'alpha', data: 'a2'),
+            const Message(name: 'gamma', data: 'g1'),
+          ],
+        ),
+      );
 
       expect(alphaMessages, hasLength(2));
       expect(alphaMessages[0].data, equals('a1'));
@@ -428,15 +444,17 @@ void main() {
             attachCount++;
             if (attachCount == 1) {
               // First attach fails
-              mockWs.activeConnection!.sendToClient(ProtocolMessage(
-                action: ProtocolAction.error,
-                channel: channelName,
-                error: const ErrorInfo(
-                  code: 40160,
-                  statusCode: 401,
-                  message: 'Not permitted',
+              mockWs.activeConnection!.sendToClient(
+                ProtocolMessage(
+                  action: ProtocolAction.error,
+                  channel: channelName,
+                  error: const ErrorInfo(
+                    code: 40160,
+                    statusCode: 401,
+                    message: 'Not permitted',
+                  ),
                 ),
-              ));
+              );
             } else {
               // Subsequent attaches succeed
               mockWs.activeConnection!.sendToClient(
@@ -687,11 +705,15 @@ void main() {
       await _awaitChannelState(channel, ChannelState.attaching);
 
       // Server sends a message while channel is still ATTACHING
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [Message(name: 'premature', data: 'should-not-deliver')],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [
+            const Message(name: 'premature', data: 'should-not-deliver')
+          ],
+        ),
+      );
 
       expect(received, isEmpty);
 
@@ -712,10 +734,12 @@ void main() {
       late final MockWebSocketClient mockWs;
       mockWs = MockWebSocketClient(
         onConnectionAttempt: (conn) {
-          conn.respondWithSuccess(ProtocolMessageHelpers.connected(
-            connectionId: connectionId,
-            connectionKey: 'key-456',
-          ));
+          conn.respondWithSuccess(
+            ProtocolMessageHelpers.connected(
+              connectionId: connectionId,
+              connectionKey: 'key-456',
+            ),
+          );
         },
         onMessageFromClient: (msg) {
           if (msg.action == ProtocolAction.attach) {
@@ -751,20 +775,24 @@ void main() {
       channel.subscribe((message) => received.add(message));
 
       // Server echoes back a message with this connection's connectionId
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        connectionId: connectionId,
-        messages: [Message(name: 'echo', data: 'from-self')],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          connectionId: connectionId,
+          messages: [const Message(name: 'echo', data: 'from-self')],
+        ),
+      );
 
       // Server sends a message from a different connection
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        connectionId: 'conn-other-789',
-        messages: [Message(name: 'remote', data: 'from-other')],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          connectionId: 'conn-other-789',
+          messages: [const Message(name: 'remote', data: 'from-other')],
+        ),
+      );
 
       // Only the message from the other connection should be delivered
       expect(received, hasLength(1));
@@ -970,27 +998,31 @@ void main() {
       channel.subscribe(listener, name: 'beta');
 
       // Both subscriptions active
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [
-          Message(name: 'alpha', data: 'a1'),
-          Message(name: 'beta', data: 'b1'),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [
+            const Message(name: 'alpha', data: 'a1'),
+            const Message(name: 'beta', data: 'b1'),
+          ],
+        ),
+      );
       expect(received, hasLength(2));
 
       // Unsubscribe only from "alpha"
       channel.unsubscribe(listener: listener, name: 'alpha');
 
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [
-          Message(name: 'alpha', data: 'a2'),
-          Message(name: 'beta', data: 'b2'),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [
+            const Message(name: 'alpha', data: 'a2'),
+            const Message(name: 'beta', data: 'b2'),
+          ],
+        ),
+      );
 
       // "alpha" unsubscribed but "beta" still active
       expect(received, hasLength(3));
@@ -1068,14 +1100,16 @@ void main() {
       channel.unsubscribe();
 
       // No listeners should receive
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [
-          Message(name: 'specific', data: 'second'),
-          Message(name: 'other', data: 'third'),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [
+            const Message(name: 'specific', data: 'second'),
+            const Message(name: 'other', data: 'third'),
+          ],
+        ),
+      );
 
       expect(messagesAll, hasLength(1)); // No new messages
       expect(messagesNamed, hasLength(1)); // No new messages
@@ -1135,32 +1169,40 @@ void main() {
       );
 
       // Message with matching name
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [Message(name: 'target-event', data: 'match-1')],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [const Message(name: 'target-event', data: 'match-1')],
+        ),
+      );
 
       // Message with different name
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [Message(name: 'other-event', data: 'no-match')],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [const Message(name: 'other-event', data: 'no-match')],
+        ),
+      );
 
       // Another message with matching name
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [Message(name: 'target-event', data: 'match-2')],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [const Message(name: 'target-event', data: 'match-2')],
+        ),
+      );
 
       // Message with no name
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [const Message(data: 'no-name')],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [const Message(data: 'no-name')],
+        ),
+      );
 
       expect(filteredMessages, hasLength(2));
       expect(filteredMessages[0].name, equals('target-event'));
@@ -1224,65 +1266,79 @@ void main() {
       );
 
       // Message with matching extras.ref.timeserial
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [
-          Message(
-            name: 'reply',
-            data: 'match',
-            extras: MessageExtras(data: {
-              'ref': {
-                'timeserial': 'abc123@1700000000000-0',
-                'type': 'com.ably.reply',
-              },
-            }),
-          ),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [
+            const Message(
+              name: 'reply',
+              data: 'match',
+              extras: MessageExtras(
+                data: {
+                  'ref': {
+                    'timeserial': 'abc123@1700000000000-0',
+                    'type': 'com.ably.reply',
+                  },
+                },
+              ),
+            ),
+          ],
+        ),
+      );
 
       // Message with different extras.ref.timeserial
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [
-          Message(
-            name: 'reply',
-            data: 'no-match',
-            extras: MessageExtras(data: {
-              'ref': {
-                'timeserial': 'xyz789@1700000000000-0',
-                'type': 'com.ably.reply',
-              },
-            }),
-          ),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [
+            const Message(
+              name: 'reply',
+              data: 'no-match',
+              extras: MessageExtras(
+                data: {
+                  'ref': {
+                    'timeserial': 'xyz789@1700000000000-0',
+                    'type': 'com.ably.reply',
+                  },
+                },
+              ),
+            ),
+          ],
+        ),
+      );
 
       // Message with no extras.ref at all
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [Message(name: 'plain', data: 'no-ref')],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [const Message(name: 'plain', data: 'no-ref')],
+        ),
+      );
 
       // Another message with matching extras.ref.timeserial
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [
-          Message(
-            name: 'reaction',
-            data: 'match-2',
-            extras: MessageExtras(data: {
-              'ref': {
-                'timeserial': 'abc123@1700000000000-0',
-                'type': 'com.ably.reaction',
-              },
-            }),
-          ),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [
+            const Message(
+              name: 'reaction',
+              data: 'match-2',
+              extras: MessageExtras(
+                data: {
+                  'ref': {
+                    'timeserial': 'abc123@1700000000000-0',
+                    'type': 'com.ably.reaction',
+                  },
+                },
+              ),
+            ),
+          ],
+        ),
+      );
 
       expect(filteredMessages, hasLength(2));
       expect(filteredMessages[0].data, equals('match'));
@@ -1345,62 +1401,76 @@ void main() {
       );
 
       // Message WITHOUT extras.ref (no extras at all)
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [Message(name: 'plain', data: 'no-extras')],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [const Message(name: 'plain', data: 'no-extras')],
+        ),
+      );
 
       // Message WITH extras.ref -- should NOT be delivered
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [
-          Message(
-            name: 'reply',
-            data: 'has-ref',
-            extras: MessageExtras(data: {
-              'ref': {
-                'timeserial': 'abc123@1700000000000-0',
-                'type': 'com.ably.reply',
-              },
-            }),
-          ),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [
+            const Message(
+              name: 'reply',
+              data: 'has-ref',
+              extras: MessageExtras(
+                data: {
+                  'ref': {
+                    'timeserial': 'abc123@1700000000000-0',
+                    'type': 'com.ably.reply',
+                  },
+                },
+              ),
+            ),
+          ],
+        ),
+      );
 
       // Message with extras but no ref field -- should be delivered
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [
-          Message(
-            name: 'annotated',
-            data: 'extras-no-ref',
-            extras: MessageExtras(data: {
-              'headers': {'custom-key': 'custom-value'},
-            }),
-          ),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [
+            const Message(
+              name: 'annotated',
+              data: 'extras-no-ref',
+              extras: MessageExtras(
+                data: {
+                  'headers': {'custom-key': 'custom-value'},
+                },
+              ),
+            ),
+          ],
+        ),
+      );
 
       // Another message WITH extras.ref -- should NOT be delivered
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [
-          Message(
-            name: 'reaction',
-            data: 'also-has-ref',
-            extras: MessageExtras(data: {
-              'ref': {
-                'timeserial': 'xyz789@1700000000000-0',
-                'type': 'com.ably.reaction',
-              },
-            }),
-          ),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [
+            const Message(
+              name: 'reaction',
+              data: 'also-has-ref',
+              extras: MessageExtras(
+                data: {
+                  'ref': {
+                    'timeserial': 'xyz789@1700000000000-0',
+                    'type': 'com.ably.reaction',
+                  },
+                },
+              ),
+            ),
+          ],
+        ),
+      );
 
       // Only messages without extras.ref should be delivered
       expect(filteredMessages, hasLength(2));
@@ -1466,83 +1536,101 @@ void main() {
       );
 
       // Message matching BOTH name AND refType -- should be delivered
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [
-          Message(
-            name: 'comment',
-            data: 'both-match',
-            extras: MessageExtras(data: {
-              'ref': {
-                'timeserial': 'abc@1700000000000-0',
-                'type': 'com.ably.reply',
-              },
-            }),
-          ),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [
+            const Message(
+              name: 'comment',
+              data: 'both-match',
+              extras: MessageExtras(
+                data: {
+                  'ref': {
+                    'timeserial': 'abc@1700000000000-0',
+                    'type': 'com.ably.reply',
+                  },
+                },
+              ),
+            ),
+          ],
+        ),
+      );
 
       // Message matching name but NOT refType -- should NOT be delivered
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [
-          Message(
-            name: 'comment',
-            data: 'name-only',
-            extras: MessageExtras(data: {
-              'ref': {
-                'timeserial': 'def@1700000000000-0',
-                'type': 'com.ably.reaction',
-              },
-            }),
-          ),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [
+            const Message(
+              name: 'comment',
+              data: 'name-only',
+              extras: MessageExtras(
+                data: {
+                  'ref': {
+                    'timeserial': 'def@1700000000000-0',
+                    'type': 'com.ably.reaction',
+                  },
+                },
+              ),
+            ),
+          ],
+        ),
+      );
 
       // Message matching refType but NOT name -- should NOT be delivered
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [
-          Message(
-            name: 'update',
-            data: 'type-only',
-            extras: MessageExtras(data: {
-              'ref': {
-                'timeserial': 'ghi@1700000000000-0',
-                'type': 'com.ably.reply',
-              },
-            }),
-          ),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [
+            const Message(
+              name: 'update',
+              data: 'type-only',
+              extras: MessageExtras(
+                data: {
+                  'ref': {
+                    'timeserial': 'ghi@1700000000000-0',
+                    'type': 'com.ably.reply',
+                  },
+                },
+              ),
+            ),
+          ],
+        ),
+      );
 
       // Message matching NEITHER -- should NOT be delivered
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [Message(name: 'update', data: 'neither')],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [const Message(name: 'update', data: 'neither')],
+        ),
+      );
 
       // Another message matching BOTH -- should be delivered
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [
-          Message(
-            name: 'comment',
-            data: 'both-match-2',
-            extras: MessageExtras(data: {
-              'ref': {
-                'timeserial': 'jkl@1700000000000-0',
-                'type': 'com.ably.reply',
-              },
-            }),
-          ),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [
+            const Message(
+              name: 'comment',
+              data: 'both-match-2',
+              extras: MessageExtras(
+                data: {
+                  'ref': {
+                    'timeserial': 'jkl@1700000000000-0',
+                    'type': 'com.ably.reply',
+                  },
+                },
+              ),
+            ),
+          ],
+        ),
+      );
 
       // Only messages matching ALL criteria
       expect(filteredMessages, hasLength(2));
@@ -1604,38 +1692,46 @@ void main() {
       );
 
       // Message with matching clientId
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [
-          Message(name: 'chat', data: 'hello', clientId: 'user-42'),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [
+            const Message(name: 'chat', data: 'hello', clientId: 'user-42'),
+          ],
+        ),
+      );
 
       // Message with different clientId -- should NOT be delivered
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [
-          Message(name: 'chat', data: 'hi', clientId: 'user-99'),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [
+            const Message(name: 'chat', data: 'hi', clientId: 'user-99'),
+          ],
+        ),
+      );
 
       // Message with no clientId -- should NOT be delivered
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [Message(name: 'system', data: 'broadcast')],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [const Message(name: 'system', data: 'broadcast')],
+        ),
+      );
 
       // Another message with matching clientId
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        messages: [
-          Message(name: 'chat', data: 'world', clientId: 'user-42'),
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          messages: [
+            const Message(name: 'chat', data: 'world', clientId: 'user-42'),
+          ],
+        ),
+      );
 
       expect(filteredMessages, hasLength(2));
       expect(filteredMessages[0].data, equals('hello'));

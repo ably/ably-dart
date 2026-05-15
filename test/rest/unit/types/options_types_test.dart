@@ -88,7 +88,7 @@ void main() {
         final options = ClientOptions(
           key: 'appId.keyId:keySecret',
           useBinaryProtocol: false,
-          defaultTokenParams: TokenParams(
+          defaultTokenParams: const TokenParams(
             ttl: 7200000,
             clientId: 'default-client',
             capability: '{"*":["subscribe"]}',
@@ -119,7 +119,7 @@ void main() {
     group('AO2 - AuthOptions attributes', () {
       // UTS: rest/unit/AO2/auth-options-attributes-0
       test('has all required attributes', () {
-        final authOptions = AuthOptions(
+        const authOptions = AuthOptions(
           authUrl: 'https://auth.example.com/token',
           authMethod: 'POST',
           authHeaders: {'Authorization': 'Bearer api-key'},
@@ -154,7 +154,7 @@ void main() {
         final authOptions = AuthOptions(authCallback: testCallback);
 
         // Verify callback is stored and callable
-        final result = await authOptions.authCallback!(TokenParams());
+        final result = await authOptions.authCallback!(const TokenParams());
         expect(callbackCalled, isTrue);
         expect((result as TokenDetails).token, equals('callback-token'));
       });

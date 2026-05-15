@@ -137,11 +137,13 @@ class MockWebSocketClient implements WebSocketClient {
     );
 
     // Record event
-    events.add(MockEvent(
-      type: MockEventType.connectionAttempt,
-      timestamp: DateTime.now(),
-      data: pendingConnection,
-    ));
+    events.add(
+      MockEvent(
+        type: MockEventType.connectionAttempt,
+        timestamp: DateTime.now(),
+        data: pendingConnection,
+      ),
+    );
 
     // Emit for awaitable pattern
     if (!_connectionAttempts.isClosed) {
@@ -428,11 +430,13 @@ class MockWebSocketConnection implements WebSocketConnection {
     final closeEvent = ClientCloseEvent(code: code, reason: reason);
 
     // Record directly in parent's event list (synchronous, guaranteed)
-    _mockClient?.events.add(MockEvent(
-      type: MockEventType.clientClose,
-      timestamp: DateTime.now(),
-      data: closeEvent,
-    ));
+    _mockClient?.events.add(
+      MockEvent(
+        type: MockEventType.clientClose,
+        timestamp: DateTime.now(),
+        data: closeEvent,
+      ),
+    );
 
     // Also emit to stream for await pattern
     _clientCloses.add(closeEvent);

@@ -79,7 +79,6 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
               ),
             );
           }
@@ -218,7 +217,6 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
               ),
             );
           }
@@ -247,11 +245,11 @@ void main() {
 
       await channel.annotations.publish(
         'msg-serial-1',
-        Annotation(
+        const Annotation(
           type: 'com.example.data',
           data: {
             'key': 'value',
-            'nested': {'a': 1}
+            'nested': {'a': 1},
           },
         ),
       );
@@ -268,7 +266,7 @@ void main() {
         json.decode(ann['data'] as String),
         equals({
           'key': 'value',
-          'nested': {'a': 1}
+          'nested': {'a': 1},
         }),
       );
 
@@ -372,7 +370,6 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
               ),
             );
           }
@@ -505,7 +502,6 @@ void main() {
             mockWs.activeConnection!.sendToClient(
               ProtocolMessageHelpers.ack(
                 msgSerial: msg.msgSerial!,
-                count: 1,
               ),
             );
           }
@@ -951,8 +947,11 @@ void main() {
       // A warning should have been logged about ANNOTATION_SUBSCRIBE mode
       final found =
           logMessages.any((msg) => msg.contains('ANNOTATION_SUBSCRIBE'));
-      expect(found, isTrue,
-          reason: 'Expected a warning about ANNOTATION_SUBSCRIBE mode');
+      expect(
+        found,
+        isTrue,
+        reason: 'Expected a warning about ANNOTATION_SUBSCRIBE mode',
+      );
 
       mockWs.dispose();
     });
@@ -1009,8 +1008,11 @@ void main() {
       // No warning about ANNOTATION_SUBSCRIBE should be logged
       final found =
           logMessages.any((msg) => msg.contains('ANNOTATION_SUBSCRIBE'));
-      expect(found, isFalse,
-          reason: 'No ANNOTATION_SUBSCRIBE warning expected');
+      expect(
+        found,
+        isFalse,
+        reason: 'No ANNOTATION_SUBSCRIBE warning expected',
+      );
 
       mockWs.dispose();
     });

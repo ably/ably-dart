@@ -30,8 +30,11 @@ void main() {
       'test-device-$tag-${DateTime.now().millisecondsSinceEpoch}';
 
   // Helper: create a minimal DeviceDetails with an APNs-style recipient.
-  DeviceDetails makeDevice(String deviceId,
-      {String? clientId, String token = 'fake-apns-token'}) {
+  DeviceDetails makeDevice(
+    String deviceId, {
+    String? clientId,
+    String token = 'fake-apns-token',
+  }) {
     return DeviceDetails(
       id: deviceId,
       clientId: clientId,

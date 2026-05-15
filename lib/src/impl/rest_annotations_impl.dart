@@ -74,9 +74,9 @@ class RestAnnotationsImpl implements RestAnnotations {
   ) async {
     // RSAN1a3: type is required
     if (annotation.type == null || annotation.type!.isEmpty) {
-      throw AblyException(
+      throw const AblyException(
         message: 'Annotation type is required',
-        errorInfo: const ErrorInfo(
+        errorInfo: ErrorInfo(
           message: 'Annotation type is required',
           code: 40003,
           statusCode: 400,

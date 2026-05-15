@@ -25,22 +25,24 @@ void main() {
       final capturedRequests = <CapturedRequest>[];
       final channelName = testChannelName('RSC10');
 
-      final authCallback = (TokenParams params) async {
+      Future<TokenDetails> authCallback(TokenParams params) async {
         callbackCount++;
         return TokenDetails(
           token: 'token-$callbackCount',
           expires: DateTime.now().millisecondsSinceEpoch + 3600000,
         );
-      };
+      }
 
       final mockHttp = MockHttpClient(
         onRequest: (req) {
-          capturedRequests.add(CapturedRequest(
-            method: req.method,
-            url: req.url,
-            headers: req.headers,
-            body: req.bodyAsString,
-          ));
+          capturedRequests.add(
+            CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ),
+          );
 
           if (req.headers['Authorization'] == 'Bearer token-1') {
             // First token is rejected
@@ -79,8 +81,10 @@ void main() {
 
       // Two HTTP requests were made (original + retry)
       final channelRequests = capturedRequests
-          .where((r) =>
-              r.url.path == '/channels/${Uri.encodeComponent(channelName)}')
+          .where(
+            (r) =>
+                r.url.path == '/channels/${Uri.encodeComponent(channelName)}',
+          )
           .toList();
       expect(channelRequests.length, equals(2));
 
@@ -106,13 +110,13 @@ void main() {
       var requestCount = 0;
       final channelName = testChannelName('RSC10b');
 
-      final authCallback = (TokenParams params) async {
+      Future<TokenDetails> authCallback(TokenParams params) async {
         callbackCount++;
         return TokenDetails(
           token: 'token-$callbackCount',
           expires: DateTime.now().millisecondsSinceEpoch + 3600000,
         );
-      };
+      }
 
       final mockHttp = MockHttpClient(
         onRequest: (req) {

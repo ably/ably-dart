@@ -78,7 +78,6 @@ class Message {
       clientId: map['clientId'] as String?,
       connectionId: map['connectionId'] as String?,
       timestamp: timestamp,
-      encoding: null, // Encoding is consumed during decode
       extras: map['extras'] != null
           ? MessageExtras.fromMap(map['extras'] as Map<String, dynamic>)
           : null,

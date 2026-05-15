@@ -16,8 +16,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyId:keySecret',
-            useBinaryProtocol: false),
+        options: ClientOptions.fromKey(
+          'appId.keyId:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -46,8 +48,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyId:keySecret',
-            useBinaryProtocol: false),
+        options: ClientOptions.fromKey(
+          'appId.keyId:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -81,8 +85,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyId:keySecret',
-            useBinaryProtocol: false),
+        options: ClientOptions.fromKey(
+          'appId.keyId:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -110,8 +116,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyId:keySecret',
-            useBinaryProtocol: false),
+        options: ClientOptions.fromKey(
+          'appId.keyId:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -139,8 +147,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyId:keySecret',
-            useBinaryProtocol: false),
+        options: ClientOptions.fromKey(
+          'appId.keyId:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -148,7 +158,7 @@ void main() {
         () => client.push.admin.publish(
           {},
           {
-            'notification': {'title': 'Test'}
+            'notification': {'title': 'Test'},
           },
         ),
         throwsA(
@@ -170,8 +180,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyId:keySecret',
-            useBinaryProtocol: false),
+        options: ClientOptions.fromKey(
+          'appId.keyId:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -199,8 +211,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyId:keySecret',
-            useBinaryProtocol: false),
+        options: ClientOptions.fromKey(
+          'appId.keyId:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -210,7 +224,7 @@ void main() {
         () => client.push.admin.publish(
           {},
           {
-            'notification': {'title': 'Test'}
+            'notification': {'title': 'Test'},
           },
         ),
         throwsA(
@@ -239,8 +253,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyId:keySecret',
-            useBinaryProtocol: false),
+        options: ClientOptions.fromKey(
+          'appId.keyId:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -248,7 +264,7 @@ void main() {
         () => client.push.admin.publish(
           {'transportType': 'invalid'},
           {
-            'notification': {'title': 'Test'}
+            'notification': {'title': 'Test'},
           },
         ),
         throwsA(

@@ -40,15 +40,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1']
+              'serials': ['s1'],
             });
           },
         );
@@ -56,7 +58,6 @@ void main() {
         final client = Rest.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
-            idempotentRestPublishing: true,
             useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
@@ -92,15 +93,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1', 's2', 's3']
+              'serials': ['s1', 's2', 's3'],
             });
           },
         );
@@ -108,7 +111,6 @@ void main() {
         final client = Rest.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
-            idempotentRestPublishing: true,
             useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
@@ -116,9 +118,9 @@ void main() {
         final channel = client.channels.get(channelName);
 
         final messages = [
-          Message(name: 'event1', data: 'data1'),
-          Message(name: 'event2', data: 'data2'),
-          Message(name: 'event3', data: 'data3'),
+          const Message(name: 'event1', data: 'data1'),
+          const Message(name: 'event2', data: 'data2'),
+          const Message(name: 'event3', data: 'data3'),
         ];
         await channel.publish(messages: messages);
 
@@ -151,15 +153,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1']
+              'serials': ['s1'],
             });
           },
         );
@@ -167,7 +171,6 @@ void main() {
         final client = Rest.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
-            idempotentRestPublishing: true,
             useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
@@ -196,15 +199,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1']
+              'serials': ['s1'],
             });
           },
         );
@@ -237,15 +242,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1']
+              'serials': ['s1'],
             });
           },
         );
@@ -253,7 +260,6 @@ void main() {
         final client = Rest.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
-            idempotentRestPublishing: true,
             useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
@@ -261,7 +267,8 @@ void main() {
         final channel = client.channels.get(channelName);
 
         await channel.publish(
-          message: Message(id: 'my-custom-id', name: 'event', data: 'data'),
+          message:
+              const Message(id: 'my-custom-id', name: 'event', data: 'data'),
         );
 
         final request = capturedRequests[0];
@@ -281,23 +288,25 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             requestCount++;
             if (requestCount == 1) {
               // First request fails with retryable error
               req.respondWith(500, {
-                'error': {'code': 50000}
+                'error': {'code': 50000},
               });
             } else {
               // Retry succeeds
               req.respondWith(201, {
-                'serials': ['s1']
+                'serials': ['s1'],
               });
             }
           },
@@ -306,7 +315,6 @@ void main() {
         final client = Rest.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
-            idempotentRestPublishing: true,
             useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
@@ -333,15 +341,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1', 's2', 's3']
+              'serials': ['s1', 's2', 's3'],
             });
           },
         );
@@ -349,7 +359,6 @@ void main() {
         final client = Rest.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
-            idempotentRestPublishing: true,
             useBinaryProtocol: false,
           ),
           httpClient: mockHttp,
@@ -357,9 +366,10 @@ void main() {
         final channel = client.channels.get(channelName);
 
         final messages = [
-          Message(id: 'client-id-1', name: 'event1', data: 'data1'),
-          Message(name: 'event2', data: 'data2'), // No ID - should be generated
-          Message(id: 'client-id-2', name: 'event3', data: 'data3'),
+          const Message(id: 'client-id-1', name: 'event1', data: 'data1'),
+          const Message(
+              name: 'event2', data: 'data2'), // No ID - should be generated
+          const Message(id: 'client-id-2', name: 'event3', data: 'data3'),
         ];
         await channel.publish(messages: messages);
 

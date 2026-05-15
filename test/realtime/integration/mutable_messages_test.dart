@@ -44,7 +44,9 @@ void main() {
     Future<void> connectAndWait(Realtime client) async {
       client.connect();
       await waitForConnectionState(
-          client.connection, ConnectionState.connected);
+        client.connection,
+        ConnectionState.connected,
+      );
     }
 
     group('Mutable messages', () {

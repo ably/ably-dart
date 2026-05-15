@@ -42,7 +42,9 @@ void main() {
       // Connect and await CONNECTED state
       client.connect();
       await waitForConnectionState(
-          client.connection, ConnectionState.connected);
+        client.connection,
+        ConnectionState.connected,
+      );
 
       // Record the connection ID
       final connectionId = client.connection.id;
@@ -104,7 +106,9 @@ void main() {
 
       // Await CONNECTED state
       await waitForConnectionState(
-          client.connection, ConnectionState.connected);
+        client.connection,
+        ConnectionState.connected,
+      );
 
       // Assert: token non-null
       expect(token, isNotNull);
@@ -138,7 +142,9 @@ void main() {
       // Connect and await CONNECTED
       client.connect();
       await waitForConnectionState(
-          client.connection, ConnectionState.connected);
+        client.connection,
+        ConnectionState.connected,
+      );
 
       expect(client.connection.id, isNotNull);
       expect(client.connection.errorReason, isNull);
@@ -172,7 +178,9 @@ void main() {
       // Connect and await CONNECTED
       client.connect();
       await waitForConnectionState(
-          client.connection, ConnectionState.connected);
+        client.connection,
+        ConnectionState.connected,
+      );
 
       // Assert: auth.clientId matches
       expect(client.auth.clientId, equals(testClientId));

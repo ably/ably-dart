@@ -54,12 +54,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -75,8 +77,10 @@ void main() {
 
         final request = capturedRequests[0];
         expect(request.method, equals('GET'));
-        expect(request.url.path,
-            equals('/channels/${Uri.encodeComponent(channelName)}/presence'));
+        expect(
+          request.url.path,
+          equals('/channels/${Uri.encodeComponent(channelName)}/presence'),
+        );
       });
 
       // UTS: rest/unit/RSP3/get-standard-headers-5
@@ -162,12 +166,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, [
               {'id': 'p1', 'action': 'present', 'clientId': 'c1'},
@@ -181,7 +187,7 @@ void main() {
         );
         final channel = client.channels.get(channelName);
 
-        await channel.presence.get(RestPresenceParams(limit: 50));
+        await channel.presence.get(const RestPresenceParams(limit: 50));
 
         final request = capturedRequests[0];
         expect(request.url.queryParameters['limit'], equals('50'));
@@ -194,12 +200,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -227,12 +235,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, [
               {'id': 'p1', 'action': 'present', 'clientId': 'filtered-client'},
@@ -247,7 +257,7 @@ void main() {
         final channel = client.channels.get(channelName);
 
         await channel.presence.get(
-          RestPresenceParams(clientId: 'filtered-client'),
+          const RestPresenceParams(clientId: 'filtered-client'),
         );
 
         final request = capturedRequests[0];
@@ -264,12 +274,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, [
               {'id': 'p1', 'action': 'present', 'connectionId': 'conn-abc'},
@@ -284,7 +296,7 @@ void main() {
         final channel = client.channels.get(channelName);
 
         await channel.presence.get(
-          RestPresenceParams(connectionId: 'conn-abc'),
+          const RestPresenceParams(connectionId: 'conn-abc'),
         );
 
         final request = capturedRequests[0];
@@ -298,12 +310,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -316,7 +330,7 @@ void main() {
         final channel = client.channels.get(channelName);
 
         await channel.presence.get(
-          RestPresenceParams(
+          const RestPresenceParams(
             limit: 25,
             clientId: 'specific-client',
             connectionId: 'specific-conn',
@@ -344,12 +358,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -364,7 +380,7 @@ void main() {
         // Attempt to get with limit > 1000
         // Implementation may either cap at 1000 or reject
         try {
-          await channel.presence.get(RestPresenceParams(limit: 1500));
+          await channel.presence.get(const RestPresenceParams(limit: 1500));
           // If it succeeded, check the limit was sent
           final request = capturedRequests[0];
           final limitParam = request.url.queryParameters['limit'];
@@ -412,12 +428,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -436,7 +454,8 @@ void main() {
         expect(
           request.url.path,
           equals(
-              '/channels/${Uri.encodeComponent(channelName)}/presence/history'),
+            '/channels/${Uri.encodeComponent(channelName)}/presence/history',
+          ),
         );
       });
 
@@ -484,12 +503,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -501,7 +522,8 @@ void main() {
         );
         final channel = client.channels.get(channelName);
 
-        await channel.presence.history(RestHistoryParams(start: 1609459200000));
+        await channel.presence
+            .history(const RestHistoryParams(start: 1609459200000));
 
         final request = capturedRequests[0];
         expect(request.url.queryParameters['start'], equals('1609459200000'));
@@ -514,12 +536,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -531,7 +555,8 @@ void main() {
         );
         final channel = client.channels.get(channelName);
 
-        await channel.presence.history(RestHistoryParams(end: 1609459300000));
+        await channel.presence
+            .history(const RestHistoryParams(end: 1609459300000));
 
         final request = capturedRequests[0];
         expect(request.url.queryParameters['end'], equals('1609459300000'));
@@ -544,12 +569,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -580,12 +607,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -598,7 +627,7 @@ void main() {
         final channel = client.channels.get(channelName);
 
         await channel.presence.history(
-          RestHistoryParams(direction: HistoryDirection.forwards),
+          const RestHistoryParams(direction: HistoryDirection.forwards),
         );
 
         final request = capturedRequests[0];
@@ -612,12 +641,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -629,7 +660,7 @@ void main() {
         );
         final channel = client.channels.get(channelName);
 
-        await channel.presence.history(RestHistoryParams(limit: 50));
+        await channel.presence.history(const RestHistoryParams(limit: 50));
 
         final request = capturedRequests[0];
         expect(request.url.queryParameters['limit'], equals('50'));
@@ -642,12 +673,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -673,12 +706,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -697,7 +732,8 @@ void main() {
         expect(
           request.url.path,
           equals(
-              '/channels/${Uri.encodeComponent(channelName)}/presence/history'),
+            '/channels/${Uri.encodeComponent(channelName)}/presence/history',
+          ),
         );
       });
 
@@ -708,12 +744,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -725,10 +763,12 @@ void main() {
         );
         final channel = client.channels.get(channelName);
 
-        await channel.presence.history(RestHistoryParams(
-          start: 1609459200000,
-          end: 1609459300000,
-        ));
+        await channel.presence.history(
+          const RestHistoryParams(
+            start: 1609459200000,
+            end: 1609459300000,
+          ),
+        );
 
         final request = capturedRequests[0];
         expect(request.url.queryParameters['start'], equals('1609459200000'));
@@ -743,12 +783,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -760,13 +802,15 @@ void main() {
         );
         final channel = client.channels.get(channelName);
 
-        final start = DateTime(2021, 1, 1, 0, 0, 0).millisecondsSinceEpoch;
-        final end = DateTime(2021, 1, 2, 0, 0, 0).millisecondsSinceEpoch;
+        final start = DateTime(2021, 1).millisecondsSinceEpoch;
+        final end = DateTime(2021, 1, 2).millisecondsSinceEpoch;
 
-        await channel.presence.history(RestHistoryParams(
-          start: start,
-          end: end,
-        ));
+        await channel.presence.history(
+          RestHistoryParams(
+            start: start,
+            end: end,
+          ),
+        );
 
         final request = capturedRequests[0];
         expect(request.url.queryParameters['start'], equals('$start'));
@@ -781,12 +825,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -799,7 +845,7 @@ void main() {
         final channel = client.channels.get(channelName);
 
         await channel.presence.history(
-          RestHistoryParams(direction: HistoryDirection.backwards),
+          const RestHistoryParams(),
         );
 
         final request = capturedRequests[0];
@@ -813,12 +859,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -846,12 +894,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -865,7 +915,7 @@ void main() {
 
         // Attempt to set limit > 1000
         try {
-          await channel.presence.history(RestHistoryParams(limit: 1500));
+          await channel.presence.history(const RestHistoryParams(limit: 1500));
           // If it succeeded, the limit was sent (server may validate)
           final request = capturedRequests[0];
           final limitParam = request.url.queryParameters['limit'];
@@ -886,12 +936,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -904,7 +956,7 @@ void main() {
         final channel = client.channels.get(channelName);
 
         await channel.presence.history(
-          RestHistoryParams(
+          const RestHistoryParams(
             start: 1609459200000,
             end: 1609459300000,
             direction: HistoryDirection.forwards,
@@ -1017,7 +1069,7 @@ void main() {
       // UTS: rest/unit/RSP5/decode-utf8-data-4
       test('RSP5_4 - UTF-8 encoded data decoded correctly', () async {
         final channelName = testChannelName('RSP5-4');
-        final utf8Text = 'Hello UTF-8: café éè';
+        const utf8Text = 'Hello UTF-8: café éè';
         final base64Data = base64Encode(utf8.encode(utf8Text));
 
         mockHttp = MockHttpClient(
@@ -1049,7 +1101,7 @@ void main() {
       // UTS: rest/unit/RSP5/decode-chained-encoding-5
       test('RSP5_5 - Chained encoding decoded correctly', () async {
         final channelName = testChannelName('RSP5-5');
-        final jsonData = '{"status":"online"}';
+        const jsonData = '{"status":"online"}';
         final base64Data = base64Encode(utf8.encode(jsonData));
 
         mockHttp = MockHttpClient(
@@ -1118,8 +1170,11 @@ void main() {
       });
 
       // UTS: rest/unit/RSP5/decode-msgpack-binary-3
-      test('RSP5 - decode msgpack binary', () {},
-          skip: 'Not yet implemented: msgpack encoding support');
+      test(
+        'RSP5 - decode msgpack binary',
+        () {},
+        skip: 'Not yet implemented: msgpack encoding support',
+      );
 
       // UTS: rest/unit/RSP5/decode-cipher-channel-7
       test('RSP5_7 - Cipher channel data decoded', () async {
@@ -1318,12 +1373,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(200, []);
           },
@@ -1403,12 +1460,14 @@ void main() {
 
           mockHttp = MockHttpClient(
             onRequest: (req) {
-              capturedRequests.add(CapturedRequest(
-                method: req.method,
-                url: req.url,
-                headers: req.headers,
-                body: req.bodyAsString,
-              ));
+              capturedRequests.add(
+                CapturedRequest(
+                  method: req.method,
+                  url: req.url,
+                  headers: req.headers,
+                  body: req.bodyAsString,
+                ),
+              );
 
               req.respondWith(200, []);
             },

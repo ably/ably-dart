@@ -25,7 +25,7 @@ void main() {
 
       // UTS: realtime/unit/TB2c/options-with-params-0
       test('TB2c - params attribute', () {
-        final options = RealtimeChannelOptions(
+        const options = RealtimeChannelOptions(
           params: {'rewind': '1', 'delta': 'vcdiff'},
         );
 
@@ -35,7 +35,7 @@ void main() {
 
       // UTS: realtime/unit/TB2d/options-with-modes-0
       test('TB2d - modes attribute', () {
-        final options = RealtimeChannelOptions(
+        const options = RealtimeChannelOptions(
           modes: [ChannelMode.publish, ChannelMode.subscribe],
         );
 
@@ -79,7 +79,7 @@ void main() {
 
       // UTS: realtime/unit/RTS3b/options-set-on-new-0.1
       test('returns true when params is set', () {
-        final options = RealtimeChannelOptions(
+        const options = RealtimeChannelOptions(
           params: {'rewind': '1'},
         );
 
@@ -88,7 +88,7 @@ void main() {
 
       // UTS: realtime/unit/RTS3b/options-set-on-new-0.2
       test('returns true when modes is set', () {
-        final options = RealtimeChannelOptions(
+        const options = RealtimeChannelOptions(
           modes: [ChannelMode.subscribe],
         );
 
@@ -146,7 +146,7 @@ void main() {
       // UTS: realtime/unit/RTS3b/options-set-on-new-0
       test('get() with options sets them on new channel', () {
         final channelName = testChannelName('RTS3b');
-        final channelOptions = RealtimeChannelOptions(
+        const channelOptions = RealtimeChannelOptions(
           params: {'rewind': '1'},
           modes: [ChannelMode.subscribe],
         );
@@ -191,17 +191,19 @@ void main() {
         expect(channel.state, equals(ChannelState.attached));
 
         // Try to update with options that require reattachment
-        final newOptions = RealtimeChannelOptions(
+        const newOptions = RealtimeChannelOptions(
           params: {'rewind': '1'},
         );
 
         expect(
           () => client.channels.get(channelName, newOptions),
-          throwsA(isA<AblyException>().having(
-            (e) => e.code,
-            'code',
-            equals(40000),
-          )),
+          throwsA(
+            isA<AblyException>().having(
+              (e) => e.code,
+              'code',
+              equals(40000),
+            ),
+          ),
         );
 
         // Channel options should not have changed
@@ -246,17 +248,19 @@ void main() {
         channel.attach();
         await _awaitChannelState(channel, ChannelState.attaching);
 
-        final newOptions = RealtimeChannelOptions(
+        const newOptions = RealtimeChannelOptions(
           modes: [ChannelMode.subscribe],
         );
 
         expect(
           () => localClient.channels.get(channelName, newOptions),
-          throwsA(isA<AblyException>().having(
-            (e) => e.code,
-            'code',
-            equals(40000),
-          )),
+          throwsA(
+            isA<AblyException>().having(
+              (e) => e.code,
+              'code',
+              equals(40000),
+            ),
+          ),
         );
 
         noRespondMockWs.dispose();
@@ -284,7 +288,7 @@ void main() {
         final channelName = testChannelName('RTL16');
         final channel = client.channels.get(channelName);
 
-        final newOptions = RealtimeChannelOptions(
+        const newOptions = RealtimeChannelOptions(
           params: {'delta': 'vcdiff'},
           attachOnSubscribe: false,
         );
@@ -305,7 +309,7 @@ void main() {
         final stateChanges = <ChannelStateChange>[];
         final subscription = channel.on().listen(stateChanges.add);
 
-        final newOptions = RealtimeChannelOptions(
+        const newOptions = RealtimeChannelOptions(
           params: {'rewind': '1'},
         );
         await channel.setOptions(newOptions);
@@ -368,14 +372,16 @@ void main() {
 
         final expectedEncoded = base64.encode(utf8.encode(filter));
         expect(
-            channel.name, equals('[filter=$expectedEncoded]$baseChannelName'));
+          channel.name,
+          equals('[filter=$expectedEncoded]$baseChannelName'),
+        );
       });
 
       // UTS: realtime/unit/RTS5a2/derived-with-params-0
       test('RTS5a2 - params included in derived channel name', () {
         final baseChannelName = testChannelName('RTS5a2');
         const deriveOptions = DeriveOptions(filter: "type == 'message'");
-        final channelOptions = RealtimeChannelOptions(
+        const channelOptions = RealtimeChannelOptions(
           params: {'rewind': '1'},
         );
 
@@ -394,7 +400,7 @@ void main() {
       test('RTS5a2 - multiple params in derived channel name', () {
         final baseChannelName = testChannelName('RTS5a2-multi');
         const deriveOptions = DeriveOptions(filter: 'true');
-        final channelOptions = RealtimeChannelOptions(
+        const channelOptions = RealtimeChannelOptions(
           params: {'rewind': '1', 'delta': 'vcdiff'},
         );
 
@@ -429,7 +435,7 @@ void main() {
       test('options passed to derived channel', () {
         final baseChannelName = testChannelName('RTS5-options');
         const deriveOptions = DeriveOptions(filter: 'true');
-        final channelOptions = RealtimeChannelOptions(
+        const channelOptions = RealtimeChannelOptions(
           modes: [ChannelMode.subscribe],
           attachOnSubscribe: false,
         );

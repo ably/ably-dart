@@ -40,7 +40,9 @@ void main() {
       // Connect
       client.connect();
       await waitForConnectionState(
-          client.connection, ConnectionState.connected);
+        client.connection,
+        ConnectionState.connected,
+      );
 
       // Assert: connection.id is non-empty string
       expect(client.connection.id, isNotNull);
@@ -72,7 +74,9 @@ void main() {
       // Connect and await CONNECTED
       client.connect();
       await waitForConnectionState(
-          client.connection, ConnectionState.connected);
+        client.connection,
+        ConnectionState.connected,
+      );
 
       // Close the connection
       client.close();
@@ -100,7 +104,9 @@ void main() {
       // First connection
       client.connect();
       await waitForConnectionState(
-          client.connection, ConnectionState.connected);
+        client.connection,
+        ConnectionState.connected,
+      );
 
       final firstConnectionId = client.connection.id;
       expect(firstConnectionId, isNotNull);
@@ -112,7 +118,9 @@ void main() {
       // Reconnect
       client.connect();
       await waitForConnectionState(
-          client.connection, ConnectionState.connected);
+        client.connection,
+        ConnectionState.connected,
+      );
 
       final secondConnectionId = client.connection.id;
       expect(secondConnectionId, isNotNull);

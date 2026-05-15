@@ -28,15 +28,17 @@ void main() {
 
           mockHttp = MockHttpClient(
             onRequest: (req) {
-              capturedRequests.add(CapturedRequest(
-                method: req.method,
-                url: req.url,
-                headers: req.headers,
-                body: req.bodyAsString,
-              ));
+              capturedRequests.add(
+                CapturedRequest(
+                  method: req.method,
+                  url: req.url,
+                  headers: req.headers,
+                  body: req.bodyAsString,
+                ),
+              );
 
               req.respondWith(201, {
-                'serials': ['s1']
+                'serials': ['s1'],
               });
             },
           );
@@ -67,15 +69,17 @@ void main() {
 
           mockHttp = MockHttpClient(
             onRequest: (req) {
-              capturedRequests.add(CapturedRequest(
-                method: req.method,
-                url: req.url,
-                headers: req.headers,
-                body: req.bodyAsString,
-              ));
+              capturedRequests.add(
+                CapturedRequest(
+                  method: req.method,
+                  url: req.url,
+                  headers: req.headers,
+                  body: req.bodyAsString,
+                ),
+              );
 
               req.respondWith(201, {
-                'serials': ['s1']
+                'serials': ['s1'],
               });
             },
           );
@@ -110,15 +114,17 @@ void main() {
 
           mockHttp = MockHttpClient(
             onRequest: (req) {
-              capturedRequests.add(CapturedRequest(
-                method: req.method,
-                url: req.url,
-                headers: req.headers,
-                body: req.bodyAsString,
-              ));
+              capturedRequests.add(
+                CapturedRequest(
+                  method: req.method,
+                  url: req.url,
+                  headers: req.headers,
+                  body: req.bodyAsString,
+                ),
+              );
 
               req.respondWith(201, {
-                'serials': ['s1']
+                'serials': ['s1'],
               });
             },
           );
@@ -148,15 +154,17 @@ void main() {
 
           mockHttp = MockHttpClient(
             onRequest: (req) {
-              capturedRequests.add(CapturedRequest(
-                method: req.method,
-                url: req.url,
-                headers: req.headers,
-                body: req.bodyAsString,
-              ));
+              capturedRequests.add(
+                CapturedRequest(
+                  method: req.method,
+                  url: req.url,
+                  headers: req.headers,
+                  body: req.bodyAsString,
+                ),
+              );
 
               req.respondWith(201, {
-                'serials': ['s1']
+                'serials': ['s1'],
               });
             },
           );
@@ -282,7 +290,7 @@ void main() {
         // UTS: rest/unit/RSL6/decode-utf8-base64-data-2
         test('decodes json/base64 encoded data', () async {
           final channelName = testChannelName('RSL6-compound');
-          final jsonData = '{"nested":"object"}';
+          const jsonData = '{"nested":"object"}';
           final base64Data = base64.encode(utf8.encode(jsonData));
 
           mockHttp = MockHttpClient(
@@ -342,14 +350,16 @@ void main() {
 
           mockHttp = MockHttpClient(
             onRequest: (req) {
-              capturedRequests.add(CapturedRequest(
-                method: req.method,
-                url: req.url,
-                headers: req.headers,
-                body: req.bodyAsString,
-              ));
+              capturedRequests.add(
+                CapturedRequest(
+                  method: req.method,
+                  url: req.url,
+                  headers: req.headers,
+                  body: req.bodyAsString,
+                ),
+              );
               req.respondWith(201, {
-                'serials': ['s1']
+                'serials': ['s1'],
               });
             },
           );
@@ -368,14 +378,23 @@ void main() {
           final body = jsonDecode(capturedRequests[0].body!) as List;
           final wireMsg = body[0] as Map<String, dynamic>;
 
-          expect(wireMsg['data'], equals(fixtureData),
-              reason: 'Wire data mismatch for $expectedType');
+          expect(
+            wireMsg['data'],
+            equals(fixtureData),
+            reason: 'Wire data mismatch for $expectedType',
+          );
           if (fixtureEncoding != null) {
-            expect(wireMsg['encoding'], equals(fixtureEncoding),
-                reason: 'Wire encoding mismatch for $expectedType');
+            expect(
+              wireMsg['encoding'],
+              equals(fixtureEncoding),
+              reason: 'Wire encoding mismatch for $expectedType',
+            );
           } else {
-            expect(wireMsg.containsKey('encoding'), isFalse,
-                reason: 'Should not have encoding field for $expectedType');
+            expect(
+              wireMsg.containsKey('encoding'),
+              isFalse,
+              reason: 'Should not have encoding field for $expectedType',
+            );
           }
         }
       });
@@ -387,15 +406,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1']
+              'serials': ['s1'],
             });
           },
         );
@@ -426,15 +447,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1']
+              'serials': ['s1'],
             });
           },
         );
@@ -455,8 +478,11 @@ void main() {
       });
 
       // UTS: rest/unit/RSL4/msgpack-protocol-content-type-3
-      test('RSL4 - msgpack protocol content-type', () {},
-          skip: 'Not yet implemented: msgpack encoding support');
+      test(
+        'RSL4 - msgpack protocol content-type',
+        () {},
+        skip: 'Not yet implemented: msgpack encoding support',
+      );
     });
 
     group('RSL4a - Unsupported data types', () {
@@ -467,15 +493,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1']
+              'serials': ['s1'],
             });
           },
         );
@@ -505,15 +533,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1']
+              'serials': ['s1'],
             });
           },
         );
@@ -539,12 +569,18 @@ void main() {
 
     group('RSL6 - Msgpack decoding', () {
       // UTS: rest/unit/RSL6/msgpack-binary-stays-binary-0
-      test('RSL6 - msgpack binary stays binary', () {},
-          skip: 'Not yet implemented: msgpack encoding support');
+      test(
+        'RSL6 - msgpack binary stays binary',
+        () {},
+        skip: 'Not yet implemented: msgpack encoding support',
+      );
 
       // UTS: rest/unit/RSL6/msgpack-string-stays-string-1
-      test('RSL6 - msgpack string stays string', () {},
-          skip: 'Not yet implemented: msgpack encoding support');
+      test(
+        'RSL6 - msgpack string stays string',
+        () {},
+        skip: 'Not yet implemented: msgpack encoding support',
+      );
 
       // UTS: rest/unit/RSL6/complex-chained-encoding-3
       test('complex chained encoding utf-8/cipher+aes-128-cbc/base64',
@@ -552,7 +588,7 @@ void main() {
         final channelName = testChannelName('RSL6-chained');
         // Simulate server returning a message with complex chained encoding
         // where an unrecognized encoding layer is preserved
-        final plainText = 'hello world';
+        const plainText = 'hello world';
         final base64Data = base64.encode(utf8.encode(plainText));
 
         mockHttp = MockHttpClient(
@@ -624,15 +660,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1']
+              'serials': ['s1'],
             });
           },
         );
@@ -661,15 +699,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1']
+              'serials': ['s1'],
             });
           },
         );
@@ -698,15 +738,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1']
+              'serials': ['s1'],
             });
           },
         );
@@ -737,7 +779,9 @@ void main() {
         expect(body[0]['encoding'], equals('json'));
         final parsedData = json.decode(body[0]['data'] as String);
         expect(
-            parsedData['level1']['level2']['level3']['value'], equals('deep'));
+          parsedData['level1']['level2']['level3']['value'],
+          equals('deep'),
+        );
       });
     });
   });

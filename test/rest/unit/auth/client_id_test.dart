@@ -41,7 +41,7 @@ void main() {
           onRequest: (req) {
             req.respondWith(200, {
               'channelId': channelName,
-              'status': {'isActive': true}
+              'status': {'isActive': true},
             });
           },
         );
@@ -69,7 +69,7 @@ void main() {
           onRequest: (req) {
             req.respondWith(200, {
               'channelId': channelName,
-              'status': {'isActive': true}
+              'status': {'isActive': true},
             });
           },
         );
@@ -112,7 +112,7 @@ void main() {
           onRequest: (req) {
             req.respondWith(200, {
               'channelId': channelName,
-              'status': {'isActive': true}
+              'status': {'isActive': true},
             });
           },
         );
@@ -143,7 +143,7 @@ void main() {
           onRequest: (req) {
             req.respondWith(200, {
               'channelId': channelName,
-              'status': {'isActive': true}
+              'status': {'isActive': true},
             });
           },
         );
@@ -179,12 +179,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             if (req.url.host == 'auth.example.com') {
               req.respondWith(
@@ -198,7 +200,7 @@ void main() {
             } else {
               req.respondWith(200, {
                 'channelId': channelName,
-                'status': {'isActive': true}
+                'status': {'isActive': true},
               });
             }
           },
@@ -242,7 +244,7 @@ void main() {
           onRequest: (req) {
             req.respondWith(200, {
               'channelId': channelName,
-              'status': {'isActive': true}
+              'status': {'isActive': true},
             });
           },
         );
@@ -282,7 +284,7 @@ void main() {
           onRequest: (req) {
             req.respondWith(200, {
               'channelId': channelName,
-              'status': {'isActive': true}
+              'status': {'isActive': true},
             });
           },
         );
@@ -313,7 +315,7 @@ void main() {
           onRequest: (req) {
             req.respondWith(200, {
               'channelId': channelName,
-              'status': {'isActive': true}
+              'status': {'isActive': true},
             });
           },
         );
@@ -344,7 +346,7 @@ void main() {
           onRequest: (req) {
             req.respondWith(200, {
               'channelId': channelName,
-              'status': {'isActive': true}
+              'status': {'isActive': true},
             });
           },
         );
@@ -381,7 +383,7 @@ void main() {
           onRequest: (req) {
             req.respondWith(200, {
               'channelId': channelName,
-              'status': {'isActive': true}
+              'status': {'isActive': true},
             });
           },
         );
@@ -411,7 +413,7 @@ void main() {
           onRequest: (req) {
             req.respondWith(200, {
               'channelId': channelName,
-              'status': {'isActive': true}
+              'status': {'isActive': true},
             });
           },
         );
@@ -443,7 +445,7 @@ void main() {
           onRequest: (req) {
             req.respondWith(200, {
               'channelId': channelName,
-              'status': {'isActive': true}
+              'status': {'isActive': true},
             });
           },
         );

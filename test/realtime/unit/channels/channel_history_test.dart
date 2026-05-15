@@ -23,24 +23,26 @@ void main() {
 
       final mockHttp = MockHttpClient(
         onRequest: (req) {
-          capturedRequests.add(CapturedRequest(
-            method: req.method,
-            url: req.url,
-            headers: req.headers,
-            body: req.bodyAsString,
-          ));
+          capturedRequests.add(
+            CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ),
+          );
           req.respondWith(200, [
             {
               'id': 'msg1',
               'name': 'event1',
               'data': 'data1',
-              'timestamp': 1000
+              'timestamp': 1000,
             },
             {
               'id': 'msg2',
               'name': 'event2',
               'data': 'data2',
-              'timestamp': 2000
+              'timestamp': 2000,
             },
           ]);
         },
@@ -91,12 +93,14 @@ void main() {
 
       final mockHttp = MockHttpClient(
         onRequest: (req) {
-          capturedRequests.add(CapturedRequest(
-            method: req.method,
-            url: req.url,
-            headers: req.headers,
-            body: req.bodyAsString,
-          ));
+          capturedRequests.add(
+            CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ),
+          );
           req.respondWith(200, []);
         },
       );
@@ -121,12 +125,14 @@ void main() {
         const RealtimeChannelOptions(attachOnSubscribe: false),
       );
 
-      await channel.history(const RestHistoryParams(
-        start: 1000,
-        end: 2000,
-        direction: HistoryDirection.forwards,
-        limit: 50,
-      ));
+      await channel.history(
+        const RestHistoryParams(
+          start: 1000,
+          end: 2000,
+          direction: HistoryDirection.forwards,
+          limit: 50,
+        ),
+      );
 
       expect(capturedRequests, hasLength(1));
       final url = capturedRequests[0].url;
@@ -152,12 +158,14 @@ void main() {
 
       final mockHttp = MockHttpClient(
         onRequest: (req) {
-          capturedRequests.add(CapturedRequest(
-            method: req.method,
-            url: req.url,
-            headers: req.headers,
-            body: req.bodyAsString,
-          ));
+          capturedRequests.add(
+            CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ),
+          );
           req.respondWith(200, []);
         },
       );
@@ -260,12 +268,14 @@ void main() {
 
       final mockHttp = MockHttpClient(
         onRequest: (req) {
-          capturedRequests.add(CapturedRequest(
-            method: req.method,
-            url: req.url,
-            headers: req.headers,
-            body: req.bodyAsString,
-          ));
+          capturedRequests.add(
+            CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ),
+          );
           req.respondWith(200, []);
         },
       );
@@ -291,7 +301,7 @@ void main() {
       );
 
       await channel.history(
-        const RealtimeHistoryParams(untilAttach: false),
+        const RealtimeHistoryParams(),
       );
 
       expect(capturedRequests, hasLength(1));
@@ -358,12 +368,14 @@ void main() {
 
       final mockHttp = MockHttpClient(
         onRequest: (req) {
-          capturedRequests.add(CapturedRequest(
-            method: req.method,
-            url: req.url,
-            headers: req.headers,
-            body: req.bodyAsString,
-          ));
+          capturedRequests.add(
+            CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ),
+          );
           req.respondWith(200, {
             'channelId': channelName,
             'name': channelName,

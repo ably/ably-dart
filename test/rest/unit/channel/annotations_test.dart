@@ -30,7 +30,7 @@ void main() {
       () {
     // UTS: rest/unit/RSAN1c6/publish-post-annotation-create-0
     test('sends POST to correct endpoint with correct body', () async {
-      final channelName = 'test-RSAN1-publish';
+      const channelName = 'test-RSAN1-publish';
       final mockHttp = MockHttpClient(
         onRequest: (request) {
           request.respondWith(201, {});
@@ -48,7 +48,7 @@ void main() {
       final channel = client.channels.get(channelName);
       await channel.annotations.publish(
         'msg-serial-1',
-        Annotation(type: 'com.example.reaction', name: 'like'),
+        const Annotation(type: 'com.example.reaction', name: 'like'),
       );
 
       expect(mockHttp.capturedRequests.length, equals(1));
@@ -96,7 +96,7 @@ void main() {
       try {
         await channel.annotations.publish(
           'msg-serial-1',
-          Annotation(name: 'like'),
+          const Annotation(name: 'like'),
         );
         fail('Expected AblyException');
       } catch (e) {
@@ -111,7 +111,7 @@ void main() {
   group('RSAN1c3 - annotation data encoded per RSL4', () {
     // UTS: rest/unit/RSAN1c3/annotation-data-encoded-0
     test('JSON data encoded as string with encoding field', () async {
-      final channelName = 'test-RSAN1c3';
+      const channelName = 'test-RSAN1c3';
       final mockHttp = MockHttpClient(
         onRequest: (request) {
           request.respondWith(201, {});
@@ -129,11 +129,11 @@ void main() {
       final channel = client.channels.get(channelName);
       await channel.annotations.publish(
         'msg-serial-1',
-        Annotation(
+        const Annotation(
           type: 'com.example.data',
           data: {
             'key': 'value',
-            'nested': {'a': 1}
+            'nested': {'a': 1},
           },
         ),
       );
@@ -147,7 +147,7 @@ void main() {
         json.decode(annotation['data'] as String),
         equals({
           'key': 'value',
-          'nested': {'a': 1}
+          'nested': {'a': 1},
         }),
       );
 
@@ -167,7 +167,6 @@ void main() {
       final client = Rest.forTesting(
         options: ClientOptions(
           key: 'appId.keyId:keySecret',
-          idempotentRestPublishing: true,
           useBinaryProtocol: false,
         ),
         httpClient: mockHttp,
@@ -176,7 +175,7 @@ void main() {
       final channel = client.channels.get('test-RSAN1c4-enabled');
       await channel.annotations.publish(
         'msg-serial-1',
-        Annotation(type: 'com.example.reaction'),
+        const Annotation(type: 'com.example.reaction'),
       );
 
       final body = mockHttp.capturedRequests[0].jsonBody as List;
@@ -213,7 +212,7 @@ void main() {
       final channel = client.channels.get('test-RSAN1c4-disabled');
       await channel.annotations.publish(
         'msg-serial-1',
-        Annotation(type: 'com.example.reaction'),
+        const Annotation(type: 'com.example.reaction'),
       );
 
       final body = mockHttp.capturedRequests[0].jsonBody as List;
@@ -228,7 +227,7 @@ void main() {
   group('RSAN2a - delete sends POST with ANNOTATION_DELETE', () {
     // UTS: rest/unit/RSAN1c6/publish-post-annotation-create-0.1
     test('sends POST with action 1 to correct endpoint', () async {
-      final channelName = 'test-RSAN2-delete';
+      const channelName = 'test-RSAN2-delete';
       final mockHttp = MockHttpClient(
         onRequest: (request) {
           request.respondWith(201, {});
@@ -246,7 +245,7 @@ void main() {
       final channel = client.channels.get(channelName);
       await channel.annotations.delete(
         'msg-serial-1',
-        Annotation(type: 'com.example.reaction', name: 'like'),
+        const Annotation(type: 'com.example.reaction', name: 'like'),
       );
 
       final request = mockHttp.capturedRequests[0];
@@ -273,7 +272,7 @@ void main() {
   group('RSAN3b - get sends GET to correct endpoint', () {
     // UTS: rest/unit/RSAN1c6/publish-post-annotation-create-0.2
     test('sends GET to annotations endpoint', () async {
-      final channelName = 'test-RSAN3-get';
+      const channelName = 'test-RSAN3-get';
       final mockHttp = MockHttpClient(
         onRequest: (request) {
           request.respondWith(200, [

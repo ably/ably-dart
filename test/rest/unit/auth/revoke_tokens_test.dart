@@ -20,12 +20,14 @@ void main() {
       final mockHttp = MockHttpClient(
         onConnectionAttempt: (conn) => conn.respondWithSuccess(),
         onRequest: (req) {
-          capturedRequests.add(CapturedRequest(
-            method: req.method,
-            url: req.url,
-            headers: req.headers,
-            body: req.bodyAsString,
-          ));
+          capturedRequests.add(
+            CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ),
+          );
           req.respondWith(200, {
             'successCount': 1,
             'failureCount': 0,
@@ -41,8 +43,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyName:keySecret',
-            useBinaryProtocol: false),
+        options: ClientOptions.fromKey(
+          'appId.keyName:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -70,12 +74,14 @@ void main() {
       final mockHttp = MockHttpClient(
         onConnectionAttempt: (conn) => conn.respondWithSuccess(),
         onRequest: (req) {
-          capturedRequests.add(CapturedRequest(
-            method: req.method,
-            url: req.url,
-            headers: req.headers,
-            body: req.bodyAsString,
-          ));
+          capturedRequests.add(
+            CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ),
+          );
           req.respondWith(200, {
             'successCount': 1,
             'failureCount': 0,
@@ -91,8 +97,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyName:keySecret',
-            useBinaryProtocol: false),
+        options: ClientOptions.fromKey(
+          'appId.keyName:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -115,12 +123,14 @@ void main() {
       final mockHttp = MockHttpClient(
         onConnectionAttempt: (conn) => conn.respondWithSuccess(),
         onRequest: (req) {
-          capturedRequests.add(CapturedRequest(
-            method: req.method,
-            url: req.url,
-            headers: req.headers,
-            body: req.bodyAsString,
-          ));
+          capturedRequests.add(
+            CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ),
+          );
           req.respondWith(200, {
             'successCount': 3,
             'failureCount': 0,
@@ -146,8 +156,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyName:keySecret',
-            useBinaryProtocol: false),
+        options: ClientOptions.fromKey(
+          'appId.keyName:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -205,8 +217,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyName:keySecret',
-            useBinaryProtocol: false),
+        options: ClientOptions.fromKey(
+          'appId.keyName:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -254,8 +268,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyName:keySecret',
-            useBinaryProtocol: false),
+        options: ClientOptions.fromKey(
+          'appId.keyName:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -306,8 +322,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyName:keySecret',
-            useBinaryProtocol: false),
+        options: ClientOptions.fromKey(
+          'appId.keyName:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -350,8 +368,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyName:keySecret',
-            useBinaryProtocol: false),
+        options: ClientOptions.fromKey(
+          'appId.keyName:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -395,8 +415,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyName:keySecret',
-            useBinaryProtocol: false),
+        options: ClientOptions.fromKey(
+          'appId.keyName:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -426,12 +448,14 @@ void main() {
       final mockHttp = MockHttpClient(
         onConnectionAttempt: (conn) => conn.respondWithSuccess(),
         onRequest: (req) {
-          capturedRequests.add(CapturedRequest(
-            method: req.method,
-            url: req.url,
-            headers: req.headers,
-            body: req.bodyAsString,
-          ));
+          capturedRequests.add(
+            CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ),
+          );
           req.respondWith(200, <dynamic>[]);
         },
       );
@@ -468,12 +492,14 @@ void main() {
       final mockHttp = MockHttpClient(
         onConnectionAttempt: (conn) => conn.respondWithSuccess(),
         onRequest: (req) {
-          capturedRequests.add(CapturedRequest(
-            method: req.method,
-            url: req.url,
-            headers: req.headers,
-            body: req.bodyAsString,
-          ));
+          capturedRequests.add(
+            CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ),
+          );
           req.respondWith(200, <dynamic>[]);
         },
       );
@@ -514,12 +540,14 @@ void main() {
       final mockHttp = MockHttpClient(
         onConnectionAttempt: (conn) => conn.respondWithSuccess(),
         onRequest: (req) {
-          capturedRequests.add(CapturedRequest(
-            method: req.method,
-            url: req.url,
-            headers: req.headers,
-            body: req.bodyAsString,
-          ));
+          capturedRequests.add(
+            CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ),
+          );
           req.respondWith(200, {
             'successCount': 1,
             'failureCount': 0,
@@ -535,8 +563,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyName:keySecret',
-            useBinaryProtocol: false),
+        options: ClientOptions.fromKey(
+          'appId.keyName:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -562,12 +592,14 @@ void main() {
       final mockHttp = MockHttpClient(
         onConnectionAttempt: (conn) => conn.respondWithSuccess(),
         onRequest: (req) {
-          capturedRequests.add(CapturedRequest(
-            method: req.method,
-            url: req.url,
-            headers: req.headers,
-            body: req.bodyAsString,
-          ));
+          capturedRequests.add(
+            CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ),
+          );
           req.respondWith(200, {
             'successCount': 1,
             'failureCount': 0,
@@ -583,8 +615,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyName:keySecret',
-            useBinaryProtocol: false),
+        options: ClientOptions.fromKey(
+          'appId.keyName:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -609,12 +643,14 @@ void main() {
       final mockHttp = MockHttpClient(
         onConnectionAttempt: (conn) => conn.respondWithSuccess(),
         onRequest: (req) {
-          capturedRequests.add(CapturedRequest(
-            method: req.method,
-            url: req.url,
-            headers: req.headers,
-            body: req.bodyAsString,
-          ));
+          capturedRequests.add(
+            CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ),
+          );
           req.respondWith(200, {
             'successCount': 1,
             'failureCount': 0,
@@ -630,8 +666,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyName:keySecret',
-            useBinaryProtocol: false),
+        options: ClientOptions.fromKey(
+          'appId.keyName:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -657,12 +695,14 @@ void main() {
       final mockHttp = MockHttpClient(
         onConnectionAttempt: (conn) => conn.respondWithSuccess(),
         onRequest: (req) {
-          capturedRequests.add(CapturedRequest(
-            method: req.method,
-            url: req.url,
-            headers: req.headers,
-            body: req.bodyAsString,
-          ));
+          capturedRequests.add(
+            CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ),
+          );
           req.respondWith(200, {
             'successCount': 1,
             'failureCount': 0,
@@ -678,8 +718,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyName:keySecret',
-            useBinaryProtocol: false),
+        options: ClientOptions.fromKey(
+          'appId.keyName:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -702,12 +744,14 @@ void main() {
       final mockHttp = MockHttpClient(
         onConnectionAttempt: (conn) => conn.respondWithSuccess(),
         onRequest: (req) {
-          capturedRequests.add(CapturedRequest(
-            method: req.method,
-            url: req.url,
-            headers: req.headers,
-            body: req.bodyAsString,
-          ));
+          capturedRequests.add(
+            CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ),
+          );
           req.respondWith(200, {
             'successCount': 1,
             'failureCount': 0,
@@ -723,8 +767,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyName:keySecret',
-            useBinaryProtocol: false),
+        options: ClientOptions.fromKey(
+          'appId.keyName:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -766,8 +812,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyName:keySecret',
-            useBinaryProtocol: false),
+        options: ClientOptions.fromKey(
+          'appId.keyName:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 
@@ -796,12 +844,14 @@ void main() {
       final mockHttp = MockHttpClient(
         onConnectionAttempt: (conn) => conn.respondWithSuccess(),
         onRequest: (req) {
-          capturedRequests.add(CapturedRequest(
-            method: req.method,
-            url: req.url,
-            headers: req.headers,
-            body: req.bodyAsString,
-          ));
+          capturedRequests.add(
+            CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ),
+          );
           req.respondWith(200, {
             'successCount': 1,
             'failureCount': 0,
@@ -817,8 +867,10 @@ void main() {
       );
 
       final client = Rest.forTesting(
-        options: ClientOptions.fromKey('appId.keyName:keySecret',
-            useBinaryProtocol: false),
+        options: ClientOptions.fromKey(
+          'appId.keyName:keySecret',
+          useBinaryProtocol: false,
+        ),
         httpClient: mockHttp,
       );
 

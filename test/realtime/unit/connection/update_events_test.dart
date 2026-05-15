@@ -19,8 +19,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'connection-id-1',
               connectionKey: 'connection-key-1',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
               clientId: 'client-123',
             ),
           );
@@ -65,7 +63,6 @@ void main() {
           connectionId: 'connection-id-1',
           connectionKey: 'connection-key-1',
           maxIdleInterval: 20000, // Different value
-          connectionStateTtl: 120000,
           clientId: 'client-123',
         ),
       );
@@ -104,8 +101,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'connection-id-1',
               connectionKey: 'connection-key-1',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },
@@ -135,9 +130,7 @@ void main() {
         ProtocolMessageHelpers.connected(
           connectionId: 'connection-id-1',
           connectionKey: 'connection-key-1',
-          maxIdleInterval: 15000,
-          connectionStateTtl: 120000,
-          error: ErrorInfo(
+          error: const ErrorInfo(
             code: 40142,
             statusCode: 401,
             message: 'Token expired; renewed automatically',
@@ -173,8 +166,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'connection-id-1',
               connectionKey: 'connection-key-1',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },
@@ -214,8 +205,7 @@ void main() {
           connectionId: 'connection-id-1',
           connectionKey: 'connection-key-updated',
           maxIdleInterval: 20000,
-          connectionStateTtl: 120000,
-          error: ErrorInfo(
+          error: const ErrorInfo(
             code: 40142,
             statusCode: 401,
             message: 'Token expired; connection details updated',
@@ -289,7 +279,6 @@ void main() {
           connectionId: 'connection-id-1',
           connectionKey: 'connection-key-1',
           maxIdleInterval: 20000, // Changed
-          connectionStateTtl: 120000, // Changed
           maxMessageSize: 32768, // Changed
           serverId: 'server-2', // Changed
           clientId: 'client-updated', // Changed
@@ -319,8 +308,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'connection-id-1',
               connectionKey: 'connection-key-1',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },
@@ -371,8 +358,6 @@ void main() {
           ProtocolMessageHelpers.connected(
             connectionId: 'connection-id-1',
             connectionKey: 'connection-key-1',
-            maxIdleInterval: 15000,
-            connectionStateTtl: 120000,
           ),
         );
         await Future<void>.delayed(Duration.zero);
@@ -391,9 +376,11 @@ void main() {
       }
 
       // No additional CONNECTED state events were emitted
-      final connectedStateEvents = allEvents.where((event) =>
-          event['type'] == 'state' &&
-          event['state'] == ConnectionState.connected);
+      final connectedStateEvents = allEvents.where(
+        (event) =>
+            event['type'] == 'state' &&
+            event['state'] == ConnectionState.connected,
+      );
       expect(connectedStateEvents.length, equals(1)); // Only the initial one
 
       await client.close();

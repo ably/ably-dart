@@ -59,15 +59,17 @@ void main() {
       channel.on().listen(stateChanges.add);
 
       // Server sends unsolicited DETACHED with error
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.detached,
-        channel: channelName,
-        error: ErrorInfo(
-          code: 90198,
-          statusCode: 500,
-          message: 'Server detached channel',
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.detached,
+          channel: channelName,
+          error: const ErrorInfo(
+            code: 90198,
+            statusCode: 500,
+            message: 'Server detached channel',
+          ),
         ),
-      ));
+      );
 
       // Channel should reattach automatically
       await _awaitChannelState(channel, ChannelState.attached);
@@ -139,17 +141,22 @@ void main() {
 
         client.connect();
         await _awaitConnectionState(
-            client.connection, ConnectionState.connected);
+          client.connection,
+          ConnectionState.connected,
+        );
 
         await channel.attach();
         expect(channel.state, equals(ChannelState.attached));
 
         // Server sends DETACHED to trigger RTL13a reattach
-        mockWs.activeConnection!.sendToClient(ProtocolMessage(
-          action: ProtocolAction.detached,
-          channel: channelName,
-          error: ErrorInfo(code: 90198, statusCode: 500, message: 'Detach 1'),
-        ));
+        mockWs.activeConnection!.sendToClient(
+          ProtocolMessage(
+            action: ProtocolAction.detached,
+            channel: channelName,
+            error: const ErrorInfo(
+                code: 90198, statusCode: 500, message: 'Detach 1'),
+          ),
+        );
         await _pumpEventQueue();
         expect(channel.state, equals(ChannelState.attaching));
 
@@ -159,11 +166,14 @@ void main() {
         expect(channel.state, equals(ChannelState.suspended));
 
         // Now send another server-initiated DETACHED while SUSPENDED
-        mockWs.activeConnection!.sendToClient(ProtocolMessage(
-          action: ProtocolAction.detached,
-          channel: channelName,
-          error: ErrorInfo(code: 90199, statusCode: 500, message: 'Detach 2'),
-        ));
+        mockWs.activeConnection!.sendToClient(
+          ProtocolMessage(
+            action: ProtocolAction.detached,
+            channel: channelName,
+            error: const ErrorInfo(
+                code: 90199, statusCode: 500, message: 'Detach 2'),
+          ),
+        );
 
         // Channel should reattach and succeed
         await _awaitChannelState(channel, ChannelState.attached);
@@ -227,7 +237,9 @@ void main() {
 
         client.connect();
         await _awaitConnectionState(
-            client.connection, ConnectionState.connected);
+          client.connection,
+          ConnectionState.connected,
+        );
 
         await channel.attach();
 
@@ -236,12 +248,17 @@ void main() {
         channel.on().listen(stateChanges.add);
 
         // Server sends unsolicited DETACHED
-        mockWs.activeConnection!.sendToClient(ProtocolMessage(
-          action: ProtocolAction.detached,
-          channel: channelName,
-          error: ErrorInfo(
-              code: 90198, statusCode: 500, message: 'Server detached'),
-        ));
+        mockWs.activeConnection!.sendToClient(
+          ProtocolMessage(
+            action: ProtocolAction.detached,
+            channel: channelName,
+            error: const ErrorInfo(
+              code: 90198,
+              statusCode: 500,
+              message: 'Server detached',
+            ),
+          ),
+        );
         await _pumpEventQueue();
 
         // Channel should be ATTACHING (RTL13a)
@@ -324,7 +341,9 @@ void main() {
 
         client.connect();
         await _awaitConnectionState(
-            client.connection, ConnectionState.connected);
+          client.connection,
+          ConnectionState.connected,
+        );
 
         // Start attach but don't await (mock won't respond)
         unawaited(channel.attach().catchError((_) {}));
@@ -336,12 +355,17 @@ void main() {
         channel.on().listen(stateChanges.add);
 
         // Server sends DETACHED while ATTACHING
-        mockWs.activeConnection!.sendToClient(ProtocolMessage(
-          action: ProtocolAction.detached,
-          channel: channelName,
-          error: ErrorInfo(
-              code: 90198, statusCode: 500, message: 'Server detached'),
-        ));
+        mockWs.activeConnection!.sendToClient(
+          ProtocolMessage(
+            action: ProtocolAction.detached,
+            channel: channelName,
+            error: const ErrorInfo(
+              code: 90198,
+              statusCode: 500,
+              message: 'Server detached',
+            ),
+          ),
+        );
         await _pumpEventQueue();
 
         // Channel should go directly to SUSPENDED (RTL13b)
@@ -415,7 +439,9 @@ void main() {
 
         client.connect();
         await _awaitConnectionState(
-            client.connection, ConnectionState.connected);
+          client.connection,
+          ConnectionState.connected,
+        );
 
         await channel.attach();
         expect(attachCount, equals(1));
@@ -425,11 +451,14 @@ void main() {
         channel.on().listen(stateChanges.add);
 
         // Server sends DETACHED
-        mockWs.activeConnection!.sendToClient(ProtocolMessage(
-          action: ProtocolAction.detached,
-          channel: channelName,
-          error: ErrorInfo(code: 90198, statusCode: 500, message: 'Detach'),
-        ));
+        mockWs.activeConnection!.sendToClient(
+          ProtocolMessage(
+            action: ProtocolAction.detached,
+            channel: channelName,
+            error: const ErrorInfo(
+                code: 90198, statusCode: 500, message: 'Detach'),
+          ),
+        );
         await _pumpEventQueue();
 
         // Cycle 1: ATTACHING -> timeout -> SUSPENDED -> retry
@@ -514,17 +543,22 @@ void main() {
 
         client.connect();
         await _awaitConnectionState(
-            client.connection, ConnectionState.connected);
+          client.connection,
+          ConnectionState.connected,
+        );
 
         await channel.attach();
         expect(attachCount, equals(1));
 
         // Server sends DETACHED
-        mockWs.activeConnection!.sendToClient(ProtocolMessage(
-          action: ProtocolAction.detached,
-          channel: channelName,
-          error: ErrorInfo(code: 90198, statusCode: 500, message: 'Detach'),
-        ));
+        mockWs.activeConnection!.sendToClient(
+          ProtocolMessage(
+            action: ProtocolAction.detached,
+            channel: channelName,
+            error: const ErrorInfo(
+                code: 90198, statusCode: 500, message: 'Detach'),
+          ),
+        );
         await _pumpEventQueue();
 
         // Reattach triggered (RTL13a) but will timeout
@@ -603,17 +637,22 @@ void main() {
 
         client.connect();
         await _awaitConnectionState(
-            client.connection, ConnectionState.connected);
+          client.connection,
+          ConnectionState.connected,
+        );
 
         await channel.attach();
         expect(attachCount, equals(1));
 
         // Server sends DETACHED -> triggers reattach that times out
-        mockWs.activeConnection!.sendToClient(ProtocolMessage(
-          action: ProtocolAction.detached,
-          channel: channelName,
-          error: ErrorInfo(code: 90198, statusCode: 500, message: 'Detached'),
-        ));
+        mockWs.activeConnection!.sendToClient(
+          ProtocolMessage(
+            action: ProtocolAction.detached,
+            channel: channelName,
+            error: const ErrorInfo(
+                code: 90198, statusCode: 500, message: 'Detached'),
+          ),
+        );
         await _pumpEventQueue();
         expect(channel.state, equals(ChannelState.attaching));
 

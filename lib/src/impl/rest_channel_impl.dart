@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:msgpack_dart/msgpack_dart.dart' as msgpack;
 
@@ -271,9 +270,9 @@ class RestChannelImpl implements RestChannel {
   /// Spec: RSL11a, RSL15a
   void _validateSerial(String? serial) {
     if (serial == null || serial.isEmpty) {
-      throw AblyException(
+      throw const AblyException(
         message: 'Message serial is required',
-        errorInfo: const ErrorInfo(
+        errorInfo: ErrorInfo(
           message: 'Message serial is required',
           code: 40003,
           statusCode: 400,

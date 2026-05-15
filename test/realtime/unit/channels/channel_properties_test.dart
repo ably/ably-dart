@@ -445,17 +445,22 @@ void main() {
 
         client.connect();
         await _awaitConnectionState(
-            client.connection, ConnectionState.connected);
+          client.connection,
+          ConnectionState.connected,
+        );
 
         await channel.attach();
         expect(channel.properties.channelSerial, equals('serial-001'));
 
         // Trigger server-initiated DETACHED -> reattach that will timeout
-        mockWs.activeConnection!.sendToClient(ProtocolMessage(
-          action: ProtocolAction.detached,
-          channel: channelName,
-          error: ErrorInfo(code: 90198, statusCode: 500, message: 'Detached'),
-        ));
+        mockWs.activeConnection!.sendToClient(
+          ProtocolMessage(
+            action: ProtocolAction.detached,
+            channel: channelName,
+            error: const ErrorInfo(
+                code: 90198, statusCode: 500, message: 'Detached'),
+          ),
+        );
         await _pumpEventQueue();
         expect(channel.state, equals(ChannelState.attaching));
 

@@ -27,8 +27,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'connection-id',
               connectionKey: 'connection-key',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },
@@ -116,8 +114,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'connection-id',
               connectionKey: 'connection-key',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },
@@ -171,11 +167,12 @@ void main() {
 
       // State changes should only contain connecting -> connected
       expect(
-          stateChanges,
-          containsAllInOrder([
-            ConnectionState.connecting,
-            ConnectionState.connected,
-          ]));
+        stateChanges,
+        containsAllInOrder([
+          ConnectionState.connecting,
+          ConnectionState.connected,
+        ]),
+      );
 
       await client.close();
       mockWs.dispose();
@@ -196,8 +193,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'connection-id',
               connectionKey: 'connection-key',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },
@@ -291,8 +286,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'connection-id',
               connectionKey: 'connection-key',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },
@@ -387,7 +380,7 @@ void main() {
         'futureField4': null,
         'futureField5': [1, 'two', 3.0],
         'futureField6': {
-          'nested': {'deep': true}
+          'nested': {'deep': true},
         },
       });
 

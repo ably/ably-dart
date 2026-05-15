@@ -155,7 +155,8 @@ void main() {
         expect(
           options.effectiveConnectivityCheckUrl,
           equals(
-              'https://internet-up.ably-realtime.com/is-the-internet-up.txt'),
+            'https://internet-up.ably-realtime.com/is-the-internet-up.txt',
+          ),
         );
       });
 
@@ -540,8 +541,11 @@ void main() {
 
           final result = await client.time();
           expect(result, isA<DateTime>());
-          expect(requestCount, equals(2),
-              reason: 'CloudFront 403 should trigger fallback retry');
+          expect(
+            requestCount,
+            equals(2),
+            reason: 'CloudFront 403 should trigger fallback retry',
+          );
         },
       );
     });
@@ -635,8 +639,10 @@ void main() {
         await client.time();
 
         expect(mockHttp.capturedRequests, hasLength(3));
-        expect(mockHttp.capturedRequests[0].url.host,
-            equals('main.realtime.ably.net'));
+        expect(
+          mockHttp.capturedRequests[0].url.host,
+          equals('main.realtime.ably.net'),
+        );
         expect(mockHttp.capturedRequests[1].url.host, equals(fallbackHost));
         // Third request goes to cached fallback, not primary
         expect(mockHttp.capturedRequests[2].url.host, equals(fallbackHost));

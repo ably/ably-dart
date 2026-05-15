@@ -94,8 +94,11 @@ void main() {
         expect(mockHttp.capturedRequests.length, equals(1));
         final request = mockHttp.capturedRequests[0];
         expect(request.url.path, equals('/time'));
-        expect(request.headers.containsKey('Authorization'), isFalse,
-            reason: 'time() should not send Authorization header');
+        expect(
+          request.headers.containsKey('Authorization'),
+          isFalse,
+          reason: 'time() should not send Authorization header',
+        );
       });
     });
 
@@ -125,8 +128,11 @@ void main() {
         final request = mockHttp.capturedRequests[0];
         expect(request.url.scheme, equals('http'));
 
-        expect(request.headers.containsKey('Authorization'), isFalse,
-            reason: 'time() should not send Authorization header');
+        expect(
+          request.headers.containsKey('Authorization'),
+          isFalse,
+          reason: 'time() should not send Authorization header',
+        );
       });
     });
 

@@ -154,9 +154,11 @@ void main() {
             connectionAttemptCount++;
             if (connectionAttemptCount == 1) {
               // Initial connection succeeds
-              conn.respondWithSuccess(ProtocolMessageHelpers.connected(
-                maxIdleInterval: 0, // Disable heartbeat idle timeout
-              ));
+              conn.respondWithSuccess(
+                ProtocolMessageHelpers.connected(
+                  maxIdleInterval: 0, // Disable heartbeat idle timeout
+                ),
+              );
             } else {
               // All subsequent attempts fail
               conn.respondWithRefused();

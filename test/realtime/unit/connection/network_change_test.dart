@@ -40,8 +40,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'connection-id',
               connectionKey: 'connection-key',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },
@@ -98,8 +96,6 @@ void main() {
               ProtocolMessageHelpers.connected(
                 connectionId: 'conn-1',
                 connectionKey: 'key-1',
-                maxIdleInterval: 15000,
-                connectionStateTtl: 120000,
               ),
             );
           } else {
@@ -108,8 +104,6 @@ void main() {
               ProtocolMessageHelpers.connected(
                 connectionId: 'conn-1',
                 connectionKey: 'key-1-resumed',
-                maxIdleInterval: 15000,
-                connectionStateTtl: 120000,
               ),
             );
           }
@@ -142,20 +136,20 @@ void main() {
       await _awaitState(
         client.connection,
         ConnectionState.connected,
-        timeout: const Duration(seconds: 5),
       );
 
       // Verify state sequence: connecting -> connected -> disconnected ->
       //                         connecting -> connected
       expect(
-          stateChanges,
-          containsAllInOrder([
-            ConnectionState.connecting,
-            ConnectionState.connected,
-            ConnectionState.disconnected,
-            ConnectionState.connecting,
-            ConnectionState.connected,
-          ]));
+        stateChanges,
+        containsAllInOrder([
+          ConnectionState.connecting,
+          ConnectionState.connected,
+          ConnectionState.disconnected,
+          ConnectionState.connecting,
+          ConnectionState.connected,
+        ]),
+      );
 
       expect(connectionAttemptCount, equals(2));
 
@@ -186,8 +180,6 @@ void main() {
                 ProtocolMessageHelpers.connected(
                   connectionId: 'conn-1',
                   connectionKey: 'key-1',
-                  maxIdleInterval: 15000,
-                  connectionStateTtl: 120000,
                 ),
               );
             } else if (connectionAttemptCount == 2) {
@@ -199,8 +191,6 @@ void main() {
                 ProtocolMessageHelpers.connected(
                   connectionId: 'conn-1',
                   connectionKey: 'key-1-resumed',
-                  maxIdleInterval: 15000,
-                  connectionStateTtl: 120000,
                 ),
               );
             }
@@ -210,7 +200,6 @@ void main() {
         final client = Realtime.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
-            disconnectedRetryTimeout: 15000, // Long timeout
             autoConnect: false,
             fallbackHosts: [],
           ),
@@ -256,7 +245,6 @@ void main() {
         await _awaitState(
           client.connection,
           ConnectionState.connected,
-          timeout: const Duration(seconds: 5),
         );
 
         expect(client.connection.state, equals(ConnectionState.connected));
@@ -286,7 +274,6 @@ void main() {
                 ProtocolMessageHelpers.connected(
                   connectionId: 'conn-1',
                   connectionKey: 'key-1',
-                  maxIdleInterval: 15000,
                   connectionStateTtl: 2000, // Short TTL to reach SUSPENDED
                 ),
               );
@@ -299,8 +286,6 @@ void main() {
                 ProtocolMessageHelpers.connected(
                   connectionId: 'conn-2',
                   connectionKey: 'key-2',
-                  maxIdleInterval: 15000,
-                  connectionStateTtl: 120000,
                 ),
               );
             }
@@ -386,8 +371,6 @@ void main() {
                 ProtocolMessageHelpers.connected(
                   connectionId: 'conn-1',
                   connectionKey: 'key-1',
-                  maxIdleInterval: 15000,
-                  connectionStateTtl: 120000,
                 ),
               );
             }
@@ -436,7 +419,6 @@ void main() {
         await _awaitState(
           client.connection,
           ConnectionState.connected,
-          timeout: const Duration(seconds: 5),
         );
 
         expect(client.connection.state, equals(ConnectionState.connected));
@@ -457,8 +439,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'conn-1',
               connectionKey: 'key-1',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },
@@ -493,8 +473,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'conn-1',
               connectionKey: 'key-1',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },
@@ -541,8 +519,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'conn-$connectionAttemptCount',
               connectionKey: 'key-$connectionAttemptCount',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },
@@ -569,7 +545,6 @@ void main() {
         await _awaitState(
           client.connection,
           ConnectionState.connected,
-          timeout: const Duration(seconds: 5),
         );
       }
 

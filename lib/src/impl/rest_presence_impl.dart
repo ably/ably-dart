@@ -71,7 +71,8 @@ class RestPresenceImpl implements RestPresence {
   }
 
   Future<PaginatedResult<PresenceMessage>> _fetchPresencePage(
-      String url) async {
+    String url,
+  ) async {
     final uri = Uri.parse(url);
     final path = uri.path;
 

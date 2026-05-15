@@ -168,7 +168,8 @@ class ProtocolMessage {
       connectionKey: json['connectionKey'] as String?,
       connectionDetails: json['connectionDetails'] != null
           ? ConnectionDetails.fromJson(
-              json['connectionDetails'] as Map<String, dynamic>)
+              json['connectionDetails'] as Map<String, dynamic>,
+            )
           : null,
       error: json['error'] != null
           ? ErrorInfo.fromJson(json['error'] as Map<String, dynamic>)

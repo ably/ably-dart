@@ -179,7 +179,7 @@ class PendingConnection {
   void respondWithRefused() {
     if (!_completer.isCompleted) {
       _completer.completeError(
-        SocketException('Connection refused'),
+        const SocketException('Connection refused'),
       );
     }
   }
@@ -255,11 +255,13 @@ class PendingRequest {
     final responseHeaders = Map<String, String>.from(headers ?? {});
     responseHeaders.putIfAbsent('Content-Type', () => 'application/json');
 
-    _completer.complete(http.StreamedResponse(
-      Stream.value(utf8.encode(bodyString)),
-      status,
-      headers: responseHeaders,
-    ));
+    _completer.complete(
+      http.StreamedResponse(
+        Stream.value(utf8.encode(bodyString)),
+        status,
+        headers: responseHeaders,
+      ),
+    );
   }
 
   /// Responds with a delay, then the specified status code, body, and headers.

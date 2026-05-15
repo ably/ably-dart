@@ -20,10 +20,7 @@ void main() {
 
           // Respond with success
           conn.respondWithSuccess(
-            ProtocolMessageHelpers.connected(
-              connectionId: 'test-connection-id',
-              connectionKey: 'test-connection-key',
-            ),
+            ProtocolMessageHelpers.connected(),
           );
         },
       );
@@ -35,8 +32,11 @@ void main() {
       );
 
       // Wait for connection
-      await _awaitState(client.connection, ConnectionState.connected,
-          timeout: Duration(seconds: 5));
+      await _awaitState(
+        client.connection,
+        ConnectionState.connected,
+        timeout: const Duration(seconds: 5),
+      );
 
       // Verify connection state
       expect(client.connection.state, equals(ConnectionState.connected));
@@ -77,8 +77,11 @@ void main() {
       );
 
       // Wait for connected state
-      await _awaitState(client.connection, ConnectionState.connected,
-          timeout: Duration(seconds: 5));
+      await _awaitState(
+        client.connection,
+        ConnectionState.connected,
+        timeout: const Duration(seconds: 5),
+      );
 
       expect(client.connection.id, equals('awaitable-id'));
 
@@ -107,8 +110,11 @@ void main() {
       client.connect();
 
       // Should reach disconnected state
-      await _awaitState(client.connection, ConnectionState.disconnected,
-          timeout: Duration(seconds: 5));
+      await _awaitState(
+        client.connection,
+        ConnectionState.disconnected,
+        timeout: const Duration(seconds: 5),
+      );
 
       expect(client.connection.state, equals(ConnectionState.disconnected));
       expect(client.connection.errorReason, isNotNull);
@@ -144,8 +150,11 @@ void main() {
       client.connect();
 
       // Should reach failed state
-      await _awaitState(client.connection, ConnectionState.failed,
-          timeout: Duration(seconds: 5));
+      await _awaitState(
+        client.connection,
+        ConnectionState.failed,
+        timeout: const Duration(seconds: 5),
+      );
 
       expect(client.connection.state, equals(ConnectionState.failed));
       expect(client.connection.errorReason, isNotNull);

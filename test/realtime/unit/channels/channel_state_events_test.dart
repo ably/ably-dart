@@ -373,12 +373,17 @@ void main() {
 
       // Count state events where current == attached AND event == attached
       final attachedStateEvents = allEvents
-          .where((e) =>
-              e.current == ChannelState.attached &&
-              e.event == ChannelEvent.attached)
+          .where(
+            (e) =>
+                e.current == ChannelState.attached &&
+                e.event == ChannelEvent.attached,
+          )
           .toList();
-      expect(attachedStateEvents.length, equals(1),
-          reason: 'Only one ATTACHED state event should be emitted');
+      expect(
+        attachedStateEvents.length,
+        equals(1),
+        reason: 'Only one ATTACHED state event should be emitted',
+      );
 
       mockWs.dispose();
     });

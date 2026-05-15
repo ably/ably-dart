@@ -13,7 +13,7 @@ void main() {
     // UTS: rest/unit/RSL14b/get-correct-endpoint-0
     test('sends GET to /channels/{channelName}/messages/{serial}/versions',
         () async {
-      final channelName = 'test-RSL14b';
+      const channelName = 'test-RSL14b';
       final mockHttp = MockHttpClient(
         onRequest: (request) {
           request.respondWith(200, [

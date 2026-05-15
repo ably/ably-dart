@@ -129,9 +129,7 @@ void main() {
           key: 'appId.keyId:keySecret',
           clientId: 'testClient',
           endpoint: 'test',
-          tls: true,
           httpRequestTimeout: 5000,
-          idempotentRestPublishing: true,
           logLevel: LogLevel.verbose,
         );
 

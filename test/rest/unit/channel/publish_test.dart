@@ -26,15 +26,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['serial1']
+              'serials': ['serial1'],
             });
           },
         );
@@ -54,8 +56,10 @@ void main() {
 
         // RSL1b - single message published
         expect(request.method, equals('POST'));
-        expect(request.url.path,
-            equals('/channels/${Uri.encodeComponent(channelName)}/messages'));
+        expect(
+          request.url.path,
+          equals('/channels/${Uri.encodeComponent(channelName)}/messages'),
+        );
 
         final body = json.decode(request.body!) as List;
         expect(body.length, equals(1));
@@ -72,15 +76,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1', 's2', 's3']
+              'serials': ['s1', 's2', 's3'],
             });
           },
         );
@@ -95,9 +101,9 @@ void main() {
         final channel = client.channels.get(channelName);
 
         final messages = [
-          Message(name: 'event1', data: 'data1'),
-          Message(name: 'event2', data: {'key': 'value'}),
-          Message(name: 'event3', data: 'data3'),
+          const Message(name: 'event1', data: 'data1'),
+          const Message(name: 'event2', data: {'key': 'value'}),
+          const Message(name: 'event3', data: 'data3'),
         ];
         await channel.publish(messages: messages);
 
@@ -141,15 +147,17 @@ void main() {
 
           mockHttp = MockHttpClient(
             onRequest: (req) {
-              capturedRequests.add(CapturedRequest(
-                method: req.method,
-                url: req.url,
-                headers: req.headers,
-                body: req.bodyAsString,
-              ));
+              capturedRequests.add(
+                CapturedRequest(
+                  method: req.method,
+                  url: req.url,
+                  headers: req.headers,
+                  body: req.bodyAsString,
+                ),
+              );
 
               req.respondWith(201, {
-                'serials': ['s1']
+                'serials': ['s1'],
               });
             },
           );
@@ -190,15 +198,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1']
+              'serials': ['s1'],
             });
           },
         );
@@ -257,15 +267,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1']
+              'serials': ['s1'],
             });
           },
         );
@@ -296,15 +308,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1']
+              'serials': ['s1'],
             });
           },
         );
@@ -318,15 +332,17 @@ void main() {
         );
         final channel = client.channels.get(channelName);
 
-        final message = Message(
+        const message = Message(
           name: 'test-event',
           data: 'test-data',
           id: 'custom-message-id',
-          extras: MessageExtras(data: {
-            'push': {
-              'notification': {'title': 'Test'},
+          extras: MessageExtras(
+            data: {
+              'push': {
+                'notification': {'title': 'Test'},
+              },
             },
-          }),
+          ),
         );
 
         await channel.publish(message: message);
@@ -337,7 +353,9 @@ void main() {
         expect(body[0]['data'], equals('test-data'));
         expect(body[0]['id'], equals('custom-message-id'));
         expect(
-            body[0]['extras']['push']['notification']['title'], equals('Test'));
+          body[0]['extras']['push']['notification']['title'],
+          equals('Test'),
+        );
       });
     });
 
@@ -349,15 +367,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1']
+              'serials': ['s1'],
             });
           },
         );
@@ -372,7 +392,7 @@ void main() {
         final channel = client.channels.get(channelName);
 
         await channel.publish(
-          message: Message(name: 'event', data: 'data'),
+          message: const Message(name: 'event', data: 'data'),
           params: {
             'customParam': 'customValue',
             'anotherParam': '123',
@@ -400,12 +420,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             requestCount++;
             if (req.url.path.contains('requestToken')) {
@@ -417,7 +439,7 @@ void main() {
             } else {
               // Publish response
               req.respondWith(201, {
-                'serials': ['s1']
+                'serials': ['s1'],
               });
             }
           },
@@ -449,12 +471,14 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             if (req.url.path.contains('requestToken')) {
               // Token request (RSA4b: key + clientId triggers token auth)
@@ -465,7 +489,7 @@ void main() {
             } else {
               // Publish response
               req.respondWith(201, {
-                'serials': ['s1']
+                'serials': ['s1'],
               });
             }
           },
@@ -481,7 +505,8 @@ void main() {
         );
 
         await clientWithId.channels.get('ch').publish(
-              message: Message(name: 'e', data: 'd', clientId: 'lib-client'),
+              message:
+                  const Message(name: 'e', data: 'd', clientId: 'lib-client'),
             );
 
         // First request is token request, second is publish
@@ -499,15 +524,17 @@ void main() {
 
         mockHttp = MockHttpClient(
           onRequest: (req) {
-            capturedRequests.add(CapturedRequest(
-              method: req.method,
-              url: req.url,
-              headers: req.headers,
-              body: req.bodyAsString,
-            ));
+            capturedRequests.add(
+              CapturedRequest(
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                body: req.bodyAsString,
+              ),
+            );
 
             req.respondWith(201, {
-              'serials': ['s1']
+              'serials': ['s1'],
             });
           },
         );
@@ -521,7 +548,8 @@ void main() {
         );
 
         await clientNoId.channels.get('ch').publish(
-              message: Message(name: 'e', data: 'd', clientId: 'msg-client'),
+              message:
+                  const Message(name: 'e', data: 'd', clientId: 'msg-client'),
             );
 
         final body = json.decode(capturedRequests[0].body!) as List;

@@ -34,7 +34,7 @@ void main() {
 
       final channel = client.channels.get('test-RSL7');
       // setOptions should complete without throwing
-      await channel.setOptions(RestChannelOptions());
+      await channel.setOptions(const RestChannelOptions());
     });
 
     // UTS: rest/unit/RSL7/setoptions-stores-options-1
@@ -44,13 +44,13 @@ void main() {
       );
 
       final channel = client.channels.get('test-RSL7-store');
-      final options = RestChannelOptions();
+      const options = RestChannelOptions();
 
       // setOptions should store the options without error
       await channel.setOptions(options);
 
       // Calling setOptions again with different options should also work
-      final options2 = RestChannelOptions();
+      const options2 = RestChannelOptions();
       await channel.setOptions(options2);
     });
   });

@@ -450,7 +450,6 @@ void main() {
         port: session.proxyPort,
         tls: false,
         useBinaryProtocol: false,
-        idempotentRestPublishing: true,
       ),
     );
     addTearDown(() async => client.close());

@@ -15,8 +15,12 @@ void groupEachProtocol(
   Object? skip,
 }) {
   for (final protocol in protocols) {
-    group('$name [$protocol]', () {
-      body(protocol);
-    }, skip: skip);
+    group(
+      '$name [$protocol]',
+      () {
+        body(protocol);
+      },
+      skip: skip,
+    );
   }
 }

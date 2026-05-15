@@ -213,7 +213,6 @@ abstract class BaseClientImpl {
       normalizedPath,
       queryParams: queryParams.isNotEmpty ? queryParams : null,
       body: body,
-      authenticated: true,
       customHeaders: headers,
       customVersion: version,
     );
@@ -256,7 +255,6 @@ abstract class BaseClientImpl {
       method,
       path,
       queryParams: queryParams,
-      authenticated: true,
       customHeaders: headers,
       customVersion: version,
     );
@@ -316,7 +314,6 @@ abstract class BaseClientImpl {
       'GET',
       '/stats',
       queryParams: queryParams.isNotEmpty ? queryParams : null,
-      authenticated: true,
     );
 
     final items = _parseStats(response.body);
@@ -339,7 +336,6 @@ abstract class BaseClientImpl {
       queryParams: uri.queryParameters.isNotEmpty
           ? Map<String, String>.from(uri.queryParameters)
           : null,
-      authenticated: true,
     );
 
     final items = _parseStats(response.body);

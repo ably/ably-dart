@@ -36,12 +36,14 @@ void main() {
 
       final mockHttp = MockHttpClient(
         onRequest: (req) {
-          capturedRequests.add(CapturedRequest(
-            method: req.method,
-            url: req.url,
-            headers: req.headers,
-            body: req.bodyAsString,
-          ));
+          capturedRequests.add(
+            CapturedRequest(
+              method: req.method,
+              url: req.url,
+              headers: req.headers,
+              body: req.bodyAsString,
+            ),
+          );
           req.respondWith(200, []);
         },
       );
@@ -64,12 +66,13 @@ void main() {
       );
       await channel.attach();
 
-      await channel.presence.history(RestHistoryParams(
-        start: 1000,
-        end: 2000,
-        direction: HistoryDirection.backwards,
-        limit: 50,
-      ));
+      await channel.presence.history(
+        const RestHistoryParams(
+          start: 1000,
+          end: 2000,
+          limit: 50,
+        ),
+      );
 
       expect(capturedRequests.length, equals(1));
       final request = capturedRequests[0];

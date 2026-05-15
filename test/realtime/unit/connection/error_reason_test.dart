@@ -210,7 +210,6 @@ void main() {
       await _awaitState(
         client.connection,
         ConnectionState.connected,
-        timeout: const Duration(seconds: 5),
       );
 
       // errorReason behavior after successful connection is implementation-specific

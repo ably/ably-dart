@@ -44,8 +44,6 @@ void main() {
                 ProtocolMessageHelpers.connected(
                   connectionId: 'connection-id',
                   connectionKey: 'connection-key',
-                  maxIdleInterval: 15000,
-                  connectionStateTtl: 120000,
                 ),
               );
             }
@@ -127,8 +125,6 @@ void main() {
               ProtocolMessageHelpers.connected(
                 connectionId: 'connection-id',
                 connectionKey: 'connection-key',
-                maxIdleInterval: 15000,
-                connectionStateTtl: 120000,
               ),
             );
           }
@@ -184,8 +180,6 @@ void main() {
               ProtocolMessageHelpers.connected(
                 connectionId: 'connection-id',
                 connectionKey: 'connection-key',
-                maxIdleInterval: 15000,
-                connectionStateTtl: 120000,
               ),
             );
           }
@@ -232,7 +226,7 @@ void main() {
             // Primary domain: connect then send DISCONNECTED with 503
             conn.respondWithSuccess(
               ProtocolMessageHelpers.disconnected(
-                error: ErrorInfo(
+                error: const ErrorInfo(
                   code: 50003,
                   statusCode: 503,
                   message: 'Service temporarily unavailable',
@@ -245,8 +239,6 @@ void main() {
               ProtocolMessageHelpers.connected(
                 connectionId: 'connection-id',
                 connectionKey: 'connection-key',
-                maxIdleInterval: 15000,
-                connectionStateTtl: 120000,
               ),
             );
           }
@@ -383,7 +375,6 @@ void main() {
       await _awaitState(
         client.connection,
         ConnectionState.disconnected,
-        timeout: const Duration(seconds: 5),
       );
 
       // Give it time to potentially try fallbacks (it shouldn't)
@@ -417,8 +408,6 @@ void main() {
               ProtocolMessageHelpers.connected(
                 connectionId: 'connection-id',
                 connectionKey: 'connection-key',
-                maxIdleInterval: 15000,
-                connectionStateTtl: 120000,
               ),
             );
           }
@@ -484,8 +473,6 @@ void main() {
               ProtocolMessageHelpers.connected(
                 connectionId: 'connection-id',
                 connectionKey: 'connection-key',
-                maxIdleInterval: 15000,
-                connectionStateTtl: 120000,
               ),
             );
           }
@@ -545,8 +532,6 @@ void main() {
               ProtocolMessageHelpers.connected(
                 connectionId: 'connection-id',
                 connectionKey: 'connection-key',
-                maxIdleInterval: 15000,
-                connectionStateTtl: 120000,
               ),
             );
           }

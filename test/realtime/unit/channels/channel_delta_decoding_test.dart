@@ -68,30 +68,32 @@ void main() {
       final delta1To2 = encoder.encodeString(baseData, secondData);
       final delta2To3 = encoder.encodeString(secondData, thirdData);
 
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'serial:0',
-        messages: [
-          {'id': 'serial:0', 'data': baseData},
-          {
-            'id': 'serial:1',
-            'data': delta1To2,
-            'encoding': 'utf-8/vcdiff',
-            'extras': {
-              'delta': {'from': 'serial:0', 'format': 'vcdiff'},
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'serial:0',
+          messages: [
+            {'id': 'serial:0', 'data': baseData},
+            {
+              'id': 'serial:1',
+              'data': delta1To2,
+              'encoding': 'utf-8/vcdiff',
+              'extras': {
+                'delta': {'from': 'serial:0', 'format': 'vcdiff'},
+              },
             },
-          },
-          {
-            'id': 'serial:2',
-            'data': delta2To3,
-            'encoding': 'utf-8/vcdiff',
-            'extras': {
-              'delta': {'from': 'serial:1', 'format': 'vcdiff'},
+            {
+              'id': 'serial:2',
+              'data': delta2To3,
+              'encoding': 'utf-8/vcdiff',
+              'extras': {
+                'delta': {'from': 'serial:1', 'format': 'vcdiff'},
+              },
             },
-          },
-        ],
-      ));
+          ],
+        ),
+      );
 
       await _pumpEventQueue();
 
@@ -145,14 +147,16 @@ void main() {
       await channel.attach();
 
       // Send non-delta to establish base
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg-1:0',
-        messages: [
-          {'id': 'msg-1:0', 'data': 'base payload'},
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg-1:0',
+          messages: [
+            {'id': 'msg-1:0', 'data': 'base payload'},
+          ],
+        ),
+      );
 
       await _pumpEventQueue();
       expect(receivedMessages.length, equals(1));
@@ -160,21 +164,23 @@ void main() {
       // Send delta referencing the base
       final delta = encoder.encodeString('base payload', 'updated payload');
 
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg-2:0',
-        messages: [
-          {
-            'id': 'msg-2:0',
-            'data': delta,
-            'encoding': 'utf-8/vcdiff',
-            'extras': {
-              'delta': {'from': 'msg-1:0', 'format': 'vcdiff'},
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg-2:0',
+          messages: [
+            {
+              'id': 'msg-2:0',
+              'data': delta,
+              'encoding': 'utf-8/vcdiff',
+              'extras': {
+                'delta': {'from': 'msg-1:0', 'format': 'vcdiff'},
+              },
             },
-          },
-        ],
-      ));
+          ],
+        ),
+      );
 
       await _pumpEventQueue();
 
@@ -231,14 +237,16 @@ void main() {
       final baseAsBase64 = base64.encode(baseBinary);
 
       // Send base64-encoded non-delta message
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg-1:0',
-        messages: [
-          {'id': 'msg-1:0', 'data': baseAsBase64, 'encoding': 'base64'},
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg-1:0',
+          messages: [
+            {'id': 'msg-1:0', 'data': baseAsBase64, 'encoding': 'base64'},
+          ],
+        ),
+      );
 
       await _pumpEventQueue();
       expect(receivedMessages.length, equals(1));
@@ -248,21 +256,23 @@ void main() {
       final delta = encoder.encodeBinary(baseBinary, newBinary);
 
       // Send delta with vcdiff/base64 encoding (base64 outermost)
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg-2:0',
-        messages: [
-          {
-            'id': 'msg-2:0',
-            'data': base64.encode(delta),
-            'encoding': 'vcdiff/base64',
-            'extras': {
-              'delta': {'from': 'msg-1:0', 'format': 'vcdiff'},
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg-2:0',
+          messages: [
+            {
+              'id': 'msg-2:0',
+              'data': base64.encode(delta),
+              'encoding': 'vcdiff/base64',
+              'extras': {
+                'delta': {'from': 'msg-1:0', 'format': 'vcdiff'},
+              },
             },
-          },
-        ],
-      ));
+          ],
+        ),
+      );
 
       await _pumpEventQueue();
 
@@ -315,56 +325,62 @@ void main() {
       await channel.attach();
 
       // Message 1: non-delta base
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg-1:0',
-        messages: [
-          {'id': 'msg-1:0', 'data': 'value-A'},
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg-1:0',
+          messages: [
+            {'id': 'msg-1:0', 'data': 'value-A'},
+          ],
+        ),
+      );
 
       await _pumpEventQueue();
       expect(receivedMessages.length, equals(1));
 
       // Message 2: delta A→B
       final deltaAToB = encoder.encodeString('value-A', 'value-B');
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg-2:0',
-        messages: [
-          {
-            'id': 'msg-2:0',
-            'data': deltaAToB,
-            'encoding': 'utf-8/vcdiff',
-            'extras': {
-              'delta': {'from': 'msg-1:0', 'format': 'vcdiff'},
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg-2:0',
+          messages: [
+            {
+              'id': 'msg-2:0',
+              'data': deltaAToB,
+              'encoding': 'utf-8/vcdiff',
+              'extras': {
+                'delta': {'from': 'msg-1:0', 'format': 'vcdiff'},
+              },
             },
-          },
-        ],
-      ));
+          ],
+        ),
+      );
 
       await _pumpEventQueue();
       expect(receivedMessages.length, equals(2));
 
       // Message 3: delta B→C (base should now be value-B)
       final deltaBToC = encoder.encodeString('value-B', 'value-C');
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg-3:0',
-        messages: [
-          {
-            'id': 'msg-3:0',
-            'data': deltaBToC,
-            'encoding': 'utf-8/vcdiff',
-            'extras': {
-              'delta': {'from': 'msg-2:0', 'format': 'vcdiff'},
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg-3:0',
+          messages: [
+            {
+              'id': 'msg-3:0',
+              'data': deltaBToC,
+              'encoding': 'utf-8/vcdiff',
+              'extras': {
+                'delta': {'from': 'msg-2:0', 'format': 'vcdiff'},
+              },
             },
-          },
-        ],
-      ));
+          ],
+        ),
+      );
 
       await _pumpEventQueue();
 
@@ -421,15 +437,17 @@ void main() {
       await channel.attach();
 
       // Establish base with msg-1
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg-1:0',
-        channelSerial: 'serial-1',
-        messages: [
-          {'id': 'msg-1:0', 'data': 'base payload'},
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg-1:0',
+          channelSerial: 'serial-1',
+          messages: [
+            {'id': 'msg-1:0', 'data': 'base payload'},
+          ],
+        ),
+      );
 
       await _pumpEventQueue();
 
@@ -439,21 +457,23 @@ void main() {
 
       // Send delta referencing wrong message ID
       final delta = encoder.encodeString('base payload', 'new payload');
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg-2:0',
-        messages: [
-          {
-            'id': 'msg-2:0',
-            'data': delta,
-            'encoding': 'vcdiff',
-            'extras': {
-              'delta': {'from': 'msg-999:0', 'format': 'vcdiff'},
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg-2:0',
+          messages: [
+            {
+              'id': 'msg-2:0',
+              'data': delta,
+              'encoding': 'vcdiff',
+              'extras': {
+                'delta': {'from': 'msg-999:0', 'format': 'vcdiff'},
+              },
             },
-          },
-        ],
-      ));
+          ],
+        ),
+      );
 
       // Recovery: ATTACHING → ATTACHED (auto-responded by mock)
       await _pumpEventQueue();
@@ -515,36 +535,40 @@ void main() {
       await channel.attach();
 
       // Send ProtocolMessage with 2 messages — stored ID should be serial:1
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'serial:0',
-        messages: [
-          {'id': 'serial:0', 'data': 'first'},
-          {'id': 'serial:1', 'data': 'second'},
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'serial:0',
+          messages: [
+            {'id': 'serial:0', 'data': 'first'},
+            {'id': 'serial:1', 'data': 'second'},
+          ],
+        ),
+      );
 
       await _pumpEventQueue();
       expect(receivedMessages.length, equals(2));
 
       // Send delta referencing serial:1 — should succeed
       final delta = encoder.encodeString('second', 'third');
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg-2:0',
-        messages: [
-          {
-            'id': 'msg-2:0',
-            'data': delta,
-            'encoding': 'utf-8/vcdiff',
-            'extras': {
-              'delta': {'from': 'serial:1', 'format': 'vcdiff'},
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg-2:0',
+          messages: [
+            {
+              'id': 'msg-2:0',
+              'data': delta,
+              'encoding': 'utf-8/vcdiff',
+              'extras': {
+                'delta': {'from': 'serial:1', 'format': 'vcdiff'},
+              },
             },
-          },
-        ],
-      ));
+          ],
+        ),
+      );
 
       await _pumpEventQueue();
 
@@ -564,10 +588,9 @@ void main() {
       final decodeCalls = <({Uint8List delta, Uint8List base})>[];
       final decoder = MockVCDiffDecoder(
         onDecode: (delta, base) {
-          decodeCalls.add((
-            delta: Uint8List.fromList(delta),
-            base: Uint8List.fromList(base)
-          ));
+          decodeCalls.add(
+            (delta: Uint8List.fromList(delta), base: Uint8List.fromList(base)),
+          );
         },
       );
 
@@ -607,35 +630,39 @@ void main() {
       await channel.attach();
 
       // Send string non-delta message (establishes string base)
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg-1:0',
-        messages: [
-          {'id': 'msg-1:0', 'data': 'hello world'},
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg-1:0',
+          messages: [
+            {'id': 'msg-1:0', 'data': 'hello world'},
+          ],
+        ),
+      );
 
       await _pumpEventQueue();
       expect(receivedMessages.length, equals(1));
 
       // Send delta referencing string base
       final delta = encoder.encodeString('hello world', 'goodbye world');
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg-2:0',
-        messages: [
-          {
-            'id': 'msg-2:0',
-            'data': delta,
-            'encoding': 'utf-8/vcdiff',
-            'extras': {
-              'delta': {'from': 'msg-1:0', 'format': 'vcdiff'},
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg-2:0',
+          messages: [
+            {
+              'id': 'msg-2:0',
+              'data': delta,
+              'encoding': 'utf-8/vcdiff',
+              'extras': {
+                'delta': {'from': 'msg-1:0', 'format': 'vcdiff'},
+              },
             },
-          },
-        ],
-      ));
+          ],
+        ),
+      );
 
       await _pumpEventQueue();
 
@@ -696,34 +723,38 @@ void main() {
       await channel.attach();
 
       // Send non-delta to establish _lastPayloadMessageId
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg-0:0',
-        messages: [
-          {'id': 'msg-0:0', 'data': 'base'},
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg-0:0',
+          messages: [
+            {'id': 'msg-0:0', 'data': 'base'},
+          ],
+        ),
+      );
 
       await _pumpEventQueue();
       stateChanges.clear();
 
       // Send delta-encoded message without plugin
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg-1:0',
-        messages: [
-          {
-            'id': 'msg-1:0',
-            'data': 'some-delta-data',
-            'encoding': 'vcdiff',
-            'extras': {
-              'delta': {'from': 'msg-0:0', 'format': 'vcdiff'},
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg-1:0',
+          messages: [
+            {
+              'id': 'msg-1:0',
+              'data': 'some-delta-data',
+              'encoding': 'vcdiff',
+              'extras': {
+                'delta': {'from': 'msg-0:0', 'format': 'vcdiff'},
+              },
             },
-          },
-        ],
-      ));
+          ],
+        ),
+      );
 
       await _pumpEventQueue();
 
@@ -781,15 +812,17 @@ void main() {
       await channel.attach();
 
       // Establish base with non-delta message
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg-1:0',
-        channelSerial: 'serial-100',
-        messages: [
-          {'id': 'msg-1:0', 'data': 'base payload'},
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg-1:0',
+          channelSerial: 'serial-100',
+          messages: [
+            {'id': 'msg-1:0', 'data': 'base payload'},
+          ],
+        ),
+      );
 
       await _pumpEventQueue();
       expect(receivedMessages.length, equals(1));
@@ -799,22 +832,24 @@ void main() {
       final initialAttachCount = attachMessages.length;
 
       // Send delta — failing decoder will throw
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg-2:0',
-        channelSerial: 'serial-200',
-        messages: [
-          {
-            'id': 'msg-2:0',
-            'data': 'fake-delta-payload',
-            'encoding': 'vcdiff',
-            'extras': {
-              'delta': {'from': 'msg-1:0', 'format': 'vcdiff'},
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg-2:0',
+          channelSerial: 'serial-200',
+          messages: [
+            {
+              'id': 'msg-2:0',
+              'data': 'fake-delta-payload',
+              'encoding': 'vcdiff',
+              'extras': {
+                'delta': {'from': 'msg-1:0', 'format': 'vcdiff'},
+              },
             },
-          },
-        ],
-      ));
+          ],
+        ),
+      );
 
       await _pumpEventQueue();
 
@@ -889,51 +924,57 @@ void main() {
       await channel.attach();
 
       // Establish base
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg-1:0',
-        channelSerial: 'serial-1',
-        messages: [
-          {'id': 'msg-1:0', 'data': 'original base'},
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg-1:0',
+          channelSerial: 'serial-1',
+          messages: [
+            {'id': 'msg-1:0', 'data': 'original base'},
+          ],
+        ),
+      );
 
       await _pumpEventQueue();
       expect(receivedMessages.length, equals(1));
 
       // Send delta that will fail on first decode attempt
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg-2:0',
-        channelSerial: 'serial-2',
-        messages: [
-          {
-            'id': 'msg-2:0',
-            'data': 'bad-delta',
-            'encoding': 'vcdiff',
-            'extras': {
-              'delta': {'from': 'msg-1:0', 'format': 'vcdiff'},
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg-2:0',
+          channelSerial: 'serial-2',
+          messages: [
+            {
+              'id': 'msg-2:0',
+              'data': 'bad-delta',
+              'encoding': 'vcdiff',
+              'extras': {
+                'delta': {'from': 'msg-1:0', 'format': 'vcdiff'},
+              },
             },
-          },
-        ],
-      ));
+          ],
+        ),
+      );
 
       // Recovery: mock auto-responds to ATTACH with ATTACHED
       await _pumpEventQueue();
       expect(channel.state, equals(ChannelState.attached));
 
       // After recovery, server resends with fresh non-delta
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg-3:0',
-        channelSerial: 'serial-3',
-        messages: [
-          {'id': 'msg-3:0', 'data': 'fresh after recovery'},
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg-3:0',
+          channelSerial: 'serial-3',
+          messages: [
+            {'id': 'msg-3:0', 'data': 'fresh after recovery'},
+          ],
+        ),
+      );
 
       await _pumpEventQueue();
 
@@ -992,55 +1033,61 @@ void main() {
       final initialAttachCount = attachMessages.length;
 
       // Establish base
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg-1:0',
-        channelSerial: 'serial-1',
-        messages: [
-          {'id': 'msg-1:0', 'data': 'base'},
-        ],
-      ));
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg-1:0',
+          channelSerial: 'serial-1',
+          messages: [
+            {'id': 'msg-1:0', 'data': 'base'},
+          ],
+        ),
+      );
 
       await _pumpEventQueue();
 
       // First delta fails — triggers recovery
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg-2:0',
-        messages: [
-          {
-            'id': 'msg-2:0',
-            'data': 'bad-delta-1',
-            'encoding': 'vcdiff',
-            'extras': {
-              'delta': {'from': 'msg-1:0', 'format': 'vcdiff'},
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg-2:0',
+          messages: [
+            {
+              'id': 'msg-2:0',
+              'data': 'bad-delta-1',
+              'encoding': 'vcdiff',
+              'extras': {
+                'delta': {'from': 'msg-1:0', 'format': 'vcdiff'},
+              },
             },
-          },
-        ],
-      ));
+          ],
+        ),
+      );
 
       await _pumpEventQueue();
       expect(channel.state, equals(ChannelState.attaching));
 
       // Second delta also fails — but recovery already in progress
       // (Channel is ATTACHING, so _handleMessage returns early per RTL17)
-      mockWs.activeConnection!.sendToClient(ProtocolMessage(
-        action: ProtocolAction.message,
-        channel: channelName,
-        id: 'msg-3:0',
-        messages: [
-          {
-            'id': 'msg-3:0',
-            'data': 'bad-delta-2',
-            'encoding': 'vcdiff',
-            'extras': {
-              'delta': {'from': 'msg-2:0', 'format': 'vcdiff'},
+      mockWs.activeConnection!.sendToClient(
+        ProtocolMessage(
+          action: ProtocolAction.message,
+          channel: channelName,
+          id: 'msg-3:0',
+          messages: [
+            {
+              'id': 'msg-3:0',
+              'data': 'bad-delta-2',
+              'encoding': 'vcdiff',
+              'extras': {
+                'delta': {'from': 'msg-2:0', 'format': 'vcdiff'},
+              },
             },
-          },
-        ],
-      ));
+          ],
+        ),
+      );
 
       await _pumpEventQueue();
 

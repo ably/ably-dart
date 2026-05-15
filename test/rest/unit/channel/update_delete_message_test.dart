@@ -15,7 +15,7 @@ void main() {
   group('RSL15b, RSL15b1 - updateMessage sends PATCH with MESSAGE_UPDATE', () {
     // UTS: rest/unit/RSL15b/update-sends-patch-update-0
     test('sends PATCH with action 1 to correct endpoint', () async {
-      final channelName = 'test-RSL15-update';
+      const channelName = 'test-RSL15-update';
       final mockHttp = MockHttpClient(
         onRequest: (request) {
           request.respondWith(200, {'versionSerial': 'vs1'});
@@ -32,7 +32,8 @@ void main() {
 
       final channel = client.channels.get(channelName);
       await channel.updateMessage(
-        Message(serial: 'msg-serial-1', name: 'updated', data: 'new-data'),
+        const Message(
+            serial: 'msg-serial-1', name: 'updated', data: 'new-data'),
       );
 
       expect(mockHttp.capturedRequests.length, equals(1));
@@ -57,7 +58,7 @@ void main() {
   group('RSL15b, RSL15b1 - deleteMessage sends PATCH with MESSAGE_DELETE', () {
     // UTS: rest/unit/RSL15b/delete-sends-patch-delete-1
     test('sends PATCH with action 2 to correct endpoint', () async {
-      final channelName = 'test-RSL15-delete';
+      const channelName = 'test-RSL15-delete';
       final mockHttp = MockHttpClient(
         onRequest: (request) {
           request.respondWith(200, {'versionSerial': 'vs1'});
@@ -74,7 +75,7 @@ void main() {
 
       final channel = client.channels.get(channelName);
       await channel.deleteMessage(
-        Message(serial: 'msg-serial-1'),
+        const Message(serial: 'msg-serial-1'),
       );
 
       final request = mockHttp.capturedRequests[0];
@@ -96,7 +97,7 @@ void main() {
   group('RSL15b, RSL15b1 - appendMessage sends PATCH with MESSAGE_APPEND', () {
     // UTS: rest/unit/RSL15b/append-sends-patch-append-2
     test('sends PATCH with action 5 to correct endpoint', () async {
-      final channelName = 'test-RSL15-append';
+      const channelName = 'test-RSL15-append';
       final mockHttp = MockHttpClient(
         onRequest: (request) {
           request.respondWith(200, {'versionSerial': 'vs1'});
@@ -113,7 +114,7 @@ void main() {
 
       final channel = client.channels.get(channelName);
       await channel.appendMessage(
-        Message(serial: 'msg-serial-1', data: 'appended-data'),
+        const Message(serial: 'msg-serial-1', data: 'appended-data'),
       );
 
       final request = mockHttp.capturedRequests[0];
@@ -152,8 +153,8 @@ void main() {
 
       final channel = client.channels.get('test-RSL15b7');
       await channel.updateMessage(
-        Message(serial: 's1', data: 'updated'),
-        operation: MessageOperation(
+        const Message(serial: 's1', data: 'updated'),
+        operation: const MessageOperation(
           clientId: 'user1',
           description: 'fixed typo',
           metadata: {'reason': 'typo'},
@@ -189,7 +190,7 @@ void main() {
 
       final channel = client.channels.get('test-RSL15b7-absent');
       await channel.updateMessage(
-        Message(serial: 's1', data: 'updated'),
+        const Message(serial: 's1', data: 'updated'),
       );
 
       final body =
@@ -218,7 +219,7 @@ void main() {
       );
 
       final channel = client.channels.get('test-RSL15c');
-      final originalMsg =
+      const originalMsg =
           Message(serial: 's1', name: 'orig', data: 'original-data');
 
       await channel.updateMessage(originalMsg);
@@ -254,7 +255,7 @@ void main() {
 
       final channel = client.channels.get('test-RSL15e');
       final result = await channel.updateMessage(
-        Message(serial: 's1', data: 'updated'),
+        const Message(serial: 's1', data: 'updated'),
       );
 
       expect(result, isA<UpdateDeleteResult>());
@@ -281,7 +282,7 @@ void main() {
 
       final channel = client.channels.get('test-RSL15e-null');
       final result = await channel.updateMessage(
-        Message(serial: 's1', data: 'updated'),
+        const Message(serial: 's1', data: 'updated'),
       );
 
       expect(result, isA<UpdateDeleteResult>());
@@ -310,7 +311,7 @@ void main() {
 
       final channel = client.channels.get('test-RSL15f');
       await channel.updateMessage(
-        Message(serial: 's1', data: 'updated'),
+        const Message(serial: 's1', data: 'updated'),
         params: {'key': 'value', 'num': '42'},
       );
 
@@ -342,7 +343,7 @@ void main() {
       final channel = client.channels.get('test-RSL15a');
 
       try {
-        await channel.updateMessage(Message(name: 'x', data: 'y'));
+        await channel.updateMessage(const Message(name: 'x', data: 'y'));
         fail('Expected AblyException');
       } catch (e) {
         expect(e, isA<AblyException>());
@@ -350,7 +351,7 @@ void main() {
       }
 
       try {
-        await channel.deleteMessage(Message(name: 'x'));
+        await channel.deleteMessage(const Message(name: 'x'));
         fail('Expected AblyException');
       } catch (e) {
         expect(e, isA<AblyException>());
@@ -358,7 +359,7 @@ void main() {
       }
 
       try {
-        await channel.appendMessage(Message(data: 'y'));
+        await channel.appendMessage(const Message(data: 'y'));
         fail('Expected AblyException');
       } catch (e) {
         expect(e, isA<AblyException>());
@@ -388,7 +389,7 @@ void main() {
 
       final channel = client.channels.get('test-RSL15d');
       await channel.updateMessage(
-        Message(serial: 's1', data: {'key': 'value'}),
+        const Message(serial: 's1', data: {'key': 'value'}),
       );
 
       final body =
@@ -404,7 +405,7 @@ void main() {
   group('RSL15b - serial URL-encoded in path', () {
     // UTS: rest/unit/RSL15b/serial-url-encoded-path-3
     test('special characters in serial are URL-encoded', () async {
-      final channelName = 'test-RSL15b-encode';
+      const channelName = 'test-RSL15b-encode';
       const serialWithSpecialChars = 'serial/special:chars';
 
       final mockHttp = MockHttpClient(
@@ -423,7 +424,7 @@ void main() {
 
       final channel = client.channels.get(channelName);
       await channel.updateMessage(
-        Message(serial: serialWithSpecialChars, data: 'updated'),
+        const Message(serial: serialWithSpecialChars, data: 'updated'),
       );
 
       final request = mockHttp.capturedRequests[0];

@@ -10,7 +10,7 @@ void main() {
     group('TD1-TD5 - TokenDetails structure', () {
       // UTS: rest/unit/TD1/token-details-attributes-0
       test('TD1 - token attribute', () {
-        final tokenDetails = TokenDetails(
+        const tokenDetails = TokenDetails(
           token: 'test-token',
           expires: 1234567890000,
         );
@@ -19,7 +19,7 @@ void main() {
 
       // UTS: rest/unit/TD1/token-details-attributes-0.1
       test('TD2 - expires attribute (milliseconds since epoch)', () {
-        final tokenDetails = TokenDetails(
+        const tokenDetails = TokenDetails(
           token: 'test-token',
           expires: 1234567890000,
         );
@@ -28,7 +28,7 @@ void main() {
 
       // UTS: rest/unit/TD1/token-details-attributes-0.2
       test('TD3 - issued attribute', () {
-        final tokenWithIssued = TokenDetails(
+        const tokenWithIssued = TokenDetails(
           token: 'test-token',
           expires: 1234567890000,
           issued: 1234567800000,
@@ -38,7 +38,7 @@ void main() {
 
       // UTS: rest/unit/TD1/token-details-attributes-0.3
       test('TD4 - capability attribute (JSON string)', () {
-        final tokenWithCapability = TokenDetails(
+        const tokenWithCapability = TokenDetails(
           token: 'test-token',
           expires: 1234567890000,
           capability: '{"*":["*"]}',
@@ -48,7 +48,7 @@ void main() {
 
       // UTS: rest/unit/TD1/token-details-attributes-0.4
       test('TD5 - clientId attribute', () {
-        final tokenWithClient = TokenDetails(
+        const tokenWithClient = TokenDetails(
           token: 'test-token',
           expires: 1234567890000,
           clientId: 'my-client',
@@ -84,51 +84,51 @@ void main() {
     group('TK1-TK6 - TokenParams structure', () {
       // UTS: rest/unit/TK1/token-params-attributes-0
       test('TK1 - ttl attribute (milliseconds)', () {
-        final params = TokenParams(ttl: 3600000);
+        const params = TokenParams(ttl: 3600000);
         expect(params.ttl, equals(3600000));
       });
 
       // UTS: rest/unit/TK1/token-params-attributes-0.1
       test('TK1 - ttl defaults to null when not specified', () {
         // RSA5 depends on this — null means "let server decide"
-        final params = TokenParams();
+        const params = TokenParams();
         expect(params.ttl, isNull);
       });
 
       // UTS: rest/unit/TK1/token-params-attributes-0.2
       test('TK2 - capability attribute', () {
-        final params = TokenParams(capability: '{"*":["subscribe"]}');
+        const params = TokenParams(capability: '{"*":["subscribe"]}');
         expect(params.capability, equals('{"*":["subscribe"]}'));
       });
 
       // UTS: rest/unit/TK1/token-params-attributes-0.3
       test('TK2 - capability defaults to null when not specified', () {
         // RSA6 depends on this — null means "use key capabilities"
-        final params = TokenParams();
+        const params = TokenParams();
         expect(params.capability, isNull);
       });
 
       // UTS: rest/unit/TK1/token-params-attributes-0.4
       test('TK3 - clientId attribute', () {
-        final params = TokenParams(clientId: 'param-client');
+        const params = TokenParams(clientId: 'param-client');
         expect(params.clientId, equals('param-client'));
       });
 
       // UTS: rest/unit/TK1/token-params-attributes-0.5
       test('TK4 - timestamp attribute (milliseconds since epoch)', () {
-        final params = TokenParams(timestamp: 1234567890000);
+        const params = TokenParams(timestamp: 1234567890000);
         expect(params.timestamp, equals(1234567890000));
       });
 
       // UTS: rest/unit/TK1/token-params-attributes-0.6
       test('TK5 - nonce attribute', () {
-        final params = TokenParams(nonce: 'unique-nonce-value');
+        const params = TokenParams(nonce: 'unique-nonce-value');
         expect(params.nonce, equals('unique-nonce-value'));
       });
 
       // UTS: rest/unit/TK1/token-params-attributes-0.7
       test('TK6 - All attributes together', () {
-        final params = TokenParams(
+        const params = TokenParams(
           ttl: 7200000,
           capability: '{"*":["*"]}',
           clientId: 'full-client',
@@ -147,7 +147,7 @@ void main() {
     group('TK - TokenParams to query string', () {
       // UTS: rest/unit/TK/token-params-to-query-string-0
       test('converts to query parameters', () {
-        final params = TokenParams(
+        const params = TokenParams(
           ttl: 3600000,
           clientId: 'query-client',
           capability: '{"ch":["pub"]}',
@@ -166,7 +166,7 @@ void main() {
     group('TE1-TE6 - TokenRequest structure', () {
       // UTS: rest/unit/TE1/token-request-attributes-0
       test('TE1 - keyName attribute', () {
-        final request = TokenRequest(
+        const request = TokenRequest(
           keyName: 'appId.keyId',
           timestamp: 1234567890000,
           nonce: 'nonce-1',
@@ -176,7 +176,7 @@ void main() {
 
       // UTS: rest/unit/TE1/token-request-attributes-0.1
       test('TE2 - ttl attribute', () {
-        final request = TokenRequest(
+        const request = TokenRequest(
           keyName: 'appId.keyId',
           ttl: 3600000,
           timestamp: 1234567890000,
@@ -188,7 +188,7 @@ void main() {
       // UTS: rest/unit/TE1/token-request-attributes-0.2
       test('TE2 - ttl defaults to null when not specified', () {
         // RSA5 depends on this — createTokenRequest must be able to omit ttl
-        final request = TokenRequest(
+        const request = TokenRequest(
           keyName: 'appId.keyId',
           timestamp: 1234567890000,
           nonce: 'nonce-2b',
@@ -198,7 +198,7 @@ void main() {
 
       // UTS: rest/unit/TE1/token-request-attributes-0.3
       test('TE3 - capability attribute', () {
-        final request = TokenRequest(
+        const request = TokenRequest(
           keyName: 'appId.keyId',
           capability: '{"*":["*"]}',
           timestamp: 1234567890000,
@@ -210,7 +210,7 @@ void main() {
       // UTS: rest/unit/TE1/token-request-attributes-0.4
       test('TE3 - capability defaults to null when not specified', () {
         // RSA6 depends on this — createTokenRequest must be able to omit capability
-        final request = TokenRequest(
+        const request = TokenRequest(
           keyName: 'appId.keyId',
           timestamp: 1234567890000,
           nonce: 'nonce-3b',
@@ -220,7 +220,7 @@ void main() {
 
       // UTS: rest/unit/TE1/token-request-attributes-0.5
       test('TE4 - clientId attribute', () {
-        final request = TokenRequest(
+        const request = TokenRequest(
           keyName: 'appId.keyId',
           clientId: 'request-client',
           timestamp: 1234567890000,
@@ -231,7 +231,7 @@ void main() {
 
       // UTS: rest/unit/TE1/token-request-attributes-0.6
       test('TE5 - timestamp attribute', () {
-        final request = TokenRequest(
+        const request = TokenRequest(
           keyName: 'appId.keyId',
           timestamp: 1234567890000,
           nonce: 'nonce-5',
@@ -241,7 +241,7 @@ void main() {
 
       // UTS: rest/unit/TE1/token-request-attributes-0.7
       test('TE6 - nonce attribute', () {
-        final request = TokenRequest(
+        const request = TokenRequest(
           keyName: 'appId.keyId',
           timestamp: 1234567890000,
           nonce: 'unique-nonce',
@@ -253,7 +253,7 @@ void main() {
     group('TE - TokenRequest with mac (signature)', () {
       // UTS: rest/unit/TE/token-request-mac-signature-0
       test('includes mac signature', () {
-        final request = TokenRequest(
+        const request = TokenRequest(
           keyName: 'appId.keyId',
           timestamp: 1234567890000,
           nonce: 'nonce-value',
@@ -267,7 +267,7 @@ void main() {
     group('TE - TokenRequest to JSON', () {
       // UTS: rest/unit/TE/token-request-to-json-1
       test('serializes correctly for transmission', () {
-        final request = TokenRequest(
+        const request = TokenRequest(
           keyName: 'appId.keyId',
           ttl: 3600000,
           capability: '{"*":["*"]}',

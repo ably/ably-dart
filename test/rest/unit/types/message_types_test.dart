@@ -13,25 +13,25 @@ void main() {
     group('TM2a-TM2i - Message attributes', () {
       // UTS: rest/unit/TM2a/message-attributes-0
       test('TM2a - id attribute', () {
-        final message = Message(id: 'unique-id');
+        const message = Message(id: 'unique-id');
         expect(message.id, equals('unique-id'));
       });
 
       // UTS: rest/unit/TM2a/message-attributes-0.1
       test('TM2b - name attribute', () {
-        final message = Message(name: 'event-name');
+        const message = Message(name: 'event-name');
         expect(message.name, equals('event-name'));
       });
 
       // UTS: rest/unit/TM2a/message-attributes-0.2
       test('TM2c - data attribute (string)', () {
-        final message = Message(data: 'string-data');
+        const message = Message(data: 'string-data');
         expect(message.data, equals('string-data'));
       });
 
       // UTS: rest/unit/TM2a/message-attributes-0.3
       test('TM2c - data attribute (map)', () {
-        final message = Message(data: {'key': 'value'});
+        const message = Message(data: {'key': 'value'});
         expect(message.data, equals({'key': 'value'}));
       });
 
@@ -44,39 +44,43 @@ void main() {
 
       // UTS: rest/unit/TM2a/message-attributes-0.5
       test('TM2d - clientId attribute', () {
-        final message = Message(clientId: 'message-client');
+        const message = Message(clientId: 'message-client');
         expect(message.clientId, equals('message-client'));
       });
 
       // UTS: rest/unit/TM2a/message-attributes-0.6
       test('TM2e - connectionId attribute', () {
-        final message = Message(connectionId: 'conn-id');
+        const message = Message(connectionId: 'conn-id');
         expect(message.connectionId, equals('conn-id'));
       });
 
       // UTS: rest/unit/TM2a/message-attributes-0.7
       test('TM2f - timestamp attribute', () {
-        final message = Message(timestamp: 1234567890000);
+        const message = Message(timestamp: 1234567890000);
         expect(message.timestamp, equals(1234567890000));
       });
 
       // UTS: rest/unit/TM2a/message-attributes-0.8
       test('TM2g - encoding attribute', () {
-        final message = Message(encoding: 'json/base64');
+        const message = Message(encoding: 'json/base64');
         expect(message.encoding, equals('json/base64'));
       });
 
       // UTS: rest/unit/TM2a/message-attributes-0.9
       test('TM2h - extras attribute', () {
-        final message = Message(
-          extras: MessageExtras(data: {
-            'push': {
-              'notification': {'title': 'Hello'},
+        const message = Message(
+          extras: MessageExtras(
+            data: {
+              'push': {
+                'notification': {'title': 'Hello'},
+              },
             },
-          }),
+          ),
         );
-        expect(message.extras?.data['push']['notification']['title'],
-            equals('Hello'));
+        expect(
+          message.extras?.data['push']['notification']['title'],
+          equals('Hello'),
+        );
       });
     });
 
@@ -167,7 +171,7 @@ void main() {
     group('TM4 - Message constructors', () {
       // UTS: rest/unit/TM4/message-constructors-0
       test('constructor(name, data)', () {
-        final message = Message(name: 'event-name', data: 'payload');
+        const message = Message(name: 'event-name', data: 'payload');
         expect(message.name, equals('event-name'));
         expect(message.data, equals('payload'));
         expect(message.clientId, isNull);
@@ -175,7 +179,7 @@ void main() {
 
       // UTS: rest/unit/TM4/message-constructors-0.1
       test('constructor(name, data, clientId)', () {
-        final message = Message(
+        const message = Message(
           name: 'event-name',
           data: 'payload',
           clientId: 'client-1',
@@ -187,7 +191,7 @@ void main() {
 
       // UTS: rest/unit/TM4/message-constructors-0.2
       test('name and data are nullable', () {
-        final message = Message();
+        const message = Message();
         expect(message.name, isNull);
         expect(message.data, isNull);
       });
@@ -196,7 +200,7 @@ void main() {
     group('TM - Null/missing attributes', () {
       // UTS: rest/unit/TM/null-missing-attributes-0
       test('null or missing attributes are handled correctly', () {
-        final message = Message();
+        const message = Message();
 
         expect(message.id, isNull);
         expect(message.name, isNull);
@@ -209,20 +213,22 @@ void main() {
     group('TM - Message with extras', () {
       // UTS: rest/unit/TM/message-with-extras-1
       test('push notification extras are handled correctly', () {
-        final message = Message(
+        const message = Message(
           name: 'push-event',
           data: 'payload',
-          extras: MessageExtras(data: {
-            'push': {
-              'notification': {
-                'title': 'New Message',
-                'body': 'You have a new notification',
-              },
-              'data': {
-                'customKey': 'customValue',
+          extras: MessageExtras(
+            data: {
+              'push': {
+                'notification': {
+                  'title': 'New Message',
+                  'body': 'You have a new notification',
+                },
+                'data': {
+                  'customKey': 'customValue',
+                },
               },
             },
-          }),
+          ),
         );
 
         expect(

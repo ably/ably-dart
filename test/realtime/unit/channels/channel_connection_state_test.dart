@@ -75,7 +75,9 @@ void main() {
       // Simulate transport failure - connection goes to DISCONNECTED
       mockWs.activeConnection!.simulateDisconnect();
       await _awaitConnectionState(
-          client.connection, ConnectionState.disconnected);
+        client.connection,
+        ConnectionState.disconnected,
+      );
 
       // Channel state must remain ATTACHED
       expect(channel.state, equals(ChannelState.attached));
@@ -134,7 +136,9 @@ void main() {
       // Simulate transport failure - connection goes to DISCONNECTED
       mockWs.activeConnection!.simulateDisconnect();
       await _awaitConnectionState(
-          client.connection, ConnectionState.disconnected);
+        client.connection,
+        ConnectionState.disconnected,
+      );
 
       // Channel state must remain ATTACHING
       expect(channel.state, equals(ChannelState.attaching));
@@ -563,7 +567,9 @@ void main() {
 
         client.connect();
         await _awaitConnectionState(
-            client.connection, ConnectionState.connected);
+          client.connection,
+          ConnectionState.connected,
+        );
 
         await channel.attach();
         expect(channel.state, equals(ChannelState.attached));
@@ -586,7 +592,9 @@ void main() {
         }
 
         await _awaitConnectionState(
-            client.connection, ConnectionState.suspended);
+          client.connection,
+          ConnectionState.suspended,
+        );
 
         expect(channel.state, equals(ChannelState.suspended));
 
@@ -653,7 +661,9 @@ void main() {
 
         client.connect();
         await _awaitConnectionState(
-            client.connection, ConnectionState.connected);
+          client.connection,
+          ConnectionState.connected,
+        );
 
         // Start attach but don't await - server won't respond
         // ignore: unawaited_futures
@@ -679,7 +689,9 @@ void main() {
         }
 
         await _awaitConnectionState(
-            client.connection, ConnectionState.suspended);
+          client.connection,
+          ConnectionState.suspended,
+        );
 
         expect(channel.state, equals(ChannelState.suspended));
 
@@ -833,7 +845,9 @@ void main() {
 
         client.connect();
         await _awaitConnectionState(
-            client.connection, ConnectionState.connected);
+          client.connection,
+          ConnectionState.connected,
+        );
 
         await channel.attach();
         expect(channel.state, equals(ChannelState.attached));
@@ -854,7 +868,9 @@ void main() {
         }
 
         await _awaitConnectionState(
-            client.connection, ConnectionState.suspended);
+          client.connection,
+          ConnectionState.suspended,
+        );
         expect(channel.state, equals(ChannelState.suspended));
 
         // Record channel state changes from this point
@@ -873,7 +889,9 @@ void main() {
         }
 
         await _awaitConnectionState(
-            client.connection, ConnectionState.connected);
+          client.connection,
+          ConnectionState.connected,
+        );
         await _awaitChannelState(channel, ChannelState.attached);
         await _pumpEventQueue();
 

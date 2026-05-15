@@ -259,7 +259,7 @@ void main() {
               ProtocolMessage(
                 action: ProtocolAction.error,
                 channel: channelName,
-                error: ErrorInfo(code: 40160, message: 'Not permitted'),
+                error: const ErrorInfo(code: 40160, message: 'Not permitted'),
               ),
             );
           }
@@ -338,7 +338,9 @@ void main() {
 
         client.connect();
         await _awaitConnectionState(
-            client.connection, ConnectionState.connected);
+          client.connection,
+          ConnectionState.connected,
+        );
 
         // Start attach — capture future and register error handler immediately
         // so the completeError from the timeout doesn't become unhandled.
@@ -400,7 +402,9 @@ void main() {
       // Start connecting but don't complete
       client.connect();
       await _awaitConnectionState(
-          client.connection, ConnectionState.connecting);
+        client.connection,
+        ConnectionState.connecting,
+      );
 
       // Put channel into attaching state
       // ignore: unawaited_futures
@@ -521,7 +525,9 @@ void main() {
 
         client.connect();
         await _awaitConnectionState(
-            client.connection, ConnectionState.connected);
+          client.connection,
+          ConnectionState.connected,
+        );
 
         await channel.attach();
         expect(channel.state, equals(ChannelState.attached));
@@ -757,7 +763,7 @@ void main() {
                 ProtocolMessage(
                   action: ProtocolAction.error,
                   channel: channelName,
-                  error: ErrorInfo(code: 40160, message: 'Denied'),
+                  error: const ErrorInfo(code: 40160, message: 'Denied'),
                 ),
               );
             } else {

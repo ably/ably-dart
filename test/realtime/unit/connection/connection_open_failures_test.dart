@@ -515,7 +515,7 @@ void main() {
               );
             } else {
               throw AblyException.fromErrorInfo(
-                ErrorInfo(
+                const ErrorInfo(
                   code: 40171,
                   statusCode: 401,
                   message: 'Unable to renew token',

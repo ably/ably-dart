@@ -289,7 +289,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
     if (_state == ConnectionState.failed) {
       throw AblyException(
         errorInfo: _errorReason ??
-            ErrorInfo(
+            const ErrorInfo(
               code: 80000,
               statusCode: 500,
               message: 'Connection failed during reauthorization',
@@ -490,7 +490,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
           _pendingPings.remove(pingId);
           if (!completer.isCompleted) {
             completer.completeError(
-              ErrorInfo(
+              const ErrorInfo(
                 code: 80014,
                 statusCode: 408,
                 message: 'Ping timeout',
@@ -564,7 +564,9 @@ class ConnectionImpl implements Connection, WebSocketListener {
 
         // RSC15f: Cache successful fallback host as preferred
         if (!_hostSelector.isPrimaryHost(
-            host, _options.effectiveRealtimeHost)) {
+          host,
+          _options.effectiveRealtimeHost,
+        )) {
           _hostSelector.clearFailureTracking(preferredHost: host);
         }
 
@@ -632,7 +634,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
 
       if (!hasConnectivity) {
         // No internet - report network error
-        lastError = ErrorInfo(
+        lastError = const ErrorInfo(
           code: 80003,
           statusCode: 503,
           message: 'No internet connectivity detected',
@@ -767,7 +769,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
       callback: () {
         if (!completer.isCompleted) {
           completer.completeError(
-            AblyException(
+            const AblyException(
               message: 'Authentication timed out',
               errorInfo: ErrorInfo(
                 code: 80019,
@@ -935,7 +937,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
 
     // Use pending error if set (e.g., from idle timeout), otherwise generic
     final error = _pendingDisconnectError ??
-        ErrorInfo(
+        const ErrorInfo(
           code: 80003,
           statusCode: 503,
           message: 'Connection lost',
@@ -1038,7 +1040,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
       _nextMsgSerial = 0;
 
       final resumeError = message.error ??
-          ErrorInfo(
+          const ErrorInfo(
             code: 80008,
             statusCode: 400,
             message: 'Resume failed',
@@ -1073,7 +1075,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
     _timerManager.cancel(owner: this, name: 'connectionTimeout');
 
     final error = message.error ??
-        ErrorInfo(
+        const ErrorInfo(
           code: 80003,
           statusCode: 503,
           message: 'Disconnected',
@@ -1113,7 +1115,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
     _timerManager.cancel(owner: this, name: 'connectionTimeout');
 
     final error = message.error ??
-        ErrorInfo(
+        const ErrorInfo(
           code: 50000,
           statusCode: 500,
           message: 'Unknown error',
@@ -1252,7 +1254,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
       return;
     }
 
-    final error = ErrorInfo(
+    const error = ErrorInfo(
       code: 80014,
       statusCode: 408,
       message: 'Connection timeout',
@@ -1495,7 +1497,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
     _logger.debug('Idle timeout, sending heartbeat');
 
     // Store error for use in onClose handler
-    _pendingDisconnectError = ErrorInfo(
+    _pendingDisconnectError = const ErrorInfo(
       code: 80003,
       statusCode: 408,
       message: 'Connection idle timeout - no activity from server',
@@ -1723,11 +1725,13 @@ class ConnectionImpl implements Connection, WebSocketListener {
       _disconnectedAt = null;
       _nextMsgSerial = 0; // RTN11d
       // Fail any pending pings
-      _failPendingPings(ErrorInfo(
-        code: 80000,
-        statusCode: 400,
-        message: 'Connection transitioned to ${newState.name}',
-      ));
+      _failPendingPings(
+        ErrorInfo(
+          code: 80000,
+          statusCode: 400,
+          message: 'Connection transitioned to ${newState.name}',
+        ),
+      );
     }
 
     // Track disconnection time for TTL (RTN14e)
@@ -1756,7 +1760,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
   /// Used by channels to send ATTACH/DETACH messages (no ACK tracking).
   void sendMessage(ProtocolMessage message) {
     if (_webSocketConnection == null) {
-      throw AblyException(
+      throw const AblyException(
         errorInfo: ErrorInfo(
           code: 80000,
           message: 'Not connected',
@@ -1784,7 +1788,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
   /// Spec: RTN7a, RTN7b, RTL6j
   Future<PublishResult> sendPublishMessage(ProtocolMessage message) {
     if (_webSocketConnection == null) {
-      throw AblyException(
+      throw const AblyException(
         errorInfo: ErrorInfo(
           code: 80000,
           message: 'Not connected',
@@ -1997,7 +2001,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
 
   /// Disposes resources used by this connection.
   void dispose() {
-    final disposeError = ErrorInfo(
+    const disposeError = ErrorInfo(
       code: 80000,
       statusCode: 400,
       message: 'Connection disposed',
@@ -2007,7 +2011,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
     _failQueuedMessages(disposeError);
     if (_pendingAuthCompleter != null && !_pendingAuthCompleter!.isCompleted) {
       _pendingAuthCompleter!.completeError(
-        AblyException(errorInfo: disposeError),
+        const AblyException(errorInfo: disposeError),
       );
       _pendingAuthCompleter = null;
     }

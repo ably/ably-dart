@@ -39,8 +39,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'connection-1',
               connectionKey: 'key-abc-123',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },
@@ -114,9 +112,9 @@ void main() {
       final reSerialized = jsonEncode(parsed);
       final reParsed = jsonDecode(reSerialized) as Map<String, dynamic>;
       expect(
-          (reParsed['channelSerials']
-              as Map<String, dynamic>)['channel-éàü-世界'],
-          equals('serial-b-002'));
+        (reParsed['channelSerials'] as Map<String, dynamic>)['channel-éàü-世界'],
+        equals('serial-b-002'),
+      );
 
       await client.close();
       mockWs.dispose();
@@ -133,8 +131,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'connection-1',
               connectionKey: 'key-1',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },
@@ -176,8 +172,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'conn-f',
               connectionKey: 'key-f',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },
@@ -227,7 +221,6 @@ void main() {
                 ProtocolMessageHelpers.connected(
                   connectionId: 'conn-s',
                   connectionKey: 'key-s',
-                  maxIdleInterval: 15000,
                   connectionStateTtl: 2000, // Short TTL
                 ),
               );
@@ -299,8 +292,6 @@ void main() {
                 ProtocolMessageHelpers.connected(
                   connectionId: 'recovered-conn-id',
                   connectionKey: 'new-key-after-recovery',
-                  maxIdleInterval: 15000,
-                  connectionStateTtl: 120000,
                 ),
               );
             } else {
@@ -308,8 +299,6 @@ void main() {
                 ProtocolMessageHelpers.connected(
                   connectionId: 'recovered-conn-id',
                   connectionKey: 'resumed-key',
-                  maxIdleInterval: 15000,
-                  connectionStateTtl: 120000,
                 ),
               );
             }
@@ -332,8 +321,10 @@ void main() {
         await _awaitState(client.connection, ConnectionState.connected);
 
         // RTN16k: First connection uses recover param with connectionKey
-        expect(capturedUrls[0].queryParameters['recover'],
-            equals('recovered-key-xyz'));
+        expect(
+          capturedUrls[0].queryParameters['recover'],
+          equals('recovered-key-xyz'),
+        );
         expect(capturedUrls[0].queryParameters.containsKey('resume'), isFalse);
 
         // Simulate disconnect and reconnection
@@ -347,8 +338,10 @@ void main() {
 
         // Second connection attempt uses resume (not recover)
         expect(capturedUrls.length, greaterThanOrEqualTo(2));
-        expect(capturedUrls[1].queryParameters['resume'],
-            equals('new-key-after-recovery'));
+        expect(
+          capturedUrls[1].queryParameters['resume'],
+          equals('new-key-after-recovery'),
+        );
         expect(capturedUrls[1].queryParameters.containsKey('recover'), isFalse);
 
         await client.close();
@@ -376,8 +369,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'recovered-conn',
               connectionKey: 'new-key',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },
@@ -428,7 +419,7 @@ void main() {
 
       // ACK the message before closing to avoid pending message errors
       mockWs.activeConnection!.sendToClient(
-        ProtocolMessageHelpers.ack(msgSerial: 42, count: 1),
+        ProtocolMessageHelpers.ack(msgSerial: 42),
       );
       await _pumpEventQueue();
 
@@ -452,8 +443,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'fresh-conn',
               connectionKey: 'fresh-key',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },
@@ -513,8 +502,6 @@ void main() {
             ProtocolMessageHelpers.connected(
               connectionId: 'recovered-conn',
               connectionKey: 'new-key',
-              maxIdleInterval: 15000,
-              connectionStateTtl: 120000,
             ),
           );
         },
@@ -591,8 +578,6 @@ void main() {
               ProtocolMessageHelpers.connected(
                 connectionId: 'recovered-conn',
                 connectionKey: 'new-key',
-                maxIdleInterval: 15000,
-                connectionStateTtl: 120000,
               ),
             );
           },
@@ -631,11 +616,16 @@ void main() {
 
         // Find the ATTACH message for channel-a
         final attachMsgs = sentMessages
-            .where((m) =>
-                m.action == ProtocolAction.attach && m.channel == 'channel-a')
+            .where(
+              (m) =>
+                  m.action == ProtocolAction.attach && m.channel == 'channel-a',
+            )
             .toList();
-        expect(attachMsgs, isNotEmpty,
-            reason: 'ATTACH message should have been sent for channel-a');
+        expect(
+          attachMsgs,
+          isNotEmpty,
+          reason: 'ATTACH message should have been sent for channel-a',
+        );
 
         // The ATTACH message should include the channelSerial from recovery
         // so the server can resume from where the channel left off
@@ -667,8 +657,6 @@ void main() {
                 ProtocolMessageHelpers.connected(
                   connectionId: 'conn-1',
                   connectionKey: 'key-original',
-                  maxIdleInterval: 15000,
-                  connectionStateTtl: 120000,
                 ),
               );
             } else {
@@ -676,8 +664,6 @@ void main() {
                 ProtocolMessageHelpers.connected(
                   connectionId: 'conn-1', // Same ID = successful resume
                   connectionKey: 'key-resumed',
-                  maxIdleInterval: 15000,
-                  connectionStateTtl: 120000,
                 ),
               );
             }
@@ -715,7 +701,9 @@ void main() {
 
         // Second connection should include resume parameter with original key
         expect(
-            capturedUrls[1].queryParameters['resume'], equals('key-original'));
+          capturedUrls[1].queryParameters['resume'],
+          equals('key-original'),
+        );
 
         // Connection key updated after resume
         expect(client.connection.key, equals('key-resumed'));
@@ -745,8 +733,6 @@ void main() {
                 ProtocolMessageHelpers.connected(
                   connectionId: 'conn-1',
                   connectionKey: 'key-v1',
-                  maxIdleInterval: 15000,
-                  connectionStateTtl: 120000,
                 ),
               );
             } else {
@@ -754,8 +740,6 @@ void main() {
                 ProtocolMessageHelpers.connected(
                   connectionId: 'conn-1',
                   connectionKey: 'key-v2',
-                  maxIdleInterval: 15000,
-                  connectionStateTtl: 120000,
                 ),
               );
             }
@@ -814,8 +798,6 @@ void main() {
                 ProtocolMessageHelpers.connected(
                   connectionId: 'conn-original',
                   connectionKey: 'key-original',
-                  maxIdleInterval: 15000,
-                  connectionStateTtl: 120000,
                 ),
               );
             } else {
@@ -824,7 +806,7 @@ void main() {
                 ProtocolMessageHelpers.connected(
                   connectionId: 'conn-new',
                   connectionKey: 'key-new',
-                  error: ErrorInfo(
+                  error: const ErrorInfo(
                     code: 80008,
                     statusCode: 400,
                     message: 'Unable to recover connection',

@@ -12,7 +12,7 @@ void main() {
   group('RSL11b - getMessage sends GET to correct endpoint', () {
     // UTS: rest/unit/RSL11b/get-correct-endpoint-0
     test('sends GET to /channels/{channelName}/messages/{serial}', () async {
-      final channelName = 'test-RSL11b';
+      const channelName = 'test-RSL11b';
       final mockHttp = MockHttpClient(
         onRequest: (request) {
           request.respondWith(200, {
@@ -96,7 +96,7 @@ void main() {
   group('RSL11b - getMessage URL-encodes serial in path', () {
     // UTS: rest/unit/RSL11b/url-encodes-serial-1
     test('special characters in serial are URL-encoded', () async {
-      final channelName = 'test-RSL11b-encode';
+      const channelName = 'test-RSL11b-encode';
       const serialWithSpecialChars = 'serial/with:special+chars';
 
       final mockHttp = MockHttpClient(

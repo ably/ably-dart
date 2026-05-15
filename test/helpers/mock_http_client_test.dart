@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:test/test.dart';
 import 'mock_http_client.dart';
 
@@ -18,7 +16,7 @@ void main() {
             request.respondWith(200, {'time': 1234567890000});
           } else {
             request.respondWith(404, {
-              'error': {'code': 40400}
+              'error': {'code': 40400},
             });
           }
         },
@@ -236,7 +234,7 @@ void main() {
       mock = MockHttpClient(
         onRequest: (request) {
           request.respondWithDelay(
-            Duration(milliseconds: 50),
+            const Duration(milliseconds: 50),
             200,
             {'delayed': true},
           );
