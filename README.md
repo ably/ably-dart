@@ -61,7 +61,7 @@ Use the REST client for stateless operations like publishing messages and queryi
 import 'package:ably/ably.dart';
 
 // Create a REST client
-final rest = Rest(options: ClientOptions(key: 'your-ably-api-key'));
+final rest = RestClient(options: ClientOptions(key: 'your-ably-api-key'));
 
 // Get a channel
 final channel = rest.channels.get('test-channel');
@@ -84,7 +84,7 @@ Use the Realtime client for persistent connections with live message delivery:
 import 'package:ably/ably.dart';
 
 // Create a Realtime client
-final realtime = Realtime(
+final realtime = RealtimeClient(
   options: ClientOptions(key: 'your-ably-api-key', clientId: 'me'),
 );
 

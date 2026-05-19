@@ -18,7 +18,7 @@ void main() {
 
     // UTS: rest/unit/RSC5/auth-attribute-accessible-0
     test('RSC5 - auth attribute exists', () {
-      final rest = Rest(
+      final rest = RestClient(
         options:
             ClientOptions(key: 'fake.key:secret', useBinaryProtocol: false),
       );
@@ -29,7 +29,7 @@ void main() {
 
     // UTS: rest/unit/RSC17/client-id-from-options-0
     test('RSC17 - clientId from options is set on auth', () {
-      final rest = Rest(
+      final rest = RestClient(
         options: ClientOptions(
           key: 'fake.key:secret',
           clientId: 'explicit-client-id',
@@ -60,7 +60,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions.fromKey(
             'appId.keyId:keySecret',
             useBinaryProtocol: false,
@@ -99,7 +99,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions.fromKey(
             'appId.keyId:keySecret',
             useBinaryProtocol: false,
@@ -142,7 +142,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             addRequestIds: true,
@@ -191,7 +191,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             addRequestIds: true,
@@ -237,7 +237,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             useBinaryProtocol: false,
@@ -279,7 +279,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
           ),
@@ -321,7 +321,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             useBinaryProtocol: false,
@@ -366,7 +366,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             useBinaryProtocol: false,
@@ -395,7 +395,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions.fromKey(
             'appId.keyId:keySecret',
             useBinaryProtocol: false,
@@ -427,7 +427,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions.fromKey(
             'appId.keyId:keySecret',
             useBinaryProtocol: false,
@@ -468,7 +468,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             useBinaryProtocol: false,
@@ -502,7 +502,7 @@ void main() {
         );
 
         // Note: API key over non-TLS should be rejected, use token auth
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             token: 'some-token',
             tls: false,
@@ -520,7 +520,7 @@ void main() {
       // UTS: rest/unit/RSC18/basic-auth-over-http-rejected-1
       test('rejects Basic auth over HTTP', () {
         expect(
-          () => Rest.forTesting(
+          () => RestClient.forTesting(
             options: ClientOptions(
               key: 'appId.keyId:keySecret',
               tls: false,
@@ -562,7 +562,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             token: 'some-token-string',
             tls: false,
@@ -596,7 +596,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             httpRequestTimeout: 1000,
@@ -623,7 +623,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             endpoint: 'test',

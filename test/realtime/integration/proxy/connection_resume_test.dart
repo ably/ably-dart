@@ -50,7 +50,7 @@ void main() {
       final apiKey = testApp.keys[0].keyStr;
       final stateChanges = <ConnectionStateChange>[];
 
-      final client = Realtime(
+      final client = RealtimeClient(
         options: ClientOptions(
           authCallback: makeAuthCallback(apiKey),
           endpoint: 'localhost',
@@ -127,7 +127,7 @@ void main() {
 
       final apiKey = testApp.keys[0].keyStr;
 
-      final client = Realtime(
+      final client = RealtimeClient(
         options: ClientOptions(
           authCallback: makeAuthCallback(apiKey),
           endpoint: 'localhost',
@@ -232,7 +232,7 @@ void main() {
 
       final apiKey = testApp.keys[0].keyStr;
 
-      final client = Realtime(
+      final client = RealtimeClient(
         options: ClientOptions(
           authCallback: makeAuthCallback(apiKey),
           endpoint: 'localhost',
@@ -308,7 +308,7 @@ void main() {
 
       // Get a real token via REST (no key/callback = non-renewable)
       final apiKey = testApp.keys[0].keyStr;
-      final restClient = Rest(
+      final restClient = RestClient(
         options: ClientOptions(
           key: apiKey,
           endpoint: 'nonprod:sandbox',
@@ -319,7 +319,7 @@ void main() {
       await restClient.close();
       final tokenString = tokenDetails.token!;
 
-      final client = Realtime(
+      final client = RealtimeClient(
         options: ClientOptions(
           token: tokenString,
           endpoint: 'localhost',
@@ -382,7 +382,7 @@ void main() {
       final apiKey = testApp.keys[0].keyStr;
       final stateChanges = <ConnectionStateChange>[];
 
-      final client = Realtime(
+      final client = RealtimeClient(
         options: ClientOptions(
           authCallback: makeAuthCallback(apiKey),
           endpoint: 'localhost',
@@ -432,7 +432,7 @@ void main() {
 
       final apiKey = testApp.keys[0].keyStr;
 
-      final client = Realtime(
+      final client = RealtimeClient(
         options: ClientOptions(
           authCallback: makeAuthCallback(apiKey),
           endpoint: 'localhost',
@@ -544,7 +544,7 @@ void main() {
       final apiKey = testApp.keys[0].keyStr;
       final stateChanges = <ConnectionStateChange>[];
 
-      final client = Realtime(
+      final client = RealtimeClient(
         options: ClientOptions(
           authCallback: makeAuthCallback(apiKey),
           endpoint: 'localhost',
@@ -624,7 +624,7 @@ void main() {
       final apiKey = testApp.keys[0].keyStr;
       final channelName = 'rtn19a-${DateTime.now().millisecondsSinceEpoch}';
 
-      final client = Realtime(
+      final client = RealtimeClient(
         options: ClientOptions(
           authCallback: makeAuthCallback(apiKey),
           endpoint: 'localhost',

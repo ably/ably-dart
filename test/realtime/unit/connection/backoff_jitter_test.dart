@@ -112,7 +112,7 @@ void main() {
 
         const disconnectedRetryTimeout = 2000; // 2 seconds
 
-        final client = Realtime.forTesting(
+        final client = RealtimeClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             disconnectedRetryTimeout: disconnectedRetryTimeout,
@@ -259,7 +259,7 @@ void main() {
 
         const disconnectedRetryTimeout = 3000; // 3 seconds
 
-        final client = Realtime.forTesting(
+        final client = RealtimeClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             disconnectedRetryTimeout: disconnectedRetryTimeout,

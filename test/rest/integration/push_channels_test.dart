@@ -17,7 +17,7 @@ void main() {
     await testApp.delete();
   });
 
-  Rest buildAdminClient() => Rest(
+  RestClient buildAdminClient() => RestClient(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
           endpoint: 'nonprod:sandbox',
@@ -59,7 +59,7 @@ void main() {
           'pushenabled:rsh7b-${DateTime.now().millisecondsSinceEpoch}';
 
       // Build a client that simulates the local device with a clientId
-      final deviceClient = Rest(
+      final deviceClient = RestClient(
         options: ClientOptions(
           key: testApp.keys[1].keyStr,
           endpoint: 'nonprod:sandbox',

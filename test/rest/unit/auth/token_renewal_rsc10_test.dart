@@ -68,7 +68,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions(authCallback: authCallback),
         httpClient: mockHttp,
       );
@@ -132,7 +132,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions(authCallback: authCallback),
         httpClient: mockHttp,
       );

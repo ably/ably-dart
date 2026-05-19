@@ -48,7 +48,7 @@ void main() {
       final apiKey = testApp.keys[0].keyStr;
       final stateChanges = <ConnectionStateChange>[];
 
-      final client = Realtime(
+      final client = RealtimeClient(
         options: ClientOptions(
           authCallback: makeAuthCallback(apiKey),
           endpoint: 'localhost',

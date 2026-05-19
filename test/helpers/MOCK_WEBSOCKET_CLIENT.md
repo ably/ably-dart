@@ -20,7 +20,7 @@ final mock = MockWebSocketClient(
   },
 );
 
-final client = Realtime.forTesting(
+final client = RealtimeClient.forTesting(
   options: ClientOptions.fromKey('app.key:secret'),
   webSocketClient: mock,
 );

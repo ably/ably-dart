@@ -9,7 +9,7 @@ import '../../../helpers/test_app_helper.dart';
 
 Future<Object> Function(TokenParams params) _tokenAuthCallback(String apiKey) {
   return (params) async {
-    final innerRest = Rest(
+    final innerRestClient = RestClient(
       options: ClientOptions(
         key: apiKey,
         endpoint: 'nonprod:sandbox',
@@ -17,9 +17,9 @@ Future<Object> Function(TokenParams params) _tokenAuthCallback(String apiKey) {
       ),
     );
     try {
-      return await innerRest.auth.requestToken();
+      return await innerRestClient.auth.requestToken();
     } finally {
-      await innerRest.close();
+      await innerRestClient.close();
     }
   };
 }
@@ -66,7 +66,7 @@ void main() {
     );
     addTearDown(() async => session.close());
 
-    final client = Rest(
+    final client = RestClient(
       options: ClientOptions(
         authCallback: _tokenAuthCallback(apiKey),
         endpoint: 'localhost',
@@ -127,7 +127,7 @@ void main() {
     );
     addTearDown(() async => session.close());
 
-    final client = Rest(
+    final client = RestClient(
       options: ClientOptions(
         authCallback: _tokenAuthCallback(apiKey),
         endpoint: 'localhost',
@@ -165,7 +165,7 @@ void main() {
     final apiKey = testApp.keys[0].keyStr;
     const nonListeningPort = 19999;
 
-    final client = Rest(
+    final client = RestClient(
       options: ClientOptions(
         authCallback: _tokenAuthCallback(apiKey),
         endpoint: 'localhost',
@@ -215,7 +215,7 @@ void main() {
     );
     addTearDown(() async => session.close());
 
-    final client = Rest(
+    final client = RestClient(
       options: ClientOptions(
         authCallback: _tokenAuthCallback(apiKey),
         endpoint: 'localhost',
@@ -272,7 +272,7 @@ void main() {
     addTearDown(() async => session.close());
 
     // No fallbackHosts -- endpoint="localhost" disables fallback (REC2c2)
-    final client = Rest(
+    final client = RestClient(
       options: ClientOptions(
         authCallback: _tokenAuthCallback(apiKey),
         endpoint: 'localhost',
@@ -323,7 +323,7 @@ void main() {
     addTearDown(() async => session.close());
 
     // No fallbackHosts -- endpoint="localhost" disables fallback (REC2c2)
-    final client = Rest(
+    final client = RestClient(
       options: ClientOptions(
         authCallback: _tokenAuthCallback(apiKey),
         endpoint: 'localhost',
@@ -377,7 +377,7 @@ void main() {
     addTearDown(() async => session.close());
 
     // Fallback hosts ARE configured -- but 403 should NOT trigger fallback
-    final client = Rest(
+    final client = RestClient(
       options: ClientOptions(
         authCallback: _tokenAuthCallback(apiKey),
         endpoint: 'localhost',
@@ -442,7 +442,7 @@ void main() {
     );
     addTearDown(() async => session.close());
 
-    final client = Rest(
+    final client = RestClient(
       options: ClientOptions(
         authCallback: _tokenAuthCallback(apiKey),
         endpoint: 'localhost',

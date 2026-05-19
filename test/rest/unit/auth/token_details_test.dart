@@ -30,7 +30,7 @@ void main() {
     // UTS: rest/unit/RSA16a/token-from-callback-0
     test('tokenDetails reflects token from authCallback', () async {
       final channelName = testChannelName('RSA16a-callback');
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions(
           authCallback: (params) async => TokenDetails(
             token: 'callback-token-abc',
@@ -74,7 +74,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey('appId.keyId:keySecret'),
         httpClient: mockHttp,
       );
@@ -92,7 +92,7 @@ void main() {
     // UTS: rest/unit/RSA16b/token-string-in-options-0
     test('tokenDetails created from token string in ClientOptions', () {
       // Provide only a token string, not full TokenDetails
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions(token: 'standalone-token-string'),
         httpClient: mockHttp,
       );
@@ -114,7 +114,7 @@ void main() {
         () async {
       final channelName = testChannelName('RSA16b-string');
       // authCallback returns just a token string, not TokenDetails
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions(
           authCallback: (params) async => 'just-a-token-string',
         ),
@@ -142,7 +142,7 @@ void main() {
         clientId: 'initial-client',
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions(tokenDetails: initialToken),
         httpClient: mockHttp,
       );
@@ -159,7 +159,7 @@ void main() {
     test('tokenDetails updated after explicit authorize()', () async {
       var tokenCount = 0;
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions(
           authCallback: (params) async {
             tokenCount++;
@@ -201,7 +201,7 @@ void main() {
         var tokenCount = 0;
         final tokenExpiryMs = testClock.now().millisecondsSinceEpoch + 1000;
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             authCallback: (params) async {
               tokenCount++;
@@ -260,7 +260,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions(
           authCallback: (params) async {
             tokenCount++;
@@ -292,7 +292,7 @@ void main() {
     test('tokenDetails is null when using basic auth', () async {
       final channelName = testChannelName('RSA16d-basic');
       // Client with only API key - uses basic auth
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey('appId.keyId:keySecret'),
         httpClient: mockHttp,
       );
@@ -307,7 +307,7 @@ void main() {
     // UTS: rest/unit/RSA16d/null-before-token-obtained-1
     test('tokenDetails is null before any token is obtained', () {
       // Client configured for token auth but no request made yet
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions(
           authCallback: (params) async => TokenDetails(
             token: 'my-token',
@@ -342,7 +342,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions(
           authCallback: (params) async {
             callbackCount++;
@@ -389,7 +389,7 @@ void main() {
   group('RSA16d - tokenDetails null after switch to basic auth', () {
     // UTS: rest/unit/RSA16d/null-after-switch-to-basic-3
     test('RSA16d - tokenDetails null after switch to basic auth', () async {
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions(
           authCallback: (params) async {
             return TokenDetails(
@@ -429,7 +429,7 @@ void main() {
       var callbackCount = 0;
       final channelName = testChannelName('RSA16-stable');
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions(
           authCallback: (params) async {
             callbackCount++;
@@ -465,7 +465,7 @@ void main() {
     // UTS: rest/unit/RSA16a/reflects-capability-1
     test('tokenDetails reflects capability from token', () async {
       final channelName = testChannelName('RSA16-capability');
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions(
           authCallback: (params) async => TokenDetails(
             token: 'capable-token',

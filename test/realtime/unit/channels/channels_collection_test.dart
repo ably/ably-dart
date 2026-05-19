@@ -10,7 +10,7 @@ import '../../../helpers/test_channel_name.dart';
 /// Spec: RTS1, RTS2, RTS3a, RTS4a
 void main() {
   group('RealtimeChannels Collection - UTS Tests', () {
-    late Realtime client;
+    late RealtimeClient client;
     late MockWebSocketClient mockWs;
 
     setUp(() {
@@ -33,7 +33,7 @@ void main() {
         },
       );
 
-      client = Realtime.forTesting(
+      client = RealtimeClient.forTesting(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,

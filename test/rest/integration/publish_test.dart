@@ -30,7 +30,7 @@ void main() {
           'fails with 40160', () async {
         // keys[2] has capabilities restricted to specific channels
         // (channel0-channel6 only). A random channel name will not match.
-        final client = Rest(
+        final client = RestClient(
           options: ClientOptions(
             key: testApp.keys[2].keyStr,
             endpoint: 'nonprod:sandbox',
@@ -60,10 +60,10 @@ void main() {
     // RSL1n — Publish returns serials
     // ---------------------------------------------------------------------------
     group('RSL1n - Publish returns serials', () {
-      late Rest client;
+      late RestClient client;
 
       setUp(() {
-        client = Rest(
+        client = RestClient(
           options: ClientOptions(
             key: testApp.keys[0].keyStr,
             endpoint: 'nonprod:sandbox',
@@ -122,7 +122,7 @@ void main() {
           '1 message in history', () async {
         // Use a key client with idempotentRestPublishing disabled so we can
         // control the message ID explicitly.
-        final client = Rest(
+        final client = RestClient(
           options: ClientOptions(
             key: testApp.keys[0].keyStr,
             endpoint: 'nonprod:sandbox',
@@ -168,7 +168,7 @@ void main() {
     group('RSL1l1 - Publish params _forceNack', () {
       test('RSL1l1 - publish with _forceNack=true fails with error code 40099',
           () async {
-        final client = Rest(
+        final client = RestClient(
           options: ClientOptions(
             key: testApp.keys[0].keyStr,
             endpoint: 'nonprod:sandbox',
@@ -204,7 +204,7 @@ void main() {
           'RSL1m4 - publish with different clientId than token clientId '
           'fails with 40012', () async {
         // Obtain a token bound to clientId "alice"
-        final keyClient = Rest(
+        final keyClient = RestClient(
           options: ClientOptions(
             key: testApp.keys[0].keyStr,
             endpoint: 'nonprod:sandbox',
@@ -218,7 +218,7 @@ void main() {
         );
 
         // Create a client using that token
-        final tokenClient = Rest(
+        final tokenClient = RestClient(
           options: ClientOptions(
             token: tokenDetails.token,
             endpoint: 'nonprod:sandbox',

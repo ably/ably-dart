@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 
 import '../auth/auth.dart';
 import '../auth/client_options.dart';
-import '../impl/realtime_impl.dart';
+import '../impl/realtime_client_impl.dart';
 import '../pagination/http_paginated_response.dart';
 import 'timer_manager.dart';
 import '../pagination/paginated_result.dart';
@@ -19,13 +19,13 @@ import 'websocket_client.dart';
 /// Provides access to realtime messaging, presence, and connection management.
 ///
 /// Spec: RTC1
-abstract class Realtime {
+abstract class RealtimeClient {
   /// Creates a Realtime client with the given options.
   ///
   /// If [key] is provided, it will be used instead of options.key.
   ///
   /// Spec: RTC1a
-  factory Realtime({
+  factory RealtimeClient({
     ClientOptions? options,
     String? key,
   }) {
@@ -36,14 +36,14 @@ abstract class Realtime {
     if (key != null && options != null) {
       resolvedOptions = resolvedOptions.copyWith(key: key);
     }
-    return RealtimeImpl(options: resolvedOptions);
+    return RealtimeClientImpl(options: resolvedOptions);
   }
 
   /// Creates a Realtime client from an API key.
   ///
   /// Spec: RTC1b
-  factory Realtime.fromKey(String key) {
-    return RealtimeImpl(options: ClientOptions(key: key));
+  factory RealtimeClient.fromKey(String key) {
+    return RealtimeClientImpl(options: ClientOptions(key: key));
   }
 
   /// Creates a Realtime client with test configuration.
@@ -51,13 +51,13 @@ abstract class Realtime {
   /// This factory is only for testing purposes and allows injection of
   /// mock dependencies.
   @visibleForTesting
-  factory Realtime.forTesting({
+  factory RealtimeClient.forTesting({
     required ClientOptions options,
     WebSocketClient? webSocketClient,
     http.Client? httpClient,
     TimerManager? timerManager,
   }) {
-    return RealtimeImpl(
+    return RealtimeClientImpl(
       options: options,
       webSocketClient: webSocketClient,
       httpClient: httpClient,

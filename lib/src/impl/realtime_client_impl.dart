@@ -7,7 +7,7 @@ import '../push/local_device.dart';
 import '../push/push.dart';
 import '../realtime/connection.dart';
 import '../realtime/protocol_message.dart';
-import '../realtime/realtime.dart';
+import '../realtime/realtime_client.dart';
 import '../realtime/realtime_channels.dart';
 import '../realtime/websocket_client.dart';
 import 'base_client_impl.dart';
@@ -22,9 +22,9 @@ import '../realtime/timer_manager.dart';
 /// Provides access to realtime messaging, presence, and connection management.
 ///
 /// Spec: RTC1
-class RealtimeImpl extends BaseClientImpl implements Realtime {
+class RealtimeClientImpl extends BaseClientImpl implements RealtimeClient {
   /// Creates a Realtime client implementation.
-  RealtimeImpl({
+  RealtimeClientImpl({
     required super.options,
     super.httpClient,
     WebSocketClient? webSocketClient,

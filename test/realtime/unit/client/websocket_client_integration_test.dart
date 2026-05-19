@@ -26,7 +26,7 @@ void main() {
       );
 
       // Inject directly into client (same as HTTP pattern!)
-      final client = Realtime.forTesting(
+      final client = RealtimeClient.forTesting(
         options: ClientOptions(key: 'test.key:secret'),
         webSocketClient: mockWs,
       );
@@ -57,7 +57,7 @@ void main() {
       final connFuture = mockWs.awaitConnectionAttempt();
 
       // Create client
-      final client = Realtime.forTesting(
+      final client = RealtimeClient.forTesting(
         options: ClientOptions(key: 'test.key:secret'),
         webSocketClient: mockWs,
       );
@@ -98,7 +98,7 @@ void main() {
         },
       );
 
-      final client = Realtime.forTesting(
+      final client = RealtimeClient.forTesting(
         options: ClientOptions(
           key: 'test.key:secret',
           autoConnect: false,
@@ -138,7 +138,7 @@ void main() {
         },
       );
 
-      final client = Realtime.forTesting(
+      final client = RealtimeClient.forTesting(
         options: ClientOptions(
           key: 'invalid.key:secret',
           autoConnect: false,

@@ -34,7 +34,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             authCallback: (tokenParams) async {
               callbackInvocations.add(tokenParams);
@@ -93,7 +93,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             authCallback: (params) async => TokenDetails(
               token: 'callback-token',
@@ -136,7 +136,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             authCallback: (params) async => 'raw-string-token',
             useBinaryProtocol: false,
@@ -186,7 +186,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             authCallback: (params) async => TokenRequest(
               keyName: 'appId.keyId',
@@ -250,7 +250,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             authUrl: 'https://auth.example.com/get-token',
             useBinaryProtocol: false,
@@ -306,7 +306,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             authUrl: 'https://auth.example.com/token',
             authMethod: 'GET',
@@ -360,7 +360,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             authUrl: 'https://auth.example.com/token',
             authMethod: 'POST',
@@ -419,7 +419,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             authUrl:
                 'https://auth.example.com/token?existing=value&another=123',
@@ -474,7 +474,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             authUrl: 'https://auth.example.com/get-token',
             authHeaders: {
@@ -520,7 +520,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             authUrl: 'https://auth.example.com/get-token',
           ),
@@ -568,7 +568,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             authUrl: 'https://auth.example.com/token',
             authMethod: 'GET',

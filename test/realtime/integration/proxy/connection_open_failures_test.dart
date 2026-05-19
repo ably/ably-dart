@@ -66,7 +66,7 @@ void main() {
 
       final apiKey = testApp.keys[0].keyStr;
 
-      final client = Realtime(
+      final client = RealtimeClient(
         options: ClientOptions(
           authCallback: makeAuthCallback(apiKey),
           endpoint: 'localhost',
@@ -127,7 +127,7 @@ void main() {
       final apiKey = testApp.keys[0].keyStr;
       var authCallbackCount = 0;
 
-      final client = Realtime(
+      final client = RealtimeClient(
         options: ClientOptions(
           authCallback: makeAuthCallback(
             apiKey,
@@ -180,7 +180,7 @@ void main() {
       final apiKey = testApp.keys[0].keyStr;
       final stateChanges = <ConnectionStateChange>[];
 
-      final client = Realtime(
+      final client = RealtimeClient(
         options: ClientOptions(
           authCallback: makeAuthCallback(apiKey),
           endpoint: 'localhost',
@@ -251,7 +251,7 @@ void main() {
 
       final apiKey = testApp.keys[0].keyStr;
 
-      final client = Realtime(
+      final client = RealtimeClient(
         options: ClientOptions(
           authCallback: makeAuthCallback(apiKey),
           endpoint: 'localhost',
@@ -298,7 +298,7 @@ void main() {
 
       final apiKey = testApp.keys[0].keyStr;
 
-      final client = Realtime(
+      final client = RealtimeClient(
         options: ClientOptions(
           authCallback: makeAuthCallback(apiKey),
           endpoint: 'localhost',
