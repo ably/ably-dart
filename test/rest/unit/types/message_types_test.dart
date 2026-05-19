@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:ably_dart/ably_dart.dart';
+import 'package:ably/ably.dart';
 import 'package:test/test.dart';
 
 /// Message Types Tests

@@ -1,4 +1,4 @@
-import 'package:ably_dart/ably_dart.dart';
+import 'package:ably/ably.dart';
 import 'package:test/test.dart';
 
 import '../../../helpers/mock_http_client.dart';

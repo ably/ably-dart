@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:ably_dart/ably_dart.dart';
+import 'package:ably/ably.dart';
 
 /// Unit tests for mutable message types (TM2j, TM2r, TM2s, TM5, TM8, MOP2, UDR2, TAN2).
 ///

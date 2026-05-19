@@ -1,7 +1,7 @@
-import 'package:ably_dart/src/error/error_info.dart';
-import 'package:ably_dart/src/realtime/protocol_message.dart';
-import 'package:ably_dart/src/realtime/publish_result.dart';
-import 'package:ably_dart/src/message/message.dart';
+import 'package:ably/src/error/error_info.dart';
+import 'package:ably/src/realtime/protocol_message.dart';
+import 'package:ably/src/realtime/publish_result.dart';
+import 'package:ably/src/message/message.dart';
 
 /// Helper functions for creating common protocol messages in tests.
 class ProtocolMessageHelpers {

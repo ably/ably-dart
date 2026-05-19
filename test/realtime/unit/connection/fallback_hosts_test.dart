@@ -1,6 +1,6 @@
 import 'package:clock/clock.dart';
 import 'package:test/test.dart';
-import 'package:ably_dart/ably_dart.dart';
+import 'package:ably/ably.dart';
 import '../../../helpers/fake_timer_manager.dart';
 import '../../../helpers/mock_websocket_client.dart';
 import '../../../helpers/mock_http_client.dart';

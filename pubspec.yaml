@@ -1,4 +1,4 @@
-name: ably_dart
+name: ably
 description: Ably REST SDK for Dart - A pure Dart implementation of the Ably REST API.
 version: 0.1.0
 homepage: https://github.com/ably/ably-dart

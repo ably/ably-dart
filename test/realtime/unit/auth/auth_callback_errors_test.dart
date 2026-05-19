@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:ably_dart/ably_dart.dart';
+import 'package:ably/ably.dart';
 import 'package:clock/clock.dart';
 import 'package:test/test.dart';
 
