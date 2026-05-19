@@ -1,6 +1,6 @@
-import 'package:ably_dart/src/error/error_info.dart';
-import 'package:ably_dart/src/realtime/protocol_message.dart';
-import 'package:ably_dart/src/realtime/websocket_client.dart';
+import 'package:ably/src/error/error_info.dart';
+import 'package:ably/src/realtime/protocol_message.dart';
+import 'package:ably/src/realtime/websocket_client.dart';
 import 'package:test/test.dart';
 import 'mock_websocket_client.dart';
 import 'protocol_message_helpers.dart';

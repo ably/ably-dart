@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:test/test.dart';
-import 'package:ably_dart/ably_dart.dart';
-import 'package:ably_dart/src/impl/realtime_channel_impl.dart';
-import 'package:ably_dart/src/impl/realtime_presence_impl.dart';
+import 'package:ably/ably.dart';
+import 'package:ably/src/impl/realtime_channel_impl.dart';
+import 'package:ably/src/impl/realtime_presence_impl.dart';
 import '../../../helpers/mock_websocket_client.dart';
 import '../../../helpers/protocol_message_helpers.dart';
 import '../../../helpers/test_channel_name.dart';

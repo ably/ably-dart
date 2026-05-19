@@ -1,4 +1,4 @@
-import 'package:ably_dart/src/impl/base_client_impl.dart';
+import 'package:ably/src/impl/base_client_impl.dart';
 
 /// A minimal client for testing shared BaseClientImpl functionality
 /// (time, stats, request, etc.) without needing a full Rest or Realtime client.

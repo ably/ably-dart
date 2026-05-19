@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:ably_dart/ably_dart.dart';
+import 'package:ably/ably.dart';
 import 'package:vcdiff_decoder/vcdiff_decoder.dart' as vcdiff;
 
 /// Adapter wrapping `package:vcdiff` for the Ably VCDiffDecoder interface.
