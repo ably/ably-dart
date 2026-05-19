@@ -15,7 +15,7 @@ jobs:
         with:
           submodules: recursive
       - uses: dart-lang/setup-dart@v1
-      - run: dart pub get
+      - run: dart pub get --no-example
       - run: dart analyze --fatal-infos
       - run: dart format --output=none --set-exit-if-changed .
 
@@ -27,5 +27,5 @@ jobs:
         with:
           submodules: recursive
       - uses: dart-lang/setup-dart@v1
-      - run: dart pub get
+      - run: dart pub get --no-example
       - run: dart test

@@ -1,0 +1,29 @@
+name: ably_example
+description: Example Flutter app for the ably Dart SDK.
+publish_to: none
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+  flutter: ">=3.24.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  ably:
+    path: ../
+  http: ^1.2.0
+  retry: ^3.1.2
+  rxdart: ^0.28.0
+  async: ^2.11.0
+  stream_transform: ^2.1.0
+  crypto: ^3.0.3
+  fluttertoast: ^8.2.12
+  flutter_hooks: ^0.20.5
+
+dev_dependencies:
+  flutter_lints: ^4.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
