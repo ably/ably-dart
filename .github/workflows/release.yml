@@ -7,9 +7,24 @@ on:
 
 jobs:
   publish:
+    environment:
+      name: 'pub.dev'
+      url: 'https://pub.dev/packages/ably'
     permissions:
-      id-token: write # Required for authentication using OIDC
-    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
-    with:
-      environment: 'pub.dev'
-      # working-directory: path/to/package/within/repository
+      id-token: write # This is required for requesting the JWT
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout repository
+      - uses: actions/checkout@v4
+      # Set up the Dart SDK and provision the OIDC token used for publishing.
+      # The `dart` command from this step will be shadowed by the one from the
+      # Flutter SDK below.
+      - uses: dart-lang/setup-dart@v1
+      # Minimal package setup and dry run checks.
+      - name: Install dependencies
+        run: dart pub get --no-example
+      - name: Publish - dry run
+        run: dart pub publish --dry-run
+      # Publishing...
+      - name: Publish to pub.dev
+        run: dart pub publish -f
