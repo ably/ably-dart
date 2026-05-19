@@ -19,7 +19,7 @@ void main() {
   });
 
   // Helper: create a REST client with sandbox + JSON protocol.
-  Rest makeClient() => Rest(
+  RestClient makeClient() => RestClient(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
           endpoint: 'nonprod:sandbox',

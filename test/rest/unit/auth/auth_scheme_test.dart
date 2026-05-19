@@ -63,7 +63,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions.fromKey(
             'appId.keyId:keySecret',
             useBinaryProtocol: false,
@@ -111,7 +111,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options:
               ClientOptions(token: 'my-token-string', useBinaryProtocol: false),
           httpClient: mockHttp,
@@ -150,7 +150,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             tokenDetails: TokenDetails(
               token: 'token-from-details',
@@ -196,7 +196,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             authCallback: (params) async => TokenDetails(
               token: 'callback-token',
@@ -250,7 +250,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             clientId: 'my-client',
@@ -298,7 +298,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions.fromKey(
             'appId.keyId:keySecret',
             useBinaryProtocol: false,
@@ -336,7 +336,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             authCallback: (params) async => 'callback-wins',
@@ -378,7 +378,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             token: 'explicit-token',
@@ -401,7 +401,7 @@ void main() {
       // UTS: rest/unit/RSC1b/no-auth-method-error-0
       test('throws error when no authentication method is configured', () {
         expect(
-          () => Rest(options: ClientOptions()),
+          () => RestClient(options: ClientOptions()),
           throwsA(
             isA<AblyException>().having(
               (e) => e.code,

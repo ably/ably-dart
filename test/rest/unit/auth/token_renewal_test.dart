@@ -66,7 +66,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(authCallback: authCallback),
           httpClient: mockHttp,
         );
@@ -131,7 +131,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(authCallback: authCallback),
           httpClient: mockHttp,
         );
@@ -183,7 +183,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(authCallback: authCallback),
           httpClient: mockHttp,
         );
@@ -236,7 +236,7 @@ void main() {
         );
 
         // Client with explicit token but no authCallback
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(token: 'static-token'),
           httpClient: mockHttp,
         );
@@ -304,7 +304,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             authUrl: 'https://example.com/auth',
           ),
@@ -354,7 +354,7 @@ void main() {
         );
 
         // Client with only a token string - no key, no authCallback, no authUrl
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(token: 'static-expired-token'),
           httpClient: mockHttp,
         );
@@ -423,7 +423,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(authCallback: authCallback),
           httpClient: mockHttp,
         );
@@ -501,7 +501,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(authCallback: authCallback),
           httpClient: mockHttp,
         );
@@ -558,7 +558,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(authCallback: authCallback),
           httpClient: mockHttp,
         );

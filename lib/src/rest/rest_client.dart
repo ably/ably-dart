@@ -7,7 +7,7 @@ import '../batch/batch_presence_result.dart';
 import '../batch/batch_publish_spec.dart';
 import '../batch/batch_result.dart';
 import '../channels/channels.dart';
-import '../impl/rest_impl.dart';
+import '../impl/rest_client_impl.dart';
 import '../pagination/http_paginated_response.dart';
 import '../pagination/paginated_result.dart';
 import '../push/local_device.dart';
@@ -20,26 +20,26 @@ import '../stats/stats.dart';
 /// and retrieving channel history.
 ///
 /// Spec: RSC
-abstract class Rest {
+abstract class RestClient {
   /// Creates a REST client with the given options.
   ///
   /// Spec: RSC1
-  factory Rest({
+  factory RestClient({
     required ClientOptions options,
   }) {
-    return RestImpl(options: options);
+    return RestClientImpl(options: options);
   }
 
   /// Creates a REST client from an API key.
   ///
   /// This is a convenience constructor equivalent to:
   /// ```dart
-  /// Rest(options: ClientOptions.fromKey(key))
+  /// RestClient(options: ClientOptions.fromKey(key))
   /// ```
   ///
   /// Spec: RSC1
-  factory Rest.fromKey(String key) {
-    return RestImpl(options: ClientOptions(key: key));
+  factory RestClient.fromKey(String key) {
+    return RestClientImpl(options: ClientOptions(key: key));
   }
 
   /// Creates a REST client with test configuration.
@@ -47,11 +47,11 @@ abstract class Rest {
   /// This factory is only for testing purposes and allows injection of
   /// a mock [httpClient].
   @visibleForTesting
-  factory Rest.forTesting({
+  factory RestClient.forTesting({
     required ClientOptions options,
     http.Client? httpClient,
   }) {
-    return RestImpl(options: options, httpClient: httpClient);
+    return RestClientImpl(options: options, httpClient: httpClient);
   }
 
   /// The client options.

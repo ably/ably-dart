@@ -27,7 +27,7 @@ void main() {
           Map<String, dynamic> context
         })>[];
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             logHandler: (level, message, context) {
@@ -61,7 +61,7 @@ void main() {
           Map<String, dynamic> context
         })>[];
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             logLevel: LogLevel.verbose,
@@ -107,7 +107,7 @@ void main() {
           Map<String, dynamic> context
         })>[];
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             logLevel: LogLevel.info,
@@ -144,7 +144,7 @@ void main() {
           Map<String, dynamic> context
         })>[];
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             logLevel: LogLevel.debug,
@@ -184,7 +184,7 @@ void main() {
           Map<String, dynamic> context
         })>[];
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             logLevel: LogLevel.none,

@@ -59,7 +59,7 @@ void main() {
         },
       );
 
-      final client = Realtime.forTesting(
+      final client = RealtimeClient.forTesting(
         options: ClientOptions(
           key: 'appId.keyId:keySecret',
           autoConnect: false,
@@ -144,7 +144,7 @@ void main() {
         },
       );
 
-      final client = Realtime.forTesting(
+      final client = RealtimeClient.forTesting(
         options: ClientOptions(
           key: 'appId.keyId:keySecret',
           autoConnect: false,
@@ -205,7 +205,7 @@ void main() {
         },
       );
 
-      final client = Realtime.forTesting(
+      final client = RealtimeClient.forTesting(
         options: ClientOptions(
           key: 'appId.keyId:keySecret',
           autoConnect: false,
@@ -256,7 +256,7 @@ void main() {
         },
       );
 
-      final client = Realtime.forTesting(
+      final client = RealtimeClient.forTesting(
         options: ClientOptions(
           key: 'appId.keyId:keySecret',
           autoConnect: false,

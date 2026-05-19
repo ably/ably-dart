@@ -13,10 +13,10 @@ export 'src/auth/token_request.dart';
 export 'src/auth/token_revocation.dart';
 
 // REST
-export 'src/rest/rest.dart';
+export 'src/rest/rest_client.dart';
 
 // Realtime
-export 'src/realtime/realtime.dart';
+export 'src/realtime/realtime_client.dart';
 export 'src/realtime/connection.dart';
 export 'src/realtime/connection_state.dart';
 export 'src/realtime/connection_event.dart';

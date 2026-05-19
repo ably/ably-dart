@@ -73,7 +73,7 @@ void main() {
       // UTS: rest/unit/RSC1b/no-auth-method-error-0.1
       test('throws error 40106 when no auth configured', () {
         expect(
-          () => Rest.forTesting(
+          () => RestClient.forTesting(
             options: ClientOptions(),
             httpClient: mockHttp,
           ),
@@ -90,7 +90,7 @@ void main() {
       // UTS: rest/unit/RSC1b/no-auth-method-error-0.2
       test('throws error when useTokenAuth: true but no token means', () {
         expect(
-          () => Rest.forTesting(
+          () => RestClient.forTesting(
             options: ClientOptions(useTokenAuth: true),
             httpClient: mockHttp,
           ),
@@ -107,7 +107,7 @@ void main() {
       // UTS: rest/unit/RSC1b/no-auth-method-error-0.3
       test('throws error when only clientId provided', () {
         expect(
-          () => Rest.forTesting(
+          () => RestClient.forTesting(
             options: ClientOptions(clientId: 'test'),
             httpClient: mockHttp,
           ),
@@ -133,7 +133,7 @@ void main() {
           logLevel: LogLevel.verbose,
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: options,
           httpClient: mockHttp,
         );
@@ -181,7 +181,7 @@ void main() {
       });
     });
 
-    group('Rest.fromKey convenience constructor', () {
+    group('RestClient.fromKey convenience constructor', () {
       // UTS: rest/integration/RSA4/basic-auth-key-0.2
       test('creates Rest client from API key string', () {
         mockHttp = MockHttpClient(
@@ -190,7 +190,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions.fromKey('appId.keyId:keySecret'),
           httpClient: mockHttp,
         );

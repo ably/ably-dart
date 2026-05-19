@@ -17,7 +17,7 @@ void main() {
     await testApp.delete();
   });
 
-  Rest buildClient() => Rest(
+  RestClient buildClient() => RestClient(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
           endpoint: 'nonprod:sandbox',

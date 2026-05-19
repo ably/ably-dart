@@ -37,7 +37,7 @@ void main() {
         },
       );
 
-      final client = Realtime.forTesting(
+      final client = RealtimeClient.forTesting(
         options: ClientOptions(
           key: 'appId.keyId:keySecret',
           autoConnect: false,
@@ -126,7 +126,7 @@ void main() {
           },
         );
 
-        final client = Realtime.forTesting(
+        final client = RealtimeClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             autoConnect: false,
@@ -228,7 +228,7 @@ void main() {
           },
         );
 
-        final client = Realtime.forTesting(
+        final client = RealtimeClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             autoConnect: false,
@@ -332,7 +332,7 @@ void main() {
           },
         );
 
-        final client = Realtime.forTesting(
+        final client = RealtimeClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             autoConnect: false,
@@ -430,7 +430,7 @@ void main() {
           },
         );
 
-        final client = Realtime.forTesting(
+        final client = RealtimeClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             autoConnect: false,
@@ -537,7 +537,7 @@ void main() {
           },
         );
 
-        final client = Realtime.forTesting(
+        final client = RealtimeClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             autoConnect: false,
@@ -634,7 +634,7 @@ void main() {
 
         const channelRetryTimeout = 5000;
 
-        final client = Realtime.forTesting(
+        final client = RealtimeClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             autoConnect: false,
@@ -720,7 +720,7 @@ void main() {
         },
       );
 
-      final client = Realtime.forTesting(
+      final client = RealtimeClient.forTesting(
         options: ClientOptions(
           key: 'appId.keyId:keySecret',
           autoConnect: false,

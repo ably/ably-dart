@@ -9,7 +9,7 @@ void main() {
   group('Realtime Client - UTS Tests', () {
     // UTS: realtime/unit/RTC2/connection-attribute-0
     test('RTC2 - connection attribute exists', () {
-      final realtime = Realtime(
+      final realtime = RealtimeClient(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,
@@ -22,7 +22,7 @@ void main() {
 
     // UTS: realtime/unit/RTC3/channels-attribute-0
     test('RTC3 - channels attribute exists and can get channels', () {
-      final realtime = Realtime(
+      final realtime = RealtimeClient(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,
@@ -51,7 +51,7 @@ void main() {
 
     // UTS: realtime/unit/RTC4/auth-attribute-0
     test('RTC4 - auth attribute exists', () {
-      final realtime = Realtime(
+      final realtime = RealtimeClient(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,
@@ -65,7 +65,7 @@ void main() {
     // UTS: realtime/unit/RTC17/client-id-attribute-0
     test('RTC17 - clientId attribute returns auth clientId', () {
       // Test with no clientId
-      final realtime1 = Realtime(
+      final realtime1 = RealtimeClient(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,
@@ -74,7 +74,7 @@ void main() {
       expect(realtime1.clientId, isNull);
 
       // Test with clientId in options
-      final realtime2 = Realtime(
+      final realtime2 = RealtimeClient(
         options: ClientOptions(
           key: 'fake.key:secret',
           clientId: 'test-client-id',
@@ -87,7 +87,7 @@ void main() {
     // UTS: realtime/unit/RTC1a/echo-messages-option-0
     test('RTC1a - echoMessages option in query parameters', () {
       // Test default value (true)
-      final realtime1 = Realtime(
+      final realtime1 = RealtimeClient(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,
@@ -96,7 +96,7 @@ void main() {
       expect(realtime1.options.echoMessages, isTrue);
 
       // Test explicit true
-      final realtime2 = Realtime(
+      final realtime2 = RealtimeClient(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,
@@ -105,7 +105,7 @@ void main() {
       expect(realtime2.options.echoMessages, isTrue);
 
       // Test explicit false
-      final realtime3 = Realtime(
+      final realtime3 = RealtimeClient(
         options: ClientOptions(
           key: 'fake.key:secret',
           echoMessages: false,
@@ -117,7 +117,7 @@ void main() {
 
     // UTS: realtime/unit/RTC2/connection-attribute-0.1
     test('Connection initial state is initialized', () {
-      final realtime = Realtime(
+      final realtime = RealtimeClient(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,
@@ -128,7 +128,7 @@ void main() {
 
     // UTS: realtime/unit/RTC17/client-id-attribute-0.1
     test('Channel initial state is initialized', () {
-      final realtime = Realtime(
+      final realtime = RealtimeClient(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,
@@ -152,7 +152,7 @@ void main() {
         },
       );
 
-      final realtime = Realtime.forTesting(
+      final realtime = RealtimeClient.forTesting(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,
@@ -207,7 +207,7 @@ void main() {
         },
       );
 
-      final realtime = Realtime.forTesting(
+      final realtime = RealtimeClient.forTesting(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,
@@ -256,7 +256,7 @@ void main() {
         },
       );
 
-      final realtime = Realtime.forTesting(
+      final realtime = RealtimeClient.forTesting(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,
@@ -315,7 +315,7 @@ void main() {
         },
       );
 
-      final realtime = Realtime.forTesting(
+      final realtime = RealtimeClient.forTesting(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,
@@ -378,7 +378,7 @@ void main() {
         },
       );
 
-      final realtime = Realtime.forTesting(
+      final realtime = RealtimeClient.forTesting(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,
@@ -407,8 +407,8 @@ void main() {
     });
 
     // UTS: realtime/unit/RTC2/connection-attribute-0.4
-    test('Realtime.close closes connection', () async {
-      final realtime = Realtime(
+    test('RealtimeClient.close closes connection', () async {
+      final realtime = RealtimeClient(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,
@@ -432,7 +432,7 @@ void main() {
         autoConnect: false,
       );
 
-      final realtime = Realtime(options: options);
+      final realtime = RealtimeClient(options: options);
 
       expect(realtime.options.key, equals('fake.key:secret'));
       expect(realtime.clientId, equals('test-client'));
@@ -446,7 +446,7 @@ void main() {
         autoConnect: false,
       );
 
-      final realtime = Realtime(
+      final realtime = RealtimeClient(
         options: options,
         key: 'new.key:secret',
       );
@@ -457,7 +457,7 @@ void main() {
     // UTS: realtime/unit/RTC1c/recover-option-0
     test('Constructor throws when neither options nor key provided', () {
       expect(
-        () => Realtime(),
+        () => RealtimeClient(),
         throwsArgumentError,
       );
     });
@@ -479,7 +479,7 @@ void main() {
         },
       );
 
-      final realtime = Realtime.forTesting(
+      final realtime = RealtimeClient.forTesting(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,
@@ -505,7 +505,7 @@ void main() {
 
     // UTS: realtime/unit/RTC5/stats-proxies-rest-0
     test('RTC5 - stats() method is available on Realtime client', () {
-      final realtime = Realtime(
+      final realtime = RealtimeClient(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,
@@ -520,7 +520,7 @@ void main() {
 
     // UTS: realtime/unit/RTC6/time-proxies-rest-0
     test('RTC6 - time() method is available on Realtime client', () {
-      final realtime = Realtime(
+      final realtime = RealtimeClient(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,
@@ -533,7 +533,7 @@ void main() {
 
     // UTS: realtime/unit/RTC9/request-proxies-rest-0
     test('RTC9 - request() method is available on Realtime client', () {
-      final realtime = Realtime(
+      final realtime = RealtimeClient(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,
@@ -549,7 +549,7 @@ void main() {
       // A key without the "appId.keyName:keySecret" format should
       // throw an error
       expect(
-        () => Realtime(
+        () => RealtimeClient(
           options: ClientOptions(
             key: 'invalid-key-format',
             autoConnect: false,
@@ -561,7 +561,7 @@ void main() {
 
     // UTS: realtime/unit/RTC13/push-attribute-0
     test('RTC13 - push attribute is accessible', () {
-      final realtime = Realtime(
+      final realtime = RealtimeClient(
         options: ClientOptions(
           key: 'fake.key:secret',
           autoConnect: false,

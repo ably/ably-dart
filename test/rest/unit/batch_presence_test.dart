@@ -26,7 +26,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
         httpClient: mockHttp,
       );
@@ -59,7 +59,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
         httpClient: mockHttp,
       );
@@ -90,7 +90,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
         httpClient: mockHttp,
       );
@@ -132,7 +132,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
         httpClient: mockHttp,
       );
@@ -162,7 +162,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
         httpClient: mockHttp,
       );
@@ -205,7 +205,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
         httpClient: mockHttp,
       );
@@ -255,7 +255,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
         httpClient: mockHttp,
       );
@@ -300,7 +300,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
         httpClient: mockHttp,
       );
@@ -341,7 +341,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
         httpClient: mockHttp,
       );
@@ -398,7 +398,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
         httpClient: mockHttp,
       );
@@ -448,7 +448,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
         httpClient: mockHttp,
       );
@@ -481,7 +481,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
         httpClient: mockHttp,
       );
@@ -515,7 +515,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
         httpClient: mockHttp,
       );

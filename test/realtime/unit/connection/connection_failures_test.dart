@@ -39,7 +39,7 @@ void main() {
       );
 
       // Use token directly (no way to renew)
-      final client = Realtime.forTesting(
+      final client = RealtimeClient.forTesting(
         options: ClientOptions(
           token: 'some_token_string',
           autoConnect: false,
@@ -104,7 +104,7 @@ void main() {
       );
 
       // Use authCallback for token renewal
-      final client = Realtime.forTesting(
+      final client = RealtimeClient.forTesting(
         options: ClientOptions(
           authCallback: (params) async {
             tokenRenewalCount++;
@@ -167,7 +167,7 @@ void main() {
       );
 
       // Use authCallback that succeeds first time, then fails
-      final client = Realtime.forTesting(
+      final client = RealtimeClient.forTesting(
         options: ClientOptions(
           authCallback: (params) async {
             authCallbackCount++;
@@ -252,7 +252,7 @@ void main() {
           },
         );
 
-        final client = Realtime.forTesting(
+        final client = RealtimeClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             autoConnect: false,
@@ -312,7 +312,7 @@ void main() {
         },
       );
 
-      final client = Realtime.forTesting(
+      final client = RealtimeClient.forTesting(
         options: ClientOptions(
           key: 'appId.keyId:keySecret',
           autoConnect: false,
@@ -374,7 +374,7 @@ void main() {
           },
         );
 
-        final client = Realtime.forTesting(
+        final client = RealtimeClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             autoConnect: false,
@@ -443,7 +443,7 @@ void main() {
           },
         );
 
-        final client = Realtime.forTesting(
+        final client = RealtimeClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             autoConnect: false,
@@ -522,7 +522,7 @@ void main() {
           },
         );
 
-        final client = Realtime.forTesting(
+        final client = RealtimeClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             autoConnect: false,
@@ -602,7 +602,7 @@ void main() {
           },
         );
 
-        final client = Realtime.forTesting(
+        final client = RealtimeClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             disconnectedRetryTimeout: 1000,
@@ -720,7 +720,7 @@ void main() {
         );
 
         // Use authCallback for token renewal
-        final client = Realtime.forTesting(
+        final client = RealtimeClient.forTesting(
           options: ClientOptions(
             authCallback: (params) async {
               tokenRenewalCount++;
@@ -799,7 +799,7 @@ void main() {
           },
         );
 
-        final client = Realtime.forTesting(
+        final client = RealtimeClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             autoConnect: false,
@@ -869,7 +869,7 @@ void main() {
           },
         );
 
-        final client = Realtime.forTesting(
+        final client = RealtimeClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             autoConnect: false,

@@ -8,11 +8,11 @@ import '../../helpers/test_app_helper.dart';
 
 void main() {
   late TestApp testApp;
-  late Rest client;
+  late RestClient client;
 
   setUpAll(() async {
     testApp = await TestApp.provision();
-    client = Rest(
+    client = RestClient(
       options: ClientOptions(
         key: testApp.keys[0].keyStr,
         endpoint: 'nonprod:sandbox',

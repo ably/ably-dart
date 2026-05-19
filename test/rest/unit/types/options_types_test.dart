@@ -108,7 +108,7 @@ void main() {
       // UTS: rest/unit/TO/conflicting-options-validation-1
       test('throws when no auth options provided', () {
         expect(
-          () => Rest(options: ClientOptions(useBinaryProtocol: false)),
+          () => RestClient(options: ClientOptions(useBinaryProtocol: false)),
           throwsA(isA<AblyException>()),
         );
       });

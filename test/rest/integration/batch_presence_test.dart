@@ -21,7 +21,7 @@ void main() {
 
   groupEachProtocol('Rest Batch Presence', (protocol) {
     // Helper: REST client (full-access key[0]).
-    Rest makeRestClient([int keyIndex = 0]) => Rest(
+    RestClient makeRestClient([int keyIndex = 0]) => RestClient(
           options: ClientOptions(
             key: testApp.keys[keyIndex].keyStr,
             endpoint: 'nonprod:sandbox',
@@ -30,7 +30,8 @@ void main() {
         );
 
     // Helper: Realtime client for enterClient (key auth, no clientId on options).
-    Realtime makeRealtimeClientForEnterClient([int keyIndex = 0]) => Realtime(
+    RealtimeClient makeRealtimeClientForEnterClient([int keyIndex = 0]) =>
+        RealtimeClient(
           options: ClientOptions(
             key: testApp.keys[keyIndex].keyStr,
             endpoint: 'nonprod:sandbox',

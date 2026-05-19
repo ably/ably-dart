@@ -23,7 +23,7 @@ void main() {
 
   groupEachProtocol('Rest Mutable Messages', (protocol) {
     // Helper to build a key-authenticated REST client pointed at sandbox.
-    Rest buildClient() => Rest(
+    RestClient buildClient() => RestClient(
           options: ClientOptions(
             key: testApp.keys[0].keyStr,
             endpoint: 'nonprod:sandbox',

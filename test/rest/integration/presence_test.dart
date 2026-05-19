@@ -21,7 +21,7 @@ void main() {
 
   groupEachProtocol('Rest Presence', (protocol) {
     // Helper: create a REST client.
-    Rest makeRestClient([int keyIndex = 0]) => Rest(
+    RestClient makeRestClient([int keyIndex = 0]) => RestClient(
           options: ClientOptions(
             key: testApp.keys[keyIndex].keyStr,
             endpoint: 'nonprod:sandbox',
@@ -30,7 +30,8 @@ void main() {
         );
 
     // Helper: create a Realtime client with a specific clientId.
-    Realtime makeRealtimeClientWithClientId(String clientId) => Realtime(
+    RealtimeClient makeRealtimeClientWithClientId(String clientId) =>
+        RealtimeClient(
           options: ClientOptions(
             key: testApp.keys[0].keyStr,
             endpoint: 'nonprod:sandbox',
@@ -314,7 +315,7 @@ void main() {
       test('RSP_Error_1 - presence.get() with invalid key throws 401',
           () async {
         // Use a syntactically valid key format but one that will be rejected.
-        final client = Rest(
+        final client = RestClient(
           options: ClientOptions(
             key: 'invalid.key:secret',
             endpoint: 'nonprod:sandbox',

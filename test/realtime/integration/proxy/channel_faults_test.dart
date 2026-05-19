@@ -23,12 +23,12 @@ void main() {
   });
 
   /// Creates a Realtime client configured to go through the proxy session.
-  Realtime createProxyClient(
+  RealtimeClient createProxyClient(
     ProxySession session, {
     int? realtimeRequestTimeout,
   }) {
     final apiKey = testApp.keys[0].keyStr;
-    return Realtime(
+    return RealtimeClient(
       options: ClientOptions(
         authCallback: (params) async {
           return JwtHelper.generateToken(apiKey: apiKey);

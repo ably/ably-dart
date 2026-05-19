@@ -23,10 +23,10 @@ void main() {
   });
 
   groupEachProtocol('Rest Channel History', (protocol) {
-    late Rest client;
+    late RestClient client;
 
     setUpAll(() {
-      client = Rest(
+      client = RestClient(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
           endpoint: 'nonprod:sandbox',

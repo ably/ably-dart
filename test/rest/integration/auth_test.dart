@@ -25,7 +25,7 @@ void main() {
   group('RSA4 - Basic auth', () {
     // UTS: rest/integration/RSA4/basic-auth-key-0
     test('RSA4 - basic auth with API key succeeds', () async {
-      final client = Rest(
+      final client = RestClient(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
           endpoint: 'nonprod:sandbox',
@@ -50,7 +50,7 @@ void main() {
         apiKey: testApp.keys[0].keyStr,
       );
 
-      final client = Rest(
+      final client = RestClient(
         options: ClientOptions(
           token: jwt,
           endpoint: 'nonprod:sandbox',
@@ -67,7 +67,7 @@ void main() {
     // UTS: rest/integration/RSA8/token-auth-native-1
     test('RSA8 native token - requestToken then use token string', () async {
       // Obtain a native Ably token using a key-authenticated client.
-      final keyClient = Rest(
+      final keyClient = RestClient(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
           endpoint: 'nonprod:sandbox',
@@ -80,7 +80,7 @@ void main() {
       expect(tokenDetails.token, isNotNull);
 
       // Create a new client using only the token string.
-      final tokenClient = Rest(
+      final tokenClient = RestClient(
         options: ClientOptions(
           token: tokenDetails.token,
           endpoint: 'nonprod:sandbox',
@@ -97,7 +97,7 @@ void main() {
 
     // UTS: rest/integration/RSA8/auth-callback-jwt-3
     test('RSA8 authCallback returning TokenRequest succeeds', () async {
-      final keyClient = Rest(
+      final keyClient = RestClient(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
           endpoint: 'nonprod:sandbox',
@@ -106,7 +106,7 @@ void main() {
       );
       addTearDown(keyClient.close);
 
-      final client = Rest(
+      final client = RestClient(
         options: ClientOptions(
           authCallback: (params) async {
             return keyClient.auth.createTokenRequest();
@@ -126,7 +126,7 @@ void main() {
     test('RSA8 authCallback returning JWT string succeeds', () async {
       final apiKey = testApp.keys[0].keyStr;
 
-      final client = Rest(
+      final client = RestClient(
         options: ClientOptions(
           authCallback: (params) async {
             return JwtHelper.generateToken(apiKey: apiKey);
@@ -149,7 +149,7 @@ void main() {
   group('RSA4 - Invalid credentials', () {
     // UTS: rest/integration/RSA4/invalid-credentials-rejected-1
     test('RSA4 - invalid API key returns 401 / error code 40400', () async {
-      final client = Rest(
+      final client = RestClient(
         options: ClientOptions(
           key: '${testApp.appId}.invalidKey:invalidSecret',
           endpoint: 'nonprod:sandbox',
@@ -208,7 +208,7 @@ void main() {
         capability: '{"$allowedChannel":["publish"]}',
       );
 
-      final client = Rest(
+      final client = RestClient(
         options: ClientOptions(
           token: restrictedJwt,
           endpoint: 'nonprod:sandbox',

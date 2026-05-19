@@ -197,7 +197,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             fallbackHosts: [],
@@ -233,7 +233,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(key: 'appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
@@ -294,7 +294,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(key: 'appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
@@ -331,7 +331,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(key: 'appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
@@ -359,7 +359,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(key: 'appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
@@ -388,7 +388,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(key: 'appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
@@ -413,7 +413,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(key: 'appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
@@ -449,7 +449,7 @@ void main() {
             },
           );
 
-          final client = Rest.forTesting(
+          final client = RestClient.forTesting(
             options: ClientOptions(key: 'appId.keyId:keySecret'),
             httpClient: mockHttp,
           );
@@ -482,7 +482,7 @@ void main() {
             },
           );
 
-          final client = Rest.forTesting(
+          final client = RestClient.forTesting(
             options: ClientOptions(key: 'appId.keyId:keySecret'),
             httpClient: mockHttp,
           );
@@ -531,7 +531,7 @@ void main() {
             },
           );
 
-          final client = Rest.forTesting(
+          final client = RestClient.forTesting(
             options: ClientOptions(key: 'appId.keyId:keySecret'),
             httpClient: mockHttp,
           );
@@ -570,7 +570,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(key: 'appId.keyId:keySecret'),
           httpClient: mockHttp,
         );
@@ -619,7 +619,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             fallbackRetryTimeout: 60000,
@@ -668,7 +668,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             fallbackRetryTimeout: 100,
@@ -725,7 +725,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             fallbackRetryTimeout: 100,

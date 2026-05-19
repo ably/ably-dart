@@ -22,7 +22,7 @@ void main() {
   });
 
   // Helper: build a key-authenticated REST client (key[4] has revocableTokens).
-  Rest buildRevocableKeyClient() => Rest(
+  RestClient buildRevocableKeyClient() => RestClient(
         options: ClientOptions(
           key: testApp.keys[4].keyStr,
           endpoint: 'nonprod:sandbox',
@@ -51,7 +51,7 @@ void main() {
       expect(token.token, isNotNull);
 
       // Connect a Realtime client with the token
-      final realtimeClient = Realtime(
+      final realtimeClient = RealtimeClient(
         options: ClientOptions(
           token: token.token,
           endpoint: 'nonprod:sandbox',
@@ -136,7 +136,7 @@ void main() {
         apiKey: testApp.keys[4].keyStr,
       );
 
-      final tokenClient = Rest(
+      final tokenClient = RestClient(
         options: ClientOptions(
           token: jwt,
           endpoint: 'nonprod:sandbox',

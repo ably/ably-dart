@@ -41,7 +41,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions.fromKey(
             'appId.keyId:keySecret',
             useBinaryProtocol: false,
@@ -91,7 +91,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions.fromKey(
             'appId.keyId:keySecret',
             useBinaryProtocol: false,
@@ -162,7 +162,7 @@ void main() {
             },
           );
 
-          final client = Rest.forTesting(
+          final client = RestClient.forTesting(
             options: ClientOptions.fromKey(
               'appId.keyId:keySecret',
               useBinaryProtocol: false,
@@ -213,7 +213,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions.fromKey(
             'appId.keyId:keySecret',
             useBinaryProtocol: false,
@@ -235,7 +235,7 @@ void main() {
       // UTS: rest/unit/RSL1i/message-size-limit-0
       test('rejects messages exceeding maxMessageSize', () async {
         final channelName = testChannelName('RSL1i-reject');
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             maxMessageSize: 1024, // 1KB limit for testing
@@ -282,7 +282,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             maxMessageSize: 1024,
@@ -323,7 +323,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions.fromKey(
             'appId.keyId:keySecret',
             useBinaryProtocol: false,
@@ -382,7 +382,7 @@ void main() {
           },
         );
 
-        final client = Rest.forTesting(
+        final client = RestClient.forTesting(
           options: ClientOptions.fromKey(
             'appId.keyId:keySecret',
             useBinaryProtocol: false,
@@ -443,7 +443,7 @@ void main() {
           },
         );
 
-        final clientWithId = Rest.forTesting(
+        final clientWithId = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             clientId: 'lib-client',
@@ -493,7 +493,7 @@ void main() {
           },
         );
 
-        final clientWithId = Rest.forTesting(
+        final clientWithId = RestClient.forTesting(
           options: ClientOptions(
             key: 'appId.keyId:keySecret',
             clientId: 'lib-client',
@@ -537,7 +537,7 @@ void main() {
           },
         );
 
-        final clientNoId = Rest.forTesting(
+        final clientNoId = RestClient.forTesting(
           options: ClientOptions.fromKey(
             'appId.keyId:keySecret',
             useBinaryProtocol: false,

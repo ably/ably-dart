@@ -29,7 +29,7 @@ void main() {
     test('RTL10d - History contains messages published by another client',
         () async {
       // Create two Realtime clients
-      final publisher = Realtime(
+      final publisher = RealtimeClient(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
           endpoint: 'nonprod:sandbox',
@@ -39,7 +39,7 @@ void main() {
       );
       addTearDown(() async => await publisher.close());
 
-      final subscriber = Realtime(
+      final subscriber = RealtimeClient(
         options: ClientOptions(
           key: testApp.keys[0].keyStr,
           endpoint: 'nonprod:sandbox',

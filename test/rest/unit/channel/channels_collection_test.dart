@@ -8,10 +8,10 @@ import '../../../helpers/test_channel_name.dart';
 /// Spec: RSN1, RSN2, RSN3a, RSN3b, RSN3c, RSN4a, RSN4b
 void main() {
   group('RestChannels Collection', () {
-    late Rest client;
+    late RestClient client;
 
     setUp(() {
-      client = Rest(
+      client = RestClient(
         options: ClientOptions(key: 'appId.keyId:keySecret'),
       );
     });

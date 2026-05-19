@@ -12,7 +12,7 @@ void main() {
   group('RSL9 - RestChannel name attribute', () {
     // UTS: rest/unit/RSL9/channel-name-attribute-0
     test('returns the name used when getting the channel', () {
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
       );
 
@@ -28,7 +28,7 @@ void main() {
   group('RSL7 - RestChannel setOptions', () {
     // UTS: rest/unit/RSL7/setoptions-updates-options-0
     test('setOptions completes without error', () async {
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
       );
 
@@ -39,7 +39,7 @@ void main() {
 
     // UTS: rest/unit/RSL7/setoptions-stores-options-1
     test('setOptions stores options on channel', () async {
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
       );
 
@@ -79,7 +79,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
         httpClient: mockHttp,
       );
@@ -120,7 +120,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
         httpClient: mockHttp,
       );
@@ -166,7 +166,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
         httpClient: mockHttp,
       );
@@ -221,7 +221,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
         httpClient: mockHttp,
       );
@@ -286,7 +286,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey('fake.key:secret'),
         httpClient: mockHttp,
       );

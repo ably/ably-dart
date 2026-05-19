@@ -59,19 +59,19 @@ void main() {
       );
       addTearDown(() async => await session.close());
 
-      final client = Rest(
+      final client = RestClient(
         options: ClientOptions(
           authCallback: (params) async {
             authCallbackCount++;
-            final innerRest = Rest(
+            final innerRestClient = RestClient(
               options: ClientOptions(
                 key: apiKey,
                 endpoint: 'nonprod:sandbox',
                 useBinaryProtocol: false,
               ),
             );
-            final tokenDetails = await innerRest.auth.requestToken();
-            await innerRest.close();
+            final tokenDetails = await innerRestClient.auth.requestToken();
+            await innerRestClient.close();
             return tokenDetails;
           },
           endpoint: 'localhost',
@@ -131,18 +131,18 @@ void main() {
       );
       addTearDown(() async => await session.close());
 
-      final client = Rest(
+      final client = RestClient(
         options: ClientOptions(
           authCallback: (params) async {
-            final innerRest = Rest(
+            final innerRestClient = RestClient(
               options: ClientOptions(
                 key: apiKey,
                 endpoint: 'nonprod:sandbox',
                 useBinaryProtocol: false,
               ),
             );
-            final tokenDetails = await innerRest.auth.requestToken();
-            await innerRest.close();
+            final tokenDetails = await innerRestClient.auth.requestToken();
+            await innerRestClient.close();
             return tokenDetails;
           },
           endpoint: 'localhost',
@@ -196,7 +196,7 @@ void main() {
       addTearDown(() async => await session.close());
 
       // Create Realtime client
-      final realtimeClient = Realtime(
+      final realtimeClient = RealtimeClient(
         options: ClientOptions(
           authCallback: (params) async {
             return JwtHelper.generateToken(apiKey: apiKey);
@@ -222,7 +222,7 @@ void main() {
       await Future<void>.delayed(const Duration(seconds: 1));
 
       // Create REST client through the same proxy
-      final restClient = Rest(
+      final restClient = RestClient(
         options: ClientOptions(
           authCallback: (params) async {
             return JwtHelper.generateToken(apiKey: apiKey);

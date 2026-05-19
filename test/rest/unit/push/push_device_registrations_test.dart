@@ -28,7 +28,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey(
           'appId.keyId:keySecret',
           useBinaryProtocol: false,
@@ -75,7 +75,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey(
           'appId.keyId:keySecret',
           useBinaryProtocol: false,
@@ -113,7 +113,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey(
           'appId.keyId:keySecret',
           useBinaryProtocol: false,
@@ -152,7 +152,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey(
           'appId.keyId:keySecret',
           useBinaryProtocol: false,
@@ -200,7 +200,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey(
           'appId.keyId:keySecret',
           useBinaryProtocol: false,
@@ -237,7 +237,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey(
           'appId.keyId:keySecret',
           useBinaryProtocol: false,
@@ -278,7 +278,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey(
           'appId.keyId:keySecret',
           useBinaryProtocol: false,
@@ -362,7 +362,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey(
           'appId.keyId:keySecret',
           useBinaryProtocol: false,
@@ -420,7 +420,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey(
           'appId.keyId:keySecret',
           useBinaryProtocol: false,
@@ -459,7 +459,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey(
           'appId.keyId:keySecret',
           useBinaryProtocol: false,
@@ -490,7 +490,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey(
           'appId.keyId:keySecret',
           useBinaryProtocol: false,
@@ -514,7 +514,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey(
           'appId.keyId:keySecret',
           useBinaryProtocol: false,
@@ -545,7 +545,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey(
           'appId.keyId:keySecret',
           useBinaryProtocol: false,
@@ -575,7 +575,7 @@ void main() {
         },
       );
 
-      final client = Rest.forTesting(
+      final client = RestClient.forTesting(
         options: ClientOptions.fromKey(
           'appId.keyId:keySecret',
           useBinaryProtocol: false,
