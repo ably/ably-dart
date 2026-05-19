@@ -4,3 +4,5 @@ build/
 pubspec.lock
 .claude/
 submodules/uts-proxy/test-proxy
+
+.idea
