@@ -16,6 +16,8 @@ jobs:
     steps:
       # Checkout repository
       - uses: actions/checkout@v4
+        with:
+          submodules: true
       # Set up the Dart SDK and provision the OIDC token used for publishing.
       # The `dart` command from this step will be shadowed by the one from the
       # Flutter SDK below.
