@@ -1,3 +1,4 @@
 example/
-submodules/
+submodules/**
 test/
+docs/
