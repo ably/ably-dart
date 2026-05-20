@@ -2,3 +2,4 @@ example/
 submodules/**
 test/
 docs/
+submodules/ably-common
