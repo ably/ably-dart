@@ -42,7 +42,7 @@ The Dart SDK is available as a [pub.dev package](https://pub.dev/packages/ably).
 
 ```yaml
 dependencies:
-  ably: ^0.1.0
+  ably: ^0.2.0
 ```
 
 Then run:
