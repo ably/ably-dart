@@ -310,7 +310,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
       action: ProtocolAction.auth,
       auth: {'accessToken': token.token},
     );
-    _webSocketConnection!.send(message);
+    sendMessage(message);
 
     await completer.future;
   }
@@ -505,7 +505,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
         action: ProtocolAction.heartbeat,
         id: pingId,
       );
-      _webSocketConnection!.send(message);
+      sendMessage(message);
     } catch (e) {
       _pendingPings.remove(pingId);
       _timerManager.cancel(owner: this, name: 'ping_$pingId');
@@ -1490,7 +1490,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
       return;
     }
 
-    _logger.debug('Idle timeout, sending heartbeat');
+    _logger.debug('Idle timeout, closing connection');
 
     // Store error for use in onClose handler
     _pendingDisconnectError = const ErrorInfo(
@@ -1506,8 +1506,9 @@ class ConnectionImpl implements Connection, WebSocketListener {
   /// Handles incoming HEARTBEAT messages.
   ///
   /// If the heartbeat has an id matching a pending ping (RTN13e),
-  /// resolves that ping with the round-trip duration. Otherwise,
-  /// echoes the heartbeat back (server-initiated keepalive).
+  /// resolves that ping with the round-trip duration. Otherwise, the
+  /// heartbeat is ignored — receiving it already reset the idle timer
+  /// in [onMessage], and the client does not echo heartbeats back.
   void _handleHeartbeat(ProtocolMessage message) {
     if (message.id != null && _pendingPings.containsKey(message.id)) {
       // RTN13e: Matching response to a ping
@@ -1517,9 +1518,6 @@ class ConnectionImpl implements Connection, WebSocketListener {
       if (!completer.isCompleted) {
         completer.complete(clock.now().difference(startTime));
       }
-    } else {
-      // Server-initiated heartbeat — echo back
-      _sendHeartbeat();
     }
   }
 
@@ -1552,7 +1550,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
         action: ProtocolAction.auth,
         auth: {'accessToken': tokenDetails.token},
       );
-      _webSocketConnection?.send(authMessage);
+      sendMessage(authMessage);
     } catch (e) {
       // Extract underlying error
       ErrorInfo? underlyingError;
@@ -1587,20 +1585,6 @@ class ConnectionImpl implements Connection, WebSocketListener {
 
       // If not connected, treat as normal auth error
       _handleAuthError(e);
-    }
-  }
-
-  /// Sends a heartbeat message.
-  void _sendHeartbeat() {
-    if (_webSocketConnection == null) {
-      return;
-    }
-
-    try {
-      final message = ProtocolMessage(action: ProtocolAction.heartbeat);
-      _webSocketConnection!.send(message);
-    } catch (e) {
-      _logger.warn('Error sending heartbeat', {'error': e.toString()});
     }
   }
 
@@ -1811,7 +1795,7 @@ class ConnectionImpl implements Connection, WebSocketListener {
       completer: completer,
     );
 
-    _webSocketConnection!.send(messageWithSerial);
+    sendMessage(messageWithSerial);
     return completer.future;
   }
 
@@ -1893,11 +1877,11 @@ class ConnectionImpl implements Connection, WebSocketListener {
           message: resendMessage,
           completer: pending.completer,
         );
-        _webSocketConnection!.send(resendMessage);
+        sendMessage(resendMessage);
       } else {
         // RTN19a2: Successful resume — keep same msgSerial
         _pendingMessages[entry.key] = pending;
-        _webSocketConnection!.send(originalMessage);
+        sendMessage(originalMessage);
       }
     }
   }
