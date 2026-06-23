@@ -2,7 +2,11 @@
 .packages
 build/
 pubspec.lock
-.claude/
+
+.claude/**
+!.claude/skills
+!.claude/skills/**
+
 submodules/uts-proxy/test-proxy
 
 .idea
