@@ -3,9 +3,7 @@
 build/
 pubspec.lock
 
-.claude/**
-!.claude/skills
-!.claude/skills/**
+.claude/**.local.**
 
 submodules/uts-proxy/test-proxy
 
