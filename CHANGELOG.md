@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.0](https://github.com/ably/ably-flutter/tree/v0.2.0)
+
+[Full Changelog](https://github.com/ably/ably-flutter/compare/v0.1.0...v0.2.0)
+
+- Refine heartbeat handling logic and improve logging for protocol message sending [#10](https://github.com/ably/ably-flutter/pull/10)
+
 ## [0.1.0](https://github.com/ably/ably-dart/tree/v0.1.0)
 
 Initial release of the Ably Pub/Sub Dart SDK.
