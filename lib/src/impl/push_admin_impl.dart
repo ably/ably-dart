@@ -109,13 +109,15 @@ class PushImpl implements Push {
     // RSH2f1 — validation first, without any side effects.
     if ((token.transportType != 'fcm' && token.transportType != 'apns') ||
         token.token.isEmpty) {
-      throw AblyException.fromErrorInfo(ErrorInfo(
-        message: 'push.updateToken() requires a PushDeviceToken with '
-            "transportType 'fcm' or 'apns' and a non-empty token "
-            '(got transportType "${token.transportType}")',
-        code: 40000,
-        statusCode: 400,
-      ),);
+      throw AblyException.fromErrorInfo(
+        ErrorInfo(
+          message: 'push.updateToken() requires a PushDeviceToken with '
+              "transportType 'fcm' or 'apns' and a non-empty token "
+              '(got transportType "${token.transportType}")',
+          code: 40000,
+          statusCode: 400,
+        ),
+      );
     }
 
     final machine = _requireMachine();
@@ -124,12 +126,14 @@ class PushImpl implements Push {
 
     // RSH2f2 — the device must have completed activation.
     if (device.deviceIdentityToken == null) {
-      throw AblyException.fromErrorInfo(const ErrorInfo(
-        message: 'Push token cannot be updated because the device is not '
-            'activated for push notifications; call Push#activate first',
-        code: 40000,
-        statusCode: 400,
-      ),);
+      throw AblyException.fromErrorInfo(
+        const ErrorInfo(
+          message: 'Push token cannot be updated because the device is not '
+              'activated for push notifications; call Push#activate first',
+          code: 40000,
+          statusCode: 400,
+        ),
+      );
     }
 
     // RSH2f3 — apply to the recipient slot, persist, then notify the

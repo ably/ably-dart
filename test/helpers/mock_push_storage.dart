@@ -86,7 +86,8 @@ class MockPushStorage implements PushKeyValueStorage {
 
   @override
   Future<void> setItem(String key, String value) async {
-    onOperation?.call(StorageOperation(type: 'setItem', key: key, value: value));
+    onOperation
+        ?.call(StorageOperation(type: 'setItem', key: key, value: value));
     if (failWrites) {
       throw StateError('MockPushStorage: writes are failing (failWrites)');
     }

@@ -184,8 +184,7 @@ void main() {
     // UTS: rest/unit/RSH6b/device-secret-auth-before-identity-token-0
     test(
         'RSH6b, RSH3d2b - a device with a deviceSecret but no '
-        'deviceIdentityToken authenticates with X-Ably-DeviceSecret',
-        () async {
+        'deviceIdentityToken authenticates with X-Ably-DeviceSecret', () async {
       final mockHttp = _mockRegistrationServer();
       final mockStorage = MockPushStorage();
       final client = _pushClient(mockHttp, mockStorage);

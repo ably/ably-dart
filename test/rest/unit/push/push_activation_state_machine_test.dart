@@ -184,14 +184,12 @@ void main() {
       await expectLater(
         Future.sync(() => client.push.activate()),
         throwsA(
-          isA<AblyException>()
-              .having((e) => e.errorInfo?.code, 'code', 40198),
+          isA<AblyException>().having((e) => e.errorInfo?.code, 'code', 40198),
         ),
       );
       expect(capturedRequests.length, equals(1));
       await _waitFor(
-        () =>
-            mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
+        () => mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
         'persisted activation state to become NotActivated',
       );
 
@@ -231,8 +229,7 @@ void main() {
       // No registration was attempted
       expect(capturedRequests, isEmpty);
       await _waitFor(
-        () =>
-            mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
+        () => mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
         'persisted activation state to become NotActivated',
       );
     });
@@ -289,8 +286,7 @@ void main() {
 
       await client.push.deactivate(); // RSH3b2a — resolves with no error
       await _waitFor(
-        () =>
-            mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
+        () => mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
         'persisted activation state to become NotActivated',
       );
 
@@ -443,8 +439,7 @@ void main() {
       await expectLater(
         Future.sync(() => client.push.activate()),
         throwsA(
-          isA<AblyException>()
-              .having((e) => e.errorInfo?.code, 'code', 61002),
+          isA<AblyException>().having((e) => e.errorInfo?.code, 'code', 61002),
         ),
       );
 
@@ -508,8 +503,7 @@ void main() {
       await expectLater(
         Future.sync(() => client.push.activate()),
         throwsA(
-          isA<AblyException>()
-              .having((e) => e.errorInfo?.code, 'code', 40199),
+          isA<AblyException>().having((e) => e.errorInfo?.code, 'code', 40199),
         ),
       );
       await _waitFor(
@@ -551,8 +545,7 @@ void main() {
 
       await client.push.deactivate();
       await _waitFor(
-        () =>
-            mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
+        () => mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
         'persisted activation state to become NotActivated',
       );
 
@@ -592,8 +585,7 @@ void main() {
       expect(capturedRequests.length, equals(1)); // just the seeding POST
       expect(deregisteredIds, equals([deviceId]));
       await _waitFor(
-        () =>
-            mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
+        () => mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
         'persisted activation state to become NotActivated',
       );
     });
@@ -626,8 +618,7 @@ void main() {
         equals('seeded-ident-token'),
       );
       await _waitFor(
-        () =>
-            mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
+        () => mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
         'persisted activation state to become NotActivated',
       );
     });
@@ -644,8 +635,7 @@ void main() {
 
       expect(capturedRequests, isEmpty);
       await _waitFor(
-        () =>
-            mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
+        () => mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
         'persisted activation state to become NotActivated',
       );
     });
@@ -673,8 +663,7 @@ void main() {
       await client.push.deactivate(); // resolves despite the 401
 
       await _waitFor(
-        () =>
-            mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
+        () => mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
         'persisted activation state to become NotActivated',
       );
       final persisted = mockStorage.dump();
@@ -705,8 +694,7 @@ void main() {
       await client.push.deactivate(); // resolves despite the 40005
 
       await _waitFor(
-        () =>
-            mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
+        () => mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
         'persisted activation state to become NotActivated',
       );
     });
@@ -737,8 +725,7 @@ void main() {
       await expectLater(
         Future.sync(() => client.push.deactivate()),
         throwsA(
-          isA<AblyException>()
-              .having((e) => e.errorInfo?.code, 'code', 40198),
+          isA<AblyException>().having((e) => e.errorInfo?.code, 'code', 40198),
         ),
       );
 
@@ -752,8 +739,7 @@ void main() {
       // POST + failed DELETE + successful DELETE
       expect(capturedRequests.length, equals(3));
       await _waitFor(
-        () =>
-            mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
+        () => mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
         'persisted activation state to become NotActivated',
       );
     });
@@ -794,14 +780,14 @@ void main() {
           capturedRequests.where((r) => r.method == 'DELETE').toList();
       expect(deleteRequests.length, equals(1));
       await _waitFor(
-        () =>
-            mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
+        () => mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
         'persisted activation state to become NotActivated',
       );
     });
 
     // UTS: rest/unit/RSH3f2a/deactivate-after-sync-failure-0
-    test('RSH3f2a - deactivate from AfterRegistrationSyncFailed deregisters '
+    test(
+        'RSH3f2a - deactivate from AfterRegistrationSyncFailed deregisters '
         'normally', () async {
       final capturedRequests = _mockRegistrationServer(
         overrides: (request) {
@@ -827,8 +813,7 @@ void main() {
       await expectLater(
         Future.sync(() => client.push.activate()),
         throwsA(
-          isA<AblyException>()
-              .having((e) => e.errorInfo?.code, 'code', 40199),
+          isA<AblyException>().having((e) => e.errorInfo?.code, 'code', 40199),
         ),
       );
       await _waitFor(
@@ -843,10 +828,12 @@ void main() {
       final deleteRequests =
           capturedRequests.where((r) => r.method == 'DELETE').toList();
       expect(deleteRequests.length, equals(1));
-      expect(deleteRequests[0].url.queryParameters['deviceId'], equals(deviceId));
+      expect(
+        deleteRequests[0].url.queryParameters['deviceId'],
+        equals(deviceId),
+      );
       await _waitFor(
-        () =>
-            mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
+        () => mockStorage.dump()['ably.push.activationState'] == 'NotActivated',
         'persisted activation state to become NotActivated',
       );
     });
@@ -892,8 +879,7 @@ void main() {
       await expectLater(
         Future.sync(() => client.push.activate()),
         throwsA(
-          isA<AblyException>()
-              .having((e) => e.errorInfo?.code, 'code', 40199),
+          isA<AblyException>().having((e) => e.errorInfo?.code, 'code', 40199),
         ),
       );
       await _waitFor(
@@ -906,8 +892,7 @@ void main() {
       await expectLater(
         Future.sync(() => client.push.deactivate()),
         throwsA(
-          isA<AblyException>()
-              .having((e) => e.errorInfo?.code, 'code', 40198),
+          isA<AblyException>().having((e) => e.errorInfo?.code, 'code', 40198),
         ),
       );
 

@@ -232,8 +232,7 @@ MockHttpClient _mockRegistrationServer({
         // the override handled (or held) the request
         return;
       }
-      if (req.method == 'POST' &&
-          req.url.path == '/push/deviceRegistrations') {
+      if (req.method == 'POST' && req.url.path == '/push/deviceRegistrations') {
         final body = req.jsonBody as Map<String, dynamic>;
         req.respondWith(201, {
           ...body,

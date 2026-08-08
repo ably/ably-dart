@@ -122,8 +122,7 @@ void main() {
       expect(storage.dump(), {'a': '1'});
     });
 
-    test('onOperation throw fails the op without modifying contents',
-        () async {
+    test('onOperation throw fails the op without modifying contents', () async {
       final storage = MockPushStorage(
         onOperation: (op) {
           if (op.type == 'setItem' &&

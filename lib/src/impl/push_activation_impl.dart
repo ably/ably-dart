@@ -233,8 +233,7 @@ class LocalDeviceManager {
     final bytes = List<int>.generate(16, (_) => random.nextInt(256));
     bytes[6] = (bytes[6] & 0x0f) | 0x40; // version 4
     bytes[8] = (bytes[8] & 0x3f) | 0x80; // variant 10
-    final hex =
-        bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+    final hex = bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
     return '${hex.substring(0, 8)}-${hex.substring(8, 12)}-'
         '${hex.substring(12, 16)}-${hex.substring(16, 20)}-'
         '${hex.substring(20)}';
@@ -637,11 +636,13 @@ class ActivationStateMachine {
     _logger.debug('Push local device clientId set from auth', {
       'clientId': authClientId,
     });
-    unawaited(device.persistClientId().catchError((Object e) {
-      _logger.error('Failed to persist push device clientId', {
-        'error': e.toString(),
-      });
-    }),);
+    unawaited(
+      device.persistClientId().catchError((Object e) {
+        _logger.error('Failed to persist push device clientId', {
+          'error': e.toString(),
+        });
+      }),
+    );
 
     // RSH8e — trigger a registration sync once the clientId is set.
     if (device.deviceIdentityToken != null &&
@@ -763,13 +764,18 @@ class ActivationStateMachine {
         authClientId != '*' &&
         authClientId != deviceClientId) {
       // RSH3a2a1 — incompatible identity.
-      handleEvent(SyncRegistrationFailed(ErrorInfo(
-        message: 'Activation failed: present clientId "$authClientId" is not '
-            'compatible with the device registration clientId '
-            '"$deviceClientId"',
-        code: 61002,
-        statusCode: 400,
-      ),),);
+      handleEvent(
+        SyncRegistrationFailed(
+          ErrorInfo(
+            message:
+                'Activation failed: present clientId "$authClientId" is not '
+                'compatible with the device registration clientId '
+                '"$deviceClientId"',
+            code: 61002,
+            statusCode: 400,
+          ),
+        ),
+      );
     } else if (registerCallback != null) {
       _callCustomRegisterer(isNew: false);
     } else {
@@ -830,10 +836,12 @@ class ActivationStateMachine {
           }
           responseClientId = body['clientId'] as String?;
         }
-        handleEvent(GotDeviceRegistration(
-          deviceIdentityToken: identityToken,
-          clientId: responseClientId,
-        ),);
+        handleEvent(
+          GotDeviceRegistration(
+            deviceIdentityToken: identityToken,
+            clientId: responseClientId,
+          ),
+        );
       } catch (e) {
         handleEvent(GettingDeviceRegistrationFailed(_toErrorInfo(e)));
       }
@@ -848,10 +856,12 @@ class ActivationStateMachine {
       try {
         final result = await callback(device.snapshot());
         if (isNew) {
-          handleEvent(GotDeviceRegistration(
-            deviceIdentityToken: result.deviceIdentityToken,
-            clientId: result.clientId,
-          ),);
+          handleEvent(
+            GotDeviceRegistration(
+              deviceIdentityToken: result.deviceIdentityToken,
+              clientId: result.clientId,
+            ),
+          );
         } else {
           handleEvent(RegistrationSynced(clientId: result.clientId));
         }
@@ -934,11 +944,13 @@ class ActivationStateMachine {
   void _adoptRegistration(GotDeviceRegistration event) {
     if (event.deviceIdentityToken != null) {
       device.deviceIdentityToken = event.deviceIdentityToken;
-      unawaited(device.persistIdentityToken().catchError((Object e) {
-        _logger.error('Failed to persist push device identity token', {
-          'error': e.toString(),
-        });
-      }),);
+      unawaited(
+        device.persistIdentityToken().catchError((Object e) {
+          _logger.error('Failed to persist push device identity token', {
+            'error': e.toString(),
+          });
+        }),
+      );
     }
     _adoptResponseClientId(event.clientId);
   }
@@ -952,11 +964,13 @@ class ActivationStateMachine {
       return;
     }
     device.clientId = responseClientId;
-    unawaited(device.persistClientId().catchError((Object e) {
-      _logger.error('Failed to persist push device clientId', {
-        'error': e.toString(),
-      });
-    }),);
+    unawaited(
+      device.persistClientId().catchError((Object e) {
+        _logger.error('Failed to persist push device clientId', {
+          'error': e.toString(),
+        });
+      }),
+    );
   }
 
   /// RSH3g2a — clears the registration and resets the device identity after

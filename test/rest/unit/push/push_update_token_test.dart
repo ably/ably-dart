@@ -575,7 +575,10 @@ void main() {
       expect(recipient['transportType'], equals('apns'));
 
       // PCP3a — the variant landed in its slot
-      expect(recipient['apnsDeviceTokens']['pushToStart'], equals('pts-token-1'));
+      expect(
+        recipient['apnsDeviceTokens']['pushToStart'],
+        equals('pts-token-1'),
+      );
 
       // RSH8l2 — the default token was preserved (either representation
       // per PCP3a)
@@ -630,7 +633,10 @@ void main() {
 
       // RSH8l2 — the pushToStart variant survived the default-token
       // rotation
-      expect(recipient['apnsDeviceTokens']['pushToStart'], equals('pts-token-1'));
+      expect(
+        recipient['apnsDeviceTokens']['pushToStart'],
+        equals('pts-token-1'),
+      );
 
       final dynamic persistedRecipient =
           json.decode(mockStorage.dump()['ably.push.pushRecipient']!);
@@ -668,8 +674,7 @@ _MockServer _mockRegistrationServer({
       if (overrides != null && overrides(req)) {
         return; // the override handled (or held) the request
       }
-      if (req.method == 'POST' &&
-          req.url.path == '/push/deviceRegistrations') {
+      if (req.method == 'POST' && req.url.path == '/push/deviceRegistrations') {
         final body = req.jsonBody as Map<String, dynamic>;
         req.respondWith(201, {
           ...body,
